@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { expect, it, vi } from "vitest"
 
+import { perRelation } from "../../domain/mechanics"
 import { formatQuery, parseQuery } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { TextLang } from "../../domain/search"
@@ -61,7 +62,7 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
   return (
     <>
       <KeywordFilter
-        options={{ keywords, coverage: "partial" }}
+        options={{ keywords, coverage: perRelation("partial") }}
         edition="jp"
         textLang={textLang}
         selected={query.mechanics}
@@ -97,18 +98,61 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
     </>
   )
 }
-it("toggles multiple has chips, round trips the URL and removes conditions independently", async () => {
+it("cycles a keyword through wanted, excluded and off, and removes conditions independently", async () => {
   await renderInRouter(<Harness />)
   await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
   expect(screen.getByText(/標註尚未完整/u)).toBeVisible()
   await userEvent.click(screen.getByRole("button", { name: "守護" }))
   await userEvent.click(screen.getByRole("button", { name: "疾馳" }))
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm,kw:ward")
-  expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "true")
-  await userEvent.click(screen.getByRole("button", { name: "移除條件：關鍵字：守護" }))
+  const ward = screen.getByRole("button", { name: "要有：守護" })
+  expect(ward).toHaveAttribute("aria-pressed", "true")
+  await userEvent.click(ward)
+  expect(screen.getByRole("button", { name: "不要有：守護" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  )
+  expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
+    "mech=kw:storm,-kw:ward",
+  )
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：沒有關鍵字：守護" }))
   await userEvent.click(screen.getByRole("button", { name: /^關鍵字:/u }))
   expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "false")
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm")
+  await userEvent.click(screen.getByRole("button", { name: "要有：疾馳" }))
+  await userEvent.click(screen.getByRole("button", { name: "不要有：疾馳" }))
+  expect(screen.getByLabelText("url")).toBeEmptyDOMElement()
+})
+it("keeps conditions per relation tab and names the relation in chips and the URL", async () => {
+  await renderInRouter(<Harness />)
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
+  await userEvent.click(screen.getByRole("button", { name: "守護" }))
+  const tabs = screen.getByRole("tablist", { name: "關鍵字的關係" })
+  await userEvent.click(within(tabs).getByRole("tab", { name: "給別的卡" }))
+  // The same keyword is a separate condition under another relation.
+  expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "false")
+  await userEvent.click(screen.getByRole("button", { name: "突進" }))
+  await userEvent.keyboard("{Tab}")
+  within(tabs)
+    .getByRole("tab", { name: /給別的卡/u })
+    .focus()
+  await userEvent.keyboard("{ArrowRight}")
+  expect(within(tabs).getByRole("tab", { name: "效果提到" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  )
+  await userEvent.click(screen.getByRole("button", { name: "守護" }))
+  await userEvent.click(screen.getByRole("button", { name: "要有：守護" }))
+  expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
+    "mech=kw:rush.grants,kw:ward,-kw:ward.refers",
+  )
+  expect(within(tabs).getByRole("tab", { name: /本身有/u })).toHaveTextContent("本身有1")
+  expect(screen.getByRole("button", { name: "移除條件：給別的卡：突進" })).toBeVisible()
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：效果提到：不含守護" }))
+  expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
+    "mech=kw:rush.grants,kw:ward",
+  )
+  await userEvent.click(screen.getByRole("button", { name: /^關鍵字:/u }))
   await userEvent.click(screen.getByRole("button", { name: "清除關鍵字" }))
   expect(screen.getByLabelText("url")).toBeEmptyDOMElement()
 })
@@ -132,22 +176,31 @@ it.each([
   await userEvent.click(screen.getByRole("button", { name: /^(?:關鍵字|Keywords|キーワード)/u }))
   expect(screen.getByRole("button", { name: label })).toBeVisible()
 })
-it("disables EN when the edition's coverage is unknown, even with a selected URL condition", async () => {
+it("disables only the relations an edition has no tags for and still lets conditions be cleared", async () => {
+  const onChange = vi.fn()
   await renderInRouter(
     <KeywordFilter
-      options={{ keywords, coverage: "unknown" }}
+      options={{
+        keywords,
+        coverage: { ...perRelation("unknown"), has: "complete" },
+        unknownCards: { ...perRelation(2), has: 0 },
+      }}
       edition="en"
       textLang="en"
-      selected={{ "kw:ward": "has" }}
-      onChange={() => undefined}
+      selected={{ "kw:ward.grants": "has" }}
+      onChange={onChange}
     />,
     { language: "en" },
   )
   await userEvent.click(screen.getByRole("button", { name: /^Keywords/u }))
   const group = screen.getByRole("group", { name: "Keywords" })
-  expect(within(group).getByText("English edition is not tagged yet")).toBeVisible()
-  expect(within(group).getByRole("button", { name: "守護" })).toBeDisabled()
+  expect(within(group).getByRole("button", { name: "守護" })).toBeEnabled()
+  await userEvent.click(within(group).getByRole("tab", { name: /Gives/u }))
+  expect(within(group).getByRole("status")).toHaveTextContent("English edition is not tagged yet")
+  expect(within(group).getByRole("button", { name: "Required: 守護" })).toBeDisabled()
   expect(within(group).getByRole("button", { name: "疾走" })).toBeDisabled()
+  await userEvent.click(screen.getByRole("button", { name: "Clear Keywords" }))
+  expect(onChange).toHaveBeenCalledWith({})
 })
 
 it("keeps keyword chips in place and disabled until tagging finishes", async () => {
@@ -157,7 +210,7 @@ it("keeps keyword chips in place and disabled until tagging finishes", async () 
     const [coverage, setCoverage] = useState<"pending" | "partial">("pending")
     return (
       <>
-        <KeywordFilter {...props} options={{ keywords, coverage }} />
+        <KeywordFilter {...props} options={{ keywords, coverage: perRelation(coverage) }} />
         <button
           type="button"
           onClick={() => {
@@ -194,7 +247,11 @@ it("shows a concrete unknown-card count and removes it when self coverage is com
     return (
       <>
         <KeywordFilter
-          options={{ keywords, coverage: unknownCards ? "partial" : "complete", unknownCards }}
+          options={{
+            keywords,
+            coverage: perRelation(unknownCards ? "partial" : "complete"),
+            unknownCards: perRelation(unknownCards),
+          }}
           edition="en"
           textLang="en"
           selected={{}}
@@ -217,6 +274,5 @@ it("shows a concrete unknown-card count and removes it when self coverage is com
   expect(screen.getByRole("button", { name: "守護" })).toBeEnabled()
   await userEvent.click(screen.getByRole("button", { name: "resolve" }))
   await userEvent.click(screen.getByRole("button", { name: /^Keywords/u }))
-  expect(screen.getByRole("status")).toHaveTextContent("Matches any selected keyword")
-  expect(screen.getByRole("status")).not.toHaveTextContent("undetermined")
+  expect(screen.getByRole("status")).toBeEmptyDOMElement()
 })

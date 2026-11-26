@@ -40,6 +40,7 @@ import { Segmented } from "../../components/ui/Segmented"
 import type { ImageIndex, ImageSource, QueryFailure, SearchPage } from "../../data"
 import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
+import { MECHANIC_RELATIONS, parseMechanicKey } from "../../domain/mechanics"
 import { formatQuery } from "../../domain/query/codec"
 import {
   activeFilterCount,
@@ -250,16 +251,22 @@ export function CardBrowser({
                   : t("results.countUnit")}
             </span>
           </p>
-          {Object.keys(query.mechanics).length > 0 &&
-            printingOptions?.keyword.coverage === "partial" && (
-              <p className="text-11">
-                {printingOptions.keyword.unknownCards !== undefined
-                  ? t("filters.keywordUnknownCount", {
-                      count: printingOptions.keyword.unknownCards,
-                    })
-                  : t("filters.keywordIncomplete")}
-              </p>
-            )}
+          {MECHANIC_RELATIONS.filter(
+            (relation) =>
+              printingOptions?.keyword.coverage[relation] === "partial" &&
+              Object.keys(query.mechanics).some(
+                (key) => parseMechanicKey(key)?.relation === relation,
+              ),
+          ).map((relation) => (
+            <p key={relation} className="text-11">
+              {printingOptions?.keyword.unknownCards
+                ? t("filters.keywordUnknownCount", {
+                    count: printingOptions.keyword.unknownCards[relation],
+                    relation: t(`filters.keywordRelations.${relation}`),
+                  })
+                : t("filters.keywordIncomplete")}
+            </p>
+          ))}
         </>
       ) : (
         <p aria-hidden="true">…</p>

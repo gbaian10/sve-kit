@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { perRelation } from "../../domain/mechanics"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { decodeMessage } from "../format-v3/decode-message"
@@ -220,7 +221,7 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
   created.completePrintings(source)
   created.completeMechanics(source)
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
-    expect(index.options.keywordCoverage).toBe("partial")
+    expect(index.options.keywordCoverage.has).toBe("partial")
     const find = (
       mechanics: Record<string, "has" | "not">,
       unit: "printing" | "art" | "card" = "card",
@@ -265,7 +266,7 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
   const englishSource = columns([...en.basic, ...en.printing])
   const english = new SearchIndex(englishSource, "en")
   english.completeMechanics(englishSource)
-  expect(english.options.keywordCoverage).toBe("partial")
+  expect(english.options.keywordCoverage.has).toBe("partial")
   for (const state of ["has", "not"] as const) {
     const result = english.search({
       edition: "en",
@@ -294,7 +295,7 @@ it("rejects mechanic queries when every EN shared annotation is blocked", () => 
   )
   const index = new SearchIndex(source, "en")
   index.completeMechanics(source)
-  expect(index.options.keywordCoverage).toBe("unknown")
+  expect(index.options.keywordCoverage).toEqual(perRelation("unknown"))
   for (const state of ["has", "not"] as const) {
     try {
       index.search({
@@ -310,6 +311,73 @@ it("rejects mechanic queries when every EN shared annotation is blocked", () => 
         facets: ["mechanics"],
       })
     }
+  }
+})
+
+it("answers each keyword relation from program-derived tags and leaves other cards undetermined", () => {
+  const { basic, printing } = stages("jp")
+  const fragments = [...basic, ...printing]
+  const source = columns(fragments)
+  const coverage = fragments.find((fragment) => fragment.table === "card_mechanic_coverage")
+  const projection = fragments.find((fragment) => fragment.table === "mechanic_projection")
+  if (!coverage || !projection) throw new Error("synthetic mechanics missing")
+  const checked = ["c:bp01-031", "c:bp01-051"]
+  source.ingest([
+    {
+      ...coverage,
+      rows: checked.map((id) => ({
+        card_id: id,
+        scope: "shared",
+        complete_all: true,
+        complete_mode: "include",
+        complete_keyword_ids: [],
+        partial_mode: "include",
+        partial_keyword_ids: [],
+        has_complete_keyword_ids: [],
+      })),
+    },
+    {
+      ...projection,
+      rows: [
+        {
+          card_id: "c:bp01-031",
+          keyword_id: "kw:ward",
+          scope: "shared",
+          relations: ["grants", "has"],
+          actions: [],
+        },
+      ],
+    },
+  ])
+  source.seal()
+  const created = new SearchIndex(source, "jp")
+  created.completeMechanics(source)
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    expect(index.options.keywordCoverage.grants).toBe("partial")
+    const find = (mechanics: Record<string, "has" | "not">, extra = {}) =>
+      index
+        .search({
+          edition: "jp",
+          state: { ...DEFAULT_QUERY, unit: "card", mechanics, ...extra },
+          limit: 100,
+        })
+        .items.map((item) => item.key)
+    // The fixture's own card that grants Ward is found alongside the ingested one.
+    expect(find({ "kw:ward.grants": "has" })).toEqual(["c:bp01-031", "c:bp01-041"])
+    const unknown = index.options.keywordUnknownCards?.grants ?? 0
+    expect(unknown).toBeGreaterThan(0)
+    expect(unknown).toBeLessThan(find({}).length)
+    // Only a fully checked card can lack the relation; unexamined cards match neither side.
+    const without = find({ "kw:ward.grants": "not" })
+    expect(without).toContain("c:bp01-051")
+    expect(without).not.toContain("c:bp01-031")
+    expect(without.length).toBeLessThan(find({}).length - 2)
+    expect(find({ "kw:ward.refers": "not" })).toEqual(expect.arrayContaining(checked))
+    expect(find({ "kw:ward.refers": "has" })).toEqual([])
+    // Wanted conditions combine across relations by the shared match mode.
+    const either = { "kw:ward.grants": "has", "kw:ward.counts": "has" } as const
+    expect(find(either)).toEqual(["c:bp01-031", "c:bp01-041"])
+    expect(find(either, { mechanicsMatch: "all" })).toEqual([])
   }
 })
 
@@ -352,8 +420,9 @@ it("completes English self coverage independently of shared engine eligibility a
   const created = new SearchIndex(source, "en")
   created.completeMechanics(source)
   for (const index of [created, new SearchIndex(created.encode(), "en")]) {
-    expect(index.options.keywordCoverage).toBe("complete")
-    expect(index.options.keywordUnknownCards).toBe(0)
+    // English wording only settles what a card itself has; the other relations stay untagged.
+    expect(index.options.keywordCoverage).toEqual({ ...perRelation("unknown"), has: "complete" })
+    expect(index.options.keywordUnknownCards?.has).toBe(0)
     const find = (state: "has" | "not") =>
       index
         .search({

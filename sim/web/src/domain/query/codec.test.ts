@@ -243,6 +243,23 @@ it("round trips independent ability and keyword matching modes and drops unknown
   expect(formatQuery(DEFAULT_QUERY).has("ability")).toBe(false)
 })
 
+it("round trips keyword relations and drops unknown suffixes and off-panel relation keywords", () => {
+  const state = parseQuery(
+    new URLSearchParams(
+      "mech=kw:ward,kw:ward.grants,-kw:storm.counts,kw:quick,kw:quick.grants,kw:ward.has,kw:ward.future",
+    ),
+  )
+  // Relations beyond "has" are only derived for the panel keywords; "has" keeps any registered id.
+  expect(state.mechanics).toEqual({
+    "kw:ward": "has",
+    "kw:ward.grants": "has",
+    "kw:storm.counts": "not",
+    "kw:quick": "has",
+  })
+  expect(formatQuery(state).get("mech")).toBe("kw:quick,-kw:storm.counts,kw:ward,kw:ward.grants")
+  expect(parseQuery(formatQuery(state))).toEqual(state)
+})
+
 it("round-trips independent printed mechanism groups and drops unknown or misplaced codes", () => {
   const query = parseQuery(
     new URLSearchParams(

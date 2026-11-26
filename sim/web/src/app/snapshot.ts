@@ -39,6 +39,7 @@ import {
   type ViewFace,
   viewImages,
 } from "../data"
+import { perRelation } from "../domain/mechanics"
 import { DEFAULT_QUERY } from "../domain/query/model"
 import type { Region } from "../domain/search"
 import { prefsStore, showsOtherEdition, usePrefs } from "../settings"
@@ -563,7 +564,7 @@ function useSummaryImages(result: SearchChannelStatus["previous"], edition: Regi
       page: result.page,
       options: {
         keywords: [],
-        keywordCoverage: "unknown",
+        keywordCoverage: perRelation("unknown"),
         classes: [],
         sets: [],
         quickSets: {},

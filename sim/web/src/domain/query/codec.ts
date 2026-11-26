@@ -1,5 +1,6 @@
 import { isAbilityType } from "../abilityTypes"
 import { isLocationToken } from "../deckLocation"
+import { mechanicKey, PANEL_KEYWORDS, parseMechanicKey } from "../mechanics"
 import { compareCodePoints } from "../normalize"
 import { isClassMechanism, isCollabMechanism } from "../printedMechanisms"
 import { REPRESENTATIVE_RARITIES } from "../representative"
@@ -16,6 +17,8 @@ import {
   VIEW_MODES,
 } from "./model"
 
+// `mech` entries are `[-]<keyword id>[.<relation>]`: a leading `-` excludes, and the relation suffix
+// (grants, refers, counts) is omitted for a keyword the card itself has.
 // URL parameters: q class cost atk def type loc trait artist mech set rarity alt reprint unit rep prfirst
 // stamp serial errata restricted sort view. Sort clauses carry their own direction. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
@@ -71,8 +74,15 @@ function parseMechanics(text: string | null): Record<string, MechanicState> {
   const out: Record<string, MechanicState> = {}
   for (const entry of text?.split(",") ?? []) {
     const state: MechanicState = entry.startsWith("-") ? "not" : "has"
-    const id = state === "not" ? entry.slice(1) : entry
-    if (CODE.test(id)) out[id] = state
+    const condition = parseMechanicKey(state === "not" ? entry.slice(1) : entry)
+    if (!condition || !CODE.test(condition.keywordId)) continue
+    // Relations beyond "has" are only derived for the keywords the panel offers.
+    if (
+      condition.relation !== "has" &&
+      !PANEL_KEYWORDS.some((keyword) => keyword === condition.keywordId)
+    )
+      continue
+    out[mechanicKey(condition.relation, condition.keywordId)] = state
   }
   return out
 }

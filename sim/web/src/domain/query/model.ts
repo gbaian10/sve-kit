@@ -52,7 +52,7 @@ export interface QueryState {
   readonly traits: readonly string[]
   /** Artist ids of the edition; a printing whose front art credits any selected artist passes. */
   readonly artists: readonly string[]
-  /** Unlisted keyword ids are "either"; has selections use mechanicsMatch; not selections all require absence. */
+  /** Applies to the has selections of `mechanics`. */
   readonly mechanicsMatch: MatchMode
   readonly abilityTypes: readonly AbilityType[]
   readonly abilityTypesMatch: MatchMode
@@ -60,6 +60,10 @@ export interface QueryState {
   readonly classMechanismsMatch: MatchMode
   readonly collabMechanisms: readonly PrintedMechanism[]
   readonly collabMechanismsMatch: MatchMode
+  /**
+   * Keyed by `mechanicKey(relation, keyword id)`. Unlisted conditions are "either"; has selections use
+   * mechanicsMatch across every relation; not selections all require absence.
+   */
   readonly mechanics: Readonly<Record<string, MechanicState>>
   readonly sets: readonly string[]
   readonly rarities: readonly string[]
