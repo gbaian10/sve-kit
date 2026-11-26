@@ -275,6 +275,7 @@ jobs:
             tests/architecture/test_authored_defaults.py::test_authored_tree_does_not_store_quality_defaults \
             tests/core/test_yaml_reader.py::test_all_production_files_pass_strict_reader \
             tests/domains/rulings/test_authored_hints.py \
+            tests/domains/effects/test_author_set.py::test_repository_author_keywords_are_registered \
             tests/workflows/test_authoring.py tests/workflows/test_authoring_cli.py \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"

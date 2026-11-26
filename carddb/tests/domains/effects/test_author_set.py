@@ -10,6 +10,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
+from sve_carddb.domains.effects.author_handwritten import read_files
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 from sve_carddb.domains.effects.author_set import (
     InputFile,
@@ -17,6 +18,7 @@ from sve_carddb.domains.effects.author_set import (
     merge_index_files,
     validate_author_set,
 )
+from sve_carddb.domains.mechanics import load as load_keywords
 
 from .author_entry_cases import meta, source_use
 
@@ -30,6 +32,39 @@ AUTHOR = "rules/author-effects/FIX/001.yaml"
 BODY = "rules/effect-bodies/FIX/001.yaml"
 PROTOTYPE = "rules/effects/FIX.yaml"
 INDEX = "rules/effects-index/FIX.yaml"
+ABILITY_FILTERS = frozenset(
+    {"earth_rite", "fanfare", "lastword", "quick_activation", "quick_spell"}
+)
+
+
+def _keyword_codes(node: JsonValue) -> set[str]:
+    codes: set[str] = set()
+    if isinstance(node, dict):
+        keywords = node.get("keywords")
+        if isinstance(keywords, dict):
+            keywords = keywords.get("list")
+        if isinstance(keywords, list):
+            codes.update(value for value in keywords if isinstance(value, str))
+        keyword = node.get("keyword")
+        if isinstance(keyword, str) and keyword not in ABILITY_FILTERS:
+            codes.add(keyword)
+        for item in node.values():
+            codes.update(_keyword_codes(item))
+    elif isinstance(node, list):
+        for item in node:
+            codes.update(_keyword_codes(item))
+    return codes
+
+
+def test_repository_author_keywords_are_registered() -> None:
+    authored = REPO / "authored"
+    registered = {record.code for record in load_keywords(authored).registry.records}
+    used: set[str] = set()
+    for directory, main in (("author-effects", True), ("effect-bodies", False)):
+        for _, document in read_files(authored / "rules" / directory, main=main):
+            used.update(_keyword_codes(document.value))
+    assert used
+    assert not (used - registered)
 
 
 @pytest.fixture(scope="module")
