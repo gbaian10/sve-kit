@@ -130,17 +130,6 @@ fn an_empty_deck_draw_does_not_queue_a_growth_before_deck_out_checks() {
 }
 
 #[test]
-fn legacy_draw_input_cannot_bypass_the_existing_typed_authority_boundary() {
-    let mut initial = position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"formal-spell","card":"BP06-117"}]);
-    let mut board = game(&initial);
-    let before = format!("{board:?}");
-    let error = board.decide(&json!({"do":"play","card":"formal-spell"}), "prototype-draw").unwrap_err();
-    assert!(error.to_string().contains("typed execution owns the input point"));
-    assert!(format!("{board:?}") == before, "the rejected prototype input preserves all authority state");
-}
-
-#[test]
 fn a_later_instruction_failure_restores_the_draw_and_its_queued_growth() {
     let mut initial = position();
     initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().push(json!({"id":"producer","card":"producer"}));

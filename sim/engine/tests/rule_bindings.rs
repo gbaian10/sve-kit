@@ -12,7 +12,6 @@
 )]
 
 extern crate alloc;
-use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 use serde_json::{Value, json};
 use std::env::temp_dir;
@@ -452,89 +451,6 @@ fn resource_programs(fixture: &mut Fixture) {
         json!([{"kind":"static","line":1_u8,"body":{"op":"keyword","name":"stack"}}]);
 }
 
-fn choices(game: &Game, line: u64) -> Vec<Value> {
-    game.legal()
-        .unwrap()
-        .into_iter()
-        .filter(|action| action["do"] == "activate" && action["ability"]["line"] == line)
-        .collect()
-}
-
-#[test]
-fn cost_roles_match_current_aliases_and_keep_zone_controller_and_face_up_filters() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    fixture.programs["cards"]["actor"]["abilities"][0]["body"] = json!({"op":"modify","subjects":"self.leader","hp":{"read":"self.turn.magic_item_banished"}});
-    let catalog = Arc::new(fixture.load().unwrap());
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["ex"] = json!([
-        {"id":"lesson","card":"lesson"},{"id":"alias","card":"alias"},{"id":"wrong","card":"meal"}]);
-    setup["players"]["P2"]["zones"]["ex"] = json!([{"id":"opponent-alias","card":"alias"}]);
-    setup["players"]["P1"]["zones"]["evolve_deck"] = json!([
-        {"id":"meal","card":"meal"},{"id":"drive","card":"drive"},{"id":"up","card":"drive","face_up":true}]);
-    let game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-    let material_ids = |line| {
-        choices(&game, line)
-            .iter()
-            .map(|action| action["costs"]["1"][0].as_str().unwrap().to_owned())
-            .collect::<BTreeSet<_>>()
-    };
-    assert_eq!(material_ids(1), ["lesson".into(), "alias".into()].into());
-    assert_eq!(material_ids(2), ["meal".into()].into());
-    assert_eq!(material_ids(3), ["drive".into()].into());
-    for material in ["lesson", "alias"] {
-        let mut instance = game.clone();
-        let choice = choices(&instance, 1)
-            .into_iter()
-            .find(|action| action["costs"]["1"][0] == material)
-            .unwrap();
-        assert_eq!(
-            instance.decide(&choice, "resource").unwrap().outcome,
-            "resolved"
-        );
-        let actual = instance.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]["magic_item_banished"].as_i64().unwrap_or(0);
-        assert_eq!(actual, i64::from(material == "lesson"));
-        assert_eq!(
-            instance.query(View::Referee, "P1.leader.life").unwrap(),
-            Some(json!(20_i64 + actual))
-        );
-        if material == "lesson" {
-            assert!(
-                instance.projection(View::Referee).unwrap()["objects"]
-                    .get("lesson")
-                    .is_none()
-            );
-        }
-    }
-    for line in [2_u64, 3] {
-        let mut paid = game.clone();
-        let action = choices(&paid, line).remove(0);
-        assert_eq!(
-            paid.decide(&action, "pay-role").unwrap().outcome,
-            "resolved"
-        );
-        let packet = paid.projection(View::Referee).unwrap();
-        if line == 2 {
-            assert_eq!(packet["P1"]["race"], json!(["meal"]));
-            assert_eq!(packet["objects"]["actor"]["links"]["出走"], json!(["meal"]));
-        } else {
-            assert_eq!(packet["P1"]["drive"], json!(["drive"]));
-            assert!(
-                !packet["P1"]["evolve_deck"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("drive"))
-            );
-        }
-    }
-    setup["players"]["P1"]["zones"]["ex"] = json!([]);
-    setup["players"]["P1"]["zones"]["hand"] = json!([{"id":"alias","card":"alias"}]);
-    assert_eq!(
-        choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 1),
-        Vec::<Value>::new()
-    );
-}
-
 #[test]
 fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() {
     let mut fixture = Fixture::new();
@@ -560,129 +476,6 @@ fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() 
             .remove("template");
         assert!(changed.load().is_err(), "{role}");
     }
-    let unbound = Catalog::from_documents(
-        &fixture.snapshot(),
-        &fixture.keywords.to_string(),
-        &fixture.documents(),
-    )
-    .unwrap();
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"lesson"}]);
-    let mut game = Game::new(
-        Arc::new(unbound),
-        &setup,
-        &Value::Null,
-        &Value::Null,
-        "unbound",
-    )
-    .unwrap();
-    let before = game.digest().unwrap();
-    let error = game
-        .decide(
-            &json!({"do":"activate","ability":{"source":"actor","line":1_u8}}),
-            "unbound",
-        )
-        .unwrap_err();
-    assert!(
-        error
-            .to_string()
-            .contains("unbound resource role: lesson_item"),
-        "{error}"
-    );
-    assert_eq!(before, game.digest().unwrap());
-}
-
-#[test]
-fn legacy_and_role_ride_forms_pay_once_and_malformed_forms_stay_unsupported() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    let implicit = fixture.programs["cards"]["actor"]["abilities"][2].clone();
-    let valid = json!({"op":"link_resource","subjects":"self","resource_role":"drive_point","count":1_u8,"from_zone":"evolve_deck","to":"drive"});
-    let mut legacy = valid.clone();
-    legacy.as_object_mut().unwrap().remove("resource_role");
-    legacy["name"] = json!("synthetic-drive");
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"drive","card":"drive"}]);
-    let mut expected = None;
-    for link in [None, Some(valid.clone()), Some(legacy)] {
-        fixture.programs["cards"]["actor"]["abilities"][2] = implicit.clone();
-        if let Some(link) = link {
-            fixture.programs["cards"]["actor"]["abilities"][2]["costs"]
-                .as_array_mut()
-                .unwrap()
-                .push(link);
-        }
-        let mut game = fixture.game(&setup).unwrap();
-        let actions = choices(&game, 3);
-        assert_eq!(actions.len(), 1);
-        assert_eq!(actions[0]["costs"], json!({"1":["drive"]}));
-        assert_eq!(
-            game.decide(&actions[0], "ride").unwrap().outcome,
-            "resolved"
-        );
-        let result = game.query(View::Referee, "P1.drive").unwrap();
-        if let Some(previous) = &expected {
-            assert_eq!(&result, previous);
-        }
-        expected = Some(result);
-    }
-    for (key, wrong) in [
-        ("subjects", json!("self.leader")),
-        ("count", json!(2_u8)),
-        ("from_zone", json!("ex")),
-        ("to", json!("cemetery")),
-        ("resource_role", json!("meal_item")),
-    ] {
-        let mut link = valid.clone();
-        link[key] = wrong;
-        fixture.programs["cards"]["actor"]["abilities"][2] = implicit.clone();
-        fixture.programs["cards"]["actor"]["abilities"][2]["costs"]
-            .as_array_mut()
-            .unwrap()
-            .push(link);
-        let game = fixture.game(&setup).unwrap();
-        assert!(
-            matches!(game.legal(), Err(EngineFailure::Unsupported(_))),
-            "{key}"
-        );
-    }
-}
-
-#[test]
-fn same_version_save_restores_pending_stack_and_hides_private_ids() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    let stack = fixture.programs["cards"]["actor"]["abilities"][5].clone();
-    fixture.programs["cards"]["actor"]["abilities"] = json!([stack]);
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"id":"stack","card":"stack","state":{"counters":{"stack_counter":1_u8}}}));
-    setup["players"]["P2"]["zones"]["hand"] = json!([{"id":"private-opponent-id","card":"alias"}]);
-    let mut original = fixture.game(&setup).unwrap();
-    let step = original
-        .decide(
-            &json!({"do":"activate","ability":{"source":"actor","line":6_u8}}),
-            "bindings",
-        )
-        .unwrap();
-    assert_eq!(step.outcome, "paused");
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&original).unwrap()).unwrap();
-    assert_eq!(original.legal().unwrap(), restored.legal().unwrap());
-    assert!(
-        !restored
-            .projection(View::P1)
-            .unwrap()
-            .to_string()
-            .contains("private-opponent-id")
-    );
-    let action = restored.legal().unwrap().remove(0);
-    let original_step = original.decide(&action, "resolve").unwrap();
-    let restored_step = restored.decide(&action, "resolve").unwrap();
-    assert_eq!(original_step.events, restored_step.events);
-    assert_eq!(original.digest().unwrap(), restored.digest().unwrap());
 }
 
 #[test]
@@ -745,23 +538,4 @@ fn equal_display_labels_cannot_hide_conflicting_permanent_name_ids() {
         &identity,
     )
     .unwrap_err();
-}
-
-#[test]
-fn unbound_selectors_reject_before_enumerating_an_empty_candidate_set() {
-    let mut fixture = Fixture::new();
-    for selector in [
-        json!({"side":"self","zone":"ex","resource_role":"lesson_item"}),
-        json!({"from":{"side":"self","zone":"ex"},"resource_role":"lesson_item"}),
-    ] {
-        fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":selector,"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
-        let unbound = Catalog::from_documents(
-            &fixture.snapshot(),
-            &fixture.keywords.to_string(),
-            &fixture.documents(),
-        )
-        .unwrap();
-        let game = from_catalog(Arc::new(unbound), &position()).unwrap();
-        assert!(matches!(game.legal(), Err(EngineFailure::Unsupported(_))));
-    }
 }

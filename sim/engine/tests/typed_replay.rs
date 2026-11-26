@@ -78,17 +78,60 @@ fn manual_operations_cannot_attach_private_object_identities_to_a_divergence() {
     );
 }
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "The fixture starts with one eligible amulet choice."
+)]
+fn place_start_amulet(replay: &mut Replay) -> ReplayNode {
+    let Input::Question(amulet) = replay.summary(ReplayNode::ROOT, Viewer::P1).unwrap().input
+    else {
+        panic!("expected start amulet choice");
+    };
+    let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = amulet.shape else {
+        panic!("expected start amulet candidates");
+    };
+    let (placed, placement) = replay
+        .submit(
+            ReplayNode::ROOT,
+            Viewer::P1,
+            Command::Opening {
+                token: amulet.token,
+                answer: OpeningAnswer::StartAmulet(cards.first().unwrap().handle.clone()),
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        placement.kind,
+        SubmissionKind::Applied,
+        "the offered amulet can be placed"
+    );
+    placed
+}
+
 #[test]
-fn strict_replay_rebuilds_a_shuffled_opening_and_continues_the_pending_mulligan() {
-    let decks = from_fn(|_| PlayerDeck {
-        construction: DeckConstruction::Class("ニュートラル".into()),
-        main: ["BP01-P25", "BP10-122"]
-            .into_iter()
-            .cycle()
-            .take(12)
-            .map(str::to_owned)
-            .collect(),
-        evolve: vec![],
+fn strict_replay_keeps_the_start_amulet_private_and_continues_the_pending_mulligan() {
+    let decks = from_fn(|seat| {
+        let (construction, cards) = if seat == 0 {
+            (
+                DeckConstruction::Title("cardfight_vanguard".into()),
+                ["CP03-021", "CSD03a-005"],
+            )
+        } else {
+            (
+                DeckConstruction::Class("ニュートラル".into()),
+                ["BP01-P25", "BP10-122"],
+            )
+        };
+        PlayerDeck {
+            construction,
+            main: cards
+                .into_iter()
+                .cycle()
+                .take(12)
+                .map(str::to_owned)
+                .collect(),
+            evolve: vec![],
+        }
     });
     let mut replay = Replay::start(
         repository::selection_with_rules().clone(),
@@ -97,16 +140,37 @@ fn strict_replay_rebuilds_a_shuffled_opening_and_continues_the_pending_mulligan(
         "replay-opening".into(),
     )
     .unwrap();
-    let Input::Question(first) = replay.summary(ReplayNode::ROOT, Viewer::P2).unwrap().input else {
+    let placed = place_start_amulet(&mut replay);
+    let facedown = replay.summary(placed, Viewer::P2).unwrap();
+    let Input::Question(first) = facedown.input else {
         panic!("expected first-player choice");
     };
+    let field = facedown
+        .observation
+        .players
+        .first()
+        .unwrap()
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap();
+    assert_eq!(field.count, 1);
+    assert_eq!(field.cards.len(), 0);
+    let mut recovered_opening = replay.recover(placed).unwrap();
+    assert_eq!(
+        recovered_opening.observe(Viewer::P2).unwrap(),
+        facedown.observation
+    );
     let command = Command::Opening {
         token: first.token,
         answer: OpeningAnswer::FirstPlayer(Viewer::P1),
     };
-    let (dealt, _) = replay
-        .submit(ReplayNode::ROOT, Viewer::P2, command)
-        .unwrap();
+    let (dealt, first_player) = replay.submit(placed, Viewer::P2, command.clone()).unwrap();
+    assert_eq!(first_player.kind, SubmissionKind::Applied);
+    assert_eq!(
+        recovered_opening.submit_player(Viewer::P2, command),
+        first_player
+    );
     let own = replay.summary(dealt, Viewer::P1).unwrap();
     let Input::Question(mulligan) = own.input else {
         panic!("expected mulligan");
@@ -242,7 +306,7 @@ fn scripted_random_inputs_resume_in_order() {
     let prefix = game.save(&root).unwrap();
     let mut restored = adapter();
     let start = restored.restore(&prefix).unwrap();
-    let (_next, step) = restored
+    let (next, step) = restored
         .decide(
             &start,
             &json!({"by":"P1","at":"main","do":"play","card":"spell"}),
@@ -255,6 +319,12 @@ fn scripted_random_inputs_resume_in_order() {
         .map(|event| event["result"].clone())
         .collect();
     assert_eq!(rolls, [json!(2_u8), json!(5_u8)]);
+    for view in [View::P1, View::P2] {
+        let public = restored.export(&next, view).unwrap().to_string();
+        for field in ["\"rng\"", "\"seed\"", "word_pos", "chacha12-sha256"] {
+            assert!(!public.contains(field), "a player export exposed {field}");
+        }
+    }
 }
 
 #[test]

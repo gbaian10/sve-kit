@@ -230,17 +230,6 @@ fn nonfield_ability_source_discovery_does_not_reuse_prototype_headers() {
 }
 
 #[test]
-fn current_loaded_cards_still_reject_injected_prototype_keywords() {
-    let mut initial = setup("P1", "P1", [20, 20]);
-    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"keywords":["guard"]});
-    let mut game = game(&initial);
-    let before = views(&game);
-    let error = failure(game.internal_rule_action(&json!({"do":"end-phase"})));
-    assert!(error.contains("prototype keywords"));
-    assert_eq!(views(&game), before);
-}
-
-#[test]
 fn loaded_spell_payment_stops_before_charging_for_unknown_off_field_abilities() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([

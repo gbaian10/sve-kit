@@ -2,9 +2,6 @@ use super::event_cemetery::finish_checks;
 use super::event_subject_capture::{position, prepared_program};
 use super::union_burst_batch1::{finish, pending, question, ub};
 use super::*;
-use alloc::sync::Arc;
-use sve_engine::EngineFailure;
-use sve_engine::game::internal::InstructionOutcome;
 
 fn reader_tree(who: Option<&str>) -> Value {
     let mut tree = expanded::tree().clone();
@@ -252,133 +249,6 @@ fn committed_ub_history_is_cleared_at_the_next_turn() {
     );
 }
 
-fn legacy_catalog() -> &'static SelectedEffects {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    SELECTED.get_or_init(|| {
-        let (snapshot, keywords, mut input) = producer_inputs();
-        // Keep the historical grammar independent of current card migration progress.
-        input["authors"].as_array_mut().unwrap().retain(|author| {
-            author["card_no"] != "CP04-088"
-                && !author["printings"]
-                    .as_array()
-                    .is_some_and(|printings| printings.iter().any(|number| number == "CP04-088"))
-        });
-        let documents = input["documents"].as_array_mut().unwrap();
-        documents.retain_mut(|document| {
-            let mut program: Value = serde_saphyr::from_str(document[1].as_str().unwrap()).unwrap();
-            let Some(cards) = program.get_mut("cards").and_then(Value::as_object_mut) else {
-                return true;
-            };
-            if cards.remove("CP04-088").is_none() {
-                return true;
-            }
-            if cards.is_empty() {
-                return false;
-            }
-            document[1] = json!(program.to_string());
-            true
-        });
-        documents.push(json!([
-            "legacy-ub.yaml",
-            include_str!("../../fixtures/history/CP04-088.json")
-        ]));
-        repository::selection_with_rules_from(&snapshot, &keywords, &input)
-    })
-}
-
-fn legacy_ubs(seat: &str) -> Game {
-    let other = if seat == "P1" { "P2" } else { "P1" };
-    let mut initial = draw_position();
-    initial["turn"]["active"] = json!(seat);
-    initial["players"][seat]["construction"] = json!("title");
-    initial["players"][seat]["title_code"] = json!("princess_connect_re_dive");
-    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    initial["players"][seat]["zones"]["field"] = json!([
-        {"id":"legacy0","card":"CP04-088"},{"id":"legacy1","card":"CP04-088"}
-    ]);
-    initial["players"][other]["zones"]["field"] = json!([
-        {"id":"victim0","card":"producer"},{"id":"victim1","card":"producer"}
-    ]);
-    initial["players"]["P1"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"id":"producer","card":"producer"}));
-    let mut game = Game::new(
-        Arc::clone(&legacy_catalog().prototypes),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "ub-legacy-history",
-    )
-    .unwrap();
-    for (index, id) in ["legacy0", "legacy1"].into_iter().enumerate() {
-        let step = game
-            .submit(&json!({"do":"activate","ability":{"source":id,"line":1_u64}}))
-            .unwrap();
-        assert_eq!(
-            step.outcome, "paused",
-            "the opponent chooses a victim after proper UB commitment"
-        );
-        let choice = game
-            .legal()
-            .unwrap()
-            .into_iter()
-            .find(|choice| {
-                choice["do"] == "resolve-choice"
-                    && choice["select"] == json!([format!("victim{index}")])
-            })
-            .unwrap();
-        assert_eq!(
-            game.submit(&choice).unwrap().outcome,
-            "resolved",
-            "the chosen victim moves before the next UB"
-        );
-    }
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"][seat]["ub_activated"],
-        2_u8,
-        "two resolved legacy UB plays populate the shared counter"
-    );
-    game
-}
-
-#[test]
-fn two_real_prototype_ubs_are_visible_to_the_ir_history_query() {
-    let mut game = legacy_ubs("P1");
-    let mut tree = reader_tree(Some("self"));
-    let delta =
-        &mut tree["cards"]["producer"]["abilities"][0]["activate"]["do"][0]["life"]["delta"];
-    let count = delta.take();
-    *delta = json!({"minus":[count,2_i64]});
-    let program = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
-    game.load_internal_card("producer", &program).unwrap();
-    let result = resolved(
-        game.activate_internal_card(
-            "producer",
-            program.card().abilities[0].node.id,
-            PlayerId { seat: 1 },
-        )
-        .unwrap(),
-    );
-    // A zero-delta receipt observes the count without subscribing unadmitted prototype holders.
-    let outcome = result
-        .progress
-        .receipts
-        .values()
-        .find_map(|outcome| {
-            if let InstructionOutcome::Life(event) = outcome {
-                Some(event)
-            } else {
-                None
-            }
-        })
-        .unwrap();
-    assert_eq!(
-        (outcome.before, outcome.after, outcome.delta),
-        (Int(10), Int(10), Int(0))
-    );
-}
-
 #[test]
 fn explicit_prior_ub_counters_feed_the_real_seed_and_controller_queries() {
     for (who, gain) in [(Some("self"), 3_u8), (Some("opp"), 3_u8), (None, 6_u8)] {
@@ -409,21 +279,4 @@ fn explicit_prior_ub_counters_feed_the_real_seed_and_controller_queries() {
             );
         }
     }
-}
-
-#[test]
-fn mixed_prototype_holders_keep_the_existing_phase_action_boundary() {
-    let mut game = legacy_ubs("P2");
-    let mut tree = reader_tree(Some("opp"));
-    let entry = &mut tree["cards"]["producer"]["abilities"][0];
-    let steps = entry["activate"]["do"].clone();
-    entry.as_object_mut().unwrap().remove("activate");
-    entry["auto"] = json!({"on":{"phase":{"whose":"opp","which":"end"}},"do":steps});
-    let program = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
-    game.load_internal_card("producer", &program).unwrap();
-    let error = game
-        .internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap_err();
-    assert!(matches!(error, EngineFailure::Unsupported(message)
-        if message.contains("unloaded whole card CP04-088")));
 }

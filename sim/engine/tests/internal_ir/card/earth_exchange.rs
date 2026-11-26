@@ -16,7 +16,7 @@ fn program() -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn stack_selection(snapshot: &str, document: &str) -> SelectedEffects {
+pub(super) fn stack_selection(snapshot: &str, keywords: &str, document: &str) -> SelectedEffects {
     let mut document: Value = serde_json::from_str(document).unwrap();
     document["cards"]
         .as_object_mut()
@@ -43,7 +43,7 @@ fn stack_selection(snapshot: &str, document: &str) -> SelectedEffects {
     }});
     Catalog::from_current_selection(
         snapshot,
-        include_str!("../../../../../authored/rules/keywords.yaml"),
+        keywords,
         &json!({"documents":[["unit.yaml",document.to_string()]],"authors":[author]}),
     )
     .unwrap()
@@ -58,7 +58,11 @@ pub(super) fn board(stack: u8, pp: u8) -> Game {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let (snapshot, _registry, document) = catalog_documents(&json!("4"));
-    let selected = stack_selection(&snapshot, &document);
+    let selected = stack_selection(
+        &snapshot,
+        include_str!("../../../../../authored/rules/keywords.yaml"),
+        &document,
+    );
     let mut game = Game::from_selected_effects(
         selected,
         &initial,

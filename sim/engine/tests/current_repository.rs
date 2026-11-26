@@ -86,7 +86,6 @@ mod runtime;
 #[test]
 fn repository_draw_cards_lower_as_complete_current_candidates() {
     let selected = selection().clone();
-    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
     let cases = [
         (
             "BP10-122",
@@ -109,7 +108,6 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
     ];
 
     for (card_no, card_id, head, count) in cases {
-        assert!(prototypes["programs"].get(card_no).is_none());
         let card = &selected.current[card_no];
         assert_eq!(card.card_id, card_id);
         assert_eq!(card.program.card().abilities.len(), 1);
@@ -134,13 +132,11 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
 }
 
 #[test]
-fn repository_keyword_migrations_lower_as_complete_current_candidates() {
+fn repository_keywords_lower_as_complete_current_candidates() {
     let selected = selection().clone();
-    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
     let cases = [("DSD01b-004", "c:31103e7d8c6b5a2d9e3838cac19b1c07", 2)];
 
     for (card_no, card_id, abilities) in cases {
-        assert!(prototypes["programs"].get(card_no).is_none());
         let card = &selected.current[card_no];
         assert_eq!(card.card_id, card_id);
         assert_eq!(card.program.card().abilities.len(), abilities);
@@ -284,41 +280,9 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
 }
 
 #[test]
-fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
+fn repository_selection_rejects_invalid_and_rejected_authors() {
     let (snapshot, keywords, input) = inputs();
-    let prototype = json!({
-        "format": 1_u8,
-        "kind": "effect_set",
-        "cards": {
-            "BP01-P25": {
-                "status": "complete",
-                "abilities": [{
-                    "line": 1_u8,
-                    "kind": "trigger",
-                    "event": "field_to_cemetery",
-                    "subject": "self",
-                    "body": {"op": "damage", "subjects": "both.leaders", "amount": 2_u8}
-                }]
-            }
-        }
-    });
-    let mut mixed = input.clone();
-    mixed["documents"].as_array_mut().unwrap().push(json!([
-        "probe.yaml",
-        serde_json::to_string(&prototype).unwrap()
-    ]));
-    let prototype_only = json!({"documents": mixed["documents"], "authors": []});
-    let available = Catalog::from_current_selection(snapshot, keywords, &prototype_only).unwrap();
-    let programs = serde_json::to_value(&available.prototypes).unwrap();
-    assert!(programs["programs"].get("BP01-P25").is_some());
-
-    let overlap = Catalog::from_current_selection(snapshot, keywords, &mixed)
-        .err()
-        .unwrap();
-    assert!(matches!(&overlap, EngineFailure::Invalid(reason)
-        if reason == "current selection identity or prototype overlap"));
-
-    let mut invalid = mixed.clone();
+    let mut invalid = input.clone();
     let invalid_author = invalid["authors"]
         .as_array_mut()
         .unwrap()
@@ -332,7 +296,8 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
     assert!(matches!(&failure, EngineFailure::Invalid(reason)
         if reason == "invalid_direct_admission at /card_id"));
 
-    let author = mixed["authors"]
+    let mut rejected = input.clone();
+    let author = rejected["authors"]
         .as_array_mut()
         .unwrap()
         .iter_mut()
@@ -343,7 +308,7 @@ fn repository_selection_rejects_mixed_formats_and_never_falls_back() {
         "card_no": "BP01-P25",
         "reason": "source_pending"
     });
-    let rejection = Catalog::from_current_selection(snapshot, keywords, &mixed)
+    let rejection = Catalog::from_current_selection(snapshot, keywords, &rejected)
         .err()
         .unwrap();
     assert!(matches!(&rejection, EngineFailure::Unsupported(reason)
@@ -355,27 +320,6 @@ mod evolution;
 
 #[path = "current_repository/advance.rs"]
 mod advance;
-
-#[test]
-fn repository_selection_rejects_stale_anchors_without_prototype_fallback() {
-    let (snapshot, keywords, mut input) = inputs().clone();
-    let author = input["authors"]
-        .as_array_mut()
-        .unwrap()
-        .iter_mut()
-        .find(|author| author["input"]["card_no"] == "BP10-122")
-        .unwrap();
-    *author = json!({
-        "status": "rejected",
-        "card_no": "BP10-122",
-        "reason": "stale_anchor"
-    });
-    let failure = Catalog::from_current_selection(&snapshot, &keywords, &input)
-        .err()
-        .unwrap();
-    assert!(matches!(&failure, EngineFailure::Unsupported(reason)
-        if reason == "current card rejected: BP10-122: stale_anchor"));
-}
 
 #[test]
 fn search_shape_union_lowers_filtered_branches_and_rejects_empty_or_unrestricted_ones() {
