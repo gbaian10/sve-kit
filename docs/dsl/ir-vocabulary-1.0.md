@@ -409,7 +409,7 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 物件解析其持有者，後者在目前良構子集只接受 Field／Ex。不能把混合持有者集合送到來源
 控制者的一個私人區域。MoveResult 保留 requested_position 與 actual_position，並與
 requested_to、actual_to、replacements 一起保存；這是內部承載，非公開 IR schema 或
-executor 驗收。各動作目前接受的良構範圍見 [typed IR 良構邊界](typed-ir-validation.md)。
+executor 驗收。各動作目前接受的良構範圍見 [typed IR 的良構不變量](typed-ir-validation.md)。
 
 Search 自身的 DecisionId、每段 Partition 與替代輸入點全樹唯一；groups 是單次分組回答，
 不是逐組 Decision。`SearchSelectionAnswer`／`SearchPartitionAnswer`／`SearchReplacementAnswer`

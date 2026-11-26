@@ -103,7 +103,7 @@ fn batch_damage(trigger: &TriggerSpec) -> bool {
         && DamageFilter::parse(*binding, predicate).is_some_and(|plan| plan.instruction_batch())
 }
 
-/// An immutable card whose entire accepted ability tree passed structural checking.
+/// An immutable internal card whose full ability tree satisfies the structural invariants.
 /// This does not grant capability support or permission to execute.
 /// ```compile_fail
 /// use sve_engine::ir::{CardProgram, WellFormedCardProgram};
@@ -118,7 +118,7 @@ pub struct WellFormedCardProgram {
     card: CardProgram,
 }
 impl WellFormedCardProgram {
-    /// Check every ability, including declarations and unselected branches.
+    /// Check lowering output or a Rust fixture, including every declaration and branch.
     ///
     /// # Errors
     /// Returns the first invalid or unsupported shape.
@@ -221,7 +221,7 @@ impl WellFormedCardProgram {
     }
 }
 
-/// A checked rule or quick-window procedure with no caller-supplied environment.
+/// An internal rule or Quick procedure checked in its own decision environment.
 /// ```compile_fail
 /// use sve_engine::ir::{Procedure, WellFormedProcedure};
 /// fn forge(procedure: Procedure) { let _ = WellFormedProcedure { procedure }; }
@@ -237,7 +237,7 @@ pub struct WellFormedProcedure {
     procedure: Procedure,
 }
 impl WellFormedProcedure {
-    /// Check a decision at its explicit procedure entry.
+    /// Check the constructed decision at its explicit procedure entry.
     ///
     /// # Errors
     /// Rejects mismatched procedures and domains.

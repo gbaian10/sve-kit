@@ -1,12 +1,10 @@
-# 內部 typed IR 良構邊界
+# 內部 typed IR 的良構不變量
 
-`sim/engine/src/ir/wellformed.rs` 的 `WellFormedProgram::check` 接收並持有一個
-`Program`，成功後只能取得不可變參照。呼叫者無法直接構造已驗型別，也不能修改
-其中的程式體。它驗證的是封閉程式體，並把輸入的 root 視為一次執行的完整本體；
-沒有接受外部 binding／receipt 的入口。
-`SourceHolder`、控制者與持有者仍是執行環境提供的符號。
+`sim/engine/src/ir/wellformed.rs` 檢查 lowering 產物、執行器的 Quick 程序與經良構型別建構的 Rust 測試 IR。能力准入或需求推導的探針只供分析。公開 DSL 程式包在同一快照的驗證 reader 與 AST 解碼入口處理，整卡來源由生產端驗證。
 
-已驗程式體仍由執行准入核對語義能力需求與執行環境。這些 Rust 型別屬於引擎的內部執行表示。
+`WellFormedProgram::check` 接收並持有一個封閉 `Program`。成功後可取得不可變參照，root 具有一次執行自己的 binding 和 receipt 範圍。`SourceHolder`、控制者與持有者由執行環境提供。
+
+正式建置也檢查這些不變量。lowering 產物失敗時以 `ill_formed` 記錄產生內部 IR 的位置，經過檢查的程式體仍由執行准入核對語義能力需求與執行環境。這些 Rust 型別屬於引擎內部執行表示。
 
 ## 作用域與結果
 
