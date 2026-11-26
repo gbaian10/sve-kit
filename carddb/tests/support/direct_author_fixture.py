@@ -8,8 +8,8 @@ from sve_carddb.core.json import canonical
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.workflows import authoring
 
-from ..domains.effects.test_author_current_absent import synthetic_current
 from ..domains.text_observations.test_effect_presence import page
+from .direct_current_fixture import synthetic_current
 
 
 def direct_author_input(
@@ -99,7 +99,7 @@ def direct_author_input(
                     )
         workspace = authoring.Workspace(
             authoring.Inputs(
-                profile="public", repo=repo, jp_batch_id=current.jp_batch_id
+                profile="public", repo=repo, jp_batch_id="sha256:" + "0" * 64
             ),
             current,
             AuthorExpander(repo / "dsl"),

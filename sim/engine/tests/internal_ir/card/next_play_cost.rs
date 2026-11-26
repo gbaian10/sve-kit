@@ -4,7 +4,7 @@
 )]
 use super::*;
 use crate::player_pipeline::{answer, end_command, question};
-use std::{path::PathBuf, process::Command as ProcessCommand, sync::OnceLock};
+use std::sync::OnceLock;
 use sve_engine::game::player::observation::{InstalledChange, NumberChange, ObservedZone};
 use sve_engine::game::player::{
     Command, DecisionShape, Input, MainActionAnswer, MainIntentKind, QuestionShape, SubmissionKind,
@@ -14,16 +14,15 @@ use sve_engine::game::player::{
 fn program() -> &'static WellFormedCardProgram {
     static PROGRAM: OnceLock<WellFormedCardProgram> = OnceLock::new();
     PROGRAM.get_or_init(|| {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-        let output = ProcessCommand::new("uv")
-            .args(["run", "--directory"]).arg(root.join("carddb"))
-            .args(["--locked", "--no-default-groups", "python", "-c", "import json,sys\nfrom pathlib import Path\nfrom sve_carddb.domains.effects.author_expansion import AuthorExpander\nprint(json.dumps(AuthorExpander(Path(sys.argv[1])).expand(Path(sys.argv[2]).read_bytes(), []).tree))"])
-            .arg(root.join("dsl"))
-            .arg(root.join("sim/engine/tests/fixtures/lowering/next-play-cost.yaml"))
-            .output().unwrap();
-        assert!(output.status.success(), "C0 next-play-cost fixture expansion failed");
-        let tree: Value = serde_json::from_slice(&output.stdout).unwrap();
-        lowerer().lower(&tree).unwrap().remove("unit-amulet").unwrap()
+        let tree =
+            fanfare::expanded::load(&["sim/engine/tests/fixtures/lowering/next-play-cost.yaml"])
+                .pop()
+                .unwrap();
+        lowerer()
+            .lower(&tree)
+            .unwrap()
+            .remove("unit-amulet")
+            .unwrap()
     })
 }
 

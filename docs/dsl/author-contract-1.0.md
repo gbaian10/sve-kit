@@ -16,23 +16,23 @@
 
 ### 2.1 封套與分片
 
-主檔 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，預設 shared／1.0。每卡含 `meta, abilities`，可含 `admission, ignored, rule_sections, note, deck_rule, container`；container 只保留既有卡級／面級樹的呈現。meta.written_by 必填，其餘 status 預設 draft，reviews／rulings 預設空。
+主檔 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，預設 shared／1.0。每卡含 `meta, abilities`，可含 `admission, ignored, rule_sections, note, deck_rule, token, token_sources`。meta.written_by 必填，其餘 status 預設 draft，reviews／rulings 預設空。
 
 作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。英文 override 的來源契約仍未提供。
 
 ### 2.2 材料化 companion record
 
-具名本體保存 `id, body, written_by`，可有 `admission, edition, params, ports, note`；edition 預設 1。`admission: shared` 表示集中審查的共用本體；來源路徑仍可保存原本的 scope／registration 資料，但不是直接作者入口的資格門檻。等價句型可引用同一 id，不要求相同 FrameId。
+具名本體保存 `id, body, written_by`，可有 `admission, edition, params, ports, note`；edition 預設 1。`admission: shared` 表示集中審查的共用本體。等價句型可引用同一 id。
 
 ### 2.3 材料化逐用途選版與 inline
 
-用途寫 `line` 加能力頭，或 `use` 加裸參數值；能力頭不能同時與 use 出現。edition 只有唯一版次才可省略。位置使用 face／section／scope，跨行用 covers；提醒／排版以 ignored 明示。輕量與共用本體可在同卡混用；未標 admission 的既有來源重建路徑保留，但不再讀取錨點。
+用途寫 `line` 加能力頭，或 `use` 加裸參數值；能力頭不能同時與 use 出現。edition 只有唯一版次才可省略。位置使用 face／section／scope，跨行用 covers；提醒／排版以 ignored 明示。輕量與共用本體可在同卡混用。
 
 直接來源座標為 `DirectSourceUse`：admission、永久 face_id、face_revision owner、field／ordinal、line、scope、covers。這是位置及覆蓋責任，不宣稱來源等價證明。展開後不保留 param／generated_by。
 
 #### 獨立 keywords 的非本體來源
 
-獨立 keywords 與能力本體分開降低；其來源座標仍保留永久面與行。七種已支援印刷關鍵字仍經具名 runtime 宣告及有效區域檢查，未支援的宣告整卡拒絕。
+獨立 keywords 與能力本體分開降低；其來源座標仍保留永久面與行。支援的印刷關鍵字仍經具名 runtime 宣告及有效區域檢查，未支援的宣告整卡拒絕。
 
 ### 2.4 effects-index
 
@@ -48,19 +48,11 @@
 
 直接本體宣告 `params: {name: Nat | Int | CardName | Concept | CardKind | Player | Zone | Phase}`，也接受既有 `{type,source?}` 宣告；用途只提供整數或字串，不接受布林冒整數或整棵程式。宣告名稱與實值必須完整對應且均有使用。替換後由 DSL Schema 驗目的位置型別及封閉值域，scope／binding／receipt 良構由 lowering 檢查。
 
-來源重建路徑保留既有 typed 葉的 role／component 對照，詳見實作的 `author_sites.py` 與來源展開形狀；該限制不作直接入口前置。不因放寬作者來源證明而放寬 DSL 的合法型別或可執行構造。
-
 ## 4. 本體版本與新鮮度
 
 作者以具名本體及 edition 選用內容。改本體時跑受影響行為測試，無需 SHA pin、逐用途 bytes 證明或全庫 normalizer 重鍵。
 
-### 4.1 body recipe
-
-既有來源重建入口內部仍計算 effect-body-v1：canonical payload 包含 ability_scope、dsl、params、body、ports，供其記憶體模型一致性使用。直接作者入口不依賴此摘要，作者不維護它，也不以它延續審核。
-
-### 4.2 來源與用途依賴
-
-來源重建入口保留 current 來源及 registry 檢查；直接入口從 DB 讀永久身分與每個欄位的非空行，不要求來源 adapter 重建整個能力。兩者都保留位置診斷。來源歸檔、已審 card-data 與公開快照的完整性契約不變。
+作者入口從建置 DB 讀永久身分與各欄非空行，並用原始座標報告診斷。
 
 ## 5. 審核、測試證據與 meta
 
@@ -74,7 +66,7 @@ C0 解析嚴格 YAML、展開具名本體、驗 Schema 與整卡行覆蓋，`Car
 
 D0 核對所有能力／ignored 座標與獨立行清單、面與 owner、完整閉包及 DSL 型別，再降低同一套 typed IR。Catalog 依既有面序對快照，直接入口不用卡文字 hash 配面；Game 仍執行整卡能力准入。任一不支援動作、錯型別或錯身分拒絕整張卡及該次選用，不回傳半份結果。
 
-來源重建入口仍交獨立 sidecar；直接入口只保留位置座標，不製造 current_source_checked。token 定義不能當母卡能力，尚未支援的 token 接線與對局機制仍拒絕。
+token 定義須接至衍生物本體。D0 拒絕尚未支援的 token 接線與對局機制。
 
 ### 守護與光紋的具名宣告准入
 

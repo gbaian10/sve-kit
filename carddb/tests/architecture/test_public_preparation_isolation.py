@@ -1,21 +1,20 @@
 """Prepared inputs may be shared only when every consumer gets isolated state."""
 
 import mmap
+from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import object_value, parse, string
+from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.physical_sources import page
 
 from ..support.database_template import DatabaseTemplate
 from ..support.prepared_values import freeze, restore, shared_preparation
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
-    from ..support.author_current_fixtures import CurrentSourceInputs
+REPO = Path(__file__).resolve().parents[3]
 
 
 def test_restored_graphs_keep_aliases_without_sharing_nested_mutations() -> None:
@@ -67,13 +66,16 @@ def test_interrupted_write_does_not_publish_a_partial_preparation(
     assert restore(content, dict) == {"selection": ["first"]}
 
 
-def test_fixed_catalog_reuse_keeps_physical_page_caches_private(
-    current_source_preparation: CurrentSourceInputs, tmp_path: Path
-) -> None:
-    inputs = current_source_preparation
+def test_fixed_catalog_reuse_keeps_physical_page_caches_private(tmp_path: Path) -> None:
+    catalog = read(REPO / "card-data")
+    batch = string(
+        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
+            "batch_id"
+        ]
+    )
     for parser in ("first-v1", "second-v2"):
-        batches = ParsedBatches(inputs.catalog)
-        frozen = batches.batch(tmp_path / "sources", "public-fixture", inputs.batch_id)
+        batches = ParsedBatches(catalog)
+        frozen = batches.batch(tmp_path / "sources", "public-fixture", batch)
         physical = page(
             frozen,
             frozen.current_versions[0].source_version_id,

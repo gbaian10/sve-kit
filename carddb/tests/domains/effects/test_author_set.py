@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.core.provenance import BuildContext
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -18,10 +17,6 @@ from sve_carddb.domains.effects.author_set import (
     merge_index_files,
     validate_author_set,
 )
-from sve_carddb.domains.text_observations import Vocabulary
-from sve_carddb.domains.translations.inputs import Snapshot
-from sve_carddb.domains.translations.recognition.rules import load
-from sve_carddb.domains.translations.sources import Sources
 
 from .author_entry_cases import meta, source_use
 
@@ -169,37 +164,40 @@ def test_prototype_inventory_uses_database_identity(
                 dict(db.rows("printing")[0].values)
                 | {"id": "prototype", "card_no": "FIX-001", "card_id": "c:" + "1" * 32},
             )
-        current = CurrentAuthorSources(
-            db,
-            Sources({}, REPO, BuildContext.from_inputs("0" * 40, {})),
-            Snapshot((), ()),
-            Vocabulary(bindings=()),
-            load(REPO),
-            "sha256:" + "0" * 64,
-        )
+        current = CurrentAuthorSources(db)
         prototype(tmp_path, "FIX-001")
         index(tmp_path, selection(path=PROTOTYPE))
-        result = current.validate(tmp_path, expander)
+        result = current.validate_inputs(
+            load_author_set(tmp_path, expander.schemas), expander
+        )
         assert len(result) == 1
         assert isinstance(result[0], CardRejected)
         assert result[0].diagnostic.reason == "unsupported_prototype"
         index(tmp_path, selection(path=PROTOTYPE, identity="2"))
         with pytest.raises(AuthorInputError, match="prototype_index_identity_mismatch"):
-            current.validate(tmp_path, expander)
+            current.validate_inputs(
+                load_author_set(tmp_path, expander.schemas), expander
+            )
         index(tmp_path)
         prototype(tmp_path, "MISSING")
         with pytest.raises(AuthorInputError, match="prototype_identity_unresolved"):
-            current.validate(tmp_path, expander)
+            current.validate_inputs(
+                load_author_set(tmp_path, expander.schemas), expander
+            )
         prototype(tmp_path, "FIX-001")
         for scope in ("shared", "en_override"):
             author(tmp_path, "FIX-001", scope=scope)
             index(tmp_path, selection(scope=scope))
             if scope == "shared":
                 with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
-                    current.validate(tmp_path, expander)
+                    current.validate_inputs(
+                        load_author_set(tmp_path, expander.schemas), expander
+                    )
             else:
                 with pytest.raises(AuthorInputError, match="schema/const"):
-                    current.validate(tmp_path, expander)
+                    current.validate_inputs(
+                        load_author_set(tmp_path, expander.schemas), expander
+                    )
 
 
 def test_complete_inventory_retains_bytes_and_unused_bodies(

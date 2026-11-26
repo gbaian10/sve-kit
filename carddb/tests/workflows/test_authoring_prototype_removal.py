@@ -13,7 +13,7 @@ from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.workflows import authoring
 
 from ..domains.effects.author_entry_cases import meta
-from ..domains.effects.test_author_current_absent import CARD, synthetic_current
+from ..support.direct_current_fixture import CARD, synthetic_current
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -107,7 +107,7 @@ def test_prototype_removal_deletes_only_exhausted_shards(
             authoring.Inputs(
                 profile="public",
                 repo=repo,
-                jp_batch_id=current.jp_batch_id,
+                jp_batch_id="sha256:" + "0" * 64,
                 revision="0" * 40,
             ),
             current,

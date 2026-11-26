@@ -86,7 +86,6 @@ ENTRY_TYPES: dict[str, tuple[TypeForm[object], str]] = {
     "VocabularyOwner": (four_layer.VocabularyOwner, "VocabularyOwner"),
     "WrittenBy": (evidence.WrittenBy, "WrittenBy"),
     "A.file": (entries.AuthorEffectSet, "AuthorEffectSet"),
-    "A.body-shard": (entries.EffectBodyShard, "EffectBodyShard"),
     "authored": (entries.AuthorEffectSet, "AuthorEffectSet"),
     "TokenSource": (entries.TokenSource, "TokenSource"),
 }

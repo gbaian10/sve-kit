@@ -7,15 +7,15 @@ Zone=field/hand/deck/evolve_deck/cemetery/ex；Phase=start/main/end。
 During={turn:PlayerRef}，By={ability_of:EventObjectSel}。SubjectFilter／EventRecipient 的形狀見事件與歷史形狀文件。
 主體 ref 與 sel 互斥；一般空事件 payload 合法，不表示任意 it／讀值可用。
 Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 selector 的直接參數權限。
-`A.nat-threshold` 恰一鍵 `{eq|le|ge: Nat}`；`A.die-threshold` 恰一鍵
-`{eq|le|ge: 1..6}`，兩者都只收整數常值，不收 bool、運算式或參數。
+`A.die-threshold` 恰一鍵
+`{eq|le|ge: 1..6}`，只收整數常值。
 `A.move-origin` 必填 `{who: PlayerRef, zone: Zone}`；Condition 見[運算式形狀](author-expression-shapes-1.0.md)。
 直接事件與歷史的主體窄化、來源角色、讀值及 LKI 仍需 C1／D0 接線。
 
 卡例沿事件與歷史形狀文件的凍結日文來源；本矩陣不把 Q&A 命中算為卡例。
 「合成」只表示契約形狀的測試，不能據此宣稱該格已有真卡或可執行。
 
-## 直接事件（36 鍵）
+## 直接事件
 
 | 事件 | payload 必填 | payload 選填（型別／enum） | 卡例／合成 |
 | --- | --- | --- | --- |
@@ -36,7 +36,6 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | ability_played | 無 | who:PlayerRef、holder:(Ref 或 EventObjectSel) | 合成 |
 | life_changed | 無 | who:PlayerRef、direction:up/down、during:During、by:By、crosses_zero:true | BP02-095、BP19-075、BP05-092；by 合成 |
 | stat_changed | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down | BP11-082、BP21-100；不收 subject/property/by |
-| counter_changed | 無 | ref:Ref、name:CounterName、after:A.nat-threshold、direction:up/down | 合成；不把 Stack 提醒文另造誘發 |
 | acted | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef | CP04-102、BP11-069 |
 | stood | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef | 合成 |
 | raced | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef | CP01-082、CP01-032 |
@@ -55,11 +54,9 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | hand_revealed | ref:this | 無 | CP05-068；能力使手牌中的此卡公開給對手，待機控制者為手牌持有者 |
 | fused_as_material | 無 | ref:Ref、by:By | BP19-048 |
 
-counter_reached 是額外巨集：ref:Ref／name:CounterName／value:Nat 三者必填，沒有選填欄位。
-加上此巨集共有 37 個可直接寫的鍵；它以 counter_changed 的 after 比較展開，不新增歷史事實。
-any_of 是非空事件列表組合，可含 counter_reached，但不含 state／巢狀 any_of。
+any_of 是非空事件列表組合，不含 state／巢狀 any_of。
 
-## 歷史（32 個非 state 事件與 payment）
+## 歷史（含 payment）
 
 每列頂層均必填 event 與 window；window=this_turn/game/{since:BindingName}。
 共通選填 distinct=facts/subjects、exclude=this_execution；condition 另有 at_least:Quantity、at:event。
@@ -84,7 +81,6 @@ any_of 是非空事件列表組合，可含 counter_reached，但不含 state／
 | ability_played | 無 | who:PlayerRef | 無 | holder:(Ref 或 EventObjectSel)、kind:quick_activation |
 | life_changed | 無 | who:PlayerRef | 無 | direction:up/down、during:During、by:By、crosses_zero:true |
 | stat_changed | 無 | — | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down |
-| counter_changed | 無 | — | 無 | ref:Ref、name:CounterName、after:A.nat-threshold、direction:up/down |
 | acted | 無 | sel:SubjectFilter、who:PlayerRef | 無 | ref:Ref |
 | stood | 無 | sel:SubjectFilter、who:PlayerRef | 無 | ref:Ref |
 | raced | 無 | sel:SubjectFilter、who:PlayerRef | 無 | ref:Ref |

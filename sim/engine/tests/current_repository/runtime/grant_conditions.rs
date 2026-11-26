@@ -160,9 +160,9 @@ fn bp08_082_keeps_one_source_ability_and_recomputes_both_necrocharge_thresholds(
             static_ability.source.author_path
         );
         let source = current.source_at(&path).unwrap();
-        assert_eq!(source.source.card_id, current.card_id);
+        assert_eq!(source.card_id, current.card_id);
         assert_eq!(
-            source.source.line, 2,
+            source.line, 2,
             "both clauses cover the same complete source line"
         );
     }

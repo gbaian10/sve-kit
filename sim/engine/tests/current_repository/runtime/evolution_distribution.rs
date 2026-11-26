@@ -52,11 +52,11 @@ fn bp16_006_current_covers_both_lines_and_all_registered_jp_printings() {
                 "/cards/{CARD}/faces/{FACE}/abilities/{ability}/{head}/do/{step}/{action}"
             ))
             .unwrap();
-        assert_eq!(source.source.card_id, CARD_ID);
-        assert_eq!(source.source.face, FACE);
-        assert_eq!(source.source.field, "effect");
-        assert_eq!(source.source.line, line);
-        assert_eq!(source.source.section, None);
+        assert_eq!(source.card_id, CARD_ID);
+        assert_eq!(source.face, FACE);
+        assert_eq!(source.field, "effect");
+        assert_eq!(source.line, line);
+        assert_eq!(source.section, None);
     }
     assert_eq!(
         selected.current["BP01-T03"].card_id,

@@ -655,7 +655,6 @@ class EffectSpecFields(TypedDict):
     lose_abilities: NotRequired[LoseAbilities]
     also_named: NotRequired[AlsoNamed]
     add_trait: NotRequired[TraitEffect]
-    remove_trait: NotRequired[TraitEffect]
     make_type: NotRequired[MakeType]
     cost_mod: NotRequired[CostMod]
     damage_mod: NotRequired[DamageMod]
@@ -712,8 +711,8 @@ def _search_entry_posture[T: Mapping[str, object]](value: T) -> T:
 
 def _replacement[T: Mapping[str, object]](value: T) -> T:
     changed = value.keys() - {"if", "after"}
-    if not changed or ("replace_with" in changed and len(changed) != 1):
-        raise ValueError("Use differences or one complete replacement")
+    if not changed:
+        raise ValueError("A replacement requires at least one change")
     if "n" in changed and "upto" in changed:
         raise ValueError("Quantity alternatives are exclusive")
     return value
@@ -940,17 +939,6 @@ type SearchDestination = (
 
 
 @with_config(CONFIG)
-class SearchPerGroupFields(TypedDict):
-    per_group: Annotated[tuple[Zone, ...], Field(min_length=2)]
-
-
-type SearchPerGroup = SearchPerGroupFields
-
-
-type GroupedSearchDestination = SearchDestination | SearchPerGroup
-
-
-@with_config(CONFIG)
 class SearchGroupExactFields(TypedDict):
     sel: ObjectSel
 
@@ -979,27 +967,13 @@ _DamageInsteadKeys = TypedDict("_DamageInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [
-                {"required": ["to"]},
-                {"required": ["n"]},
-                {"required": ["replace_with"]},
-            ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "to"]},
-                    {"required": ["replace_with", "n"]},
-                ]
-            },
-        },
+        json_schema_extra={"anyOf": [{"required": ["to"]}, {"required": ["n"]}]},
     )
 )
 class DamageInsteadFields(_DamageInsteadKeys):
     to: NotRequired[EffectRecipient]
 
     n: NotRequired[DamageAmount]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1020,17 +994,7 @@ _MoveInsteadKeys = TypedDict("_MoveInsteadKeys", {"if": Condition})
                 {"required": ["position"]},
                 {"required": ["order"]},
                 {"required": ["acted"]},
-                {"required": ["replace_with"]},
-            ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "ref"]},
-                    {"required": ["replace_with", "to"]},
-                    {"required": ["replace_with", "position"]},
-                    {"required": ["replace_with", "order"]},
-                    {"required": ["replace_with", "acted"]},
-                ]
-            },
+            ]
         },
     )
 )
@@ -1045,8 +1009,6 @@ class MoveInsteadFields(_MoveInsteadKeys):
 
     acted: NotRequired[bool]
 
-    replace_with: NotRequired[Action]
-
     after: NotRequired[Steps]
 
 
@@ -1059,27 +1021,13 @@ _BuffInsteadKeys = TypedDict("_BuffInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [
-                {"required": ["power"]},
-                {"required": ["hp"]},
-                {"required": ["replace_with"]},
-            ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "power"]},
-                    {"required": ["replace_with", "hp"]},
-                ]
-            },
-        },
+        json_schema_extra={"anyOf": [{"required": ["power"]}, {"required": ["hp"]}]},
     )
 )
 class BuffInsteadFields(_BuffInsteadKeys):
     power: NotRequired[NumericExpr]
 
     hp: NotRequired[NumericExpr]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1093,16 +1041,11 @@ _LifeInsteadKeys = TypedDict("_LifeInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [{"required": ["delta"]}, {"required": ["replace_with"]}],
-            "not": {"anyOf": [{"required": ["replace_with", "delta"]}]},
-        },
+        json_schema_extra={"anyOf": [{"required": ["delta"]}]},
     )
 )
 class LifeInsteadFields(_LifeInsteadKeys):
     delta: NotRequired[RecoveryDelta]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1117,17 +1060,7 @@ _GrantInsteadKeys = TypedDict("_GrantInsteadKeys", {"if": Condition})
     ConfigDict(
         **CONFIG,
         json_schema_extra={
-            "anyOf": [
-                {"required": ["keywords"]},
-                {"required": ["abilities"]},
-                {"required": ["replace_with"]},
-            ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "keywords"]},
-                    {"required": ["replace_with", "abilities"]},
-                ]
-            },
+            "anyOf": [{"required": ["keywords"]}, {"required": ["abilities"]}]
         },
     )
 )
@@ -1138,8 +1071,6 @@ class GrantInsteadFields(_GrantInsteadKeys):
     keywords: NotRequired[
         Annotated[tuple[Concept | ParamRef, ...], Field(min_length=1)]
     ]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1158,16 +1089,8 @@ _CreateInsteadKeys = TypedDict("_CreateInsteadKeys", {"if": Condition})
                 {"required": ["n"]},
                 {"required": ["upto"]},
                 {"required": ["to"]},
-                {"required": ["replace_with"]},
             ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "n"]},
-                    {"required": ["replace_with", "upto"]},
-                    {"required": ["replace_with", "to"]},
-                    {"required": ["n", "upto"]},
-                ]
-            },
+            "not": {"required": ["n", "upto"]},
         },
     )
 )
@@ -1177,8 +1100,6 @@ class CreateInsteadFields(_CreateInsteadKeys):
     upto: NotRequired[Quantity]
 
     to: NotRequired[CreateDestination]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1192,16 +1113,11 @@ _DrawInsteadKeys = TypedDict("_DrawInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [{"required": ["n"]}, {"required": ["replace_with"]}],
-            "not": {"anyOf": [{"required": ["replace_with", "n"]}]},
-        },
+        json_schema_extra={"anyOf": [{"required": ["n"]}]},
     )
 )
 class DrawInsteadFields(_DrawInsteadKeys):
     n: NotRequired[CountAmount]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1221,17 +1137,8 @@ _SearchInsteadKeys = TypedDict("_SearchInsteadKeys", {"if": Condition})
                 {"required": ["n"]},
                 {"required": ["upto"]},
                 {"required": ["to"]},
-                {"required": ["replace_with"]},
             ],
-            "not": {
-                "anyOf": [
-                    {"required": ["replace_with", "sel"]},
-                    {"required": ["replace_with", "n"]},
-                    {"required": ["replace_with", "upto"]},
-                    {"required": ["replace_with", "to"]},
-                    {"required": ["n", "upto"]},
-                ]
-            },
+            "not": {"required": ["n", "upto"]},
         },
     )
 )
@@ -1242,9 +1149,7 @@ class SearchInsteadFields(_SearchInsteadKeys):
 
     upto: NotRequired[SelectionQuantity]
 
-    to: NotRequired[GroupedSearchDestination]
-
-    replace_with: NotRequired[Action]
+    to: NotRequired[SearchDestination]
 
     after: NotRequired[Steps]
 
@@ -1258,16 +1163,11 @@ _BanishInsteadKeys = TypedDict("_BanishInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [{"required": ["ref"]}, {"required": ["replace_with"]}],
-            "not": {"anyOf": [{"required": ["replace_with", "ref"]}]},
-        },
+        json_schema_extra={"anyOf": [{"required": ["ref"]}]},
     )
 )
 class BanishInsteadFields(_BanishInsteadKeys):
     ref: NotRequired[EffectObject]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1281,16 +1181,11 @@ _DestroyInsteadKeys = TypedDict("_DestroyInsteadKeys", {"if": Condition})
 @with_config(
     ConfigDict(
         **CONFIG,
-        json_schema_extra={
-            "anyOf": [{"required": ["ref"]}, {"required": ["replace_with"]}],
-            "not": {"anyOf": [{"required": ["replace_with", "ref"]}]},
-        },
+        json_schema_extra={"anyOf": [{"required": ["ref"]}]},
     )
 )
 class DestroyInsteadFields(_DestroyInsteadKeys):
     ref: NotRequired[EffectObject]
-
-    replace_with: NotRequired[Action]
 
     after: NotRequired[Steps]
 
@@ -1326,8 +1221,6 @@ class SearchExactFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     cost_sum_le: NotRequired[Quantity]
 
     distinct_by: NotRequired[DistinctBy]
@@ -1350,8 +1243,6 @@ class SearchUpToFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     cost_sum_le: NotRequired[Quantity]
 
     distinct_by: NotRequired[DistinctBy]
@@ -1368,11 +1259,9 @@ type SearchUpTo = SearchUpToFields
 class SearchGroupedFields(TypedDict):
     groups: Annotated[tuple[SearchGroup, ...], Field(min_length=2)]
 
-    to: GroupedSearchDestination
+    to: SearchDestination
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     cost_sum_le: NotRequired[Quantity]
 
@@ -1395,8 +1284,6 @@ class DrawActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     who: NotRequired[EffectPlayers | ParamRef]
 
     instead: NotRequired[Annotated[tuple[DrawInstead, ...], Field(min_length=1)]]
@@ -1410,8 +1297,6 @@ class DiscardExactFields(TypedDict):
     n: CountAmount
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[EffectPlayers]
 
@@ -1429,8 +1314,6 @@ class DiscardAllFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     who: NotRequired[EffectPlayers]
 
 
@@ -1443,8 +1326,6 @@ class DiscardDownToFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     who: NotRequired[EffectPlayers]
 
 
@@ -1456,8 +1337,6 @@ class DiscardAnyFields(TypedDict):
     any: TrueFlag
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[EffectPlayers]
 
@@ -1472,8 +1351,6 @@ class DiscardRefFields(TypedDict):
     ref: Ref
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[EffectPlayers]
 
@@ -1499,8 +1376,6 @@ class DamageActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     distribute: NotRequired[TrueFlag]
 
     distribute_at: NotRequired[Literal["play", "resolution"]]
@@ -1517,8 +1392,6 @@ class DestroyLongFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     instead: NotRequired[Annotated[tuple[DestroyInstead, ...], Field(min_length=1)]]
 
 
@@ -1534,8 +1407,6 @@ class BanishLongFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     instead: NotRequired[
         Annotated[tuple[BanishActionInstead, ...], Field(min_length=1)]
     ]
@@ -1549,8 +1420,6 @@ class BanishTopFields(TypedDict):
     top: DeckSlice
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     instead: NotRequired[
         Annotated[tuple[BanishActionInstead, ...], Field(min_length=1)]
@@ -1569,8 +1438,6 @@ class ActLongFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type ActLong = ActLongFields
 
@@ -1583,8 +1450,6 @@ class StandLongFields(TypedDict):
     ref: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type StandLong = StandLongFields
@@ -1599,8 +1464,6 @@ class FlipDownLongFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type FlipDownLong = FlipDownLongFields
 
@@ -1613,8 +1476,6 @@ class FlipUpLongFields(TypedDict):
     ref: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type FlipUpLong = FlipUpLongFields
@@ -1680,8 +1541,6 @@ class MoveRefFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     position: NotRequired[Position]
 
     order: NotRequired[MoveOrder]
@@ -1740,8 +1599,6 @@ class MoveTopFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     position: NotRequired[Position]
 
     order: NotRequired[MoveOrder]
@@ -1779,8 +1636,6 @@ class LookRefFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     by: NotRequired[PlayerRef]
 
     random: NotRequired[RandomSample]
@@ -1796,8 +1651,6 @@ class LookTopFields(TypedDict):
     bind: BindingName
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     by: NotRequired[PlayerRef]
 
@@ -1816,8 +1669,6 @@ class RevealRefFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     by: NotRequired[PlayerRef]
 
     random: NotRequired[RandomSample]
@@ -1833,8 +1684,6 @@ class RevealTopFields(TypedDict):
     bind: BindingName
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     by: NotRequired[PlayerRef]
 
@@ -1876,8 +1725,6 @@ class RevealUntilActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type RevealUntilAction = RevealUntilActionFields
 
@@ -1889,8 +1736,6 @@ class LifeActionFields(TypedDict):
     delta: RecoveryDelta
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     instead: NotRequired[Annotated[tuple[LifeInstead, ...], Field(min_length=1)]]
 
@@ -1906,8 +1751,6 @@ class SetLifeActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type SetLifeAction = SetLifeActionFields
 
@@ -1922,8 +1765,6 @@ class BuffActionFields(TypedDict):
     on: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     power: NotRequired[NumericExpr]
 
@@ -1947,8 +1788,6 @@ class SetStatActionFields(TypedDict):
     on: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     power: NotRequired[Quantity | OriginalStat]
 
@@ -1980,8 +1819,6 @@ class GrantActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     until: NotRequired[Until]
 
     instead: NotRequired[Annotated[tuple[GrantInstead, ...], Field(min_length=1)]]
@@ -1995,8 +1832,6 @@ class LoseAbilitiesActionFields(TypedDict):
     on: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     until: NotRequired[Until]
 
@@ -2014,29 +1849,8 @@ class CounterActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type CounterAction = CounterActionFields
-
-
-_MoveCountersActionKeys = TypedDict("_MoveCountersActionKeys", {"from": EffectObject})
-
-
-@with_config(CONFIG)
-class MoveCountersActionFields(_MoveCountersActionKeys):
-    to: EffectObject
-
-    name: CounterName
-
-    all: TrueFlag
-
-    result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
-
-
-type MoveCountersAction = MoveCountersActionFields
 
 
 @with_config(CONFIG)
@@ -2046,8 +1860,6 @@ class PpMaxActionFields(TypedDict):
     delta: NumericExpr
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type PpMaxAction = PpMaxActionFields
@@ -2061,8 +1873,6 @@ class EpActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type EpAction = EpActionFields
 
@@ -2074,8 +1884,6 @@ class SepActionFields(TypedDict):
     delta: NumericExpr
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type SepAction = SepActionFields
@@ -2089,8 +1897,6 @@ class PpDeltaFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type PpDelta = PpDeltaFields
 
@@ -2102,8 +1908,6 @@ class PpToMaxFields(TypedDict):
     to_max: TrueFlag
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type PpToMax = PpToMaxFields
@@ -2118,8 +1922,6 @@ class ShuffleActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type ShuffleAction = ShuffleActionFields
 
@@ -2129,8 +1931,6 @@ class DiceActionFields(TypedDict):
     bind: BindingName
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[PlayerRef]
 
@@ -2145,8 +1945,6 @@ class DeclareNumberFields(TypedDict):
     kind: Literal["number"]
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[PlayerRef]
 
@@ -2165,8 +1963,6 @@ class DeclareNameFields(TypedDict):
     kind: Literal["name"]
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     who: NotRequired[PlayerRef]
 
@@ -2193,8 +1989,6 @@ class EquipActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type EquipAction = EquipActionFields
 
@@ -2213,8 +2007,6 @@ class StealActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     to: NotRequired[PlayerRef | Literal["other_players"]]
 
 
@@ -2226,8 +2018,6 @@ class GiveActionFields(TypedDict):
     ref: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     to: NotRequired[PlayerRef | Literal["other_players"]]
 
@@ -2243,8 +2033,6 @@ class BoxActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type BoxAction = BoxActionFields
 
@@ -2254,8 +2042,6 @@ class RaceActionFields(TypedDict):
     ref: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     n: NotRequired[Quantity]
 
@@ -2269,8 +2055,6 @@ class GainDriveActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type GainDriveAction = GainDriveActionFields
 
@@ -2282,8 +2066,6 @@ class PlayCardActionFields(TypedDict):
     cost: NotRequired[Annotated[Literal[0], BeforeValidator(integer)]]
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type PlayCardAction = PlayCardActionFields
@@ -2307,8 +2089,6 @@ class PlayAbilityTriggerFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     cost_policy: NotRequired[Literal["normal", "waive_original"]]
 
 
@@ -2322,8 +2102,6 @@ class PlayAbilityAbilityFields(TypedDict):
     ability: UbInvocation
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     cost_policy: NotRequired[Literal["normal", "waive_original"]]
 
@@ -2342,8 +2120,6 @@ class ApplyActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     until: NotRequired[Until]
 
     capture: NotRequired[Literal["play"]]
@@ -2360,8 +2136,6 @@ class PlayerEffectActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     until: NotRequired[Until]
 
 
@@ -2374,8 +2148,6 @@ class WinActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type WinAction = WinActionFields
 
@@ -2386,8 +2158,6 @@ class SkipTurnActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
 
 type SkipTurnAction = SkipTurnActionFields
 
@@ -2397,8 +2167,6 @@ class ExtraTurnActionFields(TypedDict):
     who: EffectPlayers
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
 
 type ExtraTurnAction = ExtraTurnActionFields
@@ -2411,8 +2179,6 @@ class MakeTypeActionFields(TypedDict):
     type: Code
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     until: NotRequired[Until]
 
@@ -2520,8 +2286,6 @@ class CreateActionFields(TypedDict):
 
     result: NotRequired[BindingName]
 
-    precondition: NotRequired[Condition]
-
     n: NotRequired[CountAmount]
 
     upto: NotRequired[Quantity]
@@ -2549,8 +2313,6 @@ class EvolveActionFields(TypedDict):
     ref: EffectObject
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     into: NotRequired[EvolutionDestination]
 
@@ -2583,8 +2345,6 @@ class TransformActionFields(TypedDict):
     into: Text | TransformAllocated
 
     result: NotRequired[BindingName]
-
-    precondition: NotRequired[Condition]
 
     entry_effects: NotRequired[Annotated[tuple[EffectSpec, ...], Field(min_length=1)]]
 
@@ -2759,30 +2519,6 @@ type RepeatWhile = RepeatWhileFields
 type RepeatControl = RepeatCount | RepeatUntil | RepeatWhile
 
 
-_RepeatAbilityControlKeys = TypedDict("_RepeatAbilityControlKeys", {"while": Condition})
-
-
-@with_config(CONFIG)
-class RepeatAbilityControlFields(_RepeatAbilityControlKeys):
-    pass
-
-
-type RepeatAbilityControl = RepeatAbilityControlFields
-
-
-_ForeachControlKeys = TypedDict(
-    "_ForeachControlKeys", {"in": EffectObject, "as": BindingName}
-)
-
-
-@with_config(CONFIG)
-class ForeachControlFields(_ForeachControlKeys):
-    do: Steps
-
-
-type ForeachControl = ForeachControlFields
-
-
 @with_config(CONFIG)
 class PlayerStageModeFields(TypedDict):
     do: Steps
@@ -2896,8 +2632,6 @@ class ActionFields(TypedDict):
     lose_abilities: NotRequired[LoseAbilitiesAction]
 
     counter: NotRequired[CounterAction]
-
-    move_counters: NotRequired[MoveCountersAction]
 
     pp_max: NotRequired[PpMaxAction]
 
@@ -3013,8 +2747,6 @@ class StepFields(_StepKeys):
 
     counter: NotRequired[CounterAction]
 
-    move_counters: NotRequired[MoveCountersAction]
-
     pp_max: NotRequired[PpMaxAction]
 
     ep: NotRequired[EpAction]
@@ -3080,10 +2812,6 @@ class StepFields(_StepKeys):
     either: NotRequired[EitherControl]
 
     repeat: NotRequired[RepeatControl]
-
-    repeat_ability: NotRequired[RepeatAbilityControl]
-
-    foreach: NotRequired[ForeachControl]
 
     each_player: NotRequired[EachPlayerControl]
 
@@ -3589,8 +3317,6 @@ class DelayedActionFields(TypedDict):
     next_only: NotRequired[bool]
 
     until: NotRequired[Until]
-
-    precondition: NotRequired[Condition]
 
 
 type DelayedAction = Annotated[DelayedActionFields, AfterValidator(_delayed)]

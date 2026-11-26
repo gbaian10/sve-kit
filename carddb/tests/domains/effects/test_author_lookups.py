@@ -7,12 +7,15 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
-from sve_carddb.domains.effects.author_sources import SourceError
+from sve_carddb.domains.effects.author_inputs import (
+    AuthorInputError,
+    SourceError,
+    parse_document,
+)
 from sve_carddb.workflows import authoring
 
+from ...support.direct_current_fixture import synthetic_current
 from .author_entry_cases import meta
-from .test_author_current_absent import synthetic_current
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

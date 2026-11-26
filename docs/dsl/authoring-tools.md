@@ -16,7 +16,7 @@
 }
 ```
 
-`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 仍需 `database`、`recipe`、`frozen_inputs` 以重建相同來源上下文，依 CLI 型別接受配置；一般作者使用公開 profile 即可。來源歸檔及已審解析輸入的完整性契約不變。
+`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 仍需 `database`、`recipe`、`frozen_inputs` 以確認建置與 JP 批次，依 CLI 型別接受配置；一般作者使用公開 profile 即可。來源歸檔及已審解析輸入的完整性契約不變。
 
 ## 查詢與手寫
 
@@ -24,6 +24,8 @@
 uv --directory /absolute/project/carddb run sve-carddb author inspect \
   --inputs /absolute/work/public.json --card SYN-01
 ```
+
+`inspect` 顯示永久身分、各卡面的規則行、已存作者檔及具名本體，並回報該卡的定位或材料化錯誤。
 
 主檔與索引只登錄每張永久卡片的一個代表 `record_key`；同卡的 JP 印刷別名由 current 選用依永久身分展開，不重複寫入主檔。
 
@@ -61,7 +63,7 @@ records:
           - draw: {who: self, n: {param: n}}
 ```
 
-`admission` 可放卡、本體或用途，值為 `light | shared`；用途優先於本體，本體優先於卡。只要任一層明示 admission，該卡走直接作者入口，其餘未標用途保留為共用語義責任。未標 admission 的既有卡維持來源重建路徑，亦不需要錨點。共用整理與審查見[常見效果作者流程](common-family-authoring.md)。
+`admission` 可放卡、本體或用途，值為 `light | shared`；用途優先於本體，本體優先於卡。未標用途依共用審查處理。共用整理與審查見[常見效果作者流程](common-family-authoring.md)。
 
 ## 表面的進化牌組卡片翻回裏面
 
@@ -118,7 +120,6 @@ BP08-053 的入場曲以三張翻上付款後破壞目標；BP17-116 的一張�
 lowering 核對宣告及整卡覆蓋後，沿用既有的空能力卡程式。
 構築索引與作者入口共用相同的固定句型解析器；索引仍從快照的已採納本文產生 `copies`，
 既有純函式驗證器依構築名稱與區域套用上限。放寬同名張數不放寬主牌組或進化牌組總張數。
-未標 admission 的來源重建入口未因此擴充。
 
 **引擎比較的卡名**：current handoff 對每張已准入卡另附各面的 JP 構築名稱（primary）。
 引擎的卡名條件、同名判定、收據成員名稱、token 規則名稱，以及投影與預防標籤等對局中顯示的卡名都用它；

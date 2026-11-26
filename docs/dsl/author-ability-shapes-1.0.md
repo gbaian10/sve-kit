@@ -58,9 +58,9 @@ play 的 optional_cost 沿既有 OptionalCosts 形狀（保留 C0/C1 已定邊�
 
 GrantedAbilityHead 共用普通頭 payload，接受 7 個觸發巨集頭、auto、activate、static、play；排除 keywords、spell、evolve、ride、feed。grant.keywords 已承載關鍵字；其餘未證實能授予的規則入口不新增接受形狀。每項恰一個頭，沒有 line/sources/ports/generated_by。類別與接受者准入仍由 C1 驗。
 
-- A.act.grant：on:EffectRecipient 必填（擴成可含領袖），keywords?/abilities? 至少一項且各非空，可並用；沿原 result/precondition/until/instead。keywords 元素 Concept|ParamRef；abilities 為 GrantedAbilityHead 列表。
+- A.act.grant：on:EffectRecipient 必填（擴成可含領袖），keywords?/abilities? 至少一項且各非空，可並用；沿原 result/until/instead。keywords 元素 Concept|ParamRef；abilities 為 GrantedAbilityHead 列表。
 - EffectSpec.grant：on:EffectRecipient 選填，keywords?/abilities? 至少一項；keywords 只有 Concept，不繼承動作直接 param。static 明寫 on 是 C1 的要求；C0 仍接受省略 on 的效果形狀。apply/player_effect/entry_effects 按既有 optional R scope 表，不推測物件↔玩家轉換。
-- grant.instead 差異可改 keywords、abilities（可同時）；replace_with 與任何差異互斥；不改 on/until/result，合併後重驗。abilities 差異是合成，BP15-029 只佐證 keywords。
+- grant.instead 差異可改 keywords、abilities（可同時）；不改 on/until/result，合併後重驗。abilities 差異是合成，BP15-029 只佐證 keywords。
 - 一個 grant 的 until 適用全部內容。BP20-036 的 keywords 無期限、abilities until:turn，寫兩個有序 grant 步驟。官方英文卡文將「本回合」只掛在後面的防傷能力；Q629 亦確認未限期的指定攻擊不在回合末失去，CR 10.2.1.2／7.4.8 分別規定無明示期限及回合末到期。同型卡名還有 BP05-112、BP16-103、BP18-017（突進）、BP18-026（オーラ），各用途仍核對其官方卡文；不以一個 grant 把期限擴到前面的關鍵字。此為文字範圍判讀，官方 Q&A 未直接回答 BP20-036 的掛接範圍，Q2647 只確認防傷能力不擋非傷害的攻擊力與體力減少；C1 仍須驗證用途來源與資格。
 - 純關鍵字優先現有 keywords 形，混合例 BP12-029/BP13-033/CP03-023/ECP01-043；多能力 ECP02-061；授予 play BP17-079、lastword BP07-038；grant 頭子集合的其他無實例格標合成。
 
@@ -72,7 +72,7 @@ CP04-045 授予 auto 明寫 zone:ex。巢狀能力預設依接受者種類，不
 
 ## delayed 與 Until
 
-A.act.delayed={on:EventPattern,do:Steps,targets?:T,optional_cost?:O,x?:X,define?:D,aggregation?:batch,next_only?:bool,until?:Until,precondition?:Condition}。沒有 line/result/cost/zone/per_turn/ub/when。來源由外層用途＋結構路徑 sidecar 保存；不把印刷行號寫進 body。result 不接受：沒有本契約定義的延遲 receipt 投影，不能假借 ReceiptId；precondition 依一般動作規則，在安裝延遲前查（合成）。delayed 是 Action，replace_with 可使用它（合成），不另造排除延遲的平行 Action union。
+A.act.delayed={on:EventPattern,do:Steps,targets?:T,optional_cost?:O,x?:X,define?:D,aggregation?:batch,next_only?:bool,until?:Until}。沒有 line/result/cost/zone/per_turn/ub/when。來源由外層用途＋結構路徑 sidecar 保存；不把印刷行號寫進 body。result 不接受：沒有本契約定義的延遲 receipt 投影，不能假借 ReceiptId。delayed 是 Action，不另造排除延遲的平行 Action union。
 
 on/do/T/O/X/D/aggregation 都用同一原型別，T/O/X/D 為合成欄。無 until 預設僅一次；無 until＋next_only:false 拒絕。有 until 時省略 next_only 或 false 表期限內各次，true 為期限內一次。前者 lowering Once，後者 Until；期限內一次用 Until＋TriggerSpec.limit(maximum=1,window=Game,scope=AbilityInstance,consume_at=PendingAdmission)，不新增 IR lifetime 變體。delayed runtime 的有效身分／清除時點須由 D0 驗證，C0 不執行。
 

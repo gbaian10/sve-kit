@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 def public_program(result: CardAccepted) -> dict[str, JsonValue]:
     """Keep executable nodes and permanent identities without author/source audit data."""
-    tree = object_value(result.candidate.tree)
+    tree = object_value(result.tree)
     card = object_value(object_value(tree["cards"])[result.record.record_key])
     program: dict[str, JsonValue] = {
         "card_id": result.record.card_id,
@@ -70,9 +70,7 @@ def populate(
         hashed = digest(canonical(program))
         identifier = "dsl:" + hashed[7:]
         authored = object_value(
-            object_value(object_value(result.candidate.tree)["cards"])[
-                result.record.record_key
-            ]
+            object_value(object_value(result.tree)["cards"])[result.record.record_key]
         )
         status = string(object_value(authored["meta"]).get("status", "draft"))
         support_status = "reviewed" if status in {"reviewed", "verified"} else "draft"

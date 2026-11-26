@@ -690,24 +690,6 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
             .contains("no authored program"),
         "a plain catalogue has no program to admit the current card against"
     );
-    let strict_number = "BP10-122";
-    assert_ne!(accepted.current[strict_number].source_version, "direct");
-    let changed = snapshot
-        .lines()
-        .map(|line| {
-            let mut card: Value = serde_json::from_str(line).unwrap();
-            if card["number"] == strict_number {
-                card["faces"][0]["name"] = json!("foreign");
-            }
-            card.to_string()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-    let foreign = repository::select(&changed, keywords, input).unwrap();
-    assert!(
-        construct(foreign, "foreign").contains("no unique snapshot source"),
-        "source-rebuilt candidates still reject different snapshot face text"
-    );
     let changed_faces = snapshot
         .lines()
         .map(|line| {

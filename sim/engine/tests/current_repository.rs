@@ -56,8 +56,6 @@ fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     let card = &selected.current["BP01-P25"];
     assert_eq!(card.card_id, "c:efb62b3ef53e576797625688d75164d9");
     assert_eq!(card.program.card().abilities.len(), 1);
-    let direct = lowerer().lower_current(p25(&inputs().2)).unwrap();
-    assert_eq!(card.source_version, direct.source_version);
     assert_eq!(card.source_payload["card_id"], card.card_id);
     assert_eq!(card.source_payload["faces"].as_array().unwrap().len(), 1);
     assert_eq!(card.source_payload["faces"][0]["face_id"], BP01_P25_FACE);
@@ -71,10 +69,10 @@ fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
             "/cards/BP01-P25/faces/{BP01_P25_FACE}/abilities/0/lastword/do/0/damage/n"
         ))
         .unwrap();
-    assert_eq!(source.source.face, "f:90c74424f2435907a035f70ce37463d4");
-    assert_eq!(source.source.field, "effect");
-    assert_eq!(source.source.line, 1);
-    assert_eq!(source.source.section, None);
+    assert_eq!(source.face, "f:90c74424f2435907a035f70ce37463d4");
+    assert_eq!(source.field, "effect");
+    assert_eq!(source.line, 1);
+    assert_eq!(source.section, None);
 }
 
 #[path = "current_repository/runtime.rs"]
@@ -110,19 +108,23 @@ fn repository_draw_cards_lower_as_complete_current_candidates() {
         let card = &selected.current[card_no];
         assert_eq!(card.card_id, card_id);
         assert_eq!(card.program.card().abilities.len(), 1);
+        let face_id = card.face_ordinals.keys().next().unwrap();
+        assert_eq!(card.face_ordinals.len(), 1);
         assert_eq!(
-            card.expanded["cards"][card_no]["abilities"][0][head]["do"][0]["draw"],
+            card.expanded["cards"][card_no]["faces"][face_id]["abilities"][0][head]["do"][0]["draw"],
             json!({"who":"self", "n":count})
         );
         let source = card
-            .source_at(&format!("/cards/{card_no}/abilities/0/{head}/do/0/draw/n"))
+            .source_at(&format!(
+                "/cards/{card_no}/faces/{face_id}/abilities/0/{head}/do/0/draw/n"
+            ))
             .unwrap();
-        assert_eq!(source.source.card_id, card_id);
-        assert_eq!(source.source.card_no, card_no);
-        assert_eq!(source.source.scope, "ability_0");
-        assert_eq!(source.source.field, "effect");
-        assert_eq!(source.source.line, 1);
-        assert_eq!(source.source.section, None);
+        assert_eq!(source.card_id, card_id);
+        assert_eq!(source.card_no, card_no);
+        assert_eq!(source.scope, "ability_0");
+        assert_eq!(source.field, "effect");
+        assert_eq!(source.line, 1);
+        assert_eq!(source.section, None);
     }
 }
 
@@ -156,20 +158,18 @@ fn repository_named_search_lowers_as_a_complete_current_candidate() {
         card.expanded["cards"][card_no]["faces"][face_id]["abilities"][0]["lastword"]["do"][0]["search"],
         json!({"sel":{"who":"self","zone":"deck","name":"式神の使役"},"n":1_i32,"to":"hand"})
     );
-    let direct = lowerer().lower_current(b4(&inputs().2)).unwrap();
-    assert_eq!(card.source_version, direct.source_version);
     let source = card
         .source_at(&format!(
             "/cards/{card_no}/faces/{face_id}/abilities/0/lastword/do/0/search/n"
         ))
         .unwrap();
-    assert_eq!(source.source.card_id, card_id);
-    assert_eq!(source.source.card_no, card_no);
-    assert_eq!(source.source.face, face_id);
-    assert_eq!(source.source.scope, "ability_0");
-    assert_eq!(source.source.field, "effect");
-    assert_eq!(source.source.line, 1);
-    assert_eq!(source.source.section, None);
+    assert_eq!(source.card_id, card_id);
+    assert_eq!(source.card_no, card_no);
+    assert_eq!(source.face, face_id);
+    assert_eq!(source.scope, "ability_0");
+    assert_eq!(source.field, "effect");
+    assert_eq!(source.line, 1);
+    assert_eq!(source.section, None);
 }
 
 #[test]

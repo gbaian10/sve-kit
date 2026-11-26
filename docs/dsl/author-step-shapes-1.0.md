@@ -6,7 +6,7 @@
 
 ## 共用型別
 
-以下 O=Ref 或 ObjectSel；R=Ref 或 RecipientSel；P=PlayerRef 或 PlayerSet；B=BindingName；C=Condition；Q=Quantity；N=NumericExpr；E=EffectSpec；U=Until；Z=Zone。`?` 表選填；除 Steps 外列表在表中未另註時均非空。長形共通 M=`result?:B, precondition?:C`，choose 不帶 M，短形不能附 M。
+以下 O=Ref 或 ObjectSel；R=Ref 或 RecipientSel；P=PlayerRef 或 PlayerSet；B=BindingName；C=Condition；Q=Quantity；N=NumericExpr；E=EffectSpec；U=Until；Z=Zone。`?` 表選填；除 Steps 外列表在表中未另註時均非空。長形共通 M=`result?:B`，choose 不帶 M，短形不能附 M。
 
 CountAmount=Q 或 ParamRef，只供 draw/discard/create.n；DamageAmount=Q 或 ParamRef，只供 damage.n；RecoveryDelta=N 或 ParamRef，只供 life.delta，直接參數須是增加方向。這些角色仍按承載契約 §3 分別驗證，不借用 SelectionQuantity。直接參數只進白名單位置，群組搜尋數量、partition、allocate.total、內層目的地不繼承參數權限。名稱葉沿 CardName／Concept／CardKind，不新增任意 JSON。
 
@@ -21,7 +21,6 @@ CountAmount=Q 或 ParamRef，只供 draw/discard/create.n；DamageAmount=Q 或 P
 | SearchDestination 區域 | Z 或 ParamRef | 直接參數只限此整個目的地葉 | BP03-002 原目的地 |
 | SearchDestination 分配 | order:printed、partition:[{zone:Z,n:Q / upto:Q}] 至少兩項 | 每份 n 與 upto 互斥；印刷順序消耗剩餘 found；upto 由玩家選 0 到宣告上限；進場與 EX 的 n／upto 都受當下空位限制，未分配成員留牌庫 | CP03-SL07、BP20-117 |
 | SearchDestination 取代 | zone:Z、instead:{if:C,zone:Z,may?:bool} | 找到並公開後判斷；可讀 found；無 found 不詢問；拒絕走原區；不收 after | BP03-002 |
-| SearchDestination 逐組 | per_group:Z[] 至少兩項 | 只在分組 search；與 groups 等長且同序，由 C1 驗 | BP12-041 |
 
 Search 的 found 是私有找到集合，revealed 是公開證明，moved 是實際成功移動的 after；不能互換。found/revealed 不流出 continuation，後續用 `result`＋`follow`。search.bind／move.bind 不接受；create.bind 是新建立物件，另有契約。整副被搜尋牌庫只在尾端洗一次。群組來源的 who／牌庫一致性、等長、disjoint、容量及成功成員由 C1/D0 驗證。
 
@@ -31,7 +30,7 @@ Position 有三支：top/bottom/{nth:正安全整數}；`{one_of:[上述位置�
 
 move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 move.by 排序，shuffle 洗指定集合。choose.order:true 在同一次選擇回答已排序，後續引用該 binding 不再次 order；false 不建立排序證據。C1 驗來源順序，未展開目的地參數延至展開後驗。
 
-「残り」寫 `{in:seen,except:{in:{objects_of:moved,view:before}}}`，扣除成功搬移的 before，保留容量不足而未搬走者。多次搬移可用 except.any_of。差集保留觀察順序，不重新查牌庫頂；不新增 rest/first/second/底來源節點。前者／後者使用兩個 Target binding 或既有 roles；分組搜尋使用 per_group。同牌庫 move 重排降低為 Order，不變世代；其 receipt 仍須提供成功 before 成員供差集消費。獨立 order DSL 鍵不接受；既有分類 ID A.order 對應 choose.order／move.order。
+「残り」寫 `{in:seen,except:{in:{objects_of:moved,view:before}}}`，扣除成功搬移的 before，保留容量不足而未搬走者。多次搬移可用 except.any_of。差集保留觀察順序，不重新查牌庫頂；不新增 rest/first/second/底來源節點。前者／後者使用兩個 Target binding 或既有 roles。同牌庫 move 重排降低為 Order，不變世代；其 receipt 仍須提供成功 before 成員供差集消費。獨立 order DSL 鍵不接受；既有分類 ID A.order 對應 choose.order／move.order。
 
 執行期的私有 Look 選卡可用 `choose.from: {in: seen, except: {in: seen, name: 指定名字}}` 排除一個字面名字，並與既有種類／特徵條件交集。此准入要求相同 observation 與非空名字，不接受公開目標、搜尋、聯集、分組或和 `not_same_name_as_this` 合用；這不改變下方一般 schema 的其他尚未准入形狀。
 
@@ -56,7 +55,6 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | grant | on:R、keywords:[Concept或ParamRef]／abilities:[GrantedAbilityHead] 至少一項，可並用 | until:U、instead | BP19-056、BP11-P27；領袖／混合／裝備見能力矩陣 |
 | lose_abilities | on:O | until:U | BP05-061 |
 | counter | on:O、name:CounterName、delta:N | 與費用 counter 分開 | BP20-030 |
-| move_counters | from:O、to:O、name、all:true | 不接受部分量 | BP01-T10 |
 | pp | who:P、delta:N 或 to_max:true | 兩支互斥 | BP03-057；to_max 合成 |
 | pp_max/ep/sep | who:P、delta:N | 不接受 to_max | 此動作矩陣以合成格驗證 |
 | shuffle | who:P | 整副牌庫 | BP05-054 |
@@ -85,11 +83,11 @@ TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time
 
 create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef,kind?:follower}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
 
-delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。feed、drive_check 沒有本矩陣的接受形狀。pilot 只指名被操縱的物件；提醒文不代表第二個物件，攻體來自印刷資料，期限依 CR5.32 固定為本回合。這個有限 Step union 不宣稱所有登錄構造均可承載。
+delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 不收 result。feed、drive_check 沒有本矩陣的接受形狀。pilot 只指名被操縱的物件；提醒文不代表第二個物件，攻體來自印刷資料，期限依 CR5.32 固定為本回合。這個有限 Step union 不宣稱所有登錄構造均可承載。
 
 ## 自我取代
 
-除 choice 外，entry 必填 if:C；同型差異或 replace_with:A.action 恰一種；可帶 after:Steps。差異至少一欄，不收 result/precondition；replace_with 可同種，但不接受控制流程。
+除 choice 外，entry 必填 if:C；同型差異至少一欄；可帶 after:Steps。差異不收 result。
 
 | 動作 | 可取代欄位 | 證據 |
 | --- | --- | --- |
@@ -99,13 +97,13 @@ delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](a
 | life | delta:RecoveryDelta | 合成 |
 | grant | keywords:[Concept或ParamRef]、abilities:[GrantedAbilityHead] 可並用 | keywords BP15-029 sections/0；abilities 合成 |
 | create | n:CountAmount或upto:Q、to:CreateDestination | ETD01-018、BP07-P20；to 合成 |
-| draw | n:CountAmount | 同型合成；replace_with:search BP07-096 |
-| search | sel:ObjectSel、n或upto:SelectionQuantity、to:SearchDestination或per_group | 同型合成；BP13-035 完整替換群組 |
+| draw | n:CountAmount | 同型合成 |
+| search | sel:ObjectSel、n或upto:SelectionQuantity、to:SearchDestination | 同型合成；BP13-035 完整替換群組 |
 | banish/destroy | ref:O | 合成 |
 
-if 在原指示開始讀，search.instead 不能讀 found；找到之後的取代只放 search.to.instead。數量差異取代整個數量 variant（n→upto 時清掉 n）；合併後須驗完整合法 payload。ref/top、單組/群組切換請用完整 replace_with。after 只在取代成功適用後執行；禁止重入循環，C1 驗依賴及執行身分。
+if 在原指示開始讀，search.instead 不能讀 found；找到之後的取代只放 search.to.instead。數量差異取代整個數量 variant（n→upto 時清掉 n）；合併後須驗完整合法 payload。after 只在取代成功適用後執行；禁止重入循環，C1 驗依賴及執行身分。
 
-ChoiceInstead 獨立為 `{if:C,n:Q}` 或 `{if:C,upto:Q}`，不接受 after／replace_with；在打出時決定模式數，並非結算期動作取代（BP02-045、BP21-026）。
+ChoiceInstead 獨立為 `{if:C,n:Q}` 或 `{if:C,upto:Q}`，不接受 after；在打出時決定模式數，並非結算期動作取代（BP02-045、BP21-026）。
 
 ## 控制流程逐 variant
 
@@ -118,33 +116,12 @@ ChoiceInstead 獨立為 `{if:C,n:Q}` 或 `{if:C,upto:Q}`，不接受 after／rep
 | if | cond:C、then:Steps | else:Steps | A-001 |
 | repeat.count | n:Q、do:Steps | collect:{receipts:B}；不收 check | BP14-077、BP17-004 |
 | repeat.until/while | until或while:C、do:Steps | check:before/after、collect | A-016c；while 合成 |
-| repeat_ability | while:C | 不重新 play | BP05-054 |
-| foreach | in:O、as:B、do:Steps | 不把群體指示偷換成逐一 | 合成；BP01-008 是 move 的位置選擇，不算 foreach 真例 |
 | each_player | stages:至少一項Stage | who:each、as:B | BP13-043、BP06-113 |
 | simultaneous | do:非空Steps | result:B | A-016i；單步合成 |
 | by_kind | ref:R、leader:Steps、follower:Steps | as:B | BP21-P54 |
 
 Stage=Steps 或 `{do:Steps,mode:choice|nonchoice}` 或 `{do:Steps,mode:explicit,evidence:非空字串}`；evidence 只配 explicit。each_player 省略 as 時 item 是該玩家，具名時只宣告該 PlayerRef，禁止隱式遮蔽。每 stage 跨玩家執行；draw.who:each 是單一群體指示，不能取代多階段程序。玩家作用域、終止性及時序由 C1/D0 驗證。
 
-## 付款決定與准入責任
-
-`{payment_decided:optional}` 是付款前的決定，定位到同一張卡、同一次 play 的唯一可選費用宣告；不是 paid，也不是 x_paid。C1 只准 choice.instead.if 及其布林組合，拒絕跨 play、多組歧義、其他本文／selector／history 位置和循環依賴。共用 Condition 的形狀驗證不代替位置准入。paid:optional 以同樣規則定位費用，但只讀已完成付款。
-
-BP21-026 與 PR-585 是同卡異印，來源文分別含可選 +2 費用及一項→至多兩項模式。能力內容示意如下（完整 DSL 容器仍須將 play、spell 分成各自的 A.ability，不允許單一能力兩個頭）：
-
-```yaml
-play:
-  optional_cost: {pp: 2}
-spell:
-  do:
-    - choice:
-        n: 1
-        instead: [{if: {payment_decided: optional}, upto: 2}]
-        options:
-          - [{search: {sel: {who: self, zone: deck, kind: follower, name_contains: エミリア}, n: 1, to: field}}]
-          - [{search: {sel: {who: self, zone: deck, kind: follower, name_contains: リーシャ}, n: 1, to: field}}]
-```
-
-C1/D0 還須接上 per_group、compound 位置回答、付款決定、每玩家作用域、Order 成功 before 收據及展開後的合法 payload 檢查；本片不更改公開 IR 或 capability，不宣稱這些卡已可執行。多張 found 的條件量化、BP01-008 同位置多牌的相對順序不得靠 C0 猜測；pilot 的印刷數值及本回合期限由 IR／執行層依 CR5.32 驗證。
+## 准入責任
 
 驗證範圍含每個定義的 Python/schema 漂移、負向 schema 突變、獨立卡例與合成 variant、未知鍵／錯型別／互斥／錯上下文、遞迴與 canonical roundtrip。卡例核對遞迴涵蓋凍結 JP 302 檔、7369 documents、7383 faces，以及 EN 297 檔、7420 documents、7437 faces 的 text/sections；Q&A 不作卡例。未找到直接卡例的格明列合成，不將 shape 通過宣稱為全卡語義驗收。

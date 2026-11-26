@@ -67,14 +67,6 @@ def test_recursive_program_preserves_empty_blocks_duplicates_and_order() -> None
     _check(program)
 
 
-def test_payment_decision_has_a_separate_preserved_wire_key() -> None:
-    _check({"payment_decided": "optional"}, name="A.cond")
-    _check(
-        {"all": [{"payment_decided": "optional"}, {"not": {"paid": "optional"}}]},
-        name="A.cond",
-    )
-
-
 @pytest.mark.parametrize(
     ("part", "accepted"),
     [

@@ -401,7 +401,7 @@ fn check_token_sources(prototypes: &Catalog, program: &CurrentCardProgram) -> Re
     Ok(())
 }
 
-/// Consume `CurrentAuthorSources.selection_input()` from the trusted Python reader.
+/// Consume `CurrentAuthorSources.selection_from_results()` from the trusted Python reader.
 ///
 /// The reader owns index closure and permanent-identity overlap checks. This
 /// handoff is internal and deliberately not a serialized catalog/save format.

@@ -7,14 +7,17 @@ import pytest
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_direct import materialize
 from sve_carddb.domains.effects.author_handwritten import Body, Handwritten, read
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
-from sve_carddb.domains.effects.author_sources import SourceError
+from sve_carddb.domains.effects.author_inputs import (
+    AuthorInputError,
+    SourceError,
+    parse_document,
+)
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
 from ...support.direct_author_fixture import direct_author_input
+from ...support.direct_current_fixture import synthetic_current
 from ..text_observations.test_effect_presence import page
-from .test_author_current_absent import synthetic_current
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -120,12 +123,13 @@ def test_direct_rejects_incomplete_or_invalid_cards(
     handwritten = Handwritten(
         {"SYN-01": card}, bodies, {"SYN-01": parse_document(canonical(card))}
     )
+    error_type = AuthorInputError if mutation == "bad_param" else SourceError
     with (
         synthetic_current(
             tmp_path / "source",
             page("jp", '<div class="detail">Unknown wording.</div>'),
         ) as current,
-        pytest.raises(SourceError, match=expected),
+        pytest.raises(error_type, match=expected),
     ):
         materialize(current, "SYN-01", handwritten)
 

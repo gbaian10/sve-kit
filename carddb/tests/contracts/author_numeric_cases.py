@@ -41,7 +41,6 @@ NUMERIC_NAMES = {
     "A.cond.any": "CondAny",
     "A.cond.not": "CondNot",
     "A.cond.did": "CondDid",
-    "A.cond.payment-decided": "CondPaymentDecided",
     "A.cond": "Condition",
 }
 
@@ -81,7 +80,6 @@ EXPRESSIONS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.expr.count-of", {"count_of": "returned"}),
 ]
 CONDITIONS: list[tuple[str, dict[str, JsonValue]]] = [
-    ("A.cond.payment-decided", {"payment_decided": "optional"}),
     ("A.cond.cmp", CMP),
     ("A.cond.all", {"all": [CMP]}),
     ("A.cond.all", {"all": [CMP, {"not": CMP}]}),

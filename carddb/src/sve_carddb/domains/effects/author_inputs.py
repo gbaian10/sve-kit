@@ -13,11 +13,7 @@ from pydantic import JsonValue, TypeAdapter, ValidationError
 from referencing import Registry, Resource
 from referencing.exceptions import Unresolvable
 
-from sve_carddb.contracts.author_entries import (
-    Ability,
-    AuthorEffectSet,
-    EffectBodyShard,
-)
+from sve_carddb.contracts.author_entries import Ability, AuthorEffectSet
 from sve_carddb.contracts.author_evidence import (
     CardKeywordSourceUse,
     DirectSourceUse,
@@ -42,22 +38,16 @@ PathParts = tuple[str | int, ...]
 Leaf = Literal["A.param", "ParamDecl", "ParamValue", "ParamDeclarations", "ParamValues"]
 _NODES = "urn:sve-kit:author-nodes:1.0"
 _INDEX = "urn:sve-kit:effects-index:1"
-_AUTHOR = "urn:sve-kit:author:1.0"
-_BODIES = "urn:sve-kit:effect-bodies:1.0"
 _PROTOTYPE = "urn:sve-kit:effects:astra:1"
 _RESOURCES = {
     "author-nodes.schema.json": _NODES,
     "effects-index.schema.json": _INDEX,
-    "author.schema.json": _AUTHOR,
-    "effect-bodies.schema.json": _BODIES,
     "effects.schema.json": _PROTOTYPE,
     "author-storage.schema.json": "urn:sve-kit:author-storage:2",
     "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
 }
 _INDEX_VALUE = TypeAdapter(EffectsIndex)
 _AUTHOR_VALUE = TypeAdapter(AuthorEffectSet)
-_BODIES_VALUE = TypeAdapter(EffectBodyShard)
-type AuthorDocument = AuthorEffectSet | EffectBodyShard | EffectsIndex
 type Stage = Literal[
     "yaml",
     "json",
@@ -91,6 +81,14 @@ class Diagnostic:
     scope: str | None = None
     source: SourceUse | CardKeywordSourceUse | DirectSourceUse | None = None
     card_line: int | None = None
+
+
+class SourceError(ValueError):
+    """Diagnostics expose reason codes without copying candidate source wording."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(reason)
 
 
 class AuthorInputError(ValueError):
@@ -289,11 +287,6 @@ def _entry_preflight(document: ParsedDocument, expected: str) -> None:
             for key, card in cards.items()
             if isinstance(card, dict)
         ]
-    records = value.get("records")
-    if expected == "effect_body_shard" and isinstance(records, list):
-        candidates = [
-            (("records", index), record) for index, record in enumerate(records)
-        ]
     _candidate_checks(document, candidates)
 
 
@@ -333,34 +326,7 @@ def _abilities(decoded: AuthorEffectSet) -> Iterator[tuple[PathParts, Ability]]:
                 yield ("cards", key, "faces", face_id, "abilities", index), ability
 
 
-def _body_duplicates(document: ParsedDocument, decoded: EffectBodyShard) -> None:
-    keys: set[tuple[str, str, str]] = set()
-    for offset, record in enumerate(decoded.records):
-        key = (record["frame_id"], record["ability_scope"], record["body_version"])
-        if key in keys:
-            raise AuthorInputError(
-                document.diagnostic("container", "duplicate_body", ("records", offset))
-            )
-        keys.add(key)
-        identifiers: set[str] = set()
-        for index, registration in enumerate(record["registrations"]):
-            if registration.id in identifiers:
-                raise AuthorInputError(
-                    document.diagnostic(
-                        "container",
-                        "duplicate_registration",
-                        ("records", offset, "registrations", index, "id"),
-                    )
-                )
-            identifiers.add(registration.id)
-
-
-def _local_invariants(
-    document: ParsedDocument, decoded: AuthorEffectSet | EffectBodyShard
-) -> None:
-    if isinstance(decoded, EffectBodyShard):
-        _body_duplicates(document, decoded)
-        return
+def _local_invariants(document: ParsedDocument, decoded: AuthorEffectSet) -> None:
     for path, ability in _abilities(decoded):
         node = ability.root
         if "keywords" in node:
@@ -664,22 +630,6 @@ class AuthorSchemas:
         self._compiled_registry = jsonschema_rs.Registry(list(schemas.items()))
         self._compiled: dict[bytes, jsonschema_rs.Draft202012Validator] = {}
         self._heads = _head_shapes(registry)
-        envelope = object_value(
-            JSON_VALUE.validate_python(
-                registry.resolver(_NODES).lookup("#/$defs/A.file").contents
-            )
-        )
-        properties = object_value(envelope["properties"])
-        self._inventory = {
-            **envelope,
-            "properties": {
-                **properties,
-                "cards": {
-                    **object_value(properties["cards"]),
-                    "additionalProperties": True,
-                },
-            },
-        }
 
     def _validate(self, document: ParsedDocument, reference: str) -> None:
         self._validate_schema(document, {"$ref": reference})
@@ -737,48 +687,6 @@ class AuthorSchemas:
         self._validate(document, references[kind])
         return document.value
 
-    def _author(
-        self, document: ParsedDocument, *, expanded: bool = False
-    ) -> AuthorEffectSet:
-        _entry_preflight(document, "author_effect_set")
-        reference = _NODES + "#/$defs/expanded" if expanded else _AUTHOR
-        self._validate(document, reference)
-        decoded = _entry_decode(document, _AUTHOR_VALUE)
-        if expanded:
-            for violation in expanded_residuals(decoded):
-                raise AuthorInputError(
-                    _located(
-                        document,
-                        document.diagnostic(
-                            "container", violation.reason, violation.path
-                        ),
-                    )
-                )
-        _local_invariants(document, decoded)
-        return decoded
-
-    def author_tree(
-        self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> JsonValue:
-        """Validate and retain the original JSON tree, without decoder defaults."""
-        document = _document(raw, context)
-        self._author(document)
-        return document.value
-
-    def author_inventory_tree(
-        self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> JsonValue:
-        """Validate shared inputs; EN values remain opaque for index closure only."""
-        document = _document(raw, context)
-        value = document.value
-        if isinstance(value, dict) and value.get("scope") == "en_override":
-            # Reuse strict format/kind checks without claiming EN body support.
-            _envelope(document, "author_effect_set")
-            self._validate_schema(document, self._inventory)
-        else:
-            self._author(document)
-        return document.value
-
     def prototype_tree(
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
     ) -> JsonValue:
@@ -792,39 +700,19 @@ class AuthorSchemas:
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
     ) -> AuthorEffectSet:
         """Read a fully expanded tree; this does not establish source admission."""
-        return self._author(_document(raw, context), expanded=True)
-
-    def _bodies(self, document: ParsedDocument) -> EffectBodyShard:
-        _entry_preflight(document, "effect_body_shard")
-        self._validate(document, _BODIES)
-        decoded = _entry_decode(document, _BODIES_VALUE)
+        document = _document(raw, context)
+        _entry_preflight(document, "author_effect_set")
+        self._validate(document, _NODES + "#/$defs/expanded")
+        decoded = _entry_decode(document, _AUTHOR_VALUE)
+        for violation in expanded_residuals(decoded):
+            raise AuthorInputError(
+                _located(
+                    document,
+                    document.diagnostic("container", violation.reason, violation.path),
+                )
+            )
         _local_invariants(document, decoded)
         return decoded
-
-    def body_tree(self, raw: bytes) -> JsonValue:
-        """Validate companion inputs while retaining exact hash payload subtrees."""
-        document = _document(raw)
-        self._bodies(document)
-        return document.value
-
-    def document(
-        self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> AuthorDocument:
-        """Select exactly one registered envelope; never fall back to a prototype."""
-        document = _document(raw, context)
-        value = document.value
-        kind = value.get("kind") if isinstance(value, dict) else None
-        if kind == "author_effect_set":
-            return self._author(document)
-        if kind == "effect_body_shard":
-            return self._bodies(document)
-        if kind == "effects_index":
-            return self._index(document)
-        raise AuthorInputError(
-            _located(
-                document, document.diagnostic("envelope", "unsupported_kind", ("kind",))
-            )
-        )
 
     def leaf(self, raw: bytes, definition: Leaf) -> JsonValue:
         """Validate a fragment; this grants no placement or source-role permission."""

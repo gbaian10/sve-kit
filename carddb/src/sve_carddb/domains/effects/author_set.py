@@ -5,11 +5,10 @@ import stat
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Never
 
-from sve_carddb.contracts.author_leaves import AuthorIndexRecord, EffectsIndex
+from sve_carddb.contracts.author_leaves import EffectsIndex
 from sve_carddb.core.authored import check_path, require_directory
 from sve_carddb.core.json import digest, object_value
 from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.domains.effects.author_expansion import BodyLibrary
 from sve_carddb.domains.effects.author_handwritten import (
     MAIN_SHARD_PATTERN,
     BodyFile,
@@ -54,7 +53,6 @@ class AuthorInputSet:
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
     prototype_files: tuple[InputFile, ...]
-    lint_exceptions: dict[str, JsonValue] = field(default_factory=dict)
 
 
 def _reject(reason: str, path: str, record: IndexRecord | None = None) -> Never:
@@ -147,15 +145,14 @@ def _inventory(files: tuple[InputFile, ...], area: str) -> dict[str, InputFile]:
     return result
 
 
-def _tree(
-    schemas: AuthorSchemas, item: InputFile, context: AuthorIndexRecord | None
-) -> dict[str, JsonValue]:
+def _tree(schemas: AuthorSchemas, item: InputFile) -> dict[str, JsonValue]:
+    prototype = item.path.startswith(_PROTOTYPE + "/")
     try:
-        if item.path.startswith(_PROTOTYPE + "/"):
+        if prototype:
             return object_value(schemas.prototype_tree(item.raw))
-        if object_value(parse_document(item.raw).value).get("format") == STORAGE_FORMAT:
-            return object_value(schemas.storage_tree(item.raw, "author_effect_set"))
-        return object_value(schemas.author_inventory_tree(item.raw, context=context))
+        if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:
+            _reject("unsupported_storage_format", "format")
+        return object_value(schemas.storage_tree(item.raw, "author_effect_set"))
     except AuthorInputError as error:
         raise AuthorInputError(
             replace(error.diagnostic, path=(item.path, *error.diagnostic.path))
@@ -220,15 +217,7 @@ def validate_author_set(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
     selections = _selections(inputs.index, authors, prototypes)
     for path, item in {**authors, **prototypes}.items():
         selected = selections.get(path, {})
-        context = next(
-            (
-                record
-                for record in selected.values()
-                if isinstance(record, AuthorIndexRecord)
-            ),
-            None,
-        )
-        tree = _tree(schemas, item, context)
+        tree = _tree(schemas, item)
         if path in authors and not selected:
             _reject("orphan_author_file", path)
         if selected:
@@ -242,20 +231,7 @@ def validate_author_set(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
                 ):
                     _reject("index_envelope_mismatch", path, record)
 
-    _validate_storage(inputs, schemas)
-
-
-def _validate_storage(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
-    formats = {
-        object_value(parse_document(item.raw).value).get("format")
-        for item in (*inputs.author_files, *inputs.body_files)
-    }
-    if len(formats) > 1:
-        _reject("mixed_storage_formats", _AUTHOR)
-    if formats == {STORAGE_FORMAT}:
-        _handwritten_inventory(inputs, schemas)
-    else:
-        BodyLibrary(schemas, (item.raw for item in inputs.body_files))
+    _handwritten_inventory(inputs, schemas)
 
 
 def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputSet:

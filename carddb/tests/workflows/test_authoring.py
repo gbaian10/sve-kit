@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, digest, object_value, string
+from sve_carddb.core.json import array, digest, object_value
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
@@ -125,20 +125,14 @@ def rename_draw_parameter(
     ("number", "reprint"),
     [("BP01-046", "SD02-008"), ("BP01-176", "ETD01-019")],
 )
-def test_public_inspect_reconstructs_multi_printing_sources(
+def test_public_inspect_resolves_multi_printing_identity(
     workspace: authoring.Workspace, number: str, reprint: str
 ) -> None:
     report = authoring.inspect(workspace, number)
-    assert report["gaps"] == []
-    assert report["card_gap"] is None
-    assert report["candidates"]
-    assert all(
-        object_value(candidate)["supported"]
-        for candidate in array(report["candidates"])
-    )
+    assert report["fields"]
     other = authoring.inspect(workspace, reprint)
     assert other["card_id"] == report["card_id"]
-    assert other["source"] == report["source"]
+    assert other["fields"] == report["fields"]
     assert other["payload"] == report["payload"]
 
 
@@ -175,14 +169,13 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
 @pytest.mark.parametrize(
     ("mutation", "reason"),
     [
-        ("face", "missing_source"),
-        ("param", "source_param_value_mismatch"),
+        ("face", "missing_face"),
+        ("param", "param_type_mismatch"),
         ("body_author", "body_metadata_conflict"),
         ("body_review", "body_metadata_conflict"),
         ("body_syntax", "additionalProperties"),
-        ("body_source", "missing_parameter_source"),
         ("status", "author_metadata_conflict"),
-        ("closure", "source_ability_closure_mismatch"),
+        ("closure", "source_line_closure_mismatch"),
         ("duplicate_body", "duplicate_body_id"),
         ("editions", "ambiguous_body_version"),
     ],
@@ -203,7 +196,7 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
         case "line" | "face" | "section" | "scope":
             ability[mutation] = 99
         case "param":
-            ability["params"] = {"n": 2}
+            ability["params"] = {"n": "invalid"}
         case "missing_body":
             ability["use"] = "absent.v1"
         case "body_author":
@@ -224,13 +217,6 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             ]
         case "body_syntax":
             definition["body"] = {"unknown": {}}
-        case "body_source":
-            definition["params"] = {
-                "n": {
-                    "type": "Nat",
-                    "source": {"slot": "leaf_0", "component": "constant"},
-                }
-            }
         case "author":
             object_value(card["meta"])["written_by"] = [
                 {"actor": {"who": "Another"}, "date": "2026-10-26"}
@@ -258,7 +244,7 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             cards=frozenset({"BP10-122"}),
         )
     assert error.value.diagnostic.reason == reason
-    if mutation in {"param", "body_source", "body_syntax", "editions"}:
+    if mutation in {"param", "body_syntax", "editions"}:
         assert error.value.diagnostic.card_line == 1
         assert error.value.diagnostic.line is not None
     if mutation == "editions":
@@ -266,23 +252,32 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
     assert fingerprint(output_root) == before
 
 
-@pytest.mark.parametrize(("edition", "expected_admission"), [(1, None), (2, "direct")])
+@pytest.mark.parametrize(
+    ("edition", "expected_admission"), [(1, "light"), (2, "shared")]
+)
 def test_current_handoff_uses_selected_body_edition(
     workspace: authoring.Workspace,
     output_root: Path,
+    tmp_path: Path,
+    handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
     edition: int,
-    expected_admission: str | None,
+    expected_admission: str,
 ) -> None:
-    main = output_root / "rules/author-effects/BP10/000.yaml"
-    main_tree = tree(main)
+    main, companion, main_tree, body_tree = handwriting(tmp_path, handwritten)
     card = object_value(object_value(main_tree["cards"])["BP10-122"])
+    card["admission"] = "light"
     object_value(array(card["abilities"])[0])["edition"] = edition
     main.write_bytes(authoring.format_yaml(main_tree))
-    companion = output_root / "rules/effect-bodies/BP10/000.yaml"
-    body_tree = tree(companion)
     records = array(body_tree["records"])
     records.append({**object_value(records[0]), "edition": 2, "admission": "shared"})
     companion.write_bytes(authoring.format_yaml(body_tree))
+    authoring.write(
+        workspace,
+        main=main,
+        bodies=companion,
+        output_root=output_root,
+        cards=frozenset({"BP10-122"}),
+    )
 
     report = authoring.check(replace(workspace, authored=output_root))
     authors = array(object_value(report["selection"])["authors"])
@@ -291,10 +286,15 @@ def test_current_handoff_uses_selected_body_edition(
         for row in authors
         if (item := object_value(object_value(row)["input"]))["card_no"] == "BP10-122"
     )
-    assert handoff.get("admission") == expected_admission
+    expanded = object_value(
+        object_value(object_value(handoff["tree"])["cards"])["BP10-122"]
+    )
+    face = object_value(next(iter(object_value(expanded["faces"]).values())))
+    ability = object_value(array(face["abilities"])[0])
+    assert object_value(array(ability["sources"])[0])["admission"] == expected_admission
 
 
-def test_real_multiface_ambiguity_precedes_pending(
+def test_real_multiface_requires_a_face(
     workspace: authoring.Workspace,
     output_root: Path,
     tmp_path: Path,
@@ -317,63 +317,23 @@ def test_real_multiface_ambiguity_precedes_pending(
             output_root=output_root,
             cards=frozenset({"BP09-005"}),
         )
-    assert error.value.diagnostic.reason == "ambiguous_source"
-    assert error.value.diagnostic.expected == "face: 1, 2"
-    ability = object_value(
-        array(object_value(object_value(main_tree["cards"])["BP09-005"])["abilities"])[
-            0
-        ]
-    )
-    ability["face"] = "back"
-    main.write_bytes(authoring.format_yaml(main_tree))
-    with pytest.raises(authoring.AuthorInputError) as error:
-        authoring.write(
-            workspace,
-            main=main,
-            bodies=bodies,
-            output_root=output_root,
-            cards=frozenset({"BP09-005"}),
-        )
-    assert error.value.diagnostic.reason == "unsupported_source_projection"
+    assert error.value.diagnostic.reason == "ambiguous_face"
 
 
-def test_inspect_lists_pending_faces_and_exact_body_definitions(
+def test_inspect_lists_rule_lines_and_exact_body_definitions(
     workspace: authoring.Workspace,
 ) -> None:
     report = authoring.inspect(workspace, "BP09-005")
-    candidates = [object_value(item) for item in array(report["candidates"])]
-    assert {(item["face"], item["line"]) for item in candidates} == {
-        (1, 1),
-        (2, 1),
-        (2, 2),
-    }
-    assert report["gaps"]
-    assert all(item["gap"] and item["state"] == "pending" for item in candidates)
+    faces = array(object_value(report["payload"])["faces"])
+    assert [object_value(face)["ordinal"] for face in faces] == [0, 1]
+    assert report["fields"]
     draw = authoring.inspect(workspace, "BP10-122")
-    assert draw["bodies"]
     assert draw["existing"]
     assert draw["handwritten"]
     assert draw["resolution_diagnostic"] is None
     assert draw["body_definitions"]
-    candidate = object_value(array(draw["candidates"])[0])
-    assert candidate["slots"]
-    assert candidate["supported"] is True
-    assert candidate["values"] == {"leaf_0": 1}
     alias = authoring.inspect(workspace, "BP06-P15")
     assert object_value(array(alias["existing"])[0])["record_key"] == "BP06-048"
-    storm = authoring.inspect(workspace, "BP01-048")
-    # Storm is admitted now; inspection must expose its supported keyword candidate.
-    keywords = [
-        object_value(item)
-        for item in array(storm["candidates"])
-        if object_value(item)["sentence"] == "card_keywords.v2"
-    ]
-    assert keywords
-    assert all(item["supported"] is True and item["gap"] is None for item in keywords)
-    assert not any(
-        object_value(item)["gap"] == "unsupported_source_keyword"
-        for item in array(storm["gaps"])
-    )
 
 
 def test_alias_cannot_create_a_second_index_record(
@@ -544,10 +504,13 @@ def test_keyword_shorthand_keeps_the_existing_lowercase_boundary(
             for item in array(object_value(report["selection"])["authors"])
             if object_value(object_value(item)["input"])["card_no"] == "BP01-138"
         )
-        declarations = array(object_value(selected["input"])["declaration_sidecar"])
-        declaration = object_value(declarations[0])
-        assert object_value(declaration["declaration"])["keywords"] == ["ward", "aura"]
-        assert "ability_scope" not in object_value(declaration["source_use"])
+        lowered = object_value(selected["input"])
+        card = object_value(
+            object_value(object_value(lowered["tree"])["cards"])["BP01-138"]
+        )
+        face = object_value(next(iter(object_value(card["faces"]).values())))
+        declaration = object_value(array(face["abilities"])[0])
+        assert declaration["keywords"] == ["ward", "aura"]
 
 
 def test_wrong_owner_and_symlink_inputs_are_rejected(
@@ -607,25 +570,6 @@ def test_strict_handwritten_yaml_rejects_without_writes(
             workspace, main=path, bodies=None, output_root=output_root, all_cards=True
         )
     assert fingerprint(output_root) == before
-
-
-def test_shared_body_cannot_bind_to_two_different_source_frames(
-    workspace: authoring.Workspace, output_root: Path
-) -> None:
-    path = output_root / "rules/author-effects/ECP01/000.yaml"
-    main = tree(path)
-    ability = object_value(
-        array(object_value(object_value(main["cards"])["ECP01-002"])["abilities"])[0]
-    )
-    ability["use"] = "draw_exact_attack_time.v1"
-    path.write_bytes(authoring.format_yaml(main))
-    selection = workspace.current.selection_input(output_root, workspace.expander)
-    rejected = {
-        string(object_value(card)["reason"])
-        for card in array(object_value(selection)["authors"])
-        if object_value(card)["status"] == "rejected"
-    }
-    assert "body_source_frame_mismatch" in rejected
 
 
 def test_output_and_handwriting_copies_cannot_change_session_inputs(

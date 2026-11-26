@@ -11,8 +11,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 from ...contracts.test_author_abilities import HEADS
-from .test_author_entries import NESTED, ability, document
-from .test_author_expansion import generated, registered
+from .test_author_entries import ability, document
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -39,27 +38,34 @@ def test_expanded_accepts_each_concrete_head(
     assert schemas.expanded(canonical(value)).model_dump(mode="json") == value
 
 
-@pytest.mark.parametrize("head", [head for head, _ in NESTED])
+PARAM_DRAW: dict[str, JsonValue] = {"draw": {"n": {"param": "N"}}}
+
+
+@pytest.mark.parametrize(
+    "head",
+    [
+        {"spell": {"do": [PARAM_DRAW]}},
+        {
+            "spell": {
+                "do": [
+                    {
+                        "grant": {
+                            "on": "this",
+                            "abilities": [{"fanfare": {"do": [PARAM_DRAW]}}],
+                        }
+                    }
+                ]
+            }
+        },
+    ],
+    ids=["draw", "grant"],
+)
 def test_recursive_profile_rejects_parameters(
     schemas: AuthorSchemas, head: dict[str, JsonValue]
 ) -> None:
     value = document(ability(head))
     schema = object_value(parse((SCHEMAS / "author-nodes.schema.json").read_bytes()))
     assert not profile_validator(schema).is_valid(value)
-    with pytest.raises(AuthorInputError) as error:
-        schemas.expanded(canonical(value))
-    assert error.value.diagnostic.stage == "schema"
-
-
-@pytest.mark.parametrize("face", [False, True])
-def test_generated_branch_is_only_available_before_expansion(
-    schemas: AuthorSchemas, face: bool
-) -> None:
-    value = document(generated(registered({"spell": {"do": []}})))
-    if face:
-        card = object_value(object_value(value["cards"])["FIX-001"])
-        card["faces"] = {"f:" + "1" * 32: {"abilities": card.pop("abilities")}}
-    schemas.document(canonical(value))
     with pytest.raises(AuthorInputError) as error:
         schemas.expanded(canonical(value))
     assert error.value.diagnostic.stage == "schema"

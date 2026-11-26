@@ -1,5 +1,5 @@
 //! Real current selections exercise rules; external instruction producers are synthetic.
-use super::{current_inputs, snapshot};
+use super::{author, snapshot};
 use crate::catalog::Catalog;
 use crate::game::internal::{Activation, Answer, CardPlay, DecisionView, InputDomain};
 use crate::game::{Game, View};
@@ -171,17 +171,11 @@ fn producer(actions: Vec<Action>, targets: Option<PlayerRelation>) -> WellFormed
 }
 
 fn game(initial: &Value, number: &str, program: &WellFormedCardProgram) -> Game {
-    let mut selection = if number == NUMBER {
-        current_inputs()["keywords"].clone()
-    } else {
-        current_inputs()["keyword_fanfare"][number].clone()
-    };
+    let mut authors = vec![author(NUMBER)];
     if number != NUMBER {
-        selection["authors"]
-            .as_array_mut()
-            .unwrap()
-            .push(current_inputs()["keywords"]["authors"][0].clone());
+        authors.push(author(number));
     }
+    let selection = json!({"authors":authors});
     selected_game(initial, selection, &snapshot(), program)
 }
 

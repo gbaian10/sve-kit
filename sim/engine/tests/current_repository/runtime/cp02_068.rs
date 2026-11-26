@@ -112,54 +112,6 @@ fn drawing_exactly_the_last_cards_does_not_lose() {
 }
 
 #[test]
-fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
-    const REJECTIONS: [&str; 4] = [
-        "current_ability_closure_mismatch",
-        "current_ability_closure_mismatch",
-        "current_ability_closure_mismatch",
-        "invalid_current_source",
-    ];
-    // Source closure must reject head, actor and count mutations even when they parse.
-    // Dropped provenance must still fail its own evidence check.
-    let (snapshot, keywords, accepted) = inputs();
-    for (probe, rejection) in REJECTIONS.iter().enumerate() {
-        let mut selection = accepted.clone();
-        let author = selection["authors"]
-            .as_array_mut()
-            .unwrap()
-            .iter_mut()
-            .find(|author| author["input"]["card_no"] == "CP02-068")
-            .unwrap();
-        let candidate = &mut author["input"];
-        match probe {
-            0 => {
-                let ability = &mut candidate["tree"]["cards"]["CP02-068"]["abilities"][0];
-                let body = ability.as_object_mut().unwrap().remove("spell").unwrap();
-                ability
-                    .as_object_mut()
-                    .unwrap()
-                    .insert("attack_time".into(), body);
-            }
-            1 => {
-                candidate["tree"]["cards"]["CP02-068"]["abilities"][0]["spell"]["do"][0]["draw"]
-                    ["who"] = json!("opponent");
-            }
-            2 => {
-                candidate["tree"]["cards"]["CP02-068"]["abilities"][0]["spell"]["do"][0]["draw"]
-                    ["n"] = json!(2_u8);
-            }
-            // The last probe drops the source sidecar.
-            _ => candidate["sidecar"] = json!([]),
-        }
-        let diagnostic = failure(repository::select(snapshot, keywords, &selection));
-        assert!(
-            diagnostic.contains(*rejection),
-            "mutated input {probe} must be rejected for its own reason: expected {rejection}, got {diagnostic}"
-        );
-    }
-}
-
-#[test]
 fn alternate_printing_uses_the_representatives_whole_card_program() {
     let fixtures = inputs();
     let (snapshot, keywords, input) = &fixtures;

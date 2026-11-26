@@ -63,11 +63,11 @@ search 沒有 any；counter 沒有省略數量形。
 on:this 的 holder 唯一且禁止 holders；on:ObjectSel 必填 holders。
 holder 個數與每個 holder 的 counter 要求量是不同位置，兩者都不收直接 selection_count 參數。
 
-| 共用選填欄 | 型別與局部限制 |
-| --- | --- |
-| Target | roles:TargetRoles、option:正安全整數、cost_sum_le:Q、distinct_by:DistinctBy、distinct_names:嚴格 true |
-| choose | by:PlayerRef、may:bool、reveal:bool、order:bool、position:top_or_bottom、groups、cost_sum_le:Q、distinct_by:DistinctBy |
-| search | result、precondition、cost_sum_le:Q、distinct_by:DistinctBy、entry_effects、instead；不收 bind |
+| 共用選填欄 | 型別與局部限制                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Target     | roles:TargetRoles、option:正安全整數、cost_sum_le:Q、distinct_by:DistinctBy、distinct_names:嚴格 true                  |
+| choose     | by:PlayerRef、may:bool、reveal:bool、order:bool、position:top_or_bottom、groups、cost_sum_le:Q、distinct_by:DistinctBy |
+| search     | result、cost_sum_le:Q、distinct_by:DistinctBy、entry_effects、instead；不收 bind                                       |
 
 Target 的 distinct_by 與 distinct_names 互斥。名稱互異的DSL 標準形為 distinct_by:name；
 既有 distinct_names:true 保留，但兩者不推定相同 body hash。
@@ -152,7 +152,7 @@ ECP01-038 的 DeckSlice 為 `{who:opponents,n:20}`；
 - 參數來源 role、component、mode 與完整算式 operand 路徑仍須核對；
   shape 合法不表示來源、資訊可見性或操作能力已准入。
 
-完整 choose/search 群組、位置、search.to.partition、entry_effects、instead、precondition 及 move/banish/look/reveal 已由[動作矩陣](author-step-shapes-1.0.md)承載。
+完整 choose/search 群組、位置、search.to.partition、entry_effects、instead 及 move/banish/look/reveal 已由[動作矩陣](author-step-shapes-1.0.md)承載。
 本表保留數量角色邊界；完整能力入口、來源／型別／scope／ports／receipt/capability 檢查仍另行實作。
 
 C1 的 `choice.upto` 另接受單一 `count: {who: self, zone: field, trait: <類型>}`：以正式模式宣告時的公開場上集合求上限，再沿用選項數上限、適正目標與不重複規則。零張略過群組。另准入 `per: {of: {count: <公開自身計數>}, unit: <正整數>}`，按完整單位向下取整並限制於模式總數；不擴充精確 `n`、替換上限或其他模式算式。

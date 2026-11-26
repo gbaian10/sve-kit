@@ -530,9 +530,10 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 `text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v2 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，角色／域、語義變體或被引用定義變更須重鍵，單純 normalizer 版本改變只更新基準並重驗，NP／中文形式不入身分。
 
-`program_hash`＝canonical `{dsl_version,ast}`；正式 DSL 1.0 的 body_version 依[承載 §4.1](../../dsl/author-contract-1.0.md#41-body-recipe)的 effect-body-v1 完整 payload（含 params、ability_scope、ports），取代舊 macro `{dsl_version,body}` 配方。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與類型），只作觀測追溯，不充當 DSL 新鮮度鍵。
-
-目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。正式 DSL 1.0 的來源新鮮度文稿依[承載 §4.2](../../dsl/author-contract-1.0.md#42-來源與用途依賴)，尚未實作；不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
+`program_hash`＝canonical `{dsl_version,ast}`。正式 DSL 使用具名本體的
+edition 選版，作者驗證目前卡片身分、版次及來源行覆蓋，見[承載契約](../../dsl/author-contract-1.0.md)。
+face-bundle-v1 保留觀測配方（含 revision ID、原始名稱與本文、數值和類型），用於追溯凍結來源。
+翻譯依自己的 exact source/context 檢查新鮮度。
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 

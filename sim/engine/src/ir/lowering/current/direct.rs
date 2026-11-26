@@ -1,6 +1,6 @@
 //! Direct author admission retains identity and whole-card coverage without source equivalence.
 
-use super::{CurrentCardProgram, CurrentIdentity, CurrentKeywordEvidence, CurrentSourceEvidence};
+use super::{CurrentCardProgram, CurrentIdentity, CurrentKeywordEvidence};
 use crate::ir::lowering::{
     CardCoordinates, ExpandedLowerer, LoweringError, ability_entries, ast, decode, error,
     pointer_key,
@@ -141,7 +141,7 @@ fn coverage(
     clippy::too_many_lines,
     reason = "Reconcile the complete line inventory before constructing an executable candidate."
 )]
-pub(super) fn lower(
+pub(in crate::ir::lowering) fn lower(
     compiler: &ExpandedLowerer,
     value: &Value,
 ) -> Result<CurrentCardProgram, LoweringError> {
@@ -266,7 +266,7 @@ pub(super) fn lower(
     }
     let construction_lines = covered.clone();
     let mut uses = BTreeSet::new();
-    let mut source_sidecar = BTreeMap::new();
+    let mut sources = BTreeMap::new();
     let mut declarations = BTreeMap::new();
     for (path, ability) in &entries {
         let ast::SourceUse::Direct(source) = &ability.sources[0] else {
@@ -303,24 +303,11 @@ pub(super) fn lower(
                 path.clone(),
                 CurrentKeywordEvidence {
                     source: source_span,
-                    reference: None,
-                    direct_keywords: keywords,
-                    input_hash: String::new(),
-                    source_input_hash: String::new(),
-                    expansion_recipe: String::new(),
-                    adapter_recipe: String::new(),
+                    keywords,
                 },
             );
         } else {
-            source_sidecar.insert(
-                path.clone(),
-                CurrentSourceEvidence {
-                    source: source_span,
-                    source_use: ability.sources[0].json(),
-                    input_hash: String::new(),
-                    source_input_hash: String::new(),
-                },
-            );
+            sources.insert(path.clone(), source_span);
         }
     }
     for source in &ignored {
@@ -381,13 +368,11 @@ pub(super) fn lower(
         deck_rule,
         card_id: input.card_id,
         card_no: input.card_no.clone(),
-        source_version: "direct".into(),
         source_payload: value["source_payload"].clone(),
         expanded: input.tree,
         face_ordinals: ordinals,
-        source_sidecar,
-        declaration_sidecar: declarations,
-        non_body_sources: Vec::new(),
+        sources,
+        declarations,
         program: programs
             .remove(&input.card_no)
             .ok_or_else(|| invalid("/cards"))?,

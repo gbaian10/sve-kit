@@ -93,25 +93,6 @@ SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
             "entry_effects": [{"no_trigger": {"on": "entering", "kinds": ["fanfare"]}}],
         }
     },
-    {
-        "search": {
-            "sel": {"who": "self", "zone": "deck"},
-            "n": 1,
-            "to": "hand",
-            "instead": [
-                {
-                    "if": {"paid": "optional"},
-                    "replace_with": {
-                        "search": {
-                            "sel": {"who": "self", "zone": "deck"},
-                            "upto": 2,
-                            "to": "field",
-                        }
-                    },
-                }
-            ],
-        }
-    },
     {"draw": {"n": {"param": "count"}, "who": {"param": "player"}}},
     {
         "draw": {
@@ -304,8 +285,6 @@ SYNTHETIC_CONTROLS: list[dict[str, JsonValue]] = [
         }
     },
     {"repeat": {"while": {"awakened": True}, "do": [], "check": "after"}},
-    {"repeat_ability": {"while": {"awakened": True}}},
-    {"foreach": {"in": "t", "as": "subject", "do": [{"act": "subject"}]}},
     {
         "each_player": {
             "stages": [
@@ -393,63 +372,6 @@ CARD_STEPS.extend(
                         "to": "field",
                         "entry_effects": [
                             {"no_trigger": {"on": "entering", "kinds": ["fanfare"]}}
-                        ],
-                    }
-                }
-            ],
-        ),
-        (
-            "BP13-035",
-            "text/search",
-            [
-                {
-                    "search": {
-                        "sel": {
-                            "who": "self",
-                            "zone": "deck",
-                            "names": [
-                                "レヴィオンの副団長・マイム",
-                                "レヴィオンの魔術師・ミイム",
-                                "レヴィオンの武闘家・メイム",
-                            ],
-                        },
-                        "n": 1,
-                        "to": "hand",
-                        "instead": [
-                            {
-                                "if": {"paid": "optional"},
-                                "replace_with": {
-                                    "search": {
-                                        "groups": [
-                                            {
-                                                "sel": {
-                                                    "who": "self",
-                                                    "zone": "deck",
-                                                    "name": "レヴィオンの副団長・マイム",
-                                                },
-                                                "n": 1,
-                                            },
-                                            {
-                                                "sel": {
-                                                    "who": "self",
-                                                    "zone": "deck",
-                                                    "name": "レヴィオンの魔術師・ミイム",
-                                                },
-                                                "n": 1,
-                                            },
-                                            {
-                                                "sel": {
-                                                    "who": "self",
-                                                    "zone": "deck",
-                                                    "name": "レヴィオンの武闘家・メイム",
-                                                },
-                                                "n": 1,
-                                            },
-                                        ],
-                                        "to": "field",
-                                    }
-                                },
-                            }
                         ],
                     }
                 }

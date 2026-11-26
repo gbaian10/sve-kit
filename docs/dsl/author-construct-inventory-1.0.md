@@ -8,31 +8,10 @@
 
 ## 容器與共用葉
 
-下列父容器已具封閉 Schema、Python 型別與結構 reader；[入口矩陣](author-entry-shapes-1.0.md)列出逐 variant、局部 invariant 與未涵蓋的來源／展開責任。
-
-| 上下文 | 欄位／形狀 | 分開驗證的責任 |
-| --- | --- | --- |
-| A.file | format=1、kind=author_effect_set、scope、cards | cards 為原樣 CardNumber → A.card；逐卡 meta.dsl 不能另選 schema |
-| A.card | meta、note?、abilities?、faces?、deck_rule? | faces 為 Map<FaceId,{abilities}>，以穩定 FaceId 定位；不附另一份卡表 |
-| A.ability | line、section?、sources、imports?、一個能力頭或 generated_by | inline 另必填 ports；generated_by 不覆寫 ports |
-| sources[] | binding_id、occurrence、ability_scope | 恰一筆；occurrence 沿四層型別，segments 可多段 |
-| ports | imports、exports | Code → {path,bind}；path 元素為字串鍵／Nat 索引；imports path 必空 |
-| imports | Code → {binding_id,ability_scope,port} | 引用可見上游 export；不是葉參數 |
-| generated_by | macro、version、params | macro={frame_id,ability_scope,applicability_scope}；version 為完整 body_version |
-| effect_body_shard | format=1、kind、scope=shared、records | companion 不進逐卡索引 |
-| records[]（companion） | frame_id、ability_scope、body_version、dsl、params、body、ports、written_by、registrations、note? | body 只有能力頭／payload，不含位置或 generated_by |
-| registrations[] | id、domain、reviews | domain={regions}；body review 與 use review 分開 |
-| effects_index | format=1、kind=effects_index、records | (card_id,scope) 唯一 |
-| records[]（index） | card_id、scope、file、kind、record_key | file 原樣 POSIX 相對路徑；effect_set 只准 shared；候選閉包另驗 |
-| A.param | {param:ParamName} | 只准承載 §3 白名單的葉位置 |
-| ParamDecl | {type,source:{slot,component}} | 八種 type；component=value/constant/negated_magnitude；來源角色由接線驗證 |
-| ParamValue | {type,value} | Int／Nat／CardName／Concept／CardKind／Player／Zone／Phase 的封閉和型別 |
-| meta | dsl、source、written_by、reviewed_by、status、verified_by_exam、rulings | 宣告不授予資格；不以空 do 代替來源判定 |
-| written_by[]／Actor | {actor:{who,model},date} | model 可 null；真實身分由作業填入 |
-| Review | kind=body/use、reviewer、date、verdict、reason、dependencies、rekey? | disputed 的 reason 非空；依賴型別按 kind 分開 |
-| macro_mechanical | kind、body、use_dependencies | 沒有虛構 reviewer |
-
-CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原字；存在性及卡號／永久 ID 對應另查登錄，不靠新正規式推算。ParamName 為 `[A-Za-z][A-Za-z0-9_]*`，來源 Code 為 `[a-z][a-z0-9_.-]*`，兩者不可合併。
+[入口矩陣](author-entry-shapes-1.0.md)列出作者主檔、具名本體、索引與降低交接的形狀。
+主檔以印刷卡號選取卡片，以行與面定位能力。具名本體以 id 和 edition 選版，
+只在已登錄的葉位置代入整數或字串。展開後的來源座標保存永久面、現行 revision 及覆蓋行。
+卡號保留官網原字，包括小寫與 `Ⓢ`。卡號與永久 ID 透過既有登錄確認。
 
 ## 能力、費用與控制流程
 
@@ -60,8 +39,6 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | A.declare | bind、kind=number/name、min?、max?、who? | number 可收 min/max，name 拒絕；上下界關係由 C1 驗 |
 | A.if | cond、then、else? | 不讀事件前置 when |
 | A.comb.repeat | n\|until\|while、check?、do、collect? | collect={receipts:name}；check=before/after |
-| repeat_ability | {while} | 本文重複，非 play_ability |
-| A.comb.foreach | in、as、do | 明示逐物件；不把全體改逐一 |
 | A.comb.each_player | who?=each、as?、stages | stage 為 Steps 或 {do,mode,evidence?}；mode=choice/nonchoice/explicit |
 | A.comb.simultaneous | do、result? | 尚未完成的 receipt 不可互讀 |
 | A.by-kind | ref、as?、leader、follower | leader 分支為 PlayerRef、follower 為 ObjectRef |
@@ -74,19 +51,19 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 | A.define | binding → NumericExpr | 純 Live 別名；不取代步驟、不在能力入口凍結 |
 | A.expr 算術 | plus、minus、times、half_up、per、min、max | 二元運算恰兩元素；min/max 為非空 Expr 陣列；per={of,unit}（§5、§13 GAP-A-028） |
 | A.expr 集合／物件讀值 | count、count_of、bound、power_of、hp_of、cost_of、orig_cost_of、hand、leader_life、counter、distinct_names、distinct_orig_costs | count_of 短形是 actual；已定片段見[讀值矩陣](author-expression-shapes-1.0.md#快照與收據讀值矩陣) |
-| 非數值 operand | objects_of、lki_of | objects_of 是明示 view 的快照，僅用於已登錄 operand；lki_of 只進 counter.on，均不直接成為 NumericExpr |
+| 非數值 operand | objects_of | 明示 view 的快照，僅用於已登錄 operand |
 | A.expr 程序／歷史 | dice、x_paid、history_count、history_sum、resource、agg、event、turn_number | resource={who,kind}；agg={of,attr,fn}；history_sum 先窄化欄位 |
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
 | A.cond 組合 | cmp:{left,op,right}、all、any、not | 數值 cmp.op=eq/ne/lt/le/gt/ge；PlayerExpr 只 eq/ne，左右同型 |
 | A.cond 解放狀態 | limit_broken、final_limit_broken、final_limit_break_possible | 讀取單一場上物件 |
-| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、payment_decided、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
+| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
 | Sel 玩家／區域／種類 | who、zone、kind、class、not_class、trait、traits_any、traits_all、not_trait | zone 單值或集合；traits_all 與 traits_any 不合併；kind 可 same_as（§13 GAP-A-057） |
 | Sel 名稱 | name、names、name_contains、not_same_name_as_this | name 可 {same_as:{objects_of,view}}，不是任意字串替換 |
 | Sel 數值 | cost_*、orig_cost_*、hp_le、power_max | 比較 suffix 與數量 Expr 分開 |
 | Sel 狀態 | other、acted、evolved、keyword、has_trigger、has_evolve、not_token、token、face_up、advance_follower、boxed、racing、entered_this_turn | token:true 是 TokenStatus 別名；advance_follower 在 §5 列為欄位、§13 GAP-A-036 列為 kind 值，本表保留差異 |
 | Sel 組合／視圖 | leader、leader_or、leader_of、in、any_of、except、where、as；同型／同名引用 | in 接 ObjectRef／物件 binding，receipt 須先 objects_of；where 的 item 局部 |
 | PlayerRef／PlayerSet | self、turn、non_turn、current、owner_of、master_of、opp／opponents、each、other_players | owner 與 controller 不互換；集合不因二席而降單人 |
-| Ref／Recipient | this、it、binding、attack_target、host、cost1；leader、leaders、role、follow、event | 前後者用 Target binding／roles／search.per_group；by_kind 的 item 按分支窄化 |
+| Ref／Recipient | this、it、binding、attack_target、host、cost1；leader、leaders、role、follow、event | 前後者用 Target binding／roles；by_kind 的 item 按分支窄化 |
 | ReceiptRef | binding；{event:move_receipt}；{entry_payment:additional} | 只有有移動授權的 receipt 可 follow；不存在的合法 entry_payment 不等於拼錯引用 |
 | count_of 長形 | receipt、where、view=before/after | 三鍵必填；成功材料快照篩選，不查現在卡片；receipt 材料型別另驗 |
 | did 長形 | result、where；view?=before/after | 前兩鍵必填；預設成功判準且存在匹配的成功材料；付款／捨牌省略為 before，其他材料須明示 view，型別另驗 |
@@ -106,7 +83,7 @@ Sel.top／bottom 不接受；同層動作 top 與目的地 position 見[動作�
 
 ## 動作與內層選項
 
-動作共通 `result? / precondition?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。
+動作共通 `result?` 不表示每個短形都可附物件欄位；短形須轉成該動作已登錄的長形。by 是執行者，who 是資源接受者，目的區持有者另判。
 
 move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{top:…} 別名；
 四個父動作與遞迴 Steps 已有封閉片段，完整能力入口另驗。費用 banish.top 已接入相同 payload，見費用與目標矩陣。
@@ -123,7 +100,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | life／set_life | who、delta／n | delta 與 n 不互換 |
 | buff／set_stat | on、power?、hp?、until?、instead? | effect.stat/set_stat 是持續效果，另型別 |
 | grant／lose_abilities | grant:{on,keywords?,abilities?,until?,instead?}；lose_abilities:{on,until?} | keywords／abilities 至少一項且非空，可並用；不接受舊 grant.effects |
-| counter／move_counters | {on,name,delta}／{from,to,name,all:true} | cost.counter 使用材料數量，非 delta |
+| counter | {on,name,delta} | cost.counter 使用材料數量，非 delta |
 | pp／pp_max／ep／sep | {who,delta}；pp 另 {who,to_max:true} | delta 與 to_max 互斥 |
 | reveal／look | ref\|top、bind、result?、by?、random? | random={n}，與 cost.discard.random=true 不同 |
 | reveal_until | sel、n、bind、matched | 結果區分公開與匹配 |
@@ -132,12 +109,12 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | dice／declare | {bind,who?}／控制流程表 | 骰子與宣告分開 |
 | equip | on、token | 裝備不占普通場格 |
 | limit_break／final_limit_break | on | 上限解放素材的普通／最終解放階段 |
-| steal／give | ref、to?、precondition? | 同世代控制轉移 |
+| steal／give | ref、to? | 同世代控制轉移 |
 | stack_plus | Expr | 規則選擇與建立 counter 語義 |
 | box／pilot | box:{ref,until}；pilot:{ref} | box 期限必填；pilot 沿 CR5.32 使用印刷攻體、固定本回合 |
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
 | play_card／play_ability | {ref}（cost?:0；其餘費用覆寫尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
-| delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until?、precondition? | 無期限僅一次，有期限預設各次；不收 line/result |
+| delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until? | 無期限僅一次，有期限預設各次；不收 line/result |
 | player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
 | win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
@@ -149,7 +126,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 
 ## 事件與歷史的封閉變體
 
-36 個直接事件鍵如下。`any_of` 是事件組合，`counter_reached` 是 counter_changed.after 的比較。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列DSL 文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
+直接事件鍵如下。`any_of` 是事件組合。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列DSL 文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
 
 | 直接事件 | DSL 明示的專屬 filter／責任 |
 | --- | --- |
@@ -170,7 +147,6 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | ability_played | 能力打出，不以 played 代替 |
 | life_changed | 生命變更；history_sum.delta 先窄化方向 |
 | stat_changed | ref、stat=power/hp 或列表、direction=up/down；不收 subject/property |
-| counter_changed | after 比較；DSL 別名 counter_reached:{ref,name,value} 降為 counter_changed.after 比較（§8、§13 GAP-A-043），不另算直接事件 |
 | acted | 姿態實變 |
 | stood | 姿態實變 |
 | raced | 出走主體 |
@@ -198,7 +174,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | stat／set_stat | 數值增減／設定分開 |
 | keywords | {on?,list}；不同於 A.ability.keywords 的列表 |
 | grant／lose_abilities | grant={on?,keywords?,abilities?}，內容至少一項且非空；lose_abilities={on?}，AllAtTime |
-| also_named／add_trait／remove_trait／make_type | 名稱／種族／種類變更，各自有型別 |
+| also_named／add_trait／make_type | 名稱／種族／種類變更，各自有型別 |
 | cost_mod | when_playing、delta\|set、next_only?；delta Int、set Nat 葉參數 |
 | damage_mod | on?、source?、kind?、delta\|multiply、next_only? |
 | banish_instead | 取代移動，不等於直接 A.act.banish |
@@ -217,7 +193,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | choice_any | who；模式自我取代可選零 |
 | extra_trigger | phase、who、n；附加次數 |
 | must_target | on、by |
-| instead[] | if、同種 payload 差異或 replace_with、after? |
+| instead[] | if、同種 payload 差異、after? |
 | until | turn/next_opp_turn/this_and_next_opp_turn/game；{next_phase:{who,phase,edge}}／{next_turn:{who,edge}}／{during_next_phase:{who,phase}}／{during_next_turn:{who}} |
 | entry_effects[] | EffectSpec；move/search/create/transform 共用；entering 為本次新世代 |
 
@@ -226,7 +202,7 @@ cannot.what 的 12 種變體為 play_card/play_ability/attack/choose_target/draw
 card 只用於 play_card，ability 只用於 play_ability；cannot.ability.except 統一為非空列表 [evolution]，不收純量。
 draw.during 與 stand.during 分開；damage_mod.kind 可 attack，prevent.kind 不可。
 
-instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/destroy；同種差異保留未改欄位，異種 replace_with 是完整另一動作。choice 數量取代在打出時計算。expiry 與 next_only 的使用額度分開；EntryOccurrence 也不是通用時間期限。
+instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/destroy；同種差異保留未改欄位。choice 數量取代在打出時計算。expiry 與 next_only 的使用額度分開；EntryOccurrence 也不是通用時間期限。
 
 ## Canonical ID 與移除語法
 
@@ -238,7 +214,7 @@ instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/dest
 | declare | A.declare；保留 v0 ID |
 | order | A.order；不另造 A.act.order |
 | distribute／place-acted 分類 | A.distribute／A.place-acted；動作欄位展開不是新獨立 op |
-| each_player/foreach/repeat/instead/simultaneous | A.comb.<鍵> |
+| each_player/repeat/instead/simultaneous | A.comb.<鍵> |
 | apply／sep 與其他原子 | A.act.<鍵> |
 | dig／discount／search_to | §10 保留的 v0 巨集；按已登錄展開，不接任意模板 |
 | when、targets[].if、cost timing、grant.effects、subject/property 舊別名 | 拒絕，不靜默遷移 |
