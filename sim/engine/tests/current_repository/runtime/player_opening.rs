@@ -212,7 +212,7 @@ fn title_deck_with_drive_check_reports_missing_icons_before_opening() {
             reason: AdmissionGapReason::MissingTriggerIcons,
         }),
     );
-    assert!(startup.gaps(Viewer::P2).is_empty());
+    assert_eq!(startup.gaps(Viewer::P2), []);
 
     players[0].construction = DeckConstruction::Class("ビショップ".into());
     assert!(Game::check_player_decks(selected, &players).unwrap().is_admitted());
@@ -245,14 +245,14 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
             reason: AdmissionGapReason::MissingTriggerIcons,
         }],
     );
-    assert!(preflight.gaps(Viewer::P2).is_empty());
+    assert_eq!(preflight.gaps(Viewer::P2), []);
 
     players[0].main.retain(|number| number != "BP13-043");
     for transfer_card in ["BP13-043", "BP03-109"] {
         let mut receiving_title = players.clone();
         receiving_title[1].main.push(transfer_card.into());
         let report = Game::check_player_decks(selection_with_rules(), &receiving_title).unwrap();
-        assert!(report.gaps(Viewer::P1).is_empty());
+        assert_eq!(report.gaps(Viewer::P1), []);
         assert_eq!(
             report.gaps(Viewer::P2),
             [AdmissionGap {
