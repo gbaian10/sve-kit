@@ -138,7 +138,7 @@ class RepoScopeTests(unittest.TestCase):
             "carddb/uv.toml",
             "carddb/pyproject.toml",
             "scan/pyproject.toml",
-            "tests/rules-scenarios/ruff.toml",
+            "ruff.toml",
             "sim/web/scripts/rules/.ruff.toml",
             "pyproject.toml",
             "uv.lock",

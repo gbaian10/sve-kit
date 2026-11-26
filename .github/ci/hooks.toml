@@ -75,11 +75,11 @@ job = "repo"
 [hooks.snapshot-format-lock]
 job = "repo"
 
+# Python files in any directory need both checks, including on PRs without a Python job.
 [hooks.ruff-format]
-job = "python"
+job = "repo"
 
 [hooks.ruff-check]
-# Rust scenario and Web rules scripts may change without a Python job.
 job = "repo"
 
 [hooks.pytest]

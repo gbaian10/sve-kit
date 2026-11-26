@@ -226,7 +226,7 @@ jobs:
           if git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
             git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/ ':(glob)**/*.md'; then
             scope=(--from-ref "$BASE" --to-ref "$HEAD")
-            if ! git diff --quiet --no-renames "${BASE}...${HEAD}" -- ':(glob)**/*.py'; then
+            if ! git diff --quiet --no-renames "${BASE}...${HEAD}" -- ':(glob)**/*.py' ':(glob)**/*.pyi'; then
               # Adding or removing a module can change imports in untouched Python files.
               prek run --config .pre-commit-config.yaml ruff-check --all-files --hook-stage manual
               SKIP="$SKIP,ruff-check"

@@ -54,12 +54,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.5
     hooks:
-      # Standalone Python tools extend the carddb settings; scan/ keeps its own.
+      # Ruff uses the nearest project config and defaults for Python outside configured directories.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|publish|scan|tools/schema-er|sim/web/scripts/rules|tests/rules-scenarios|\.github/ci)/
+        types_or: [python, pyi]
       - id: ruff-check
-        files: ^(carddb|publish|scan|tools/schema-er|sim/web/scripts/rules|tests/rules-scenarios|\.github/ci)/
+        types_or: [python, pyi]
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.24.1
