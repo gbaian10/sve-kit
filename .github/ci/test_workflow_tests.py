@@ -18,7 +18,7 @@ import yaml
 from hooks import ROOT, main, owners
 
 # Jobs that run a component's tests, and the jobs that gate the shards' merged coverage.
-TEST_JOBS = ("python-tests", "rust-tests", "web")
+TEST_JOBS = ("author-data", "python-tests", "rust-tests", "web")
 COVERAGE_JOBS = ("python-coverage", "rust-coverage")
 COVERAGE_DIRS = {
     "python-tests": "sve-python-coverage",
@@ -47,35 +47,75 @@ class DirectTestTests(unittest.TestCase):
         assert main(["check"]) == 0
 
     def test_component_inputs_select_their_jobs(self) -> None:
-        """A change to any of these inputs starts the job that tests it; otherwise its tests silently skip."""
+        """Check the workflow's include and exclude rules against real input paths."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        filters = yaml.safe_load(
-            next(
-                step["with"]["filters"]
-                for step in workflow["jobs"]["changes"]["steps"]
-                if step.get("id") == "filter"
-            )
+        config = next(
+            step["with"]
+            for step in workflow["jobs"]["changes"]["steps"]
+            if step.get("id") == "filter"
         )
-        selected = {
-            # bunfig.toml carries the Tailwind class order; the web types come from the contract crate.
-            "web": (
-                "bunfig.toml",
-                "sim/battle-contract/src/lib.rs",
-                "Cargo.lock",
-                "rust-toolchain.toml",
-            ),
-            "python": (
-                "carddb/src/sve_carddb/export/read_api.py",
-                "publish/src/sve_publish/gc.py",
-            ),
-            "rust": ("sim/engine/src/lib.rs", "tests/engine/card-input.json"),
+        assert config["predicate-quantifier"] == "some-with-excludes"
+        filters = yaml.safe_load(config["filters"])
+        author = {"author_data", "rust"}
+        python = {"python", "python_runtime"}
+        cases = {
+            "authored/rules/author-effects/BP01/000.yaml": author,
+            "authored/rules/effect-bodies/BP06/000.yaml": author,
+            "authored/rules/effects-index/BP01.yaml": author,
+            "authored/rules/comprehensive/jp/1.29.0/ch01.json": {
+                "python",
+                "rust",
+                "web",
+            },
+            "authored/translations/comprehensive-rules/zh-TW/1.29.0/ch01.json": {
+                "python",
+                "rust",
+                "web",
+            },
+            "authored/rules/keywords.yaml": {"python", "rust", "web"},
+            "docs/sim/deck-construction-cases.json": {"web"},
+            "sim/battle-host/src/lib.rs": {"rust", "web"},
+            "sim/battle-contract/src/lib.rs": {"rust", "web"},
+            "sim/engine/src/lib.rs": {"rust"},
+            "tests/engine/card-input.json": {"rust"},
+            "bunfig.toml": {"web"},
+            "Cargo.lock": {"rust", "web"},
+            "rust-toolchain.toml": {"rust", "web"},
+            "uv.lock": python | {"card_data", "rust"},
+            "carddb/src/sve_carddb/export/read_api.py": python
+            | {"card_data", "rust", "scan"},
+            "carddb/tests/support/repository_current.py": python | {"rust"},
+            "carddb/tests/support/battle_projection.py": python | {"rust"},
+            "carddb/tests/support/snapshot_project_fixtures.py": python | {"rust"},
+            "carddb/tests/support/current_lowering_fixtures.py": python | {"rust"},
+            "carddb/tests/support/direct_author_fixture.py": python | {"rust"},
+            "carddb/tests/fixtures/author_entries/golden.yaml": python | {"rust"},
+            "carddb/tests/domains/registry/test_registry.py": python | {"rust"},
+            "carddb/tests/core/test_yaml_reader.py": python,
+            "publish/pyproject.toml": python | {"card_data", "rust"},
+            "publish/src/sve_publish/gc.py": python,
+            "README.md": set(),
         }
-        for job, paths in selected.items():
-            for path in paths:
-                assert any(fnmatchcase(path, pattern) for pattern in filters[job]), (
-                    job,
-                    path,
-                )
+        for path, expected in cases.items():
+            with self.subTest(path=path):
+                selected = set()
+                for job, rules in filters.items():
+                    # The only nested list comes from the shared Python patterns.
+                    patterns = [
+                        pattern
+                        for rule in rules
+                        for pattern in (rule if isinstance(rule, list) else [rule])
+                    ]
+                    matches = {
+                        pattern
+                        for pattern in patterns
+                        if fnmatchcase(path, pattern.removeprefix("!"))
+                    }
+                    if matches and not any(
+                        pattern.startswith("!") for pattern in matches
+                    ):
+                        selected.add(job)
+                assert selected == expected
 
     def test_workflow_test_and_cleanup_contract(self) -> None:
         """Required component test and cleanup steps remain in their jobs."""
@@ -117,6 +157,7 @@ class DirectTestTests(unittest.TestCase):
         """Python and Rust CI read public inputs without adding private credentials."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         for job in (
+            "author-data",
             "python",
             "python-tests",
             "python-coverage",
@@ -137,7 +178,7 @@ class DirectTestTests(unittest.TestCase):
     def test_python_cleanup_removes_test_data_and_reports(self) -> None:
         """Python cleanup removes private reports and test data from a failed run."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        for job in ("python", "python-tests"):
+        for job in ("author-data", "python", "python-tests"):
             steps = workflow["jobs"][job]["steps"]
             script = str(
                 next(
@@ -186,6 +227,7 @@ class DirectTestTests(unittest.TestCase):
         )
         jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
         for job, executable in (
+            ("author-data", "uv"),
             ("python-tests", "uv"),
             ("rust-tests", "python3"),
             ("web", "bun"),

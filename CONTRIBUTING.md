@@ -467,16 +467,22 @@ can hold card wording. The Web results come from `sim/web/scripts/ci/public-juni
 a case by a hash of its title and records each Vitest retry as a failed attempt, so tests that pass only on
 retry show up as flaky (`--retry=2` hides them from the built-in reports).
 
-Draft pull requests run only the quick checks (repository hooks and the title). The Python, Rust,
-Web and card-data jobs are skipped and `ci-ok` fails with a note that tests
+Changes to DSL author files, named bodies and their index run `author-data` and the Rust
+suite. The focused Python job covers cases that read the checked-in author files. The Rust
+input generator also validates the complete author inventory. Changes that also select
+the full Python suite get those cases through the usual Python shards. The fresh-interpreter
+import matrix runs for Python code, dependency, toolchain and CI changes.
+
+Draft pull requests run only the quick checks (repository hooks and the title). Component
+jobs are skipped and `ci-ok` fails with a note that tests
 were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.
 
-In pull requests the repository-wide hooks check only the files the PR changes, as the local
-commit hook does; the gitleaks scan still covers the PR's whole commit range. Changes to shared
+Repository-wide hooks normally check changed files on pull requests and pushes to `main`.
+The gitleaks scan still covers the whole commit range. Changes to shared
 hook configuration, workflow/action metadata or Python lock inputs trigger a full scan, as do
 schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
-includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings. Pushes
-to `main` also check all files.
+includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings.
+Other deletions and renames run the link check over all Markdown files.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per
