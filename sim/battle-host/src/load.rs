@@ -2,11 +2,15 @@
 
 use crate::session::{LocalSession, SeatControl};
 use crate::wire::{Identity, Region, Seat, viewer_of};
+use alloc::collections::BTreeMap;
 use serde::Deserialize;
 use serde_json::Value;
 use sha2::{Digest as _, Sha256};
 use sve_engine::battle::{BattleReferences, ReferenceInput};
-use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput};
+use sve_engine::catalog::{
+    Catalog, CurrentSelectionLoader, EngineIdentityInput, ProgramPrinting, SelectedEffects,
+    SnapshotPrograms,
+};
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck};
 use sve_engine::host::HostLimits;
@@ -139,7 +143,7 @@ pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
     if references.region != region || references.snapshot_sha256 != hex(&snapshot) {
         return Err(LoadError::References);
     }
-    let [first, second] = setup.decks;
+    let [first, second] = setup.decks.clone();
     let decks = [deck(first), deck(second)];
     let selected = CurrentSelectionLoader::new()
         .and_then(|loader| {
@@ -155,11 +159,132 @@ pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
             )
         })
         .map_err(|_error| LoadError::Selection)?;
-    // Every face of the snapshot, not only the decks' reach, must have an exact identity.
-    let references = BattleReferences::new(&selected.prototypes, references)
-        .map_err(|_error| LoadError::References)?;
-    // The engine matches the wording and rule manifests with each other; here they must name the
-    // verified manifest this game is pinned to. References naming none were not read from it.
+    let references = bind_references(&selected.prototypes, references, &identity)?;
+    open(selected, decks, references, identity, &setup)
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PublishedInputs {
+    snapshot: String,
+    keywords: String,
+    rules: String,
+    references: ReferenceInput,
+    identity: Identity,
+    printings: Vec<ProgramPrinting>,
+    engine_identity: EngineIdentityInput,
+}
+
+/// One verified snapshot input, reusable across local matches.
+#[derive(Debug)]
+pub struct PreparedBattle {
+    programs: SnapshotPrograms,
+    references: BattleReferences,
+    identity: Identity,
+}
+
+impl PreparedBattle {
+    /// Bind the published program bytes to the exact native catalogue and manifest identities.
+    ///
+    /// # Errors
+    /// Refuses malformed, mismatched or unsupported published inputs.
+    pub fn new(inputs: &str, programs: &str) -> Result<Self, LoadError> {
+        let document: PublishedInputs =
+            serde_json::from_str(inputs).map_err(|_error| LoadError::Format)?;
+        if document.identity.region != Region::Jp
+            || document.identity.programs.sha256 != hex(programs)
+            || document.identity.rules.sha256 != hex(&document.rules)
+        {
+            return Err(LoadError::Identity);
+        }
+        if document.references.region != "jp"
+            || document.references.snapshot_sha256 != hex(&document.snapshot)
+            || !same_printings(&document.references, &document.printings)
+        {
+            return Err(LoadError::References);
+        }
+        let programs = SnapshotPrograms::new(
+            &document.snapshot,
+            &document.keywords,
+            programs,
+            &document.printings,
+            &document.rules,
+            &document.engine_identity,
+        )
+        .map_err(|_error| LoadError::Selection)?;
+        let references = bind_references(
+            programs.catalogue(),
+            document.references,
+            &document.identity,
+        )?;
+        Ok(Self {
+            programs,
+            references,
+            identity: document.identity,
+        })
+    }
+
+    /// Start a match from these assets, lowering only the decks' reachable programs.
+    ///
+    /// # Errors
+    /// Refuses malformed setups, illegal decks or reachable programs the engine cannot admit.
+    pub fn open(&self, setup: &str) -> Result<LocalSession, LoadError> {
+        let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
+        let decks = setup.decks.clone().map(|mut input| {
+            for number in input.main.iter_mut().chain(&mut input.evolve) {
+                if let Some(locator) = self.programs.native_printing(number) {
+                    *number = locator.to_owned();
+                }
+            }
+            deck(input)
+        });
+        let selected = Game::select_snapshot_decks(&self.programs, &decks)
+            .map_err(|_error| LoadError::Selection)?;
+        open(
+            selected,
+            decks,
+            self.references.clone(),
+            self.identity.clone(),
+            &setup,
+        )
+    }
+}
+
+fn same_printings(references: &ReferenceInput, printings: &[ProgramPrinting]) -> bool {
+    let indexed = printings
+        .iter()
+        .map(|printing| (printing.card_no.as_str(), printing))
+        .collect::<BTreeMap<_, _>>();
+    let Some(wording) = &references.wording else {
+        return false;
+    };
+    indexed.len() == printings.len()
+        && references.faces.iter().all(|face| {
+            indexed
+                .get(face.card_no.as_str())
+                .is_some_and(|printing| printing.printing_id == face.card.printing_id.as_str())
+        })
+        && wording.faces.iter().all(|face| {
+            indexed
+                .get(face.card_no.as_str())
+                .and_then(|printing| printing.faces.get(usize::try_from(face.native_face).ok()?))
+                .is_some_and(|projected| {
+                    projected.face_id == face.face_id
+                        && face
+                            .revisions
+                            .iter()
+                            .any(|revision| revision.revision_id == projected.revision_id)
+                })
+        })
+}
+
+fn bind_references(
+    catalogue: &Catalog,
+    references: ReferenceInput,
+    identity: &Identity,
+) -> Result<BattleReferences, LoadError> {
+    let references =
+        BattleReferences::new(catalogue, references).map_err(|_error| LoadError::References)?;
     if references
         .manifest_sha256()
         .and_then(|manifest| manifest.strip_prefix("sha256:"))
@@ -167,6 +292,16 @@ pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
     {
         return Err(LoadError::References);
     }
+    Ok(references)
+}
+
+fn open(
+    selected: SelectedEffects,
+    decks: [PlayerDeck; 2],
+    references: BattleReferences,
+    identity: Identity,
+    setup: &MatchSetup,
+) -> Result<LocalSession, LoadError> {
     // The selection already loaded, so a failure here is a reference or source gap.
     let admission = Game::check_battle_decks(&selected, &decks, &references)
         .map_err(|_error| LoadError::References)?;
