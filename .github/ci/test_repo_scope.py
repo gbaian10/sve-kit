@@ -153,8 +153,10 @@ class RepoScopeTests(unittest.TestCase):
                     else:
                         self.command("rm", name)
                     head = self.commit()
-                    assert "--all-files" in self.scope(self.base, head)
-                    assert "--all-files" in self.scope(self.base, head, event="push")
+                    for event in ("pull_request", "push"):
+                        scope = self.scope(self.base, head, event=event)
+                        assert "pre-commit run --all-files" in scope
+                        assert "--from-ref" not in scope
 
     def test_non_markdown_deletions_only_expand_the_link_check(self) -> None:
         """An unchanged Markdown file may link to a removed schema, image or script."""
@@ -163,7 +165,7 @@ class RepoScopeTests(unittest.TestCase):
         for event in ("pull_request", "push"):
             with self.subTest(event=event):
                 scope = self.scope(self.base, head, event=event)
-                assert "run lychee --all-files" in scope
+                assert scope.count("run lychee --all-files") == 1
                 assert f"run --from-ref {self.base} --to-ref {head}" in scope
 
     def changed_files(self, base: str, head: str) -> list[str]:
