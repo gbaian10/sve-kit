@@ -1,36 +1,28 @@
-//! Opt-in exercise of the strict player pipeline against the current repository selection.
+//! Seeded matches on the current repository selection through the native player pipeline.
 //!
-//! From the repository root:
-//!
-//! ```bash
-//! SVE_SELFPLAY_GAMES=100 SVE_SELFPLAY_SEED=0 python3 .github/ci/rust_tests.py \
-//!   test --locked -p sve-engine --lib selfplay::run -- --ignored --nocapture
-//! ```
-//!
-//! Set `SVE_SELFPLAY_REPRINTS` to sample alternate printings. Each seat uses base construction
-//! rules, independent of any tournament format or ban list.
+//! This is the driver of the main-action property checks, which need the authority's own
+//! state. Batch self-play, its invariants and its reports live in `sim/selfplay`, above the
+//! battle host. Each seat uses base construction rules, independent of any format or ban list.
 
 #![expect(
     clippy::unwrap_used,
-    reason = "A missing fixture or malformed run configuration must fail this diagnostic test."
+    reason = "A missing fixture must fail the tests that drive these matches."
 )]
 
+use super::Game;
 use super::player::{DeckConstruction, Input, PlayerDeck, Question, Viewer};
-use super::{Game, repository};
 use crate::catalog::SelectedEffects;
 use crate::ir::{Cardinality, KeywordId, printed_keywords};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::num::NonZeroUsize;
 use core::ops::ControlFlow;
 use core::panic::AssertUnwindSafe;
-use core::sync::atomic::{AtomicU64, Ordering};
 use rand::seq::{IndexedRandom as _, SliceRandom as _};
 use rand::{RngExt as _, SeedableRng as _};
 use rand_chacha::ChaCha8Rng;
 use serde_json::{Value, json};
-use std::env;
 use std::panic::catch_unwind;
-use std::{thread, time::Instant};
+use std::thread;
 
 pub(super) mod answers;
 
@@ -216,24 +208,13 @@ struct Trace {
     step: usize,
     turn: Value,
     context: VecDeque<String>,
-    seen: BTreeSet<String>,
-    rollbacks: usize,
-    cancellations: usize,
 }
 
-impl Trace {
-    fn record_visible(&mut self, game: &Game) {
-        for object in game.state.objects.values() {
-            if !matches!(object.zone.as_str(), "deck" | "evolve_deck" | "void") {
-                self.seen.insert(object.card.clone());
-            }
-        }
-    }
-}
-
+/// How a match stopped without a failure.
 enum MatchEnd {
-    Finished(Option<Viewer>),
-    Sampled,
+    /// The rules ended it, or the inspector had seen enough.
+    Completed,
+    /// The decks need verified Trigger icons that the current facts lack.
     MissingTriggerIcons,
 }
 
@@ -269,10 +250,9 @@ fn play(
     let mut input = game.input(Viewer::P1);
     for step in 0..=STEP_LIMIT {
         trace.step = step;
-        trace.record_visible(&game);
         trace.turn = game.state.turn.clone();
         let question = match active_input(&game, input) {
-            Input::Finished { winner } => return Ok(MatchEnd::Finished(winner)),
+            Input::Finished { .. } => return Ok(MatchEnd::Completed),
             Input::EngineFault => {
                 return Err(game.referee_fault().map_or_else(
                     || {
@@ -294,7 +274,7 @@ fn play(
             ));
         }
         if inspect(&game, &question, step)?.is_break() {
-            return Ok(MatchEnd::Sampled);
+            return Ok(MatchEnd::Completed);
         }
         let (command, context) = answers::choose(&question, rng)
             .map_err(|message| ("policy", format!("{:?}: {message}", question.purpose)))?;
@@ -320,11 +300,7 @@ fn play(
                     diagnostic,
                 ));
             }
-            SubmissionKind::Applied => {}
-            SubmissionKind::Reverted => trace.rollbacks = trace.rollbacks.saturating_add(1),
-            SubmissionKind::Cancelled => {
-                trace.cancellations = trace.cancellations.saturating_add(1);
-            }
+            SubmissionKind::Applied | SubmissionKind::Reverted | SubmissionKind::Cancelled => {}
         }
         input = submission.input;
     }
@@ -352,22 +328,14 @@ fn diagnostic(error: &crate::EngineFailure) -> (&'static str, String) {
     (kind, error.to_string())
 }
 
-pub(super) struct MatchReport {
-    outcome: &'static str,
-    included: BTreeSet<String>,
-    seen: BTreeSet<String>,
-    pub(super) failure: Option<Value>,
-    steps: usize,
-    rollbacks: usize,
-    cancellations: usize,
-}
-
-const MISSING_TRIGGER_ICONS: &str = "missing_trigger_icons";
-
-impl MatchReport {
-    pub(super) fn missing_trigger_icons(&self) -> bool {
-        self.outcome == MISSING_TRIGGER_ICONS
-    }
+/// What became of one seeded match.
+pub(super) enum MatchOutcome {
+    /// It ended by the rules or by the inspector's stop.
+    Completed,
+    /// It never opened: the decks need verified Trigger icons.
+    MissingTriggerIcons,
+    /// It stopped otherwise; the value is the replayable diagnostic.
+    Failed(Value),
 }
 
 pub(super) fn run_match(
@@ -375,17 +343,12 @@ pub(super) fn run_match(
     pools: &[DeckPool],
     seed: u64,
     inspect: impl FnMut(&Game, &Question, usize) -> Inspect,
-) -> MatchReport {
+) -> MatchOutcome {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     let decks = [
         deck(pools.choose(&mut rng).unwrap(), &mut rng),
         deck(pools.choose(&mut rng).unwrap(), &mut rng),
     ];
-    let included = decks
-        .iter()
-        .flat_map(|deck| deck.main.iter().chain(&deck.evolve))
-        .cloned()
-        .collect();
     let mut trace = Trace::default();
     let result = catch_unwind(AssertUnwindSafe(|| {
         play(selected, decks.clone(), seed, &mut rng, &mut trace, inspect)
@@ -399,31 +362,16 @@ pub(super) fn run_match(
             .into();
         Err(("panic", message))
     });
-    let (outcome, failure) = match result {
-        Ok(MatchEnd::Finished(Some(Viewer::P1))) => ("P1", None),
-        Ok(MatchEnd::Finished(Some(Viewer::P2))) => ("P2", None),
-        Ok(MatchEnd::Finished(None)) => ("draw", None),
-        Ok(MatchEnd::Sampled) => ("sampled", None),
-        Ok(MatchEnd::MissingTriggerIcons) => (MISSING_TRIGGER_ICONS, None),
-        Err((kind, message)) => (
-            kind,
-            Some(json!({
-                "seed": seed, "kind": kind, "error": message, "step": trace.step,
-                "turn": trace.turn, "context": trace.context,
-                "main": decks.each_ref().map(|deck| &deck.main),
-                "evolve": decks.each_ref().map(|deck| &deck.evolve),
-                "basis": decks.each_ref().map(|deck| format!("{:?}", deck.construction)),
-            })),
-        ),
-    };
-    MatchReport {
-        outcome,
-        included,
-        seen: trace.seen,
-        failure,
-        steps: trace.step,
-        rollbacks: trace.rollbacks,
-        cancellations: trace.cancellations,
+    match result {
+        Ok(MatchEnd::Completed) => MatchOutcome::Completed,
+        Ok(MatchEnd::MissingTriggerIcons) => MatchOutcome::MissingTriggerIcons,
+        Err((kind, message)) => MatchOutcome::Failed(json!({
+            "seed": seed, "kind": kind, "error": message, "step": trace.step,
+            "turn": trace.turn, "context": trace.context,
+            "main": decks.each_ref().map(|deck| &deck.main),
+            "evolve": decks.each_ref().map(|deck| &deck.evolve),
+            "basis": decks.each_ref().map(|deck| format!("{:?}", deck.construction)),
+        })),
     }
 }
 
@@ -462,76 +410,4 @@ where
     });
     reports.sort_by_key(|(seed, _)| *seed);
     reports
-}
-
-#[test]
-#[ignore = "opt-in multi-game diagnostic using the current repository selection"]
-fn run() {
-    let setup = Instant::now();
-    let selected = repository::selection_with_rules();
-    let reprints = env::var_os("SVE_SELFPLAY_REPRINTS").is_some();
-    let pools = pools(selected, reprints);
-    assert!(!pools.is_empty());
-    let count: u64 = env::var("SVE_SELFPLAY_GAMES")
-        .map_or(Ok(1), |value| value.parse())
-        .unwrap();
-    let first_seed: u64 = env::var("SVE_SELFPLAY_SEED")
-        .map_or(Ok(0), |value| value.parse())
-        .unwrap();
-    assert!(count > 0);
-    let last_seed = first_seed.checked_add(count.saturating_sub(1)).unwrap();
-    let start = Instant::now();
-    let completed = AtomicU64::new(0);
-    let reports = run_seeds(&(first_seed..=last_seed), |seed| {
-        let report = run_match(selected, &pools, seed, |_, _, _| {
-            Ok(ControlFlow::Continue(()))
-        });
-        let done = completed.fetch_add(1, Ordering::Relaxed).saturating_add(1);
-        if count <= 30 || done.is_multiple_of(64) {
-            eprintln!(
-                "selfplay {done}/{count} games complete (seed {seed}, {} submissions)",
-                report.steps
-            );
-        }
-        report
-    });
-    let mut included = BTreeMap::<String, u64>::new();
-    let mut seen = BTreeMap::<String, u64>::new();
-    let mut outcomes = BTreeMap::<&str, u64>::new();
-    let mut submissions = 0_usize;
-    let mut rollbacks = 0_usize;
-    let mut cancellations = 0_usize;
-    for (_, report) in reports {
-        submissions = submissions.saturating_add(report.steps);
-        rollbacks = rollbacks.saturating_add(report.rollbacks);
-        cancellations = cancellations.saturating_add(report.cancellations);
-        for number in report.included {
-            *included.entry(number).or_default() += 1;
-        }
-        for number in report.seen {
-            *seen.entry(number).or_default() += 1;
-        }
-        if let Some(failure) = report.failure {
-            println!("{failure}");
-        }
-        *outcomes.entry(report.outcome).or_default() += 1;
-    }
-    let eligible: BTreeSet<_> = pools
-        .iter()
-        .flat_map(|pool| {
-            pool.cards
-                .main
-                .iter()
-                .chain(&pool.cards.evolve)
-                .map(|card| &card.number)
-        })
-        .collect();
-    println!(
-        "{}",
-        json!({"first_seed":first_seed,"games":count,"elapsed_seconds":start.elapsed().as_secs_f64(),
-        "total_seconds":setup.elapsed().as_secs_f64(),"reprints":reprints,"workers":worker_count(),
-        "submissions":submissions,"rollbacks":rollbacks,"cancellations":cancellations,
-        "selection":selected.current.len(),"eligible":eligible,
-        "built":included,"seen":seen,"outcomes":outcomes})
-    );
 }

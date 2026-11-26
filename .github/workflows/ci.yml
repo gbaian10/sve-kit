@@ -107,6 +107,7 @@ jobs:
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
               - 'sim/battle-host/**'
+              - 'sim/selfplay/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'rust-toolchain.toml'

@@ -99,3 +99,7 @@ component_management:
       name: battle host
       paths:
         - sim/battle-host/src/**
+    - component_id: selfplay
+      name: selfplay
+      paths:
+        - sim/selfplay/src/**

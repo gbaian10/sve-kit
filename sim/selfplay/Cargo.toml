@@ -1,0 +1,26 @@
+[package]
+name = "sve-selfplay"
+version = "0.1.0"
+description = "Random self-play over the battle host: whole-catalogue decks, invariants, replay records and timings"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# Same pinned generators as the engine: a seed must keep naming the same match.
+rand = { version = "=0.10.4", default-features = false }
+rand_chacha = { version = "=0.10.0", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11"
+sve-battle-contract = { path = "../battle-contract" }
+sve-battle-host = { path = "../battle-host" }
+# The runner feature carries the referee reads that explain a fault.
+sve-engine = { path = "../engine" }
+
+[dev-dependencies]
+serde-saphyr = "2.0"

@@ -63,6 +63,7 @@ sve-kit/
 │   ├── battle-contract/   Wire types shared by the battle host and its clients
 │   ├── engine/            Rust rules-engine prototype
 │   ├── scenario-runner/   Engine-neutral scenario runner
+│   ├── selfplay/          Random self-play over the battle host
 │   └── web/               Web client (React / TypeScript)
 │
 └── docs/                  ADRs (docs/adr), DSL specs (docs/dsl), schema and operations (docs/operations)
