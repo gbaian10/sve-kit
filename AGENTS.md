@@ -32,6 +32,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 記錄架構決定時依 [ADR 規則](docs/adr/README.md) 判斷是否同時符合難以回頭、需背景解釋及真實取捨；規格細節留在對應契約。
 新增或修改 ADR、名詞表時參考 `mattpocock-skills` 的 `domain-modeling` skill（Claude Code 由 `.claude/settings.json` 啟用）；名詞表用繁體中文，與 skill 預設不同處以本 repo 規則為準。
 `docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
+收錄新卡包、PR 卡、勘誤公告或綜合規則改版前先讀[卡包收錄流程](docs/operations/pack-intake.md)：步驟順序、各步的 repo 指令，以及要先取得維護者同意的動作。
 
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`；`card-data/` → `carddb/`。
 `card-data/` 保存日英解析輸入；產生器與資料變更 CI 驗證 schema、hash、閉包及歷史，普通建置只讀取已驗證資料；`carddb` 匯出的有版號快照仍是使用者與模擬器的**唯一卡片資料權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），

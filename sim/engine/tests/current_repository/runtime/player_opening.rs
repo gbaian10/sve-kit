@@ -8,8 +8,8 @@ use core::array::from_fn;
 use sve_engine::game::player::events::{ActionKind, EventKind};
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
-    Command, DeckConstruction, Input, OpeningAnswer, OpeningQuestion, PlayerDeck, Question,
-    QuestionShape, StrictStartError, SubmissionKind, Viewer,
+    AdmissionGap, AdmissionGapReason, Command, DeckConstruction, Input, OpeningAnswer,
+    OpeningQuestion, PlayerDeck, Question, QuestionShape, StrictStartError, SubmissionKind, Viewer,
 };
 
 fn question(game: &Game, viewer: Viewer) -> Question {
@@ -182,6 +182,85 @@ fn player_opening_is_serial_private_and_reproducible_from_the_accepted_selection
         deck.iter().skip(4).cloned().collect::<Vec<_>>(),
         original.into_iter().rev().collect::<Vec<_>>()
     );
+}
+
+#[test]
+fn title_deck_with_drive_check_reports_missing_icons_before_opening() {
+    let mut players = decks();
+    players[0] = PlayerDeck {
+        construction: DeckConstruction::Title("cardfight_vanguard".into()),
+        main: [
+            "CP03-124", "CP03-110", "CP03-112", "CP03-117", "CP03-119", "CP03-120",
+        ]
+        .into_iter()
+        .map(str::to_owned)
+        .collect(),
+        evolve: vec!["CP03-127".into()],
+    };
+    let selected = selection_with_rules();
+    let preflight = Game::check_player_decks(selected, &players).unwrap();
+    let Err(StrictStartError::Admission(startup)) =
+        Game::start_player_game(selected.clone(), players.clone(), Viewer::P1, "missing-icons")
+    else {
+        panic!("opening must stop before publishing a question");
+    };
+    assert_eq!(startup, preflight);
+    assert_eq!(
+        startup.gaps(Viewer::P1),
+        ["CP03-110", "CP03-112"].map(|card_no| AdmissionGap {
+            card_no: card_no.into(),
+            reason: AdmissionGapReason::MissingTriggerIcons,
+        }),
+    );
+    assert_eq!(startup.gaps(Viewer::P2), []);
+
+    players[0].construction = DeckConstruction::Class("ビショップ".into());
+    assert!(Game::check_player_decks(selected, &players).unwrap().is_admitted());
+
+    players[0].main.push("CP03-123".into());
+    let filter = Game::check_player_decks(selected, &players).unwrap();
+    assert_eq!(
+        filter.gaps(Viewer::P1),
+        [AdmissionGap {
+            card_no: "CP03-123".into(),
+            reason: AdmissionGapReason::MissingTriggerIcons,
+        }],
+    );
+}
+
+#[test]
+fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
+    let mut players = decks();
+    players[0].construction = DeckConstruction::Class("ウィッチ".into());
+    players[0].main.extend(["BP13-043".into(), "CP03-046".into()]);
+    players[0].evolve.push("CP03-047".into());
+    players[1].construction = DeckConstruction::Title("cardfight_vanguard".into());
+    players[1].main[0] = "CP03-124".into();
+
+    let preflight = Game::check_player_decks(selection_with_rules(), &players).unwrap();
+    assert_eq!(
+        preflight.gaps(Viewer::P1),
+        [AdmissionGap {
+            card_no: "CP03-047".into(),
+            reason: AdmissionGapReason::MissingTriggerIcons,
+        }],
+    );
+    assert_eq!(preflight.gaps(Viewer::P2), []);
+
+    players[0].main.retain(|number| number != "BP13-043");
+    for transfer_card in ["BP13-043", "BP03-109"] {
+        let mut receiving_title = players.clone();
+        receiving_title[1].main.push(transfer_card.into());
+        let report = Game::check_player_decks(selection_with_rules(), &receiving_title).unwrap();
+        assert_eq!(report.gaps(Viewer::P1), []);
+        assert_eq!(
+            report.gaps(Viewer::P2),
+            [AdmissionGap {
+                card_no: transfer_card.into(),
+                reason: AdmissionGapReason::MissingTriggerIcons,
+            }],
+        );
+    }
 }
 
 #[test]

@@ -65,7 +65,7 @@ sve-kit/
 │   ├── scenario-runner/   Engine-neutral scenario runner
 │   └── web/               Web client (React / TypeScript)
 │
-└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl) and schema
+└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl), schema and operations (docs/operations)
 ```
 
 The carddb package groups data domains under `sve_carddb.domains`; translation
