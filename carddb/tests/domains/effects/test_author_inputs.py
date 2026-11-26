@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import object_value
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
+from sve_carddb.domains.effects.author_inputs import (
+    AuthorInputError,
+    AuthorSchemas,
+    parse_document,
+)
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -127,6 +131,17 @@ def test_index_duplicate_diagnostic(schemas: AuthorSchemas) -> None:
     assert diagnostic.reason == "duplicate_card_scope"
     assert diagnostic.path == ("records", 1)
     assert diagnostic.line == 1
+
+
+@pytest.mark.parametrize(
+    "raw", [b"chosen: 1.0\n", b'{"chosen": 1.0}'], ids=["yaml", "json"]
+)
+def test_author_parser_rejects_integral_floats_before_schema(raw: bytes) -> None:
+    with pytest.raises(AuthorInputError) as caught:
+        parse_document(raw)
+    diagnostic = caught.value.diagnostic
+    assert (diagnostic.stage, diagnostic.reason) == ("json", "noncanonical_value")
+    assert diagnostic.path == ("chosen",)
 
 
 def test_duplicate_key_diagnostic_does_not_expose_input(schemas: AuthorSchemas) -> None:

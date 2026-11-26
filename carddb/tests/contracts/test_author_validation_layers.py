@@ -85,13 +85,15 @@ def test_author_syntax_acceptance_at_consumer_sites(
     _assert_acceptance(head, accepted=accepted)
 
 
-def _assert_acceptance(head: JsonValue, *, accepted: bool) -> None:
+def _assert_acceptance(
+    node: JsonValue, *, accepted: bool, definition: str = "A.ability-head"
+) -> None:
     schema = {
         "$id": NODES["$id"],
         "$defs": NODES["$defs"],
-        "$ref": "#/$defs/A.ability-head",
+        "$ref": f"#/$defs/{definition}",
     }
-    assert Draft202012Validator(schema).is_valid(head) is accepted
+    assert Draft202012Validator(schema).is_valid(node) is accepted
 
 
 @pytest.mark.parametrize(
@@ -143,6 +145,84 @@ def test_conditional_grants_preserve_the_head_and_stay_out_of_installed_effects(
         {"spell": {"do": [{"apply": {"on": "this", "effect": declaration}}]}},
         accepted=False,
     )
+
+
+@pytest.mark.parametrize(
+    ("definition", "control", "invalid"),
+    [
+        pytest.param(
+            "A.expr.count-objects",
+            {
+                "who": "self",
+                "zone": "field",
+                "as": "counted",
+                "where": {"my_turn": True},
+            },
+            {"who": "self", "zone": "field", "as": "counted"},
+            id="alias-requires-where",
+        ),
+        pytest.param(
+            "A.history.destroyed-condition",
+            {"event": "destroyed", "window": "this_turn", "sel": {"kind": "follower"}},
+            {
+                "event": "destroyed",
+                "window": "this_turn",
+                "sel": {"kind": "follower"},
+                "where": {"ref": "this"},
+            },
+            id="history-subject-is-exclusive",
+        ),
+        pytest.param(
+            "A.effect.card-predicate",
+            {"name": "sample"},
+            {"name": "sample", "names": ["sample"]},
+            id="name-filters-are-exclusive",
+        ),
+        pytest.param(
+            "A.head.play",
+            {"optional_cost": {"pp": 1}, "optional_cost_delta": -1},
+            {
+                "optional_cost": [{"pp": 1, "option": 1}, {"pp": 1, "option": 2}],
+                "optional_cost_delta": -1,
+            },
+            id="modifier-requires-one-optional-payment",
+        ),
+        pytest.param(
+            "A.act.move.ref",
+            {"ref": "this", "to": "deck", "position": "top"},
+            {"ref": "this", "to": "hand", "position": "top"},
+            id="position-requires-deck-destination",
+        ),
+        pytest.param(
+            "A.instead.search",
+            {"if": {"my_turn": True}, "n": 1},
+            {"if": {"my_turn": True}, "n": 1, "upto": 1},
+            id="replacement-quantity-is-exclusive",
+        ),
+        pytest.param(
+            "A.target.exact",
+            {
+                "bind": "marked",
+                "from": {"who": "opp", "zone": "field", "kind": "follower"},
+                "n": 1,
+                "distinct_names": True,
+            },
+            {
+                "bind": "marked",
+                "from": {"who": "opp", "zone": "field", "kind": "follower"},
+                "n": 1,
+                "distinct_names": True,
+                "distinct_by": "name",
+            },
+            id="distinct-target-filters-are-exclusive",
+        ),
+    ],
+)
+def test_schema_rejects_conflicting_constraints(
+    definition: str, control: JsonValue, invalid: JsonValue
+) -> None:
+    _assert_acceptance(control, definition=definition, accepted=True)
+    _assert_acceptance(invalid, definition=definition, accepted=False)
 
 
 def _local_author_references(node: JsonValue) -> JsonValue:
