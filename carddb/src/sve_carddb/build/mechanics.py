@@ -62,7 +62,8 @@ TABLES = (
             QueryCheck(
                 "printed_keyword_concept",
                 "SELECT 1 FROM keyword AS k JOIN glossary_term AS t ON t.id=k.term_id "
-                "WHERE k.kind='printed_keyword' AND t.category!='keyword' LIMIT 1",
+                "WHERE k.kind='printed_keyword' "
+                "AND t.category NOT IN ('keyword','ability','rule_term') LIMIT 1",
                 ("keyword", "glossary_term"),
             ),
         ),
