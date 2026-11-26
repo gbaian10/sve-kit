@@ -488,6 +488,7 @@ hook configuration, workflow/action metadata or Python lock inputs trigger a ful
 schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
 includes mise, Markdown, EditorConfig, Git attributes, gitleaks, Ruff, Taplo and uv settings.
 Other deletions and renames run the link check over all Markdown files.
+Python changes run `ruff-check` over all Python files because module changes can affect untouched imports.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per

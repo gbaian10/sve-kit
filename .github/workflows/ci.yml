@@ -226,6 +226,11 @@ jobs:
           if git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
             git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/ ':(glob)**/*.md'; then
             scope=(--from-ref "$BASE" --to-ref "$HEAD")
+            if ! git diff --quiet --no-renames "${BASE}...${HEAD}" -- ':(glob)**/*.py'; then
+              # Adding or removing a module can change imports in untouched Python files.
+              prek run --config .pre-commit-config.yaml ruff-check --all-files --hook-stage manual
+              SKIP="$SKIP,ruff-check"
+            fi
             if ! git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}"; then
               # Links can also point from untouched Markdown to scripts, images and data.
               prek run --config .pre-commit-config.yaml lychee --all-files --hook-stage manual

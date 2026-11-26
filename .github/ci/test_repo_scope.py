@@ -181,7 +181,21 @@ class RepoScopeTests(unittest.TestCase):
             with self.subTest(event=event):
                 scope = self.scope(self.base, head, event=event)
                 assert scope.count("lychee --all-files") == 1
+                assert "ruff-check --all-files" not in scope
                 assert f"--from-ref {self.base} --to-ref {head}" in scope
+
+    def test_removed_python_module_expands_ruff_check(self) -> None:
+        """Removing a module can invalidate imports and packages in untouched files."""
+        self.write("package/__init__.py", "")
+        self.write("package/service.py", "")
+        base = self.commit()
+        self.command("rm", "package/__init__.py")
+        head = self.commit()
+        for event in ("pull_request", "push"):
+            with self.subTest(event=event):
+                scope = self.scope(base, head, event=event)
+                assert scope.count("ruff-check --all-files") == 1
+                assert f"--from-ref {base} --to-ref {head}" in scope
 
     def changed_files(self, base: str, head: str) -> list[str]:
         """Ask prek which paths it passes to a hook for this range."""
