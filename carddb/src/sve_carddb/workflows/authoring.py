@@ -19,6 +19,7 @@ from sve_carddb.core.provenance import BuildContext, Revision
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
+from sve_carddb.domains.effects.author_counters import check_counter_registration
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_direct import inventory, materialize
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -415,6 +416,7 @@ def check(
     ]
     if rejected:
         raise AuthorInputError(rejected[0].diagnostic)
+    check_counter_registration(workspace.inputs.repo / "authored", results)
     selection = workspace.current.selection_from_results(inputs, results)
     if compare_public is not None:
         if workspace.inputs.profile != "database" or compare_public.profile != "public":

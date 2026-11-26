@@ -15,6 +15,7 @@ from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.yaml import MAX_BYTES
+from sve_carddb.domains.effects.author_counters import check_counter_registration
 from sve_carddb.domains.effects.author_current import CardRejected
 from sve_carddb.domains.effects.author_handwritten import (
     Body,
@@ -414,6 +415,10 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     ]
     if rejected:
         raise _located_error(candidate, supplied, rejected[0].diagnostic)
+    try:
+        check_counter_registration(workspace.inputs.repo / "authored", results)
+    except AuthorInputError as error:
+        raise _located_error(candidate, supplied, error.diagnostic) from None
     outputs = {
         **authors,
         **companions,

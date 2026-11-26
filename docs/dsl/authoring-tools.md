@@ -984,6 +984,8 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 
 確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。
 
+`check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keywords.yaml` 以 `role: counter` 登錄規則名稱。
+
 移除既有原型後，若歷史共享情境仍使用該卡，應將各舊原型印刷條目原樣存入 `sim/engine/tests/fixtures/prototype-bodies/`。歷史 fixture 只供回歸測試，不填回 current 選用，也不作為准入證據。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
