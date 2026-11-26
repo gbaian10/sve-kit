@@ -452,8 +452,10 @@ ships its merged profile, the coverage sections of its test objects and the exac
 `rust-coverage` merges the profiles and applies the 90% line gate to llvm-cov's own total.
 It first requires identical objects from every shard and that llvm-cov reproduces each
 shard's own totals, so a mismatch fails rather than changing the measurement.
-pytest still records `--durations=30` and JUnit. Web formatting, lint, types, Vitest, dependency
-checks and build use the existing package scripts in separate steps. Local manual test hooks
+pytest still records `--durations=30` and JUnit. Web CI generates and verifies the battle contract,
+builds WebAssembly once, and shares the outputs across formatting, lint, types, Vitest, dependency
+checks and the Vite build. The separate `engine-wasm` job builds and measures WASM on Rust changes
+that skip Web CI. Local manual test hooks
 remain available and run the whole suite at once. The hook ownership table marks direct steps
 so pre-commit skips them.
 
