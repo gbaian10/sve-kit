@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.contracts.rulings import LegacyReference
-from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.json import digest
 from sve_carddb.domains.rulings.mapping import (
     Definition,
     FrameUse,
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.contracts.rulings import HistoricalUse
-    from sve_carddb.domains.effects.reader import Catalog
     from sve_carddb.domains.rulings.reader import Document
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
 
@@ -37,7 +36,6 @@ V0 = Namespace(
 @dataclass(frozen=True)
 class Observation:
     text: str
-    face: int
     cards: frozenset[str]
 
 
@@ -58,7 +56,7 @@ def references(documents: tuple[Document, ...]) -> tuple[LegacyReference, ...]:
     return tuple(result[k] for k in sorted(result))
 
 
-def verify_use(use: HistoricalUse, observed: Observation) -> str:
+def verify_use(use: HistoricalUse, observed: Observation) -> None:
     """A missing binding is pending; false source facts cannot be downgraded to pending."""
     occurrence = use.occurrence
     raw = observed.text
@@ -73,13 +71,12 @@ def verify_use(use: HistoricalUse, observed: Observation) -> str:
     end = start + len(lines[occurrence.line_ordinal])
     if any(s.start < start or s.end > end for s in occurrence.segments):
         raise ValueError("Historical source segments cross their exact line")
-    return "".join(raw[s.start : s.end] for s in occurrence.segments)
 
 
 def inputs(
     documents: tuple[Document, ...],
 ) -> LegacyInputs:
-    """Read admitted definitions without replaying source or catalog validation."""
+    """Read admitted definitions from the reviewed use list."""
     definitions = []
     for reference in references(documents):
         uses = tuple(
@@ -108,52 +105,12 @@ def inputs(
 
 def validate(
     documents: tuple[Document, ...],
-    catalog: Catalog,
     observe: Callable[[HistoricalUse], Observation],
 ) -> None:
-    """At data admission every v0 member must occur exactly once with its old body hash."""
-    if catalog.namespace != V0.code:
-        raise ValueError("Historical catalog namespace differs")
-    members = {m.id: m for m in catalog.members}
-    classifications = {c.id: c for c in catalog.classifications}
+    """Verify the recorded historical use coordinates against the selected build."""
     for reference in references(documents):
-        classification = classifications.get(reference.legacy)
-        if classification is None:
-            raise ValueError("Historical definition is absent from the catalog")
-        expected = {
-            canonical(members[i].position.model_dump(mode="json")): members[i]
-            for i in classification.members
-        }
-        seen: set[bytes] = set()
         for use in reference.uses:
-            observed = observe(use)
-            body = verify_use(use, observed)
-            occurrence = use.occurrence
-            for card in use.cards:
-                position = canonical(
-                    {
-                        "region": "jp",
-                        "card_no": card,
-                        "face": observed.face,
-                        "field": occurrence.field,
-                        "ordinal": occurrence.ordinal,
-                        "line": occurrence.line_ordinal,
-                    }
-                )
-                member = expected.get(position)
-                if member is None or position in seen:
-                    raise ValueError(
-                        "Historical domain adds or repeats a catalog member"
-                    )
-                if member.body_hash != digest(
-                    body.encode()
-                ) or member.body_length != len(body):
-                    raise ValueError(
-                        "Historical source span differs from the catalog body"
-                    )
-                seen.add(position)
-        if seen != expected.keys():
-            raise ValueError("Historical domain omits catalog members")
+            verify_use(use, observe(use))
 
 
 class Observations:
@@ -172,11 +129,6 @@ class Observations:
         encoded = key(field)
         if encoded not in self.cache:
             source = card_field(self.db, field)
-            face = self.db.select("face", ("ordinal",), where={"id": source.face_id})[
-                0
-            ].values["ordinal"]
-            if type(face) is not int:
-                raise TypeError("Historical face ordinal must be an integer")
             printings = {
                 row.values["id"]: row.values["card_no"]
                 for row in self.db.select(
@@ -192,7 +144,7 @@ class Observations:
                 )
                 if row.values["printing_id"] in printings
             )
-            self.cache[encoded] = Observation(source.text, face, cards)
+            self.cache[encoded] = Observation(source.text, cards)
         return self.cache[encoded]
 
 

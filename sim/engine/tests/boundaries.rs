@@ -301,7 +301,7 @@ fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
         engine
             .decide(&json!({"do":"resolve-choice","select":[]}), "full")
             .unwrap();
-        // Freeze the known chosen-binding defect, not correct card semantics (docs/dsl/v0-regression.md).
+        // Freeze the prototype's known chosen-binding defect for regression coverage.
         let (order, deck) = if number == "BP18-059" {
             (json!(["d3", "d2"]), json!(["d1", "d4", "d3", "d2"]))
         } else {

@@ -8,8 +8,6 @@ import typer
 
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.authored import authored_root
-from sve_carddb.domains.effects.reader import load as load_catalog
 from sve_carddb.domains.rulings.historical import Observations, references, validate
 from sve_carddb.domains.rulings.reader import load
 
@@ -28,16 +26,15 @@ def validate_command(
         ),
     ],
 ) -> None:
-    """Check candidate rulings and classifications before admitting data changes."""
+    """Check candidate rulings and their historical source uses."""
     if not repo.is_absolute() or not build_db.is_absolute():
         raise typer.BadParameter("Validation requires explicit absolute paths")
     try:
         documents = load(repo)
         explicit = references(documents)
         if explicit:
-            catalog = load_catalog(authored_root(repo))
             with open_database(compile_build(), build_db) as db:
-                validate(documents, catalog, Observations(db))
+                validate(documents, Observations(db))
     except OSError, ValueError, TypeError, sqlite3.Error:
         # Validation diagnostics can contain source wording or private build paths.
         typer.echo(
