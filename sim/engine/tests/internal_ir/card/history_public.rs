@@ -507,6 +507,33 @@ fn no_lesson_banish_means_no_draw_and_each_wrong_owner_remains_independent() {
 }
 
 #[test]
+fn banishing_a_lesson_alias_does_not_count_as_banishing_the_registered_item() {
+    let alias = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"static":{"effects":[{"also_named":{"name":"魔法のアイテム"}}]}}),
+            "unit-other",
+        ))
+        .unwrap()
+        .remove("unit-other")
+        .unwrap();
+    let mut board = position_with_other(
+        |initial| {
+            initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"alias","card":"unit-other"}]);
+        },
+        &alias,
+    );
+    activate_line(&mut board, "s", "unit-follower", 3);
+    let view = board.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["ex"], json!([]));
+    assert_eq!(view["P1"]["banish"], json!(["alias"]));
+    read_lesson(&mut board);
+    assert_eq!(
+        board.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!([])
+    );
+}
+
+#[test]
 fn playing_the_ex_spell_into_cemetery_is_not_a_lesson_banish() {
     let mut board = position();
     resolved(

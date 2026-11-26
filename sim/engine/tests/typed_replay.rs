@@ -306,7 +306,7 @@ fn scripted_random_inputs_resume_in_order() {
     let prefix = game.save(&root).unwrap();
     let mut restored = adapter();
     let start = restored.restore(&prefix).unwrap();
-    let (_next, step) = restored
+    let (next, step) = restored
         .decide(
             &start,
             &json!({"by":"P1","at":"main","do":"play","card":"spell"}),
@@ -319,6 +319,12 @@ fn scripted_random_inputs_resume_in_order() {
         .map(|event| event["result"].clone())
         .collect();
     assert_eq!(rolls, [json!(2_u8), json!(5_u8)]);
+    for view in [View::P1, View::P2] {
+        let public = restored.export(&next, view).unwrap().to_string();
+        for field in ["\"rng\"", "\"seed\"", "word_pos", "chacha12-sha256"] {
+            assert!(!public.contains(field), "a player export exposed {field}");
+        }
+    }
 }
 
 #[test]
