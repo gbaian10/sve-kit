@@ -71,6 +71,8 @@ class Keyword(RecordData):
     id: Text
     code: Code
     term_id: Text
+    term_category: Literal["keyword", "ability", "rule_term"] = "keyword"
+    english: Text | None = None
 
     @model_validator(mode="after")
     def permanent_id(self) -> Keyword:
@@ -217,7 +219,7 @@ def _register(db: Database, inputs: Inputs, revision: str) -> str:
     interner = TextInterner(db)
     for keyword in inputs.registry.records:
         term = terms.get(keyword.term_id)
-        if term is None or term["category"] != "keyword":
+        if term is None or term["category"] != keyword.term_category:
             raise ValueError(
                 "Keyword registration requires its existing keyword concept: "
                 + keyword.term_id
@@ -262,18 +264,19 @@ def _register(db: Database, inputs: Inputs, revision: str) -> str:
 
 def producer_version(inputs: Inputs, classifier: Classifier) -> str:
     """Presentation choices and unrelated commits cannot invalidate source labels."""
+    registered = {record.term_id for record in inputs.registry.records}
     payload: dict[str, JsonValue] = {
         "adapter": ADAPTER,
         "normalizer": NORMALIZER,
         "rules": classifier.rules.model_dump(mode="json"),
         "keywords": [
-            record.model_dump(mode="json")
+            record.model_dump(mode="json", exclude_defaults=True)
             for record in sorted(inputs.registry.records, key=lambda record: record.id)
         ],
         "concepts": [
             [term.id, term.category, term.source_ja]
             for term in sorted(classifier.terms.values(), key=lambda term: term.id)
-            if term.category == "keyword"
+            if term.category == "keyword" or term.id in registered
         ],
     }
     return ADAPTER + ":" + digest(canonical(payload))

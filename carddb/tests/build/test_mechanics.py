@@ -24,7 +24,9 @@ def template() -> DatabaseTemplate:
             for identifier, category in (
                 ("a", "keyword"),
                 ("b", "keyword"),
+                ("ability", "ability"),
                 ("rule", "rule_term"),
+                ("trait", "trait"),
             ):
                 db.insert(
                     "glossary_term",
@@ -149,10 +151,18 @@ def test_connected_manual_rows_are_valid(
         db.insert(table, row(table))
 
 
+@pytest.mark.parametrize("term_id", ["term:ability", "term:rule"])
+def test_printed_keyword_can_use_an_ability_or_rule_term(
+    template: DatabaseTemplate, term_id: str
+) -> None:
+    with template.copy() as db, db.transaction():
+        db.insert("keyword", row("keyword") | {"term_id": term_id})
+
+
 @pytest.mark.parametrize(
     ("table", "changes", "check"),
     [
-        ("keyword", {"term_id": "term:rule"}, "printed_keyword_concept"),
+        ("keyword", {"term_id": "term:trait"}, "printed_keyword_concept"),
         ("keyword", {"code": "a"}, "UNIQUE"),
         ("keyword", {"term_id": "term:a"}, "UNIQUE"),
     ],

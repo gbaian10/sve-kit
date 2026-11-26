@@ -33,6 +33,22 @@ def test_declarations_keep_ambiguous_uses_unknown(
     assert ("kw:ward" in uncertain) is unknown
 
 
+@pytest.mark.parametrize(
+    ("region", "icon", "ability"),
+    [
+        ("jp", "{クイック}", "{Q}{起動}：合成。"),
+        ("en", "{icon_quick|[quick]}", "{icon_q|[Q]}{icon_act|[Act]}: Synthetic."),
+    ],
+)
+def test_only_standalone_quick_icon_declares_the_keyword(
+    region: str, icon: str, ability: str
+) -> None:
+    spelling = {"kw:quick": "クイック" if region == "jp" else "Quick"}
+    assert classify(icon, region, spelling) == ({"kw:quick"}, set())
+    assert classify(ability, region, spelling) == (set(), set())
+    assert classify(f'"{icon}"', region, spelling) == (set(), {"kw:quick"})
+
+
 def printing(db: Database, cid: str, region: str) -> None:
     card = db.select("card", db.columns("card"), where={"id": cid})[0].values
     db.insert(
@@ -133,3 +149,26 @@ def test_token_definition_does_not_label_its_owner(
         assert isinstance(covered, Json)
         assert "kw:ward" not in array(covered.value)
         assert "kw:storm" in array(covered.value)
+
+
+def test_section_quick_declaration_does_not_prove_absence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with case(tmp_path, monkeypatch, "", sections=("{クイック}",)) as (
+        db,
+        inputs,
+        settings,
+        cid,
+    ):
+        first, *others = inputs.registry.records
+        quick = first.model_copy(update={"id": "kw:quick", "code": "quick"})
+        registry = inputs.registry.model_copy(update={"records": (quick, *others)})
+        with db.transaction():
+            printing(db, cid, "jp")
+            mechanics.apply(db, mechanics.Inputs(registry, inputs.exact), settings)
+        assert not db.rows("mechanic_projection")
+        covered = db.rows("card_mechanic_coverage")[0].values[
+            "has_complete_keyword_ids"
+        ]
+        assert isinstance(covered, Json)
+        assert "kw:quick" not in array(covered.value)

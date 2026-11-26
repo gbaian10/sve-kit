@@ -23,8 +23,9 @@ suppressions: []
 ```
 
 records 明示永久 `kw:<code>` ID、英文 code 與既有 glossary term ID。
-目前只登錄 `category=keyword, kind=printed_keyword`，definition 為 null、actions 空。
-缺 term、非 keyword 類別或多重概念不能靠拼寫補配。日文名稱及多語 label 使用同一
+預設詞彙類別為 `keyword`，也可透過 `term_category` 明示既有的 `ability` 或 `rule_term`。
+資料庫仍使用 `kind=printed_keyword`，definition 為 null、actions 空。
+缺 term、類別不符或多重概念不能靠拼寫補配。日文名稱及多語 label 使用同一
 已採納 glossary 概念的選詞與 low_confidence，不另維護譯名。保留 choice 的 origin、
 source_id 與來源權威；已驗的官方數位詞典選詞為 official／digital_official，
 不得改成 project／unofficial，也不得冒充實體 SVE 官文。品質合併 term／choice 的 low_confidence。
@@ -441,15 +442,17 @@ reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 
 
 `printed-self-keywords-v1` 在原有四關係 reducer 之後檢查所有非 retired 卡的各地區
 current 主文，包含進化面與 token 卡自己的主文，不依賴 DSL。沿 registry 的永久概念，
-JP 用已採納的日文拼寫，EN 用同一 code 的英文能力名（Ward、Storm、Rush、Assail、
-Intimidate、Bane、Drain、Aura）。JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
+JP 用已採納的日文拼寫，EN 預設用同一 code 的英文能力名。多詞名稱可由 `english` 明示
+官方表記，例如 Starting Amulet。Quick 另辨識日英各自的獨立 Quick 圖示。
+JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
 
 整行的能力宣告（可接括號 reminder，可含其他能力名），以及明示自身取得能力的有限句型
 （JP「これは…【K】を持つ」、EN「Give this follower … K」／「this has K」，可含指定格式的攻防增幅）產生 has 正標籤。
 不從引述內的相同句子產生正標籤；未識別的自身取得句型仍保守保留未知。
 主文未提到某 keyword 時，可確認沒有明印該 keyword；出現在授予、條件、選擇、數量、
 引號能力或未識別句型中的 keyword 保持未知，既有已採納 has 正標籤仍有效。
-補充段落不產母卡的 has；不明用途保留未知。跨行引述中的宣告也不能掛到母卡。
+補充段落不產母卡的 has；不明用途保留未知。補充段落出現 Quick、Stack、Starting Amulet、
+Single Drive 或 Twin Drive 的獨立宣告時，該關鍵字保留未知。跨行引述中的宣告也不能掛到母卡。
 缺 current 面、未確認 identity 不授全卡否定完整性；任一已確認面有宣告即為 present。
 
 結果合併到 `mechanic_projection`，完整性另放 `card_mechanic_coverage.has_complete_keyword_ids`。

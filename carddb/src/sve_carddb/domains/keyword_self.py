@@ -19,6 +19,10 @@ if TYPE_CHECKING:
 ADAPTER = "printed-self-keywords-v1"
 _JP_DECLARATION = re.compile(r"(?:【[^【】\n]+】\s*)+(?:[（(].*[）)])?")
 _EN_DECLARATION = re.compile(r"(?:[A-Z][A-Za-z ]*\.\s*)+(?:\(.*\))?")
+_QUICK_ICON = {"jp": "{クイック}", "en": "{icon_quick|[quick]}"}
+_SECTION_DECLARATIONS = frozenset(
+    {"kw:quick", "kw:single_drive", "kw:stack", "kw:start_amulet", "kw:twin_drive"}
+)
 
 
 def _acquired(line: str, region: str, spellings: Mapping[str, str]) -> set[str]:
@@ -81,6 +85,13 @@ def classify(
             else [part.strip() for part in head.split(".")]
         )
         for keyword, spelling in spellings.items():
+            if keyword == "kw:quick" and _QUICK_ICON[region] in line:
+                # The standalone Quick icon differs from the activated ability's Q icon.
+                if not in_quote and line == _QUICK_ICON[region]:
+                    present.add(keyword)
+                else:
+                    uncertain.add(keyword)
+                continue
             marker = (
                 re.escape("【" + spelling + "】")
                 if region == "jp"
@@ -226,7 +237,7 @@ def apply(
         spellings = {
             record.id: settings.classifier.terms[record.term_id].source_ja
             if region == "jp"
-            else record.code.title()
+            else record.english or record.code.title()
             for record in inputs.registry.records
         }
         known_cards = 0
@@ -243,8 +254,9 @@ def apply(
                 unknown.update(uncertain)
             # Supplemental token definitions never give their native keywords to the owner.
             for section in selected.sections:
-                _, uncertain = classify(section, region, spellings)
+                found, uncertain = classify(section, region, spellings)
                 unknown.update(uncertain)
+                unknown.update(found & _SECTION_DECLARATIONS)
             complete = universe - unknown
             positive = _project(
                 db,
