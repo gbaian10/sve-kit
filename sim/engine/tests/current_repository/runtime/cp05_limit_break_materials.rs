@@ -1,4 +1,6 @@
 use super::*;
+use sve_battle_contract::observation::{LimitBreakStage, RelationshipKind};
+use sve_engine::catalog::EngineIdentityInput;
 
 const ELEMENTS: [(&str, &str, &str, &str); 6] = [
     ("CP05-T09", "CP05-P93", "fire", "火属性"),
@@ -10,8 +12,8 @@ const ELEMENTS: [(&str, &str, &str, &str); 6] = [
 ];
 const GOLD: [&str; 2] = ["CP05-T15", "CP05-P99"];
 
-fn materials() -> &'static SelectedEffects {
-    static MATERIALS: OnceLock<SelectedEffects> = OnceLock::new();
+fn materials() -> &'static (SelectedEffects, BattleReferences) {
+    static MATERIALS: OnceLock<(SelectedEffects, BattleReferences)> = OnceLock::new();
     MATERIALS.get_or_init(|| {
         let (source_snapshot, keywords, input) = inputs();
         let prints: BTreeSet<_> = ELEMENTS
@@ -55,15 +57,26 @@ fn materials() -> &'static SelectedEffects {
                 vec![json!({"keywords":["final_limit_break_possible"]})],
             );
             record["faces"][0]["traits"] = json!([trait_name]);
+            record["faces"][0]["title"] = json!("synthetic");
             snapshot.push(record.to_string());
             authors.push(author);
         }
-        Catalog::from_current_selection(
-            &snapshot.join("\n"),
+        let snapshot = snapshot.join("\n");
+        let rules = rule_fixtures::rules(
+            &snapshot,
+            json!([rule_fixtures::title("synthetic", "granblue", json!([]))]),
+            json!([]),
+        );
+        let selected = Catalog::from_current_selection_with_rules(
+            &snapshot,
             keywords,
             &json!({"documents":[],"authors":authors}),
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
         )
-        .unwrap()
+        .unwrap();
+        let references = test_battle_references(&selected, &snapshot);
+        (selected, references)
     })
 }
 
@@ -75,8 +88,9 @@ fn board(printings: [&str; 2], bearer: &str) -> Game {
     initial["players"]["P1"]["zones"]["ex"] =
         json!([{"id":"first","card":printings[0]}, {"id":"second","card":printings[1]}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":bearer}]);
+    let (selected, _) = materials();
     Game::from_selected_effects(
-        materials().clone(),
+        selected.clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -198,4 +212,43 @@ fn gold_targets_own_granblue_follower_and_supplies_both_stages_at_once() {
         assert_eq!(state["objects"]["bearer"]["power"], 3_u8);
         assert_eq!(state["objects"]["bearer"]["max_hp"], 3_u8);
     }
+}
+
+#[test]
+fn fresh_public_observations_report_the_stage_for_both_seats() {
+    let (_, references) = materials();
+    let assert_stage = |game: &Game, bearer: &str, stage, attached| {
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let board = game.battle_observation(viewer, references).unwrap();
+            let (handle, follower) = board
+                .objects
+                .iter()
+                .find(|(_, object)| {
+                    object.owner == sve_battle_contract::Seat::P1
+                        && object.card.printing_id == bearer
+                })
+                .unwrap();
+            assert_eq!(follower.state.as_ref().unwrap().limit_break, stage);
+            assert_eq!(
+                board
+                    .relationships
+                    .iter()
+                    .filter(|link| link.kind == RelationshipKind::LimitBreak && &link.to == handle)
+                    .count(),
+                attached
+            );
+        }
+    };
+
+    let mut wind = board(["CP05-T12", "CP05-T12"], "wind");
+    assert_stage(&wind, "wind", LimitBreakStage::None, 0);
+    use_material(&mut wind, "first", "wind");
+    assert_stage(&wind, "wind", LimitBreakStage::Broken, 1);
+    use_material(&mut wind, "second", "wind");
+    assert_stage(&wind, "wind", LimitBreakStage::Final, 2);
+
+    let mut gold = board(["CP05-T15", "CP05-T12"], "granblue");
+    assert_stage(&gold, "granblue", LimitBreakStage::None, 0);
+    use_material(&mut gold, "first", "granblue");
+    assert_stage(&gold, "granblue", LimitBreakStage::Final, 1);
 }
