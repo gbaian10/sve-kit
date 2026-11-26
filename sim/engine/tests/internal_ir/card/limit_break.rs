@@ -223,7 +223,7 @@ fn a_departed_follower_loses_its_public_limit_break_stage() {
         departed.card.properties.state.as_ref().unwrap().limit_break,
         LimitBreakStage::None
     );
-    assert!(observed.relationships.is_empty());
+    assert_eq!(observed.relationships.as_slice(), &[]);
 }
 
 fn assert_public_break_events(game: &mut Game) {

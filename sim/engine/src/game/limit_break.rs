@@ -45,7 +45,7 @@ impl Game {
         current
     }
 
-    fn limit_break_materials<'a>(&'a self, id: &'a str) -> impl Iterator<Item = &'a Object> {
+    fn limit_break_materials(&self, id: &str) -> impl Iterator<Item = &Object> {
         self.state.objects.values().filter(move |material| {
             material.zone == "limit_break" && material.state["limit_break_of"] == id
         })

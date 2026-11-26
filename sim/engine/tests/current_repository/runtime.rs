@@ -79,7 +79,7 @@ fn assert_battle_counter(game: &Game, card_no: &str, name: &str, amount: u32) {
     static REFERENCES: OnceLock<BattleReferences> = OnceLock::new();
     let references = REFERENCES.get_or_init(|| {
         let (snapshot, _, _) = inputs();
-        test_battle_references(selection(), &snapshot)
+        test_battle_references(selection(), snapshot)
     });
     let objects = game.battle_objects(Viewer::P1, references).unwrap();
     let expected = Counter {
