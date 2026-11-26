@@ -2,7 +2,10 @@ use super::*;
 use alloc::collections::BTreeSet;
 use core::fmt::Display;
 use serde_json::Value;
-use sve_engine::catalog::SelectedEffects;
+use sve_battle_contract::observation::Counter;
+use sve_battle_contract::{CardRef, Nat as WireNat};
+use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
+use sve_engine::catalog::{Card, SelectedEffects};
 use sve_engine::game::internal::{
     Activation, Answer, CardPlay, DecisionView, Fact, InputDomain, ResumeStage, SearchAnswer,
     SearchDomain,
@@ -42,6 +45,53 @@ pub(super) fn game(initial: &Value) -> Game {
         "current-runtime",
     )
     .unwrap()
+}
+
+fn assert_battle_counter(game: &Game, card_no: &str, name: &str, amount: u32) {
+    static REFERENCES: OnceLock<BattleReferences> = OnceLock::new();
+    let references = REFERENCES.get_or_init(|| {
+        let (snapshot, _, _) = inputs();
+        let faces = snapshot
+            .lines()
+            .map(|line| serde_json::from_str::<Card>(line).unwrap())
+            .flat_map(|card| {
+                (0..card.faces.len()).map(move |ordinal| PrintingFaceIdentity {
+                    card_no: card.number.clone(),
+                    native_face: u64::try_from(ordinal).unwrap(),
+                    card: CardRef {
+                        printing_id: card.number.clone(),
+                        face: WireNat::from(u32::try_from(ordinal).unwrap()),
+                    },
+                })
+            })
+            .collect();
+        BattleReferences::new(
+            &selection().prototypes,
+            ReferenceInput {
+                region: "jp".into(),
+                snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+                faces,
+                wording: None,
+                rules: None,
+            },
+        )
+        .unwrap()
+    });
+    let objects = game.battle_objects(Viewer::P1, references).unwrap();
+    let expected = Counter {
+        name: name.into(),
+        amount: WireNat::from(amount),
+    };
+    assert!(
+        objects.values().any(|object| {
+            object.card.printing_id == card_no
+                && object
+                    .state
+                    .as_ref()
+                    .is_some_and(|state| state.counters.contains(&expected))
+        }),
+        "expected {amount} {name} on {card_no}"
+    );
 }
 
 pub(super) fn game_from_selection(
