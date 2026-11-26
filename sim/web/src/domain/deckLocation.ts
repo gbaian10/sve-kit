@@ -1,7 +1,7 @@
 // Token and leader keep the sub-values they had under the former type filter (`token:<type>`,
 // `leader:<frame>`), so the location tokens older `type=` URLs carry still resolve.
 export const LOCATION_ORDER = ["main", "evolve", "advance", "token", "leader", "ep", "sep"] as const
-const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment"] as const
+const TOKEN_TYPES = ["follower", "spell", "amulet", "crest", "equipment", "treasure"] as const
 const LEADER_FRAMES = ["gold", "white", "unknown"] as const
 
 /** Whether a filter token names a deck location (or one of its sub-values) rather than a type. */

@@ -38,11 +38,16 @@ export function RarityFilter({
     const style = code.slice("pr:".length)
     return { code, label: prStyleLabel(t, style), ...visual(prStyleVisual(style, edition)) }
   })
-  const items: FacetChip[] = orderRarities(rarities).map((rarity) =>
-    rarity.code === "pr"
-      ? { ...rarity, content: prBadgeVisual(), children }
-      : { ...rarity, ...visual(rarityBadgeVisual({ rarityCode: rarity.code, region: edition })) },
-  )
+  // A rarity the edition has no non-Premium printings of stays out, as in the location row: GBF is
+  // JP only.
+  const counts = options?.counts
+  const items: FacetChip[] = orderRarities(rarities)
+    .filter((rarity) => !counts || (counts[rarity.code] ?? 0) > 0)
+    .map((rarity) =>
+      rarity.code === "pr"
+        ? { ...rarity, content: prBadgeVisual(), children }
+        : { ...rarity, ...visual(rarityBadgeVisual({ rarityCode: rarity.code, region: edition })) },
+    )
   items.push({
     code: UNRATED_RARITY,
     label: t("rarityBadge.unrated"),
@@ -54,7 +59,7 @@ export function RarityFilter({
       <FacetChips
         title={t("rarityBadge.label")}
         items={items}
-        counts={options?.counts}
+        counts={counts}
         selected={selected}
         onChange={onChange}
       />

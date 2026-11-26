@@ -1,10 +1,12 @@
 import br from "../../assets/rarity/br.svg"
 import br_en from "../../assets/rarity/br-en.svg"
+import gbf from "../../assets/rarity/gbf.svg"
 import gr from "../../assets/rarity/gr.svg"
 import gr_en from "../../assets/rarity/gr-en.svg"
 import lg from "../../assets/rarity/lg.svg"
 import lg_en from "../../assets/rarity/lg-en.svg"
 import pr_bronze from "../../assets/rarity/pr-bronze.svg"
+import pr_gbf from "../../assets/rarity/pr-gbf.svg"
 import pr_gold from "../../assets/rarity/pr-gold.svg"
 import pr_pastel from "../../assets/rarity/pr-pastel.svg"
 import pr_rainbow from "../../assets/rarity/pr-rainbow.svg"
@@ -22,11 +24,13 @@ import type { RarityBadgeAsset } from "../../domain/rarityBadges"
 const ASSETS: Readonly<Record<RarityBadgeAsset, string>> = {
   "br-en": br_en,
   br: br,
+  gbf: gbf,
   "gr-en": gr_en,
   gr: gr,
   "lg-en": lg_en,
   lg: lg,
   "pr-bronze": pr_bronze,
+  "pr-gbf": pr_gbf,
   "pr-gold": pr_gold,
   "pr-pastel": pr_pastel,
   "pr-rainbow": pr_rainbow,

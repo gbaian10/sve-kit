@@ -14,10 +14,10 @@ _LABELS = {
         "GR": "gr",
         "LG": "lg",
         "SL": "sl",
+        "GBF": "gbf",
         "UR": "ur",
         "SP": "sp",
         "SSP": "ssp",
-        "GBF": "gbf",
         "PR": "pr",
     },
     "en": {
@@ -41,6 +41,7 @@ _UNCODED: dict[str, dict[str, bool | None]] = {
 _JP_LABELS = {code: label for label, code in _LABELS["jp"].items()}
 
 # Vocabulary tiers follow the approved card-face order, independent of card numbers.
+# The snapshot does not carry this order, so sim/web repeats it in src/domain/rarity-rank.ts.
 RARITY_ORDER = tuple(_JP_LABELS)
 
 

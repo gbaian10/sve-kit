@@ -344,9 +344,7 @@ function optionOf(index: CardIndex, row: JsonObject, field: string): SearchOptio
 }
 
 function prBadgeFilterStyle(row?: JsonObject): string {
-  const style = row && badgeOf(row)?.style
-  // Use the existing fallback group until the filter offers a GBF appearance.
-  return style === "gbf" ? "unknown" : (style ?? "unknown")
+  return (row && badgeOf(row)?.style) ?? "unknown"
 }
 
 function optionsOf(

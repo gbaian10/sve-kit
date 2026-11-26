@@ -14,6 +14,7 @@ describe("rarity badge selection", () => {
     ["sl", "sl", "sl"],
     ["sp", "sp", "sp"],
     ["ssp", "ssp", "ssp"],
+    ["gbf", "gbf", "gbf"],
   ])("uses the printed JP and EN letters for official %s", (rarityCode, jp, en) => {
     expect(selectRarityBadges({ ...base, rarityCode })).toEqual([jp])
     expect(selectRarityBadges({ ...base, rarityCode, region: "en" })).toEqual([en])
@@ -33,6 +34,7 @@ describe("rarity badge selection", () => {
     ["lg", "pr-red"],
     ["sl", "pr-pastel"],
     ["sp", "pr-rainbow"],
+    ["gbf", "pr-gbf"],
   ] as const)("shows a confirmed %s PR", (style, asset) => {
     expect(
       selectRarityBadges({ ...base, rarityCode: "pr", rarityBadge: { style, text: "PR" } }),

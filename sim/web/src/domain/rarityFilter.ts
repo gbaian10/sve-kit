@@ -6,6 +6,12 @@ export const PREMIUM_RARITY = "premium"
 
 // The rarity ladder runs low to high, then Premium and PR.
 const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PREMIUM_RARITY, PROMO_RARITY]
+// PR appearances follow the same ladder, then the two that have no badge.
+const PR_STYLE_ORDER: readonly string[] = [
+  ...RARITY_LADDER.filter((code) => (BADGE_STYLES as readonly string[]).includes(code)),
+  "none",
+  "unknown",
+]
 
 /** Applies official rarity tokens and the shared premium dimension to one printing. */
 export function matchesRaritySelection(
@@ -36,11 +42,9 @@ export function orderRarities<T extends { readonly code: string }>(rarities: rea
   return rarities.toSorted((a, b) => rank(a.code) - rank(b.code))
 }
 
-/** The PR appearance tokens (`pr:<style>`) the panel offers, in badge order. */
+/** The PR appearance tokens (`pr:<style>`) the panel offers, in ladder order. */
 export function prStyleTokens(styles: readonly string[]): string[] {
-  return [...BADGE_STYLES, "unknown"]
-    .filter((style) => styles.includes(style))
-    .map((style) => `pr:${style}`)
+  return PR_STYLE_ORDER.filter((style) => styles.includes(style)).map((style) => `pr:${style}`)
 }
 
 /** Selected rarity tokens (`lg`, `pr`, `pr:gr`, `unrated`) in the filter's display order. */
@@ -49,10 +53,9 @@ export function orderRarityTokens(tokens: readonly string[]): string[] {
     if (token === UNRATED_RARITY) return [RARITY_ORDER.length + 1, 0]
     const [code = "", style] = token.split(":")
     const index = RARITY_ORDER.indexOf(code)
-    const styles: readonly string[] = [...BADGE_STYLES, "unknown"]
     return [
       index === -1 ? RARITY_ORDER.length : index,
-      style === undefined ? -1 : styles.indexOf(style),
+      style === undefined ? -1 : PR_STYLE_ORDER.indexOf(style),
     ]
   }
   return tokens.toSorted((a, b) => {

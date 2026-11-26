@@ -4,7 +4,7 @@ These are hand-drawn SVGs modelled on the rarity labels printed on official card
 not crops of official images. The underlying official designs are excluded from the
 project's license grants; see [LICENSING.md](../../../../../LICENSING.md).
 The drawings were produced with Codex gpt-6.1-sol and
-reviewed by Claude Opus 5.5 for #730.
+reviewed by Claude Opus 5.5 for #730; `gbf.svg` and `pr-gbf.svg` were drawn by Claude Fable 5.2.
 
 Glyphs are paths converted from **Liberation Serif Bold 2.1.5**, distributed under
 SIL Open Font License 1.1. Font source: [Liberation Fonts](https://github.com/liberationfonts/liberation-fonts).
@@ -26,6 +26,7 @@ runtime font lookup is needed. Vite imports these SVGs as assets and inlines sma
 | `ur-en.svg`      | EN Ultimate, printed U                                                    |
 | `sp.svg`         | JP and EN SP                                                              |
 | `ssp.svg`        | JP and EN SSP                                                             |
+| `gbf.svg`        | JP GBF, the Granblue Fantasy collaboration frame (CP05)                   |
 | `pr.svg`         | PR as a whole (grey): only the search filter's PR chip, never a card face |
 | `pr-bronze.svg`  | Confirmed bronze PR appearance                                            |
 | `pr-silver.svg`  | Confirmed silver PR appearance                                            |
@@ -33,3 +34,4 @@ runtime font lookup is needed. Vite imports these SVGs as assets and inlines sma
 | `pr-red.svg`     | Confirmed red PR appearance                                               |
 | `pr-pastel.svg`  | Confirmed pastel rainbow PR appearance                                    |
 | `pr-rainbow.svg` | Confirmed vivid rainbow PR appearance, including official SP printed PR   |
+| `pr-gbf.svg`     | Confirmed PR appearance on the Granblue Fantasy collaboration frame       |

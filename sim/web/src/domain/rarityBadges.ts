@@ -3,8 +3,8 @@ import type { Region } from "./search"
 export const RARITY_BADGE_HEIGHT = 11
 export const RARITY_COLUMN_MIN_WIDTH = Math.ceil((RARITY_BADGE_HEIGHT * 56) / 21) + 10
 
-export const BADGE_STYLES = ["br", "sr", "gr", "lg", "sl", "sp", "none"] as const
-type BadgeStyle = (typeof BADGE_STYLES)[number] | "gbf"
+export const BADGE_STYLES = ["br", "sr", "gr", "lg", "sl", "sp", "gbf", "none"] as const
+type BadgeStyle = (typeof BADGE_STYLES)[number]
 export type RarityBadge = { readonly style: BadgeStyle; readonly text?: string }
 
 export interface RarityBadgeInput {
@@ -23,6 +23,7 @@ const BASE_BADGES = {
   ur: "ur",
   sp: "sp",
   ssp: "ssp",
+  gbf: "gbf",
 } as const
 const EN_BADGES = { br: "br-en", sr: "sr-en", gr: "gr-en", lg: "lg-en", ur: "ur-en" } as const
 const APPEARANCE_BADGES = {
@@ -45,6 +46,8 @@ const APPEARANCE_BADGES = {
   "sp:SP": "sp",
   "sp:SSP": "ssp",
   "sp:PR": "pr-rainbow",
+  "gbf:GBF": "gbf",
+  "gbf:PR": "pr-gbf",
 } as const
 export type RarityBadgeAsset =
   | (typeof BASE_BADGES)[keyof typeof BASE_BADGES]

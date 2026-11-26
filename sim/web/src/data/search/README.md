@@ -20,8 +20,8 @@ A merged cell (one per card, or one per card and front-face `art_id`; a printing
 `art_id` is its own cell) shows one representative chosen among the printings that passed every
 filter and, with text, share the group's best text rank (#781): the PR printing when `prFirst` is
 set and one is present, else the lowest or highest rarity on the fixed ladder BR < SR < GR < LG < SL
-< UR < SP < SSP (`domain/representative.ts`; no rarity sits below BR, PR is off the ladder and shown
-only when the group has nothing else), ties going to the earliest card number. A locator whose
+< GBF < UR < SP < SSP (`domain/rarity-rank.ts`; no rarity sits below BR, PR is off the ladder and
+shown only when the group has nothing else), ties going to the earliest card number. A locator whose
 printing metadata has not arrived stands aside while the group has a completed printing, and
 every merged-unit query waits for printing completion so the first answer is the final one.
 Sorting uses the representative printing's values for merged cells and each printing's own values for printing cells.
