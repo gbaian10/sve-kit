@@ -6,9 +6,7 @@
 沒有接受外部 binding／receipt 的入口。
 `SourceHolder`、控制者與持有者仍是執行環境提供的符號。
 
-此程式體邊界不代表整個 `CardProgram`、能力宣告、capability 或可執行性通過。
-`Registry::check_capabilities` 仍只檢查需求，不能產生此型別；已驗程式體也不能
-跳過 capability 與執行環境的准入。這些 Rust 型別沒有公開 wire 格式。
+已驗程式體仍由執行准入核對語義能力需求與執行環境。這些 Rust 型別屬於引擎的內部執行表示。
 
 ## 作用域與結果
 

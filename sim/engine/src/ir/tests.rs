@@ -119,32 +119,6 @@ fn source_trigger(pattern: EventPattern) -> TriggerSpec {
         aggregation: TriggerAggregation::PerFact {},
     }
 }
-fn bp08() -> Located<CardProgram> {
-    let mut seed = card(bp08_body(), "BP08-038");
-    for ability in &mut seed.node.abilities {
-        ability.node.kind = AbilityKind::Triggered;
-        ability.node.source.origin = AbilityOrigin::Keyword {
-            keyword: KeywordId::Fanfare,
-            origin: Box::new(ability.node.source.origin.clone()),
-        };
-        if let Some(body) = &mut ability.node.body {
-            for step in &mut body.steps {
-                if let Node::Instruction { instruction } = &mut step.node {
-                    instruction.source = ability.node.source.clone();
-                }
-            }
-        }
-        let event = Binding::new(1, ScopeId(1));
-        ability.node.trigger = Some(source_trigger(EventPattern::EnterField {
-            binding: event,
-            predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
-                left: Expr::Frozen(Box::new(ObjectFrozen::EnterFieldObject { event })),
-                right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
-            })),
-        }));
-    }
-    seed
-}
 fn turn() -> Duration {
     Duration {
         end: DurationEnd::CurrentTurnEnd {},
@@ -275,37 +249,6 @@ fn cp04(follow_moved: bool, set: bool) -> Located<CardProgram> {
         }));
     }
     seed
-}
-#[test]
-fn registry_is_closed_and_versions_do_not_imply_backward_support() {
-    let seed = bp08();
-    assert!(Registry::current().supported().is_empty());
-    assert!(matches!(
-        Registry::current().check_capabilities(&seed),
-        Err(AdmissionError::Missing(_))
-    ));
-    let mut registry = Registry::test_support(&seed);
-    registry.test_upgrade("action.draw");
-    assert!(matches!(
-        registry.check_capabilities(&seed),
-        Err(AdmissionError::Missing(_))
-    ));
-    let mut stale = Registry::test_support(&seed);
-    stale.dsl = "old";
-    stale.ir_schema.hash.push('0');
-    stale.derivation.hash.push('0');
-    stale.engine_build.push('0');
-    let Err(AdmissionError::StaleRegistry(mismatches)) = stale.check_capabilities(&seed) else {
-        panic!("stale identities admitted");
-    };
-    let names: Vec<_> = mismatches.iter().map(|item| item.dependency).collect();
-    assert_eq!(
-        names,
-        vec!["dsl", "ir_schema.hash", "engine_build", "derivation.hash"]
-    );
-    for mismatch in mismatches {
-        assert_ne!(mismatch.expected, mismatch.actual);
-    }
 }
 
 mod walk;
