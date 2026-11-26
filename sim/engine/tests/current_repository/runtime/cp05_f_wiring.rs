@@ -131,14 +131,23 @@ fn trou_creates_water_material_then_draws() {
 }
 
 #[test]
-fn sandalphon_enters_evolved_with_zero_sep_and_keeps_the_fanfare_heal() {
-    let mut initial = support("CP05-105", "hand");
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-106"}]);
-    let mut game = loaded(&initial);
-    play(&mut game, &[]);
-    let state = view(&game);
-    assert_eq!(state["objects"]["source"]["evolved_with"], "form");
-    assert_eq!(state["P1"]["leader"]["life"], 12_u8);
+fn sandalphon_fanfare_requires_zero_sep_for_evolution_and_heal() {
+    // CP05-106's evolve-time ability deals another 2 damage after the zero-SEP fanfare.
+    for (sep, form, life, enemy_hp, opponent_life) in [
+        (0_u8, json!("form"), 12_u8, 26_u8, 16_u8),
+        (1_u8, Value::Null, 10_u8, 28_u8, 18_u8),
+    ] {
+        let mut initial = support("CP05-105", "hand");
+        initial["players"]["P1"]["sep"] = json!(sep);
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-106"}]);
+        let mut game = loaded(&initial);
+        play(&mut game, &[]);
+        let state = view(&game);
+        assert_eq!(state["objects"]["source"]["evolved_with"], form, "SEP {sep}");
+        assert_eq!(state["P1"]["leader"]["life"], life, "SEP {sep}");
+        assert_eq!(state["objects"]["enemy"]["hp"], enemy_hp, "SEP {sep}");
+        assert_eq!(state["P2"]["leader"]["life"], opponent_life, "SEP {sep}");
+    }
 }
 
 #[test]
