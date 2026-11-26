@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 
 MEDIA = "4.0.0"
-READER_VERSION = "4.1.1"
 PROGRAMS = "4.1.0"
+PROGRAM_DEPENDENCIES = "4.2.0"
 
 
 @dataclass(frozen=True)
@@ -31,6 +31,12 @@ class Profile:
     text_bands: Bands
     image_bands: Bands
     global_detail_width: int
+
+    def payload_version(self, role: str) -> str:
+        """Keep existing non-program blobs in the program-dependency profile."""
+        if self.version == PROGRAM_DEPENDENCIES and role != "programs":
+            return PROGRAMS
+        return self.version
 
     def width(self, purpose: str, family: str, region: str | None = None) -> int:
         """Keep physical membership stable across data versions, including exceptions."""
@@ -68,10 +74,24 @@ PROFILES += (
         "v4",
         PROFILES[0].buckets,
         tuple(sorted((*PROFILES[0].capabilities, "dsl-programs-v1"))),
-        min_reader_version=READER_VERSION,
+        min_reader_version="4.1.1",
         text_bands=PROFILES[0].text_bands,
         image_bands=PROFILES[0].image_bands,
         global_detail_width=PROFILES[0].global_detail_width,
+    ),
+)
+
+
+PROFILES += (
+    Profile(
+        PROGRAM_DEPENDENCIES,
+        "v5",
+        PROFILES[1].buckets,
+        tuple(sorted((*PROFILES[1].capabilities, "dsl-program-dependencies-v1"))),
+        min_reader_version="4.2.0",
+        text_bands=PROFILES[1].text_bands,
+        image_bands=PROFILES[1].image_bands,
+        global_detail_width=PROFILES[1].global_detail_width,
     ),
 )
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, PROGRAMS
+from sve_carddb.contracts.profiles import MEDIA, PROGRAM_DEPENDENCIES, PROGRAMS
 from sve_carddb.contracts.profiles import profile as profile_for
 from sve_carddb.contracts.snapshot import definition, tables
 from sve_carddb.core.json import (
@@ -59,8 +59,11 @@ class Snapshot:
         )
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
-        entries = object_value(parse(self.payloads["programs"].raw))["entries"]
-        if entries != list(projection.programs):
+        programs = object_value(parse(self.payloads["programs"].raw))
+        if (
+            programs["entries"] != list(projection.programs)
+            or programs.get("printings") != projection.program_printings
+        ):
             raise ValueError("Export differs from public programs")
 
 
@@ -170,10 +173,28 @@ def export_snapshot(
         raise ValueError("Candidate exporter requires a preview data version")
     if set(projection.tables) != set(tables()):
         raise ValueError("Exact public collection whitelist required")
-    format_version = format_version or (PROGRAMS if projection.programs else MEDIA)
-    if projection.programs and format_version != PROGRAMS:
-        raise ValueError("Nonempty programs require snapshot format 4.1.0")
+    if format_version is None:
+        if projection.program_printings is not None:
+            format_version = PROGRAM_DEPENDENCIES
+        else:
+            format_version = PROGRAMS if projection.programs else MEDIA
+    if projection.programs and format_version == MEDIA:
+        raise ValueError("Nonempty programs require snapshot format 4.1.0 or newer")
+    if (
+        projection.program_printings is not None
+        and format_version != PROGRAM_DEPENDENCIES
+    ):
+        raise ValueError("Program printing references require snapshot format 4.2.0")
     selected = profile_for(format_version)
+    payload_version = selected.payload_version("text")
+    programs: Record = {
+        "format_version": format_version,
+        "entries": list(projection.programs),
+    }
+    if format_version == PROGRAM_DEPENDENCIES:
+        if projection.program_printings is None:
+            raise ValueError("Missing program printing references")
+        programs["printings"] = projection.program_printings
     properties = object_value(definition("Manifest", format_version)["properties"])
     profile = object_value(object_value(properties["partitioning"])["properties"])
     count = integer(object_value(profile["bucket_count"])["const"])
@@ -183,21 +204,16 @@ def export_snapshot(
         for row in projection.tables[table]
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
-    layout = Layout(compact_names(projection.tables), ownership, count, format_version)
+    layout = Layout(compact_names(projection.tables), ownership, count, payload_version)
     with ThreadPoolExecutor(max_workers=2) as shards:
         files = _Files(brotli, shards)
         config = files.add(
             "config",
             "config",
-            projection.config | {"format_version": format_version},
+            projection.config | {"format_version": selected.payload_version("config")},
             [],
         )
-        files.add(
-            "programs",
-            "programs",
-            {"format_version": format_version, "entries": list(projection.programs)},
-            [],
-        )
+        files.add("programs", "programs", programs, [])
         FamilyLayout(layout).seal(files, config)
         languages = json_list(
             sorted(

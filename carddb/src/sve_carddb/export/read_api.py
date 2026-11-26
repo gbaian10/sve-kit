@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 
-from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.profiles import MEDIA, PROGRAM_DEPENDENCIES, profile
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import (
@@ -310,6 +310,8 @@ def _load(
         blobs[string(row["path"])], encoded = _blob(
             root, row, verify_integrity=is_changes_ref
         )
+        if is_changes_ref and manifest["format_version"] == PROGRAM_DEPENDENCIES:
+            validate("Changes", parse(blobs[string(row["path"])]), PROGRAM_DEPENDENCIES)
         members += encoded
     payloads = {
         string(f["key"]): blobs[string(f["path"])]

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.profiles import MEDIA, PROGRAM_DEPENDENCIES, profile
 from sve_carddb.contracts.snapshot import (
     decode,
     definition,
@@ -205,13 +205,17 @@ def _load(
     if set(files) != set(payloads):
         raise ValueError("Payload set does not match manifest")
     result: list[Fragment] = []
+    selected = profile(version)
     for key, file in files.items():
-        value = object_value(_payload(file, payloads[key]))
-        if value["format_version"] != version:
-            raise ValueError("Payload format differs from manifest")
         role = string(file["role"])
+        payload_version = selected.payload_version(role)
+        value = object_value(_payload(file, payloads[key]))
+        if value["format_version"] != payload_version:
+            raise ValueError("Payload format differs from manifest profile")
         if role in {"config", "programs"}:
-            validate("Config" if role == "config" else "Programs", value, version)
+            validate(
+                "Config" if role == "config" else "Programs", value, payload_version
+            )
             if role == "config":
                 validate_config(value)
             if file["row_counts"] != []:
@@ -442,6 +446,55 @@ def _walk(value: JsonValue, targets: dict[str, set[str]]) -> None:
         _walk(item, targets)
 
 
+def _program_printings(view: View, programs: Row, entries: list[Row]) -> None:
+    if programs["format_version"] != PROGRAM_DEPENDENCIES:
+        return
+    owners = {string(object_value(entry["ast"])["card_id"]) for entry in entries}
+    bindings = object_value(programs["printings"])
+    if len(owners) != len(entries) or set(bindings) != owners:
+        raise ValueError("Program printing owners differ from DSL owners")
+    printings = {
+        string(row["id"]): row
+        for row in view["printing"]
+        if row["region"] == "jp" and row["card_no_state"] == "official"
+    }
+    token_revisions = {
+        string(row["id"])
+        for row in view["face_revision"]
+        if row["region"] == "jp" and "token" in array(row["special_kinds"])
+    }
+    token_faces = {
+        string(face["id"])
+        for face in view["face"]
+        if face["ordinal"] == 0
+        and any(
+            object_value(current)["revision_id"] in token_revisions
+            for current in array(face["current"])
+            if object_value(current)["region"] == "jp"
+        )
+    }
+    for card, raw in bindings.items():
+        entry = object_value(raw)
+        representative = printings.get(string(entry["representative"]))
+        if representative is None or representative["card_id"] != card:
+            raise ValueError("Program representative belongs to another card or region")
+        links = array(entry["tokens"])
+        _ordered(links)
+        for target in links:
+            printing = printings.get(string(target))
+            if (
+                printing is None
+                or string(printing["card_id"]) not in owners
+                or not any(
+                    string(object_value(face)["face_id"]) in token_faces
+                    for face in array(printing["faces"])
+                )
+            ):
+                raise ValueError(
+                    "Program dependency is not an admitted JP token printing"
+                )
+
+
 def _program_closure(
     view: View, files: dict[str, Row], payloads: Mapping[str, bytes]
 ) -> None:
@@ -486,6 +539,7 @@ def _program_closure(
             used.add(string(entry["id"]))
     if used != set(by_id):
         raise ValueError("Unreferenced program entry")
+    _program_printings(view, programs, entries)
 
 
 def _closure(view: View, manifest: Row) -> None:

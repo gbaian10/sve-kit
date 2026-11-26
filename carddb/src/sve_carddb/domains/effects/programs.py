@@ -1,5 +1,6 @@
 """Project every admitted author, including light admission, into public DSL programs."""
 
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import Json
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
     from sve_carddb.domains.effects.author_current import (
         CardAccepted,
+        CardResult,
         CurrentAuthorSources,
     )
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -54,14 +56,54 @@ def _ability(value: dict[str, JsonValue]) -> JsonValue:
     return {key: item for key, item in value.items() if key != "sources"}
 
 
+def _printing_references(
+    db: Database, results: tuple[CardResult, ...]
+) -> dict[str, JsonValue]:
+    printings: dict[str, list[str]] = defaultdict(list)
+    for row in db.select(
+        "printing",
+        ("id", "card_no"),
+        where={"region": "jp", "card_no_state": "official"},
+    ):
+        number, printing = row.values["card_no"], row.values["id"]
+        assert isinstance(number, str)
+        assert isinstance(printing, str)
+        printings[number].append(printing)
+
+    def printing_id(number: str) -> str:
+        matched = printings[number]
+        if len(matched) != 1:
+            raise ValueError(f"Program printing is missing or ambiguous: {number}")
+        return matched[0]
+
+    references: dict[str, JsonValue] = {}
+    for result in results:
+        if isinstance(result, CardRejected):
+            raise AuthorInputError(result.diagnostic)
+        authored = object_value(
+            object_value(result.tree["cards"])[result.record.record_key]
+        )
+        dependencies = {
+            printing_id(string(object_value(source)["card_no"]))
+            for source in array(authored.get("token_sources", []))
+        }
+        tokens: list[JsonValue] = [*sorted(dependencies)]
+        references[result.record.card_id] = {
+            "representative": printing_id(result.record.record_key),
+            "tokens": tokens,
+        }
+    return references
+
+
 def populate(
     db: Database,
     current: CurrentAuthorSources,
     inputs: AuthorInputSet,
     expander: AuthorExpander,
-) -> None:
-    """Reject incomplete admission rather than silently publishing a partial program set."""
+) -> dict[str, JsonValue]:
+    """Admit complete programs and return their permanent printing references."""
     results = current.validate_inputs(inputs, expander)
+    references = _printing_references(db, results)
     documents: dict[str, tuple[str, str, str]] = {}
     for result in results:
         if isinstance(result, CardRejected):
@@ -122,3 +164,4 @@ def populate(
                 )
         else:
             db.insert("card_engine_support", values)
+    return references

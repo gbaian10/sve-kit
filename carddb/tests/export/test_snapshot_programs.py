@@ -26,7 +26,7 @@ from sve_carddb.export.read_api import load_snapshot
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Ownership, export_snapshot
 
-from ..support.snapshot_contract_fixtures import _reseal
+from ..support.snapshot_contract_fixtures import _reseal, fixture
 from ..support.snapshot_project_fixtures import populate, schema
 from .test_snapshot_export import BATCH
 from .test_snapshot_project import projected
@@ -226,8 +226,58 @@ def test_required_capability_cannot_be_omitted(packed: Snapshot) -> None:
         )
 
 
-def test_program_profile_schema_is_reproducible() -> None:
-    assert parse(generate("4.1.0")) == contract_schema("4.1.0")
+@pytest.mark.parametrize("version", ["4.1.0", "4.2.0"])
+def test_program_profile_schema_is_reproducible(version: str) -> None:
+    assert parse(generate(version)) == contract_schema(version)
+
+
+@pytest.fixture(scope="module")
+def package_with_printings(
+    admitted: tuple[Projection, Ownership],
+) -> Snapshot:
+    projection, ownership = admitted
+    sample = object_value(fixture("programs-4.2.json"))
+    bindings = object_value(object_value(sample["programs"])["printings"])
+    return export_snapshot(
+        replace(projection, program_printings=bindings), ownership, BATCH
+    )
+
+
+def test_program_printings_use_the_shared_profile_and_reuse_every_other_payload(
+    packed: Snapshot, package_with_printings: Snapshot
+) -> None:
+    sample = object_value(fixture("programs-4.2.json"))
+    for key, value in object_value(sample["manifest"]).items():
+        assert package_with_printings.manifest[key] == value
+    assert parse(package_with_printings.payloads["programs"].raw) == sample["programs"]
+    assert {
+        key: blob.raw
+        for key, blob in package_with_printings.payloads.items()
+        if key != "programs"
+    } == {key: blob.raw for key, blob in packed.payloads.items() if key != "programs"}
+
+
+@pytest.mark.parametrize("change", ["owner", "representative", "token", "config"])
+def test_program_printings_reject_inexact_closure(
+    package_with_printings: Snapshot, change: str
+) -> None:
+    manifest = deepcopy(package_with_printings.manifest)
+    payloads = {
+        key: parse(blob.raw) for key, blob in package_with_printings.payloads.items()
+    }
+    programs = object_value(payloads["programs"])
+    bindings = object_value(programs["printings"])
+    if change == "owner":
+        bindings["old_card"] = bindings.pop("card")
+    elif change == "representative":
+        object_value(bindings["card"])["representative"] = "missing-printing"
+    elif change == "token":
+        object_value(bindings["card"])["tokens"] = ["printing"]
+    else:
+        object_value(payloads["config"])["format_version"] = "4.2.0"
+    sealed = _reseal(manifest, payloads)
+    with pytest.raises((ValueError, ValidationError)):
+        read_snapshot(manifest, sealed)
 
 
 def test_preview_reader_loads_program_profiles(

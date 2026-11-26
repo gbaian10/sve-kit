@@ -1,0 +1,31 @@
+{
+  "manifest": {
+    "format_version": "4.2.0",
+    "min_reader_version": "4.2.0",
+    "required_capabilities": [
+      "column-partition-v1",
+      "digital-same-name-links-v1",
+      "dsl-program-dependencies-v1",
+      "dsl-programs-v1",
+      "fragment-container-v1",
+      "image-entity-buckets-v1",
+      "image-id-url-v1",
+      "jp-source-translation-v1",
+      "public-annotation-v1",
+      "rules-name-on-demand-v1"
+    ]
+  },
+  "programs": {
+    "format_version": "4.2.0",
+    "entries": [
+      {
+        "id": "program",
+        "dsl_version": "1.0",
+        "ast": { "card_id": "card", "scope": "shared", "abilities": [] }
+      }
+    ],
+    "printings": {
+      "card": { "representative": "printing", "tokens": [] }
+    }
+  }
+}
