@@ -11,6 +11,7 @@ from sve_carddb.contracts.profiles import profile
 from sve_carddb.core.json import canonical, digest, object_value
 from sve_carddb.core.stage_log import mark
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
+from sve_carddb.export.battle_rules import resolve_engine_rules
 from sve_carddb.export.construction_index import (
     ConstructionIndexError,
     write_construction_indexes,
@@ -117,21 +118,40 @@ def battle_inputs_command(
     ],
     export_dir: Annotated[Path, typer.Option(envvar="SVE_EXPORT_DIR")],
     region: Annotated[str, typer.Option()] = "jp",
+    published: Annotated[
+        bool, typer.Option(help="Bind rules to the published DSL program package.")
+    ] = False,
 ) -> None:
     """Write the engine's native snapshot, its reference identities and the rules bound to it."""
     if not output.is_absolute():
         raise typer.BadParameter("--output requires an absolute path")
     try:
-        inputs = load_battle_inputs(export_dir.resolve(), region)
+        inputs = load_battle_inputs(export_dir.resolve(), region, published=published)
         rules = _bound_rules(engine_rules, region, inputs.snapshot)
+        projection = None
+        if inputs.programs is not None:
+            projection = canonical(
+                {
+                    "descriptor": inputs.programs.descriptor,
+                    "printings": inputs.programs.printings,
+                    "engine_identity": resolve_engine_rules(
+                        rules, inputs.programs.rule_faces
+                    ),
+                }
+            )
     except ExportError as error:
         typer.echo(str(error), err=True)
+        raise typer.Exit(3) from None
+    except KeyError, TypeError, ValueError:
+        typer.echo("Battle inputs could not be bound to this snapshot", err=True)
         raise typer.Exit(3) from None
     # The host hashes these exact bytes; a partial or reused directory must never pass for them.
     output.mkdir(parents=True)
     (output / "snapshot.jsonl").write_bytes(inputs.snapshot)
     (output / "references.json").write_bytes(canonical(inputs.references))
     (output / "rules.json").write_bytes(canonical(rules))
+    if projection is not None:
+        (output / "program-projection.json").write_bytes(projection)
 
 
 def _bound_rules(path: Path, region: str, snapshot: bytes) -> dict[str, JsonValue]:

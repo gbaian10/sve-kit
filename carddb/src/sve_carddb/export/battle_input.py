@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.profiles import PROGRAM_DEPENDENCIES
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.battle_rules import rule_identities
 from sve_carddb.export.text_owners import TextOwners
@@ -25,19 +26,32 @@ class BattleInputs:
 
     snapshot: bytes
     references: dict[str, JsonValue]
+    programs: ProgramInputs | None = None
 
 
-def build_battle_inputs(snapshot: Snapshot, region: str) -> BattleInputs:
+@dataclass(frozen=True, repr=False)
+class ProgramInputs:
+    """Exact program attachment and its native printing and rule projections."""
+
+    descriptor: Row
+    printings: list[JsonValue]
+    rule_faces: dict[tuple[str, int], Row]
+
+
+def build_battle_inputs(
+    snapshot: Snapshot, region: str, *, published: bool = False
+) -> BattleInputs:
     """Keep the entire region's catalogue independently of decks or selected programs."""
     try:
-        return _build(snapshot, region)
+        return _build(snapshot, region, published=published)
     except ValueError, KeyError, TypeError:
         raise ValueError("Battle snapshot projection is unavailable") from None
 
 
 class _Projection:
-    def __init__(self, snapshot: Snapshot, region: str) -> None:
+    def __init__(self, snapshot: Snapshot, region: str, *, published: bool) -> None:
         self.region = region
+        self.published = published
         self.owners = TextOwners(snapshot.tables)
         self.texts = {
             string(row["id"]): string(row["text"])
@@ -86,6 +100,16 @@ class _Projection:
             raise ValueError("Wording section ordinals must be unique and nonnegative")
         return sections
 
+    def current(self, face: str) -> Row:
+        candidates = [
+            string(current["revision_id"])
+            for current in map(object_value, array(self.faces[face]["current"]))
+            if current["region"] == self.region
+        ]
+        if len(candidates) != 1:
+            raise ValueError("Battle face has no unique adopted revision")
+        return self.owner(self.revisions[candidates[0]], face)
+
     def face(self, printed: Row) -> Row:
         observations = list(map(object_value, array(printed["observations"])))
         versions = {
@@ -93,13 +117,19 @@ class _Projection:
             for row in observations
             if row["state"] == "available"
         }
-        if len(versions) != 1 or any(
-            row["state"] != "available" for row in observations
+        face = string(printed["face_id"])
+        if (
+            self.published
+            and observations
+            and all(row["state"] == "missing_effect" for row in observations)
         ):
+            revision = self.current(face)
+        elif len(versions) == 1 and all(
+            row["state"] == "available" for row in observations
+        ):
+            revision = self.owner(self.revisions[next(iter(versions))], face)
+        else:
             raise ValueError("Battle printing has no unique available observation")
-        revision = self.owner(
-            self.revisions[next(iter(versions))], string(printed["face_id"])
-        )
         titles = array(revision["titles"])
         if len(titles) > 1:
             raise ValueError("Native title representation is incomplete")
@@ -178,27 +208,94 @@ class _Projection:
         return faces
 
 
-def _build(snapshot: Snapshot, region: str) -> BattleInputs:
+def _program_inputs(
+    snapshot: Snapshot, projection: _Projection, printings: list[Row]
+) -> ProgramInputs:
+    descriptors = [
+        row
+        for row in map(object_value, array(snapshot.manifest["files"]))
+        if row["role"] == "programs"
+    ]
+    if len(descriptors) != 1:
+        raise ValueError("Battle program attachment is missing or ambiguous")
+    names = {
+        string(row["id"]): string(row["official_name"])
+        for row in snapshot.tables["rules_name"]
+        if row["region"] == "jp"
+    }
+    primary: dict[str, list[str]] = {}
+    for row in snapshot.tables["face_rules_name"]:
+        if row["region"] == "jp" and row["role"] == "primary":
+            primary.setdefault(string(row["face_id"]), []).append(
+                string(row["rules_name_id"])
+            )
+    rule_faces: dict[tuple[str, int], Row] = {}
+    projected: list[JsonValue] = []
+    for printing in printings:
+        number = string(printing["card_no"])
+        faces: list[JsonValue] = []
+        for ordinal, face in enumerate(projection.printing_faces(printing)):
+            face_id = string(face["face_id"])
+            current = projection.current(face_id)
+            named = primary.get(face_id, [])
+            name_id = named[0] if len(named) == 1 else None
+            titles = array(current["titles"])
+            faces.append(
+                {
+                    "face_id": face_id,
+                    "revision_id": current["id"],
+                    "cost": current["cost"],
+                    "rules_name": names[name_id] if name_id is not None else None,
+                }
+            )
+            rule_faces[number, ordinal] = {
+                "card_no": number,
+                "face_ordinal": ordinal,
+                "face_id": face_id,
+                "rules_name_id": name_id,
+                "title_code": titles[0] if titles else None,
+            }
+        projected.append(
+            {
+                "printing_id": printing["id"],
+                "card_no": number,
+                "card_id": printing["card_id"],
+                "faces": faces,
+            }
+        )
+    return ProgramInputs(descriptors[0], projected, rule_faces)
+
+
+def _official_printings(snapshot: Snapshot, region: str) -> list[Row]:
+    printings = [
+        printing
+        for printing in snapshot.tables["printing"]
+        if printing["region"] == region
+        and not (
+            printing["card_no_state"] == "none"
+            and printing["manual_type_code"] in RESOURCE_TYPES
+        )
+    ]
+    return sorted(printings, key=lambda row: string(row["card_no"]))
+
+
+def _build(snapshot: Snapshot, region: str, *, published: bool = False) -> BattleInputs:
     if (
         region not in {"jp", "en"}
         or region not in array(snapshot.manifest["regions"])
         or re.fullmatch(r"sha256:[0-9a-f]{64}", snapshot.manifest_sha256) is None
     ):
         raise ValueError("Battle snapshot background mismatch")
-    projection = _Projection(snapshot, region)
+    if published and (
+        region != "jp" or snapshot.manifest["format_version"] != PROGRAM_DEPENDENCIES
+    ):
+        raise ValueError("Published battle inputs require a 4.2.0 JP snapshot")
+    projection = _Projection(snapshot, region, published=published)
     records: dict[str, bytes] = {}
     faces: list[JsonValue] = []
     wording: list[JsonValue] = []
-    for printing in sorted(
-        snapshot.tables["printing"], key=lambda row: string(row["card_no"])
-    ):
-        if printing["region"] != region:
-            continue
-        if (
-            printing["card_no_state"] == "none"
-            and printing["manual_type_code"] in RESOURCE_TYPES
-        ):
-            continue
+    printings = _official_printings(snapshot, region)
+    for printing in printings:
         number = string(printing["card_no"])
         if printing["card_no_state"] != "official" or not number or number in records:
             raise ValueError("Battle printing locator is unavailable or ambiguous")
@@ -233,4 +330,5 @@ def _build(snapshot: Snapshot, region: str) -> BattleInputs:
             "wording": {"manifest_sha256": snapshot.manifest_sha256, "faces": wording},
             "rules": rule_identities(snapshot, region),
         },
+        _program_inputs(snapshot, projection, printings) if published else None,
     )
