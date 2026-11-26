@@ -63,23 +63,85 @@ class _Found:
             self.handled.add(path)
 
 
-def _self_aliases(node: JsonValue, found: set[str]) -> set[str]:
-    """Collect result bindings of steps that move or change this card itself."""
-    if isinstance(node, dict):
-        if node.get("ref") == "this" and isinstance(name := node.get("result"), str):
-            found.add(name)
-        for value in node.values():
-            _self_aliases(value, found)
-    elif isinstance(node, list):
-        for value in node:
-            _self_aliases(value, found)
-    return found
-
-
-def _is_self(recipient: JsonValue, aliases: frozenset[str]) -> bool:
+def _is_self(recipient: JsonValue, aliases: frozenset[str] | set[str]) -> bool:
     if isinstance(recipient, dict) and recipient.keys() == {"follow"}:
         recipient = recipient["follow"]
     return isinstance(recipient, str) and (recipient == "this" or recipient in aliases)
+
+
+def _collect_aliases(node: JsonValue, found: set[str], owner: str | None) -> None:
+    if isinstance(node, dict):
+        # A transformed card is another object, even when this card was transformed.
+        if (
+            owner != "transform"
+            and _is_self(node.get("ref"), found)
+            and isinstance(name := node.get("result"), str)
+        ):
+            found.add(name)
+        for key, value in node.items():
+            # A granted ability binds its own names; they never reach the outer steps.
+            if key != "abilities":
+                _collect_aliases(value, found, key)
+    elif isinstance(node, list):
+        for value in node:
+            _collect_aliases(value, found, owner)
+
+
+def _self_aliases(ability: JsonValue) -> frozenset[str]:
+    """Collect result bindings of steps that move or change this card itself."""
+    found: set[str] = set()
+    size = -1
+    # A later step may act on an earlier result, in any authored order.
+    while size != len(found):
+        size = len(found)
+        _collect_aliases(ability, found, None)
+    return frozenset(found)
+
+
+def _mentions_tracked(node: JsonValue) -> bool:
+    if isinstance(node, dict):
+        return any(
+            key in _SEMANTIC or _mentions_tracked(value) for key, value in node.items()
+        )
+    if isinstance(node, list):
+        return any(_mentions_tracked(value) for value in node)
+    return isinstance(node, str) and node in TRACKED
+
+
+def _receives_itself(
+    node: dict[str, JsonValue], path: PathParts, context: _Context
+) -> bool:
+    if "on" in node:
+        return _is_self(node["on"], context.aliases)
+    if context.implicit is None:
+        # Without a known recipient only a grant that names no tracked keyword is harmless.
+        if _mentions_tracked(node):
+            raise UnclassifiedKeywordError(path)
+        return False
+    return context.implicit == "self"
+
+
+def _grant_branch(
+    branch: dict[str, JsonValue],
+    path: PathParts,
+    context: _Context,
+    found: _Found,
+    *,
+    names: str,
+    own: bool,
+) -> None:
+    if isinstance(listed := branch.get(names), list):
+        for index, code in enumerate(listed):
+            found.add((*path, names, index), code, "has" if own else "grants")
+    for name, value in branch.items():
+        if name in {names, "instead"}:
+            continue
+        if name == "abilities" and isinstance(value, list):
+            for index, granted in enumerate(value):
+                inner = _Context(_self_aliases(granted), foreign=not own)
+                _walk(granted, (*path, name, index), inner, found)
+        else:
+            _walk(value, (*path, name), context, found)
 
 
 def _grant(
@@ -89,41 +151,27 @@ def _grant(
     found: _Found,
     names: str,
 ) -> None:
-    if "on" in node:
-        to_self = _is_self(node["on"], context.aliases)
-    elif context.implicit is None:
-        raise UnclassifiedKeywordError(path)
-    else:
-        to_self = context.implicit == "self"
-    own = to_self and not context.foreign
-    branches: list[tuple[PathParts, JsonValue]] = [(path, node)]
+    own = _receives_itself(node, path, context) and not context.foreign
+    _grant_branch(node, path, context, found, names=names, own=own)
     if isinstance(alternatives := node.get("instead"), list):
-        branches.extend(
-            ((*path, "instead", index), alternative)
-            for index, alternative in enumerate(alternatives)
-        )
-    for branch_path, branch in branches:
-        if not isinstance(branch, dict):
-            continue
-        key = names if branch is node else "keywords"
-        if isinstance(listed := branch.get(key), list):
-            for index, code in enumerate(listed):
-                found.add((*branch_path, key, index), code, "has" if own else "grants")
-        for name, value in branch.items():
-            if name in {key, "instead"}:
-                continue
-            _walk(
-                value,
-                (*branch_path, name),
-                replace(context, foreign=not own, implicit=None, counting=False)
-                if name == "abilities"
-                else context,
-                found,
-            )
+        for index, alternative in enumerate(alternatives):
+            if isinstance(alternative, dict):
+                _grant_branch(
+                    alternative,
+                    (*path, "instead", index),
+                    context,
+                    found,
+                    names="keywords",
+                    own=own,
+                )
 
 
 def _enter(
-    key: str, value: JsonValue, parent: dict[str, JsonValue], context: _Context
+    key: str,
+    value: JsonValue,
+    parent: dict[str, JsonValue],
+    owner: str | int | None,
+    context: _Context,
 ) -> _Context:
     if key in _COUNTING:
         return replace(context, counting=True)
@@ -136,7 +184,8 @@ def _enter(
         to_self = _is_self(value.get("on"), context.aliases)
         return replace(context, implicit="self" if to_self else "other")
     if key == "entry_effects":
-        to_self = _is_self(parent.get("ref"), context.aliases)
+        # Only moving this card keeps it the same object; created, found or transformed cards are others.
+        to_self = owner == "move" and _is_self(parent.get("ref"), context.aliases)
         return replace(context, implicit="self" if to_self else "other")
     if key == "player_effect":
         return replace(context, implicit=None)
@@ -161,7 +210,8 @@ def _walk(node: JsonValue, path: PathParts, context: _Context, found: _Found) ->
         else:
             if key in _SEMANTIC:
                 found.uses.add(_SEMANTIC[key])
-            _walk(value, here, _enter(key, value, node, context), found)
+            owner = path[-1] if path else None
+            _walk(value, here, _enter(key, value, node, owner, context), found)
 
 
 def _unclassified(
@@ -190,7 +240,7 @@ def _unclassified(
 def ability_relations(ability: dict[str, JsonValue]) -> set[Use]:
     """Return every tracked keyword relation of one ability, or fail on an unknown use."""
     found = _Found(set(), set())
-    context = _Context(frozenset(_self_aliases(ability, set())))
+    context = _Context(_self_aliases(ability))
     head = {key: value for key, value in ability.items() if key not in _METADATA}
     if isinstance(declared := head.get("keywords"), list):
         for index, code in enumerate(declared):

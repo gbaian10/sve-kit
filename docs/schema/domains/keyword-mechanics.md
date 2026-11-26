@@ -55,17 +55,22 @@ registry hash 與各 adapter 版本。
 
 授予對象的判定：
 
-- 明寫 `on`：`this`，或同一能力內以 `ref: this` 移動／變更自己的步驟所產生的 `result`
-  （含 `{follow: 名稱}`）是自己；綁定名、`it`、其他 `follow`、群組選擇器都是其他物件。
+- 明寫 `on`：`this`，或同一能力內對自己操作的步驟所產生的 `result`（含 `{follow: 名稱}`）是自己。
+  步驟的 `ref` 是 `this` 或前一個這類結果時，它的 `result` 仍是自己，可以連續傳遞；
+  變身（`transform`）的結果是另一個物件。綁定名、`it`、其他 `follow`、群組選擇器都是其他物件。
   群組可能包含自己時仍只算 grants，has 只認明確指自己的寫法。
 - 省略 `on`（只有效果層可省略）依外層決定：卡片自己的 `static.effects`（含其中的 `if`）是自己；
-  `apply` 看它的 `on`；產生、搜尋、變身、移動的 `entry_effects` 是被移動的物件，只有 `ref: this` 才是自己。
-- 裝備區的 static、`player_effect` 及其他未列出的外層沒有可判定的對象，視為未分類。
+  `apply` 看它的 `on`；移動（`move`）自己時的 `entry_effects` 是自己；
+  產生、搜尋、變身及移動其他卡的 `entry_effects` 是其他物件。
+- 裝備區的 static、`player_effect` 及其他未列出的外層沒有可判定的對象；
+  這種授予只要含八個關鍵字之一就視為未分類。
+- 被授予的能力有自己的綁定名稱，不與外層步驟互通。
 - 授予給其他物件的能力（`grant.abilities`）內部的 `this` 指被授予者：其中的關鍵字授予一律是 grants，
   篩選器仍依位置算 refers／counts。
 
 計數運算式為 `count`、`count_of`、`distinct_names`、`distinct_orig_costs`、`agg`、`history_count`、
-`history_sum`。計數內的篩選器只算 counts，不另加 refers。Token 原生的關鍵字屬於 Token 自己的程式，
+`history_sum`。計數內的篩選器只算 counts，不另加 refers。分類以 DSL 的寫法為準：
+以 `count` 比較門檻（即使是 1 以上）屬 counts，以 `exists` 判斷有無屬 refers。Token 原生的關鍵字屬於 Token 自己的程式，
 不掛到產生它的卡。
 
 未分類的用法不能被准入：能力樹內任何值等於八個 code 之一的位置必須已由上表處理；
@@ -142,7 +147,7 @@ JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
 
 補充段落依[印刷機制](#職業與合作作品的印刷機制)的同一套段落歸屬判定處理：可辨識為本卡續文的段落
 與主文相同，宣告產生 has 正標籤；Token 定義與 reminder 段落不產母卡的 has；無法確認歸屬的段落中
-出現的宣告保留未知，不能當成沒有。任何段落出現 Quick、Stack、Starting Amulet、
+出現的宣告保留未知，不能當成沒有。非本卡續文的段落出現 Quick、Stack、Starting Amulet、
 Single Drive 或 Twin Drive 的獨立宣告時，該關鍵字保留未知。跨行引述中的宣告也不能掛到母卡。
 缺 current 面、未確認 identity 不授全卡否定完整性；任一已確認面有宣告即為 present。
 

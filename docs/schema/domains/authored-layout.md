@@ -37,7 +37,7 @@
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
 | 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔 | `rules/author-effects/<卡包>/<record_key>.yaml`（既有數字分片保留）、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index/<卡包>.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md) |
 | 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
-| 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
+| 定案（技術契約） | 查卡 keyword 登錄 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；四種關係由已准入程式推導，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 

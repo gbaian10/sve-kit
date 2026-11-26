@@ -56,6 +56,86 @@ def grant(recipient: JsonValue, *keywords: str) -> dict[str, JsonValue]:
             },
             {("storm", "has")},
         ),
+        # A result of acting on an earlier self result is still this card.
+        (
+            {
+                "lastword": {
+                    "do": [
+                        {"move": {"ref": "this", "result": "back", "to": "field"}},
+                        {"evolve": {"ref": {"follow": "back"}, "result": "changed"}},
+                        grant("changed", "storm"),
+                    ]
+                }
+            },
+            {("storm", "has")},
+        ),
+        (
+            {
+                "lastword": {
+                    "do": [
+                        {
+                            "move": {
+                                "ref": "this",
+                                "to": "field",
+                                "entry_effects": [{"grant": {"keywords": ["rush"]}}],
+                            }
+                        }
+                    ]
+                }
+            },
+            {("rush", "has")},
+        ),
+        # A transformed card is another object, whatever it was before.
+        (
+            {
+                "fanfare": {
+                    "do": [
+                        {
+                            "transform": {
+                                "ref": "this",
+                                "into": "Synthetic",
+                                "result": "form",
+                                "entry_effects": [{"grant": {"keywords": ["ward"]}}],
+                            }
+                        },
+                        grant("form", "storm"),
+                    ]
+                }
+            },
+            {("ward", "grants"), ("storm", "grants")},
+        ),
+        # A name bound inside a granted ability does not alias this card outside it.
+        (
+            {
+                "fanfare": {
+                    "do": [
+                        {
+                            "grant": {
+                                "on": "ally",
+                                "abilities": [
+                                    {
+                                        "lastword": {
+                                            "do": [
+                                                {
+                                                    "move": {
+                                                        "ref": "this",
+                                                        "result": "moved",
+                                                        "to": "field",
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],
+                            }
+                        },
+                        {"choose": {"bind": "moved", "from": _ALLIES}},
+                        grant("moved", "bane"),
+                    ]
+                }
+            },
+            {("bane", "grants")},
+        ),
         ({"fanfare": {"do": [grant("ally", "rush")]}}, {("rush", "grants")}),
         ({"auto": {"do": [grant("it", "ward")]}}, {("ward", "grants")}),
         ({"static": {"effects": [grant(_ALLIES, "storm")]}}, {("storm", "grants")}),
@@ -184,6 +264,16 @@ def grant(recipient: JsonValue, *keywords: str) -> dict[str, JsonValue]:
         (
             {"static": {"effects": [{"ignore_ward": {"on": "this"}}]}},
             {("ward", "refers")},
+        ),
+        # An unclear recipient only matters when a tracked keyword is granted.
+        (
+            {
+                "static": {
+                    "zone": "equipment",
+                    "effects": [{"grant": {"abilities": [{"fanfare": {"do": []}}]}}],
+                }
+            },
+            set(),
         ),
         # Concepts outside the tracked set keep their own handling.
         (

@@ -264,8 +264,9 @@ def apply(
                     present.update(found)
                 elif owner == "unknown":
                     unknown.update(found)
+                else:
+                    unknown.update(found & _SECTION_DECLARATIONS)
                 unknown.update(uncertain)
-                unknown.update(found & _SECTION_DECLARATIONS)
             complete = universe - unknown
             positive = _project(
                 db,
