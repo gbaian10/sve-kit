@@ -37,10 +37,6 @@ kind: author_effect_set
 cards:
   SYN-01:
     admission: light
-    meta:
-      written_by:
-        - actor: {who: "Author", model: null}
-          date: "2026-10-27"
     abilities:
       - line: 1
         use: draw-self

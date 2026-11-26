@@ -22,7 +22,7 @@
 
 ## 1. 檔案、卡片與 meta
 
-主檔以 format 2 的 `author_effect_set` 保存卡號、作者紀錄及各印刷行的能力。
+主檔以 format 2 的 `author_effect_set` 保存卡號及各印刷行的能力，`meta` 可保存審查與裁定。
 作者可直接寫能力或用 `use` 參照具名本體。卡號照官網保存，面與版次由身分登錄解析。
 欄位矩陣見[入口形狀](author-entry-shapes-1.0.md)，位置與資料契約見[DSL 承載契約](author-contract-1.0.md)。
 
@@ -32,10 +32,6 @@ kind: author_effect_set
 cards:
   SYN-001:
     admission: light
-    meta:
-      written_by:
-        - actor: { who: human, model: null }
-          date: "2026-10-27"
     abilities:
       - line: 1
         keywords: [ward]
@@ -43,7 +39,7 @@ cards:
 
 `line` 從 1 起算。同一行多能力可以分條列出。不同卡面的能力用 `face` 明示，區段以 `section` 定位，跨行以 `covers` 記錄。
 材料化後由永久 FaceId 分組能力，留存面、版次、欄和行。token 說明段落掛到 token 定義。
-作者與審查紀錄依真實作業填寫，`rulings` 保存裁定 ID。卡表快照、CR／裁定與引擎版本各自保存。
+審查紀錄依真實作業填寫，`rulings` 保存裁定 ID。卡表快照、CR／裁定與引擎版本各自保存。
 
 ## 2. 能力頭與來源
 
@@ -313,13 +309,13 @@ Python YAML 載入器必過金絲雀：含 on、n、yes／no 值的最小卡片�
 
 ## 12. 狀態與證據
 
-meta.status／reviewed_by 保留真實作者與審查紀錄，不以 hash freshness 作准入證明；disputed 保留且只阻擋受影響卡。輕量與共用本體的准入依[承載契約](author-contract-1.0.md)執行。
+`meta.status` 與 `meta.reviewed_by` 保存真實審查紀錄，`disputed` 只阻擋受影響卡。輕量與共用本體的准入依[承載契約](author-contract-1.0.md)執行。
 
 R-0001～R-0009 的效力、strength、取代關係以裁定登錄為準，完整對照在 IR §0。第 9～17 族本文件補語法；第 18、19 族統一 capture，第 20 族因 R-0009 不再需要兩次條件求值而結案，第 21 族以遷移稽核處理。沒有改寫 v0 標註。每族是否能提升「兩層通過」須聯合檢查該句型所有缺口，不可加總重疊族行數。
 
 ## 13. GAP-A 逐族補法與真實卡例
 
-下列 YAML 是指定能力行的最小表達，非整卡驗收產物；`line`／meta 由上層容器補入。例子中的卡名、數字以所列來源行為準；同族其他變體由欄位型別覆蓋，不以一張例子代替全族引擎驗證。
+下列 YAML 是指定能力行的最小表達，`line` 由上層容器補入。例子中的卡名、數字以所列來源行為準；同族其他變體由欄位型別覆蓋，不以一張例子代替全族引擎驗證。
 
 ### GAP-A-001
 

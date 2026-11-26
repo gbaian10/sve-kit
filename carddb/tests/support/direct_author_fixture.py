@@ -31,14 +31,6 @@ def direct_author_input(
                 "cards": {
                     "SYN-01": {
                         "admission": "light",
-                        "meta": {
-                            "written_by": [
-                                {
-                                    "actor": {"who": "synthetic test", "model": None},
-                                    "date": "2026-10-27",
-                                }
-                            ]
-                        },
                         "abilities": [{"line": 1, "use": "draw", "params": {"n": 1}}],
                         **(
                             {"lint_exceptions": lint_exceptions}

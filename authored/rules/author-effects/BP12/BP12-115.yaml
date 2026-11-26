@@ -29,11 +29,5 @@ cards:
                       then:
                         - draw: { who: self, n: 1 }
     admission: light
-    meta:
-      written_by:
-        - actor:
-            model: gpt-6-sol
-            who: Codex
-          date: "2026-11-20"
 format: 2
 kind: author_effect_set

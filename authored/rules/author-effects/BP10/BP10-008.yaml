@@ -18,9 +18,3 @@ cards:
                   in: seen
                   except: { in: { objects_of: placed, view: before } }
                 to: cemetery
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

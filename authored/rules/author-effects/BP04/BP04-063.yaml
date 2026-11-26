@@ -25,9 +25,3 @@ cards:
                 then:
                   - buff: { "on": this, power: 1, hp: 1 }
                   - grant: { "on": this, keywords: [intimidate] }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

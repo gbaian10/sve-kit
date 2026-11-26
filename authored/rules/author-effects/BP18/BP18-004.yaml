@@ -36,9 +36,3 @@ cards:
                       minus:
                         - 0
                         - history_count: { event: played, window: this_turn, who: self }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: Codex gpt-6.1-sol
-          date: "2026-11-14"

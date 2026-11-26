@@ -32,11 +32,6 @@ def schemas() -> AuthorSchemas:
 def rule_card() -> dict[str, JsonValue]:
     return {
         "admission": "light",
-        "meta": {
-            "written_by": [
-                {"actor": {"who": "test", "model": None}, "date": "2026-10-29"}
-            ]
-        },
         "rule_sections": [{"section": 1}],
         "abilities": [
             {"line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}},

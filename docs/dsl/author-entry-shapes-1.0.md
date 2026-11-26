@@ -4,16 +4,16 @@
 
 ## 容器矩陣
 
-| 入口         | 必填                                        | 選填與配置                                                               |
-| ------------ | ------------------------------------------- | ------------------------------------------------------------------------ |
-| 主檔         | format: 2、kind: author_effect_set、cards   | scope 默認 shared，dsl 默認 1.0                                          |
-| 卡片         | meta、abilities                             | admission、note、deck_rule、rule_sections、ignored、token、token_sources |
-| inline 能力  | line、恰一個能力頭                          | face、section、scope、covers、admission                                  |
-| 具名本體用途 | line、use                                   | params、edition、face、section、scope、covers、admission                 |
-| 本體分片     | format: 2、kind: effect_body_shard、records | scope 默認 shared，dsl 默認 1.0                                          |
-| 具名本體     | id、body、written_by                        | admission、edition、params、ports、note                                  |
+| 入口         | 必填                                        | 選填與配置                                                                     |
+| ------------ | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| 主檔         | format: 2、kind: author_effect_set、cards   | scope 默認 shared，dsl 默認 1.0                                                |
+| 卡片         | abilities                                   | meta、admission、note、deck_rule、rule_sections、ignored、token、token_sources |
+| inline 能力  | line、恰一個能力頭                          | face、section、scope、covers、admission                                        |
+| 具名本體用途 | line、use                                   | params、edition、face、section、scope、covers、admission                       |
+| 本體分片     | format: 2、kind: effect_body_shard、records | scope 默認 shared，dsl 默認 1.0                                                |
+| 具名本體     | id、body、written_by                        | admission、edition、params、ports、note                                        |
 
-作者與審查紀錄使用實際參與者和日期。具名本體的 id 與版次在全庫唯一。作者索引雙向覆蓋主檔，卡號對應永久 CardId。
+具名本體的作者及逐卡審查紀錄使用實際參與者和日期。具名本體的 id 與版次在全庫唯一。作者索引雙向覆蓋主檔，卡號對應永久 CardId。
 同一永久卡片的印刷別名共享同一份材料化程式。
 
 ## 診斷與驗證範圍

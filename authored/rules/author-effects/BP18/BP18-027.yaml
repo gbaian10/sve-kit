@@ -36,9 +36,3 @@ cards:
                   exists: { who: self, zone: field, name: ギガブレード, other: true }
                 then:
                   - move: { ref: this, to: cemetery }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: Codex gpt-6.1-sol
-          date: "2026-11-14"

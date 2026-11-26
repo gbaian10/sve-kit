@@ -23,9 +23,6 @@ def meta() -> dict[str, JsonValue]:
     return {
         "dsl": "1.0",
         "source": "effect-source-v1:sha256:" + "3" * 64,
-        "written_by": [
-            {"actor": {"who": "synthetic author", "model": None}, "date": "2026-10-21"}
-        ],
         "reviewed_by": [],
         "status": "draft",
         "verified_by_exam": [],

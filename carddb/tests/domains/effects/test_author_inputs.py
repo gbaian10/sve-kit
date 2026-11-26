@@ -228,14 +228,6 @@ def _static_file(head: dict[str, JsonValue]) -> bytes:
             "kind": "author_effect_set",
             "cards": {
                 "SYN-01": {
-                    "meta": {
-                        "written_by": [
-                            {
-                                "actor": {"who": "Codex", "model": "gpt-6.1-sol"},
-                                "date": "2026-11-03",
-                            }
-                        ]
-                    },
                     "abilities": [{"line": 1, **head}],
                 }
             },

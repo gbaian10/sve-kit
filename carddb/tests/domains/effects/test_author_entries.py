@@ -121,15 +121,22 @@ def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> Non
 @pytest.mark.parametrize(
     "date", ["2026-02-29", "0000-01-01", "2026-10-21\n", "2026-1-01"]
 )
-def test_writer_date_is_real_exact_calendar_date(
+def test_body_writer_date_is_real_exact_calendar_date(
     schemas: AuthorSchemas, date: str
 ) -> None:
-    value = document(ability({"spell": {"do": []}}))
-    card = object_value(object_value(value["cards"])["FIX-001"])
-    author = object_value(array(object_value(card["meta"])["written_by"])[0])
-    author["date"] = date
-    with pytest.raises(AuthorInputError):
-        schemas.expanded(canonical(value))
+    value: JsonValue = {
+        "format": 2,
+        "kind": "effect_body_shard",
+        "records": [
+            {
+                "id": "synthetic",
+                "body": {"spell": {"do": []}},
+                "written_by": [{"actor": {"who": "test", "model": None}, "date": date}],
+            }
+        ],
+    }
+    with pytest.raises(AuthorInputError, match="pattern"):
+        schemas.storage_tree(canonical(value), "effect_body_shard")
 
 
 def test_keyword_review_requires_draft_metadata(schemas: AuthorSchemas) -> None:

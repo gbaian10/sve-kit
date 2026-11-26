@@ -36,12 +36,6 @@ cards:
                       ref: this
                       to: ex
     admission: light
-    meta:
-      written_by:
-        - actor:
-            model: Codex gpt-6.1-sol
-            who: Codex
-          date: "2026-10-29"
     rule_sections:
       - section: 1
 format: 2

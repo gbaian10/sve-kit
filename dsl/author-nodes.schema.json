@@ -18744,13 +18744,6 @@
           "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
           "type": "string"
         },
-        "written_by": {
-          "items": {
-            "$ref": "#/$defs/WrittenBy"
-          },
-          "minItems": 1,
-          "type": "array"
-        },
         "reviewed_by": {
           "items": {
             "anyOf": [
@@ -18789,7 +18782,6 @@
       "required": [
         "dsl",
         "source",
-        "written_by",
         "reviewed_by",
         "status",
         "verified_by_exam",
@@ -19815,13 +19807,6 @@
           "const": "direct",
           "type": "string"
         },
-        "written_by": {
-          "items": {
-            "$ref": "#/$defs/WrittenBy"
-          },
-          "minItems": 1,
-          "type": "array"
-        },
         "reviewed_by": {
           "items": {
             "anyOf": [
@@ -19867,7 +19852,6 @@
       "required": [
         "dsl",
         "source",
-        "written_by",
         "reviewed_by",
         "status",
         "verified_by_exam",

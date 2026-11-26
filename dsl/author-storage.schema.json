@@ -29,11 +29,9 @@
         "properties": {
           "meta": {
             "type": "object",
+            "minProperties": 1,
             "additionalProperties": false,
             "properties": {
-              "written_by": {
-                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/written_by"
-              },
               "status": {
                 "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/status"
               },
@@ -46,10 +44,7 @@
               "rulings": {
                 "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Meta/properties/rulings"
               }
-            },
-            "required": [
-              "written_by"
-            ]
+            }
           },
           "lint_exceptions": {
             "type": "array",
@@ -1570,7 +1565,6 @@
           }
         },
         "required": [
-          "meta",
           "abilities"
         ]
       }

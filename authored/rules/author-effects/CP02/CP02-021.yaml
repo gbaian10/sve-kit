@@ -29,9 +29,3 @@ cards:
                     right: 1
                 then:
                   - damage: { to: { leaders: opponents }, n: 5 }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

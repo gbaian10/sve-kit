@@ -3034,7 +3034,6 @@ fn current_token_identity_completes_the_shared_template_selection() {
             "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{
                 "token-current":{
                     "meta":{"dsl":"1.0","source":"direct","admission":"light",
-                        "written_by":[{"actor":{"who":"test","model":null},"date":"2026-10-28"}],
                         "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
                     "token":{"name":"shared-token","template":true},
                     "faces":{face:{"abilities":[]}}

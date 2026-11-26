@@ -12,7 +12,6 @@ from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_doc
 from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.workflows import authoring
 
-from ..domains.effects.author_entry_cases import meta
 from ..support.direct_current_fixture import CARD, synthetic_current
 
 if TYPE_CHECKING:
@@ -80,7 +79,6 @@ def test_prototype_removal_deletes_only_exhausted_shards(
                 "kind": "author_effect_set",
                 "cards": {
                     "SYN-01": {
-                        "meta": {"written_by": meta()["written_by"]},
                         "abilities": [],
                     }
                 },
