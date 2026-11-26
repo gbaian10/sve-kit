@@ -1,6 +1,10 @@
 use super::*;
-use sve_battle_contract::question::{QuestionPurpose, QuestionShape as WireShape, QuestionUse};
-use sve_battle_contract::{Answer as WireAnswer, BattleInput, Command as WireCommand, QuestionId};
+use sve_battle_contract::question::{
+    Candidate, QuestionPurpose, QuestionShape as WireShape, QuestionUse,
+};
+use sve_battle_contract::{
+    Answer as WireAnswer, BattleInput, Command as WireCommand, ObjectHandle, QuestionId, Subject,
+};
 use sve_engine::game::player::{
     Command, DecisionShape, Input, MainActionAnswer, MainIntentKind, QuestionShape, SubmissionKind,
     Viewer,
@@ -41,15 +45,15 @@ fn advance_to_recipient(game: &mut Game) {
     panic!("the Stack increase never asked for its recipient");
 }
 
-/// BP11-050 puts another 大地の魔片 into play and then adds two stacks. The rules make the
-/// player choose which Stack card receives them, and that choice must reach the wire.
+/// BP11-050 puts a second 大地の魔片 into play and then adds two stacks. The rules make the
+/// player choose which of its Stack cards receives them, and that choice must reach the wire.
 #[test]
 fn the_recipient_of_a_stack_increase_is_asked_and_answered_over_the_wire() {
     let mut initial = draw_position();
     initial["players"]["P1"]["leader"]["class"] = json!("ウィッチ");
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP11-050"}]);
     initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"sigil","card":"BP03-T02","state":{"acted":false,"entered_this_turn":false}}
+        {"id":"sigil","card":"BP03-T02","state":{"counters":{"stack_counter":1_u8}}}
     ]);
     let mut game = game(&initial);
     game.advance_player_input();
@@ -67,20 +71,27 @@ fn the_recipient_of_a_stack_increase_is_asked_and_answered_over_the_wire() {
     let WireShape::Select { selection } = &question.shape else {
         panic!("the recipient is a selection");
     };
-    assert_eq!(
-        selection.candidates.len(),
-        1,
-        "the new amulet stacked onto the one in play; a single recipient is still asked"
-    );
+    let [first, second] = selection.candidates.as_slice() else {
+        panic!("the amulet in play and the one the spell just put there are both candidates");
+    };
+    let handle = |candidate: &Candidate| match &candidate.subject {
+        Some(Subject::Card {
+            object: Some(object),
+            ..
+        }) => object.clone(),
+        other => panic!("a Stack card on the field is identifiable: {other:?}"),
+    };
+    // The second candidate: an answer mapped to the first one regardless would be caught.
+    let (chosen, other) = (handle(second), handle(first));
 
-    let chosen = selection.candidates[0].id.clone();
+    let chosen_id = second.id.clone();
     let command = projection
         .command(
             Viewer::P1,
             &WireCommand::Answer {
                 question_id: id,
                 answer: WireAnswer::Select {
-                    selected: vec![chosen],
+                    selected: vec![chosen_id],
                     groups: None,
                     roles: vec![],
                 },
@@ -99,6 +110,20 @@ fn the_recipient_of_a_stack_increase_is_asked_and_answered_over_the_wire() {
         ),
         "the spell finished and the main phase goes on"
     );
-    // One stack for the amulet the spell put into play, then the spell's two.
-    assert_battle_counter(&game, "BP03-T02", "スタックカウンター", 3);
+    let objects = game
+        .battle_objects(Viewer::P1, battle_references())
+        .unwrap();
+    let stacks = |object: &ObjectHandle| {
+        objects[object]
+            .state
+            .as_ref()
+            .unwrap()
+            .counters
+            .iter()
+            .find(|counter| counter.name == "スタックカウンター")
+            .map(|counter| counter.amount.get())
+    };
+    // Each amulet holds one stack of its own; both of the spell's go to the chosen one.
+    assert_eq!(stacks(&chosen), Some(3), "the chosen amulet receives the increase");
+    assert_eq!(stacks(&other), Some(1), "the other amulet is unchanged");
 }
