@@ -8,6 +8,10 @@ use serde_json::Value;
 pub(super) mod direct;
 
 /// Current source facts and their lowered candidate, without use qualification.
+#[expect(
+    clippy::partial_pub_fields,
+    reason = "Callers resolve checked sources through the lookup methods."
+)]
 #[derive(Debug)]
 pub struct CurrentCardProgram {
     /// Construction rule reconciled with the complete current-source handoff.
@@ -31,6 +35,10 @@ pub struct CurrentCardProgram {
 }
 
 /// A printed declaration, in source order.
+#[expect(
+    clippy::partial_pub_fields,
+    reason = "The keyword order is exposed through a read-only slice."
+)]
 #[derive(Debug)]
 pub struct CurrentKeywordEvidence {
     /// Permanent owner and original author location.
