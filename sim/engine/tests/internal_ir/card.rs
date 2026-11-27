@@ -901,6 +901,8 @@ mod ward_bypass;
 
 #[path = "card/layer3_attack_aura.rs"]
 mod layer3_attack_aura;
+#[path = "card/leader_class.rs"]
+mod leader_class;
 
 #[path = "card/layer3_conditional_quick.rs"]
 mod layer3_conditional_quick;

@@ -1128,6 +1128,9 @@
           "$ref": "#/$defs/A.cond.crimson"
         },
         {
+          "$ref": "#/$defs/A.cond.leader-class"
+        },
+        {
           "$ref": "#/$defs/A.cond.exists"
         },
         {
@@ -3551,6 +3554,18 @@
       },
       "required": [
         "crimson"
+      ],
+      "type": "object"
+    },
+    "A.cond.leader-class": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_class": {
+          "$ref": "#/$defs/NonemptyText"
+        }
+      },
+      "required": [
+        "leader_class"
       ],
       "type": "object"
     },
@@ -15070,10 +15085,7 @@
       },
       "additionalProperties": false,
       "required": ["who", "zone", "kind"],
-      "oneOf": [
-        {"required": ["orig_cost_le"]},
-        {"required": ["orig_cost_gt"]}
-      ]
+      "not": {"required": ["orig_cost_le", "orig_cost_gt"]}
     },
     "A.act.reveal-until": {
       "type": "object",

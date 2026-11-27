@@ -80,6 +80,9 @@ pub(super) fn admits_boolean(value: &Expr<Bool>, play_origin: bool) -> bool {
                 read.as_ref(),
                 BoolRead::Crimson {
                     player: PlayerRef::Controller {}
+                } | BoolRead::LeaderClass {
+                    player: PlayerRef::Controller {},
+                    ..
                 }
             ) || (play_origin
                 && matches!(

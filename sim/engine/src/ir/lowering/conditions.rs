@@ -185,6 +185,14 @@ pub(super) fn leader_life_condition(
     })
 }
 
+/// Reads the class of the ability controller's leader, so a transferred card follows its new controller.
+pub(super) fn leader_class(class: &str) -> Expr<Bool> {
+    Expr::Live(Box::new(BoolRead::LeaderClass {
+        player: PlayerRef::Controller {},
+        class: super::super::ClassId(class.to_owned()),
+    }))
+}
+
 impl BodyContext<'_> {
     pub(super) fn attack_target_objects(&mut self, path: &str) -> Result<Selector, LoweringError> {
         let Some(super::super::events::subject::SubjectFields::Attack(event)) = self.subject_event
@@ -467,6 +475,7 @@ impl BodyContext<'_> {
                     player: PlayerRef::Controller {},
                 })));
             }
+            ast::Condition::LeaderClass(class) => return Ok(leader_class(class)),
             ast::Condition::Awakened(false) | ast::Condition::Crimson(false) => {
                 return Err(unsupported(path));
             }

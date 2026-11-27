@@ -56,7 +56,7 @@
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
 | A.cond 組合 | cmp:{left,op,right}、all、any、not | 數值 cmp.op=eq/ne/lt/le/gt/ge；PlayerExpr 只 eq/ne，左右同型 |
 | A.cond 解放狀態 | limit_broken、final_limit_broken、final_limit_break_possible | 讀取單一場上物件 |
-| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
+| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、leader_class、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
 | Sel 玩家／區域／種類 | who、zone、kind、class、not_class、trait、traits_any、traits_all、not_trait | zone 單值或集合；traits_all 與 traits_any 不合併；kind 可 same_as（§13 GAP-A-057） |
 | Sel 名稱 | name、names、name_contains、not_same_name_as_this | name 可 {same_as:{objects_of,view}}，不是任意字串替換 |
 | Sel 數值 | cost_*、orig_cost_*、hp_le、power_max | 比較 suffix 與數量 Expr 分開 |

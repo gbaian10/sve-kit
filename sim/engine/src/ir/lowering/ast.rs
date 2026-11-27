@@ -3181,6 +3181,7 @@ pub(super) enum CostCondition {
     Awakened(bool),
     Crimson(bool),
     LeaderLife(PlayerThreshold),
+    LeaderClass(String),
     InZone(PlayRestrictionZone),
     All(Vec<Self>),
     Any(Vec<Self>),
@@ -3519,6 +3520,7 @@ pub(super) enum Condition {
     FinalLimitBreakPossible(String),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
+    LeaderClass(String),
 
     Crimson(bool),
     Combo(u64),

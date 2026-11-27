@@ -1463,6 +1463,12 @@ impl Execution {
                             .is_some_and(|count| *count > 0),
                 ))
             }
+            BoolRead::LeaderClass { player, class } => {
+                let player = game.player(seat_name(self.player(game, player)?)?)?;
+                Ok(Bool(
+                    player.leader["class"].as_str() == Some(class.0.as_str()),
+                ))
+            }
             _ => Err(unsupported("boolean expression")),
         }
     }
