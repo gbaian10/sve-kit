@@ -4539,8 +4539,27 @@ pub(super) enum LifeDirection {
 pub(super) struct CannotAttack {
     pub what: AttackAction,
     pub on: Option<Objects>,
-    pub target: Option<Recipients>,
+    pub target: Option<AttackRecipients>,
     pub if_can_attack: Option<AttackableKind>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum AttackRecipients {
+    OwnerField {
+        who: AttackOwner,
+        kind: AttackableKind,
+        #[serde(rename = "leader_or")]
+        _leader_or: True,
+        zone: Option<FieldZone>,
+    },
+    Other(Recipients),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackOwner {
+    pub owner_of: This,
 }
 
 #[derive(Deserialize)]
