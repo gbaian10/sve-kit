@@ -1,7 +1,7 @@
 {
   "format": 1,
   "kind": "comprehensive-rules",
-  "version": "1.26.1",
+  "version": "1.28.0",
   "nodes": [
     {
       "key": "7",
@@ -136,8 +136,7 @@
       "text": "The active player cannot choose to end their main phase if an effect is forcing them to satisfy a certain condition during their main phase which they have yet to satisfy.",
       "examples": [
         "Example: The effect \"This must attack once per turn if able\" is applied to a follower controlled by the active player, and the follower has yet to attack even though it is able to."
-      ],
-      "changed": true
+      ]
     },
     {
       "key": "7.3.4",
