@@ -190,6 +190,17 @@ fn player_hand_limit_rejects_other_recipients_and_temporary_durations() {
 
 #[test]
 fn player_hand_limit_rejects_changed_actor_lifetime_recipient_and_source_in_typed_ir() {
+    let input = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({"cost":{"pp":0},"do":[
+            {"player_effect":{"who":"self","effect":{"hand_limit":"unlimited"},"until":"game"}}
+        ]}),
+    )]);
+    let programs = lowerer().lower(&input).unwrap();
+    assert_player_rule_rejects_mutations(&programs["unit-follower"]);
+}
+
+pub(super) fn assert_player_rule_rejects_mutations(program: &WellFormedCardProgram) {
     #[derive(Debug)]
     enum Mutation {
         Actor,
@@ -198,23 +209,16 @@ fn player_hand_limit_rejects_changed_actor_lifetime_recipient_and_source_in_type
         Source,
     }
 
-    let input = evolution_linked_movement::tree(&[(
-        "activate",
-        json!({"cost":{"pp":0},"do":[
-            {"player_effect":{"who":"self","effect":{"hand_limit":"unlimited"},"until":"game"}}
-        ]}),
-    )]);
-    let programs = lowerer().lower(&input).unwrap();
     for variant in [
         Mutation::Actor,
         Mutation::Duration,
         Mutation::Recipient,
         Mutation::Source,
     ] {
-        let mut raw = programs["unit-follower"].card().clone();
+        let mut raw = program.card().clone();
         let body = raw.abilities[0].node.body.as_mut().unwrap();
         let Node::Instruction { instruction } = &mut body.steps[0].node else {
-            panic!("hand rule instruction");
+            panic!("player rule instruction");
         };
         let Action::InstallEffect {
             subjects: InstallationSubjects::Players { players, .. },
@@ -223,18 +227,23 @@ fn player_hand_limit_rejects_changed_actor_lifetime_recipient_and_source_in_type
             ..
         } = &mut instruction.action
         else {
-            panic!("hand rule installation");
+            panic!("player rule installation");
         };
         let Effect::RuleModifier { source, .. } = effect.as_mut() else {
-            panic!("hand rule modifier");
+            panic!("player rule modifier");
         };
         match variant {
             Mutation::Actor => instruction.actor = PlayerRef::Active {},
             Mutation::Duration => duration.end = DurationEnd::CurrentTurnEnd {},
             Mutation::Recipient => players.relation = PlayerRelation::Opponents,
             Mutation::Source => {
-                let AbilityOrigin::Printed { line, .. } = &mut source.origin else {
-                    panic!("printed activation source");
+                let printed = match &mut source.origin {
+                    AbilityOrigin::Keyword { origin, .. } => origin.as_mut(),
+                    printed @ AbilityOrigin::Printed { .. } => printed,
+                    AbilityOrigin::Granted { .. } => panic!("expected printed source"),
+                };
+                let AbilityOrigin::Printed { line, .. } = printed else {
+                    panic!("expected a printed line");
                 };
                 *line = Nat(99);
             }

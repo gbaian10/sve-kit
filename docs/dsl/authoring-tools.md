@@ -198,6 +198,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 
 `player_effect: {who: self, effect: {hand_limit: unlimited}, until: game}` 自此移除己方的規則手牌上限。效果會留到本局結束，能力來源離場後仍有效。結束階段略過該玩家的規則棄牌，卡片效果指定的棄牌仍照常結算。[GFB01a-003EN、Q746](https://en.shadowverse-evolve.com/cards/?cardno=GFB01a-003EN)
 
+`player_effect: {who: self, effect: {fanfare_triggers: 2}, until: {during_next_turn: {who: self}}}` 使下個己方回合的各個入場曲各觸發兩次。該回合可由額外回合程序開啟。多次安裝若作用於同一玩家的同一回合，只觸發兩次。兩次誘發各自進入待機與結算，因此適正打出 Chronos 時，兩次結算會各排入一個額外回合。[Loki Q777](https://en.shadowverse-evolve.com/cards/?cardno=GFB01c-008EN&faq=) [Chronos Q1386](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-008EN&faq=)
+
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
 

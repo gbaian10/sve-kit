@@ -181,7 +181,7 @@ pub(crate) mod paid_names;
 pub(crate) mod perspective;
 pub(crate) mod phase_restrictions;
 pub(crate) mod play_restrictions;
-pub(crate) mod player_hand_limit;
+pub(crate) mod player_rules;
 pub(crate) mod player_stages;
 pub(crate) mod prevention;
 pub(crate) mod printed_keywords;

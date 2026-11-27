@@ -112,6 +112,7 @@ variants!(RuleModifier {
     CounterCap { holder: Holder, kind: CounterKind, cap: Nat } => ["rule.counter-cap"],
     EvolutionPlayLimit { player: PlayerRef } => ["rule.evolution-play-limit"],
     UnlimitedHand { player: PlayerRef } => ["rule.unlimited-hand"],
+    DoubleFanfare { player: PlayerRef } => ["rule.double-fanfare"],
     BattleDamageBasis { objects: Selector } => ["rule.battle-damage-basis"],
     TriggerMultiplicity { pattern: EventPattern, controller: PlayerRef, add: Nat } => ["rule.trigger-multiplicity"]
 });

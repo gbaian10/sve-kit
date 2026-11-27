@@ -51,6 +51,8 @@ mod event_subject_condition;
 mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]
 mod exchange_routes;
+#[path = "card/fanfare_multiplicity.rs"]
+mod fanfare_multiplicity;
 #[path = "card/formal_target_groups.rs"]
 mod formal_target_groups;
 #[path = "card/granted_delayed.rs"]

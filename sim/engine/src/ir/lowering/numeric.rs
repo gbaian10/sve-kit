@@ -552,7 +552,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
-            ast::InstalledEffect::PlayPermission(_) | ast::InstalledEffect::HandLimit(_) => {
+            ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::HandLimit(_)
+            | ast::InstalledEffect::FanfareTriggers(_) => {
                 return Err(unsupported(path));
             }
             ast::InstalledEffect::LoseAbilities(_) => {

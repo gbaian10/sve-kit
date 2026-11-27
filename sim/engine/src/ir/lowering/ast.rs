@@ -1513,6 +1513,7 @@ pub(super) enum InstalledEffect {
     Prevent(Prevent),
     DamageCap(DamageCap),
     HandLimit(HandLimit),
+    FanfareTriggers(u64),
 }
 
 #[derive(Deserialize)]

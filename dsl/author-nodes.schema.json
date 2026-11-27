@@ -15779,6 +15779,39 @@
         "until"
       ]
     },
+    "A.act.player-effect.fanfare": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "fanfare_triggers": {
+              "const": 2
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "fanfare_triggers"
+          ]
+        },
+        "until": {
+          "const": {
+            "during_next_turn": {
+              "who": "self"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
     "A.act.make-type": {
       "type": "object",
       "properties": {
@@ -16696,6 +16729,9 @@
             },
             {
               "$ref": "#/$defs/A.act.player-effect.hand-limit"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.fanfare"
             }
           ]
         },

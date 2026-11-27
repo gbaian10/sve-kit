@@ -370,6 +370,7 @@ impl Game {
         self.internal_player_play_end_turn(turn);
         self.internal_preventions_end_turn(turn);
         self.internal_phase_restrictions_end_turn();
+        self.internal_expire_fanfare_multiplier()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
