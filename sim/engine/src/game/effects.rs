@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use crate::ir::SnapshotId;
+use crate::ir::{Position, SnapshotId};
 use alloc::collections::BTreeMap;
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -34,7 +34,7 @@ impl Game {
         ids: &[String],
         zone: &str,
         side: Option<&str>,
-        position: Option<&Value>,
+        position: Option<Position>,
         frame: &Frame,
     ) -> Result<()> {
         self.move_objects_with_play_grants(ids, zone, side, position, frame, false)
@@ -134,7 +134,7 @@ impl Game {
         ids: &[String],
         zone: &str,
         side: Option<&str>,
-        position: Option<&Value>,
+        position: Option<Position>,
         frame: &Frame,
         carry_grants: bool,
     ) -> Result<()> {

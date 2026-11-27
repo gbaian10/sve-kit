@@ -12,8 +12,8 @@ use crate::game::player::observation::InstalledEffect;
 use crate::ir::{
     Action, Bool, CharacteristicPatch, CheckId, DecisionId, DriveCheckedEvent, DriveTriggerEvent,
     Duration, DurationEnd, EffectReference, EventPayload, Expr, Instruction, Int, Nat,
-    NumericChange, ObjectRef, PlayerId, PlayerRef, Posture, RuntimeReceiptId, RuntimeZoneRef,
-    Selector, Stat, TimeAnchor, TriggerIcon, ZoneKind,
+    NumericChange, ObjectRef, PlayerId, PlayerRef, Position, Posture, RuntimeReceiptId,
+    RuntimeZoneRef, Selector, Stat, TimeAnchor, TriggerIcon, ZoneKind,
 };
 use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
@@ -358,12 +358,12 @@ impl Game {
         accepted: bool,
     ) -> Result<Run> {
         let destination = if accepted { "cemetery" } else { "deck" };
-        let position = (!accepted).then(|| serde_json::json!("bottom"));
+        let position = (!accepted).then_some(Position::Bottom {});
         self.move_objects(
             from_ref(&wait.physical),
             destination,
             Some(seat_name(wait.run.player)?),
-            position.as_ref(),
+            position,
             &execution.frame(),
         )?;
         let placed = self.object(&wait.physical)?;
