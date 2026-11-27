@@ -200,7 +200,8 @@ fn keyword_source_paths(
     paths.insert(format!("{path}/instruction/source/origin"));
     paths.insert(format!("{path}/instruction/source/origin/keyword"));
     if let Action::InstallEffect { effect, .. } = action
-        && prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+        && (prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+            || super::hand_limit::check(action, origin).is_ok())
     {
         let prefix = format!("{path}/instruction/action/effect/source/origin");
         paths.insert(prefix.clone());

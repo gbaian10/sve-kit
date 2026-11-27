@@ -130,6 +130,52 @@ fn player_hand_limit_is_removed_for_the_rest_of_the_game_even_after_the_source_l
 }
 
 #[test]
+fn player_hand_limit_is_installed_by_a_printed_fanfare() {
+    let input = evolution_linked_movement::tree(&[(
+        "fanfare",
+        json!({"do":[
+            {"player_effect":{"who":"self","effect":{"hand_limit":"unlimited"},"until":"game"}}
+        ]}),
+    )]);
+    let programs = lowerer().lower(&input).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!(
+        (0_u8..9)
+            .map(|index| {
+                let number = if index == 0 {
+                    "unit-follower"
+                } else {
+                    "unit-amulet"
+                };
+                json!({"id":format!("hand-{index}"),"card":number})
+            })
+            .collect::<Vec<_>>()
+    );
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"draw","card":"unit-amulet"}]);
+    let mut game = evolution_linked_movement::loaded(&initial, &programs["unit-follower"]);
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.advance_player_input();
+    let command = player_declarations::play_command(&game, "unit-follower");
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::Applied
+    );
+    if let Input::Question(current) = game.input(Viewer::P1)
+        && let QuestionShape::Decision(DecisionShape::Pending(choices)) = current.shape
+    {
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Pending(choices[0].handle)).kind,
+            SubmissionKind::Applied
+        );
+    }
+    end_turn(&mut game, Viewer::P1, Viewer::P2);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["turn"]["active"], "P2");
+    assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 8);
+}
+
+#[test]
 fn player_hand_limit_rejects_other_recipients_and_temporary_durations() {
     for (who, duration) in [("self", "turn"), ("opp", "game")] {
         let input = evolution_linked_movement::tree(&[(
