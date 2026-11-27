@@ -33,7 +33,7 @@ fn broken_material_question() -> Game {
         actor: Viewer::P1,
         source,
         definition: AbilityId(1),
-        code: Value::Null,
+        base_pp: 0,
         play: PlaySpec {
             limit: None,
             captures: vec![],
