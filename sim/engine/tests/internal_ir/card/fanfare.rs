@@ -408,3 +408,43 @@ fn lowered_choice_only_requires_the_selected_modes_targets() {
         json!(["d0"])
     );
 }
+
+#[test]
+fn explicit_no_effect_fanfare_is_played_and_resolves_without_actions() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP01-118"]["abilities"][0]["fanfare"] = json!({"no_effect":true});
+    let cards = lowerer().lower(&tree).unwrap();
+    let program = &cards["BP01-118"];
+    let mut game = position(1, program);
+    let CardPlay::Entered(_) = game.play_internal_card("s", PlayerId { seat: 1 }).unwrap() else {
+        panic!("follower entry");
+    };
+    assert_eq!(game.internal_card_stage(), Some(ResumeStage::Pending));
+    let state = game.projection(View::Referee).unwrap();
+    let fired = resolved(pending(&mut game).unwrap());
+    assert!(fired.progress.complete);
+    assert!(fired.progress.receipts.is_empty());
+    assert!(matches!(
+        fired.progress.facts.as_slice(),
+        [Fact::AbilityPlayed { source: played, .. }, Fact::AbilityResolved { source: resolved, .. }]
+            if *played == fired.source && *resolved == fired.source
+    ));
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"], after["P1"]);
+    assert_eq!(state["P2"], after["P2"]);
+    assert_eq!(state["objects"], after["objects"]);
+    game.resume_internal_card().unwrap();
+    assert_eq!(game.internal_card_stage(), None);
+}
+
+#[test]
+fn no_effect_fanfare_rejects_false_and_additional_instructions() {
+    for fanfare in [
+        json!({"no_effect":false}),
+        json!({"no_effect":true,"do":[{"draw":{"n":1}}]}),
+    ] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP01-118"]["abilities"][0]["fanfare"] = fanfare;
+        assert_eq!(lowerer().lower(&tree).unwrap_err().code, "invalid_expanded");
+    }
+}
