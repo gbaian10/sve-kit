@@ -682,6 +682,7 @@ impl<'query> From<&'query ast::SelectedQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::CountQuery) -> Self {
         Self {
+            acted: query.acted,
             face_up: query.face_up,
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),

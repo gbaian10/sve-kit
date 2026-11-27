@@ -2632,6 +2632,7 @@ impl CountKind {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
+    pub acted: Option<bool>,
     pub face_up: Option<bool>,
     pub class: Option<String>,
     pub not_class: Option<String>,

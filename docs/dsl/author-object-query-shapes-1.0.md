@@ -59,6 +59,8 @@ count 聯集的案例為 BP06-035：自己墓場的陰陽師卡與法術之聯�
 此例只支持計數位置的聯集；選取位置另以以下卡例定形。
 區域列表與多玩家來源也依集合身分去重；計數查詢不選取、不產生有序 binding。
 
+數值本文可用 `count: {who: opp, zone: field, kind: follower, acted: true}` 計算對手場上橫置從者，`acted: false` 計算直立從者。姿態篩選只適用場上，指示結算時讀取當前姿態，並與玩家、卡種及其他既有條件取交集。
+
 ### 選取位置的物件聯集
 
 `ObjectUnion.any_of` 的每個 limb 是區域或 in 來源，各自保留 source 角色與 F。

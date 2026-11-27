@@ -1202,6 +1202,7 @@ impl BodyContext<'_> {
                 reason = "New count filters must require an explicit admission decision."
             )]
             let ast::CountQuery {
+                acted: None,
                 face_up: None,
                 class: None,
                 not_class: None,

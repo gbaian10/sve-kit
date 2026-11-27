@@ -136,15 +136,6 @@ fn exchange_routes_reject_extra_routes_nested_shapes_and_broader_posture_queries
             );
         }
     }
-    let mut tree = fanfare::expanded::tree().clone();
-    let mut seed = tree["cards"]["BP01-041"].clone();
-    seed["abilities"][0]["activate"] = json!({"cost":{"pp":0_u8},"do":[{"draw":{"n":{"count":{"who":"self","zone":"field","acted":false}}}}]});
-    tree["cards"] = json!({"unit-follower":seed});
-    let error = lowerer().lower(&tree).unwrap_err();
-    assert_eq!(
-        error.code, "unsupported_construct",
-        "posture is not opened for ordinary counts"
-    );
 }
 
 #[test]
