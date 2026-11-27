@@ -63,12 +63,12 @@ because control transfers can require additional Drive icon facts. It writes ski
 and their reasons to `refused-decks.json` before returning an error for an all-refused list.
 The summary's `lineup` gives each admitted deck's seats, results and mirror matches.
 
-`cards.json` counts, per card number, the played cards, the ability plays and pending
-triggers from its text, the moves onto a field or into a cemetery, and the evolutions that
+`cards.json` counts, per card number, the played cards, the ability plays and the ability
+resolutions from its text, the moves onto a field or into a cemetery, and the evolutions that
 placed it. Counts use identities the host disclosed in committed events. The tool takes the
 larger count from the two feeds for each printing, event kind and playing or destination seat
-where available. The current host sends zero pending-trigger events, so `triggers` is zero
-until the host projects them. `built` and `failed` count a card at most once per match.
+where available. The host sends no pending-trigger events, so a triggered ability is counted
+only in `resolved`, once it resolves. `built` and `failed` count a card at most once per match.
 
 `replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>` submits each record's
 commands again and writes the cost of every submission. A record holds the host's setup and

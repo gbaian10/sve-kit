@@ -12,8 +12,8 @@ pub struct Uses {
     pub played: u64,
     /// Ability plays established from its text.
     pub abilities: u64,
-    /// Triggers from its text that became pending.
-    pub triggers: u64,
+    /// Abilities from its text that finished resolving, triggered ones included.
+    pub resolved: u64,
     /// Moves onto a field.
     pub entered: u64,
     /// Moves into a cemetery.
@@ -27,7 +27,7 @@ impl Uses {
         match kind {
             Kind::Played => &mut self.played,
             Kind::Ability => &mut self.abilities,
-            Kind::Trigger => &mut self.triggers,
+            Kind::Resolved => &mut self.resolved,
             Kind::Entered => &mut self.entered,
             Kind::Cemetery => &mut self.cemetery,
             Kind::Evolved => &mut self.evolved,
@@ -38,7 +38,7 @@ impl Uses {
     pub const fn add(&mut self, other: &Self) {
         self.played = self.played.saturating_add(other.played);
         self.abilities = self.abilities.saturating_add(other.abilities);
-        self.triggers = self.triggers.saturating_add(other.triggers);
+        self.resolved = self.resolved.saturating_add(other.resolved);
         self.entered = self.entered.saturating_add(other.entered);
         self.cemetery = self.cemetery.saturating_add(other.cemetery);
         self.evolved = self.evolved.saturating_add(other.evolved);
@@ -47,7 +47,7 @@ impl Uses {
     fn widest(&mut self, other: &Self) {
         self.played = self.played.max(other.played);
         self.abilities = self.abilities.max(other.abilities);
-        self.triggers = self.triggers.max(other.triggers);
+        self.resolved = self.resolved.max(other.resolved);
         self.entered = self.entered.max(other.entered);
         self.cemetery = self.cemetery.max(other.cemetery);
         self.evolved = self.evolved.max(other.evolved);
@@ -58,7 +58,7 @@ impl Uses {
 enum Kind {
     Played,
     Ability,
-    Trigger,
+    Resolved,
     Entered,
     Cemetery,
     Evolved,
@@ -92,11 +92,14 @@ fn counted(body: &EventBody) -> Option<(&str, Kind, Option<Seat>)> {
     {
         return Some((text_printing(source), Kind::Ability, Some(*player)));
     }
-    if let EventBody::TriggerPending {
-        source, controller, ..
+    // The host sends no pending-trigger events; a triggered ability shows once it resolves.
+    if let EventBody::AbilityResolved {
+        source: Some(source),
+        player,
+        ..
     } = body
     {
-        return Some((text_printing(source), Kind::Trigger, Some(*controller)));
+        return Some((text_printing(source), Kind::Resolved, Some(*player)));
     }
     if let EventBody::Evolved {
         form: Some(card), ..
@@ -190,6 +193,30 @@ mod tests {
             "status": "available", "batches": [{"id": "b", "events": events}], "animate": []
         }))
         .unwrap()
+    }
+
+    #[test]
+    fn a_resolution_both_seats_saw_counts_once() {
+        let resolved: EventDelivery = serde_json::from_value(json!({
+            "status": "available", "animate": [], "batches": [{"id": "b", "events": [{
+                "id": "e1", "cause": "c", "parent": null, "about": [], "presentation_id": null,
+                "body": {"kind": "ability_resolved", "player": "p2", "holder": null,
+                    "source": {"kind": "card", "printing_id": "test-follower", "face": null,
+                        "line": null, "holder": null},
+                    "ability": null}}]}],
+        }))
+        .unwrap();
+        let mut tally = Tally::default();
+        for viewer in [Seat::P1, Seat::P2] {
+            tally.update(viewer, &resolved);
+        }
+        assert_eq!(
+            tally.merged().get("test-follower"),
+            Some(&Uses {
+                resolved: 1,
+                ..Uses::default()
+            })
+        );
     }
 
     #[test]

@@ -345,7 +345,7 @@ fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
     // Vanilla followers are played onto the field; nothing evolves and no ability exists.
     assert!(total("played") > 0, "{cards}");
     assert_eq!(total("played"), total("entered"), "{cards}");
-    for field in ["abilities", "triggers", "evolved", "failed"] {
+    for field in ["abilities", "resolved", "evolved", "failed"] {
         assert_eq!(total(field), 0, "{field}");
     }
 }
