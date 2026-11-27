@@ -415,7 +415,7 @@ fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
     short[0].main.truncate(3);
     assert!(matches!(
         Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
-        StrictStartError::Initialization(EngineFailure::Invalid(_))
+        StrictStartError::OpeningHand(Viewer::P1)
     ));
     let mut changed = selection().clone();
     changed.current.remove("BP01-P25");
