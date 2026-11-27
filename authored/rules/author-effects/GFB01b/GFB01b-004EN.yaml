@@ -1,0 +1,49 @@
+cards:
+  GFB01b-004EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -5
+                    when_playing:
+                      in: affected
+                on: discounted
+                until: turn
+          targets:
+            - bind: discounted
+              from:
+                kind: follower
+                who: self
+                zone: ex
+              n: 1
+        line: 2
+      - auto:
+          do:
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 2
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  who: self
+                  zone: ex
+                power: 2
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

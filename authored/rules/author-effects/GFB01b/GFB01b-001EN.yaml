@@ -1,0 +1,63 @@
+cards:
+  GFB01b-001EN:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+          while:
+            cmp:
+              left:
+                history_count:
+                  event: attacked
+                  where:
+                    ref: this
+                  window: this_turn
+              op: ge
+              right: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  is:
+                    kind: follower
+                    ref: attack_target
+                then:
+                  - stand: this
+                  - apply:
+                      effect:
+                        prevent:
+                          kind: any
+                      on: this
+                      until: turn
+        line: 3
+      - auto:
+          do:
+            - if:
+                cond:
+                  history:
+                    at_least: 3
+                    event: moved
+                    from:
+                      who: opp
+                      zone: field
+                    sel:
+                      kind: follower
+                    to: cemetery
+                    window: this_turn
+                then:
+                  - evolve:
+                      ref: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 4
+    admission: light
+format: 2
+kind: author_effect_set

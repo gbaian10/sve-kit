@@ -1,0 +1,27 @@
+cards:
+  GFB01a-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - fanfare:
+          do:
+            - move:
+                ref: recovered
+                to: hand
+            - player_effect:
+                effect:
+                  hand_limit: unlimited
+                until: game
+                who: self
+          targets:
+            - bind: recovered
+              from:
+                class: ロイヤル
+                kind: follower
+                who: self
+                zone: cemetery
+              upto: 5
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

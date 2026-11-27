@@ -1,0 +1,24 @@
+cards:
+  GFB01a-020EN:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 2
+                who: self
+            - choose:
+                bind: summoned
+                from:
+                  kind: follower
+                  orig_cost_le: 2
+                  who: self
+                  zone: hand
+                upto: 2
+            - move:
+                ref: summoned
+                result: entered
+                to: field
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

@@ -1,0 +1,34 @@
+cards:
+  GFB01b-002EN:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+          while:
+            cmp:
+              left:
+                history_count:
+                  event: attacked
+                  where:
+                    ref: this
+                  window: this_turn
+              op: ge
+              right: 1
+      - attack_time:
+          do:
+            - stand: this
+            - apply:
+                effect:
+                  prevent:
+                    kind: any
+                on: this
+                until: turn
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

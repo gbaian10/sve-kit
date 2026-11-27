@@ -1,0 +1,18 @@
+cards:
+  GFB01a-004EN:
+    abilities:
+      - evolve_time:
+          do:
+            - flip_down: forms
+          targets:
+            - any: true
+              bind: forms
+              from:
+                face_up: true
+                kind: evolve_follower
+                who: self
+                zone: evolve_deck
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

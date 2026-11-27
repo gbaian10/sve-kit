@@ -1,0 +1,29 @@
+cards:
+  GFB01a-021EN:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - create:
+                      to: field
+                      token: シールドガーディアン
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - life:
+                delta: 3
+                who: self
+          quick: true
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
