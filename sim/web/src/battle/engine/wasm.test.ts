@@ -6,6 +6,8 @@ import path from "node:path"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { initSync, PreparedMatch } from "./generated/engine"
+import { BattleHost } from "./host"
+import type { MatchOptions, SeatMessage } from "./protocol"
 
 beforeAll(() => {
   initSync({ module: readFileSync(path.join(import.meta.dirname, "generated/engine_bg.wasm")) })
@@ -40,6 +42,23 @@ function inputs(programHash = sha256(programs)): string {
   })
 }
 
+function receive(channel: MessageChannel): Promise<SeatMessage[]> {
+  return new Promise((resolve) => {
+    const messages: SeatMessage[] = []
+    channel.port1.onmessage = (event: MessageEvent<SeatMessage>) => {
+      if (event.data.kind === "baseline_start" && event.data.request_id === "test-barrier") {
+        resolve(messages)
+        return
+      }
+      messages.push(event.data)
+      if (messages.length === 1) {
+        // A marker sent on the same port arrives after the complete failure delivery.
+        channel.port2.postMessage({ kind: "baseline_start", request_id: "test-barrier" })
+      }
+    }
+  })
+}
+
 describe("engine WebAssembly", () => {
   it("rejects malformed inputs, an unpinned attachment and unusable programs with codes only", () => {
     expect(() => new PreparedMatch("{}", programs)).toThrow(/^format$/)
@@ -48,5 +67,58 @@ describe("engine WebAssembly", () => {
     )
     expect(() => new PreparedMatch(inputs(sha256("[")), "[")).toThrow(/^selection$/)
     expect(() => new PreparedMatch(inputs(), programs)).toThrow(/^selection$/)
+  })
+
+  it("routes two different WebAssembly deck errors to the submitting port", async () => {
+    const [document, attachment] = JSON.parse(
+      readFileSync(
+        path.join(
+          import.meta.dirname,
+          "../../../../battle-host/tests/fixtures/published-battle.json",
+        ),
+        "utf8",
+      ),
+    ) as [unknown, string]
+    const prepared = new PreparedMatch(JSON.stringify(document), attachment)
+    const deck = (printing: string): MatchOptions["decks"][number] => ({
+      construction: { kind: "class", value: "ニュートラル" },
+      main: Array.from({ length: 8 }, () => printing),
+      evolve: [],
+    })
+    try {
+      for (const [printing, code] of [
+        ["unavailable", "deck_printing"],
+        ["test-t-unused", "deck_admission"],
+      ] as const) {
+        const p1 = new MessageChannel()
+        const p2 = new MessageChannel()
+        try {
+          const received = Promise.all([receive(p1), receive(p2)])
+          const host = new BattleHost((setup) => Promise.resolve(prepared.open(setup)))
+          host.init({
+            kind: "init",
+            options: {
+              decks: [deck("test-t-anchor"), deck(printing)],
+              control: ["player", "player"],
+              first_chooser: "p1",
+              seed: "load",
+              max_submissions: 10,
+            },
+            ports: { p1: p1.port2, p2: p2.port2 },
+          })
+          await expect(received).resolves.toEqual([
+            [{ kind: "load_error", code: "match" }],
+            [{ kind: "load_error", code }],
+          ])
+        } finally {
+          for (const channel of [p1, p2]) {
+            channel.port1.close()
+            channel.port2.close()
+          }
+        }
+      }
+    } finally {
+      prepared.free()
+    }
   })
 })

@@ -233,6 +233,9 @@ fn play(
     let mut game = match Game::start_player_game(selected.clone(), decks, first, &seed.to_string())
     {
         Ok(game) => game,
+        Err(error @ StrictStartError::OpeningHand(_)) => {
+            return Err(("invalid", error.to_string()));
+        }
         Err(StrictStartError::Initialization(fault)) => return Err(diagnostic(&fault)),
         Err(StrictStartError::Admission(report)) => {
             let first_gaps = report.gaps(Viewer::P1);
