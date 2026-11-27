@@ -1,0 +1,17 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE01-018EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        use: draw_exact_fanfare.v1
+        params:
+          n: 2

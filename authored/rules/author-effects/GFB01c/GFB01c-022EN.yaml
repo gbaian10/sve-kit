@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFB01c-022EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 5
+                to: cemetery
+            - draw:
+                who: self
+                n: 1
