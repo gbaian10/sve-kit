@@ -498,6 +498,7 @@ impl Game {
             || resource_links;
         if special {
             if execution.ability.is_none()
+                && !self.internal_additional_field_put_authorized(execution, previous, zone)?
                 && !self.internal_exchange_field_put_authorized(
                     execution,
                     &previous.id,

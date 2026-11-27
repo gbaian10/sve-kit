@@ -1,9 +1,13 @@
 use super::*;
 
 #[test]
-fn phantom_blaster_dragon_evolves_from_its_committed_additional_material() {
+fn phantom_blaster_dragon_evolves_after_paying_with_an_evolved_blaster_dark() {
     let mut initial = position_with_source("CP03-084", "hand");
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"fee","card":"CP03-086"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"fee","card":"CP03-086","state":{"evolved":true,"evolved_with":"fee-form"}}
+    ]);
+    initial["players"]["P1"]["zones"]["evolution"] =
+        json!([{"id":"fee-form","card":"CP03-SL19"}]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP03-085"}]);
     let mut game = game(&initial);
     let play = game
@@ -19,6 +23,8 @@ fn phantom_blaster_dragon_evolves_from_its_committed_additional_material() {
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["cemetery"], json!(["fee"]));
+    assert_eq!(after["P1"]["evolve_deck"], json!(["fee-form"]));
+    assert_eq!(after["objects"]["fee-form"]["face_up"], true);
     assert_eq!(after["objects"]["source"]["evolved_with"], "form");
     assert_eq!(after["P1"]["pp"]["current"], 7_i64);
 }
