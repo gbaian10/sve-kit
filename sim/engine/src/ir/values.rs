@@ -562,7 +562,9 @@ tags!(SpellCountTime {
     AtResolution,
     AtPlay
 });
+tags!(PhysicalSourceZone { Field, Ex });
 variants!(BoolRead {
+    PhysicalSourceInZone { zone: PhysicalSourceZone } => ["read.physical-source-in-zone"],
     FieldEntryOrigin { object: ObjectOperand, zone: ZoneKind } => ["read.field-entry-origin"],
     FieldEntryMethod { object: ObjectOperand, method: EntryMethod } => ["read.field-entry-method"],
     CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
