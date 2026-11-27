@@ -841,7 +841,7 @@ impl Game {
             name: self.card_name(provider)?,
             line: Some(u64::from(located.source.line)),
         };
-        let mut reference = json!({"kind":"ir-damage-prevention", "source":provider, "generation":generation, "definition":id, "line":located.source.line});
+        let mut reference = json!({"source":provider, "generation":generation, "definition":id, "line":located.source.line});
         self.granted_prevention_label(located, &mut label, &mut reference)?;
         let (delta, multiply, cap, prevent) = match rewrite {
             EventRewrite::PreventDamage { .. } => (0, None, None, true),
@@ -1125,10 +1125,6 @@ impl Game {
                 .iter()
                 .find(|effect| effect.effect == id)
                 .map(|effect| effect.origin.clone()));
-        }
-        if reference["kind"].as_str() != Some("ir-damage-prevention") {
-            // Legacy replacements can resolve without admitted typed text provenance.
-            return Ok(None);
         }
         let holder = reference["source"]
             .as_str()

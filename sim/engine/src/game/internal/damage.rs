@@ -273,21 +273,17 @@ impl Game {
         Ok(())
     }
 
-    fn damage_replacement_options(
-        replacements: &[DamageReplacement],
-    ) -> Result<Vec<ReplacementOption>> {
+    fn damage_replacement_options(replacements: &[DamageReplacement]) -> Vec<ReplacementOption> {
         replacements
             .iter()
             .zip(0_u64..)
-            .map(|(replacement, handle)| {
-                Ok(ReplacementOption {
-                    handle,
-                    card: replacement.label.card.clone(),
-                    name: replacement.label.name.clone(),
-                    line: replacement.label.line,
-                })
+            .map(|(replacement, handle)| ReplacementOption {
+                handle,
+                card: replacement.label.card.clone(),
+                name: replacement.label.name.clone(),
+                line: replacement.label.line,
             })
-            .collect::<Result<Vec<_>>>()
+            .collect()
     }
 
     pub(super) fn continue_damage(
@@ -318,7 +314,7 @@ impl Game {
                         player_id(&self.object(execution.object_id(object)?)?.controller)?
                     }
                 };
-                let options = Self::damage_replacement_options(&replacements)?;
+                let options = Self::damage_replacement_options(&replacements);
                 run.remaining.push((recipient, hit));
                 run.choice_origins = replacements
                     .iter()
