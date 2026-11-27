@@ -1,7 +1,8 @@
 use super::{BodyContext, LoweringError, SourceSpan, ast, keywords, numeric, unsupported};
+use crate::ir::player_rules::next_turn_start;
 use crate::ir::{
     Action, Duration, DurationEnd, FaceId, GrantedAbility, Interval, ObjectOperand, ObjectView,
-    Selector, TextProvider, TimeAnchor, ZoneKind,
+    PlayerRef, Selector, TextProvider, TimeAnchor, ZoneKind,
 };
 use serde_json::{Value, json};
 impl BodyContext<'_> {
@@ -15,7 +16,15 @@ impl BodyContext<'_> {
             || !matches!(
                 value.until,
                 None | Some(
-                    ast::Until::Game | ast::Until::Turn | ast::Until::DuringNextTurn { .. }
+                    ast::Until::Game
+                        | ast::Until::Turn
+                        | ast::Until::DuringNextTurn { .. }
+                        | ast::Until::NextTurn {
+                            next_turn: ast::TurnBegin {
+                                who: ast::StandPlayer::Controller,
+                                ..
+                            }
+                        }
                 )
             )
         {
@@ -31,6 +40,13 @@ impl BodyContext<'_> {
                 anchor: TimeAnchor::Installation {},
                 usage: None,
                 intervals: vec![Interval::DuringNextTurn { player }],
+            }
+        } else if matches!(value.until, Some(ast::Until::NextTurn { .. })) {
+            Duration {
+                end: next_turn_start(PlayerRef::Controller {}),
+                anchor: TimeAnchor::Installation {},
+                usage: None,
+                intervals: vec![],
             }
         } else {
             numeric::duration(value.until.as_ref(), path)?

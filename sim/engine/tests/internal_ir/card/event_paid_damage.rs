@@ -10,7 +10,7 @@ fn observer(reset: bool) -> WellFormedCardProgram {
     lower(&json!([{"pay":{"cost":{"act_self":true},"do":steps}}]))
 }
 
-fn aura_follower(mut abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
+pub(super) fn aura_follower(mut abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
     let mut aura = static_keywords::conditional_keyword();
     aura.node.id = AbilityId(500);
     aura.node.scope = ScopeId(500);

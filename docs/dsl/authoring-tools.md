@@ -200,6 +200,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 
 `player_effect: {who: self, effect: {fanfare_triggers: 2}, until: {during_next_turn: {who: self}}}` 使下個己方回合的各個入場曲各觸發兩次。該回合可由額外回合程序開啟。多次安裝若作用於同一玩家的同一回合，只觸發兩次。兩次誘發各自進入待機與結算，因此適正打出 Chronos 時，兩次結算會各排入一個額外回合。[Loki Q777](https://en.shadowverse-evolve.com/cards/?cardno=GFB01c-008EN&faq=) [Chronos Q1386](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-008EN&faq=)
 
+`player_effect: {who: self, effect: {cannot: {what: lose_defense}}, until: {next_turn: {who: self, edge: begin}}}` 讓己方主戰者從結算後到下個己方回合開始前不能失去防禦值。保護依實際傷害對象判定。受到保護的主戰者不會因傷害或防禦值減少指示失去防禦，設定更低的防禦值與支付扣防費用也無效。被防止的傷害不產生傷害事實、失去防禦的紀錄或吸血回復。保護允許防禦值提高，也會在緊接的己方額外回合開始時解除。[Yggdrasil Q1346–Q1351](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-003EN)
+
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
 
@@ -335,6 +337,8 @@ static:
 
 本文授予可指定 `until: {during_next_turn: {who: self | opp}}`，只在下一個實際開始的指定玩家回合持有該能力或關鍵字；安裝時尚未生效。共用回合排程處理額外回合與跳過回合，指定回合結束後清除。授予仍綁定受益物件世代，普通離場重入不繼承；尚未取得的能力不屬於當下失去能力的截止點。ネア使用此期限授予上述持續要求，持有者的橫置條件仍即時判定。
 
+本文授予的 `until: {next_turn: {who: self, edge: begin}}` 在結算時立即生效，持續到效果控制者下個實際回合開始前。同一玩家連續取得額外回合時也依此到期；受益者沿用既有授予的世代綁定。[Forest Archelon](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-020EN)
+
 固定播放減費可寫成 `grant: {on: {who: self, zone: ex, name: カーバンクルの煌めき}, abilities: [{play: {cost_delta: -2}}]}`。它降低為同一個靜態能力中的既有 `CostModifier`，以受益物件自身為範圍，經共同播放費用計算、合併獨立減費並把實際費用限制在零以上；不建立另一套費用狀態。只接受固定非正整數，不接受改成固定費用、條件式或可選費用。宣告在 EX 與播放解決區有效，外層施加仍可使用既有的本回合期限。在 EX 到解決區、解決區到場的播放規則移動，以及 EX 直接入場時，與其他已支援授予一同攜帶原效果；入場觀察前就可讀到承接後的能力，普通移區不繼承舊世代。
 
 授予可施加到場或 EX 區的適正受益者；其既有能力仍須通過一般准入邊界。`grant.on: {follow: moved}` 沿用同一效果的成功移動回條，對新世代施加能力；失敗移動不產生受益者，不把原物件 ID 當成永久追蹤連結。來源與目標的有效區、期限及生命週期分開處理，並沿用既有授予層對失去能力的處理。
@@ -421,6 +425,8 @@ name:
 `play.additional_cost` 適用於法術、從者與護符。沿用 `Cost` 宣告材料並於打出時完整付款；付不起或材料不合法時取消打出。自己的場上材料可以送墓／橫置，公開 EX／墓場材料可以消滅。以 `steps` 保留多組成本的順序。法術本文須無模式選擇，可搭配 X PP 的可選頭成本，並可用 `paid: {receipt: 名稱}` 讀取同次打出的具名付款。入場曲可讀取本次追加費用中從場上送墓的材料卡名。私有手牌材料與 Quick 預檢依各自的入口處理。
 
 數值算式接受 `plus`、`minus`、`times`（各恰兩項）、`min`（非空列表）、`half_up: E`（將 `E / 2` 朝正無窮方向取整）與 `per: {of, unit}`。`per` 是「N 枚につき」：`of` 除以正整數 `unit` 後向下取整（負數往負無限大取整），`unit` 為零在載入時拒絕；有號溢位使整個指示失敗、不改變局面。`max` 尚未接線。傷害事件頭（`damaged`／`dealt_damage`）的本文用 `{event: amount}` 讀該次實際傷害值。批次觀察 EX 離開的 `moved` 事件也用 `{event: amount}`，讀符合條件的成功移動張數。`dice_rolled` 的本文用 `{event: value}` 讀取最終接受的骰值。其他事件頭、起動與入場曲不提供這些事件數值。
+
+在 `each_player` 程序或 `by_kind` 的主戰者分支內，`{leader_life: p}` 以已綁定的玩家名稱 `p` 讀取該玩家主戰者目前的防禦值。可用 `per` 搭配乘減算式判斷奇偶。
 
 `play.cost_delta` 可使用既有公開計數、`minus`／`times`／`per`／`min` 運算與 `play.define` 別名，依付款時的公開數量加減印刷費用；正數為加費，負數為減費，所有修正合計後才以零為下限。場上、EX、墓場與自己表向進化卡的計數沿用一般數值與選擇器檢查，不能藉此篩選隱藏手牌／牌庫。消滅區只接受不加篩選的整區張數（`{count: {who: self, zone: banish}}`，BP17-051「自分の消滅領域の枚数」），與本文讀消滅區張數相同；加上種類等篩選仍拒絕。`in_zone: {ref: this, zone: ex}` 在減費條件中讀取本次打出前保存的來源區域，因此卡片移入結算區後仍能正確付款；目前接受手牌與 EX，且可與公開存在／數量條件組合。
 

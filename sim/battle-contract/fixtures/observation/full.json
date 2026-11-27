@@ -176,6 +176,28 @@
           },
           {
             "source": {
+              "kind": "card",
+              "printing_id": "SYN01-002",
+              "face": null,
+              "line": null,
+              "holder": null
+            },
+            "expires": {
+              "kind": "next_turn_start",
+              "player": "p1"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "grant",
+              "keywords": ["合成キーワード丁"],
+              "traits": [],
+              "definitions": []
+            }
+          },
+          {
+            "source": {
               "kind": "text",
               "text": {
                 "card": {

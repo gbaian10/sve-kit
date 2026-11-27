@@ -229,6 +229,20 @@ impl BodyContext<'_> {
                             },
                     }),
                 ) => Some(PlayerRule::DoubleFanfare),
+                (
+                    ast::InstalledEffect::Cannot(ast::Cannot::LoseDefense(
+                        ast::CannotLoseDefense {
+                            what: ast::DefenseAction::LoseDefense,
+                        },
+                    )),
+                    Some(ast::Until::NextTurn {
+                        next_turn:
+                            ast::TurnBegin {
+                                who: ast::StandPlayer::Controller,
+                                ..
+                            },
+                    }),
+                ) => Some(PlayerRule::CannotLoseDefense),
                 _ => None,
             };
             if let Some(rule) = rule {
@@ -577,7 +591,8 @@ impl BodyContext<'_> {
                 | ast::Cannot::Stand(_)
                 | ast::Cannot::Attack(_)
                 | ast::Cannot::Removal(_)
-                | ast::Cannot::PlayAbility(_),
+                | ast::Cannot::PlayAbility(_)
+                | ast::Cannot::LoseDefense(_),
             ) => {
                 return Err(unsupported(path));
             }
