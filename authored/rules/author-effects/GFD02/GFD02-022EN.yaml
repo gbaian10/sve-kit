@@ -27,12 +27,10 @@ cards:
                       to: field
                       token: ドラゴン
         line: 3
-      - lastword:
-          do:
-            - life:
-                delta: 5
-                who: self
-        line: 4
+      - line: 4
+        params:
+          n: 5
+        use: lastword.leader-life-add
     admission: light
 format: 2
 kind: author_effect_set

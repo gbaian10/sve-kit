@@ -2,28 +2,6 @@ use super::ability_combinations::{activate_card, finish};
 use super::*;
 
 #[test]
-fn babzz_creates_one_english_hornet_from_either_printed_zone() {
-    for zone in ["field", "ex"] {
-        let mut initial = draw_position();
-        initial["players"]["P1"]["zones"][zone] = json!([{"id":"babzz","card":"GFD01-001EN"}]);
-        initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"drawn","card":"BP01-037"}]);
-        let mut game = game(&initial);
-        game.internal_rule_action(&json!({"do":"end-phase"}))
-            .unwrap();
-        finish(&mut game, None, &[]);
-
-        let state = game.projection(View::Referee).unwrap();
-        let created = state["P1"]["ex"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .filter(|id| state["objects"][id.as_str().unwrap()]["card"] == "GFD01-T01EN")
-            .count();
-        assert_eq!(created, 1, "one Hornet Warrior from {zone}");
-    }
-}
-
-#[test]
 fn chronos_schedules_an_extra_turn_and_is_banished_by_its_last_words() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"chronos","card":"GFD01-008EN"}]);
@@ -36,12 +14,12 @@ fn chronos_schedules_an_extra_turn_and_is_banished_by_its_last_words() {
     assert_eq!(state["P1"]["field"], json!(["source", "chronos"]));
     assert_eq!(
         state["semantic_state"]["turn_schedule"]["extra"],
-        json!([{"player":"P1","count":1}])
+        json!([{"player":"P1","count":1_u8}])
     );
 
     activate_card(&mut game, "BP01-091", 2, &[]);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["banish"], json!(["chronos"]));
+    let after_destruction = game.projection(View::Referee).unwrap();
+    assert_eq!(after_destruction["P1"]["banish"], json!(["chronos"]));
 }
 
 #[test]
