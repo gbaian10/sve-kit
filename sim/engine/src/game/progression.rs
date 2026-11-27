@@ -6,7 +6,8 @@
 use crate::game::effects::RevealAccess;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, int, list, scalar, string};
+use super::{Frame, Game, int, scalar, string};
+use crate::ir::evolution_destination::Destination;
 use crate::ir::{Ability, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 
@@ -16,11 +17,10 @@ impl Game {
         source: &str,
         evolve: &str,
         face: usize,
-        code: &Value,
+        destination: &Destination,
     ) -> Result<bool> {
         let object = self.object(source)?;
-        if code["kind"] != "evolve"
-            || !self.evolution_resource_matches(source, evolve, face, &code["body"])?
+        if !self.evolution_resource_matches(source, evolve, face, destination)?
             || (!self.internal_unlimited_evolution(&object.controller)?
                 && self
                     .state
@@ -47,7 +47,7 @@ impl Game {
         source: &str,
         evolve: &str,
         face: usize,
-        node: &Value,
+        destination: &Destination,
     ) -> Result<bool> {
         let object = self.object(source)?;
         let next = self.object(evolve)?;
@@ -64,38 +64,28 @@ impl Game {
         if !string(&new["card_type"]).contains("エボルヴ") {
             return Ok(false);
         }
-        let contains = node.get("name_contains").and_then(Value::as_str);
-        if contains.is_some() && string(&new["card_type"]) != "フォロワー・エボルヴ" {
+        let is_evolve_follower = string(&new["card_type"]) == "フォロワー・エボルヴ";
+        if matches!(destination, Destination::Contains(_)) && !is_evolve_follower {
             return Ok(false);
         }
-        let names = if contains.is_some() {
-            vec![]
+        let source_names = if matches!(destination, Destination::SameName) {
+            self.card_names(source)?
         } else {
-            node.get("names").map_or_else(
-                || {
-                    node["name"].as_str().map_or_else(
-                        || {
-                            self.card_names(source)
-                                .map(|names| names.into_iter().map(Value::String).collect())
-                        },
-                        |name| Ok(vec![json!(name)]),
-                    )
-                },
-                |names| Ok(list(names)),
-            )?
+            vec![]
         };
-        self.card_name_matches_print(evolve, &next.card, face, |name| {
-            contains.map_or_else(
-                || names.iter().any(|wanted| wanted.as_str() == Some(name)),
-                |part| name.contains(part),
-            )
+        self.card_name_matches_print(evolve, &next.card, face, |name| match destination {
+            Destination::SameName => source_names
+                .iter()
+                .any(|source_name| destination.matches(source_name, name, is_evolve_follower)),
+            Destination::Names(_) | Destination::Contains(_) => {
+                destination.matches("", name, is_evolve_follower)
+            }
         })
     }
 
-    pub(in crate::game) fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
-        let base = int(&code["costs"][0]["amount"]).max(0);
+    pub(in crate::game) fn evolution_pp(&self, base_pp: i64, frame: &Frame) -> Result<i64> {
         self.require_ability_sources("cost adjustment")?;
-        self.internal_installed_evolution_cost(&frame.source, base)
+        self.internal_installed_evolution_cost(&frame.source, base_pp.max(0))
             .map(|cost| cost.max(0))
     }
 
@@ -109,10 +99,11 @@ impl Game {
             })
     }
 
-    pub(in crate::game) fn evolve_with_code(
+    pub(in crate::game) fn evolve_with_destination(
         &mut self,
         decision: &Value,
-        code: &Value,
+        destination: &Destination,
+        base_pp: i64,
         intrinsic: &Ability,
         probe: bool,
     ) -> Result<bool> {
@@ -120,12 +111,12 @@ impl Game {
         let evolve = string(&decision["evolve_card"]);
         let face = usize::try_from(int(&decision["face"])).map_err(invalid)?;
         if self.object(source)?.controller != string(&decision["by"])
-            || !self.evolution_pair(source, evolve, face, code)?
+            || !self.evolution_pair(source, evolve, face, destination)?
         {
             return Ok(false);
         }
-        let mut frame = self.start_frame(source, self.reference(source, code), decision)?;
-        let cost = self.evolution_pp(code, &frame)?;
+        let mut frame = self.start_frame(source, self.reference(source, &Value::Null), decision)?;
+        let cost = self.evolution_pp(base_pp, &frame)?;
         let pp = int(&decision["pay"]["pp"]);
         let ep = int(&decision["pay"]["ep"]);
         let sep = int(&decision["pay"]["sep"]);
