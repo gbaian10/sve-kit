@@ -1,0 +1,30 @@
+cards:
+  GFD01-022EN:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: -2
+                when_playing:
+                  kind: follower
+                  orig_cost_ge: 7
+                  who: self
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  leader_class: ウィッチ
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        orig_cost_ge: 7
+                        who: self
+                        zone: deck
+                      to: hand
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

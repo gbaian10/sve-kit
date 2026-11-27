@@ -9,19 +9,29 @@ evidence:
     kind: supporting
     version: "1.28.0"
     url: https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf
-    note: 效果明確指向剛換區的實體卡時，可以參照移動後的卡。
+    quote: refer to a card that has just moved zones
+    note: 英版條文讓效果中看似指向剛換區的卡參照移動後的卡。範例是同一個能力把來源移區後再指稱它，本卡的待機案例須類推。
+  - ref: CR 4.1.4
+    kind: counter
+    version: "1.28.0"
+    quote: treated as a new card
+    note: 換區原則上視為新卡。若只讀原世代，場上破壞後先謝幕移到 EX、或由 EX 經效果上場，兩種情形都不產生衍生物。
   - ref: CR 10.7.7
     kind: supporting
     version: "1.28.0"
+    quote: must still be played
     note: 已待機的自動能力即使來源換區仍須打出。
   - ref: Q1344
     kind: supporting
     url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-001EN&faq=
+    question: If my EX area is full, how do I resolve this follower's Last Words?
+    quote: This follower would stay in the cemetery.
+    date: "2025-07-18"
     note: EX 區滿時謝幕能力會讓來源留在墓場。此問答未說明待機的結束階段能力如何跨區參照來源。
   - ref: project
     kind: project
     date: "2026-11-28"
-    reason: 原文在同一條條件中明列場上與 EX 區，因此依卡文保留只讀的實體來源位置判斷。
+    reason: 卡文把兩個區域放進同一個結算位置條件，本卡的謝幕又會主動把來源從墓場送到 EX。據此採可回頭的實體來源位置解讀。
 strength: inferred
 decided_on: "2026-11-28"
 applies_to: [B.trigger, V.zone]
@@ -29,3 +39,4 @@ hint:
   zh-TW: 本專案解讀。已待機的能力在結算時查實體來源，仍在能力控制者的場上或 EX 區就產生 Hornet Warrior。
   ja: 本プロジェクトの解釈。待機した能力の解決時、その実物のカードが能力のプレイヤーの場かEXエリアにあれば、Hornet Warriorを出します。
   en: "Project interpretation: the pending ability creates a Hornet Warrior if its physical source is on its controller's field or in their EX area when it resolves."
+note: 本解讀限 Bab’zz 的兩區句型。現行程式在同一張實體卡經非公開區後回到指定公開區時也依結算位置判斷，官方條文與本案對局驗證未涵蓋該邊界。其他卡的區域與世代判斷沿用各自的規則。

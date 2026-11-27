@@ -124,3 +124,27 @@ fn pain_immortal_discards_on_the_abysscraft_fanfare_and_strikes_either_target_ki
         assert_eq!(view(&game)["P2"]["hand"].as_array().unwrap().len(), size_after_fanfare-1, "Strike discards from the controller of {attack_target}");
     }
 }
+
+#[test]
+fn wish_wielder_searches_only_for_runecraft_but_discounts_original_seven_in_both_classes() {
+    for (leader_class, searches) in [("ウィッチ", true), ("ドラゴン", false)] {
+        let mut initial = draw_position();
+        initial["players"]["P1"]["leader"]["class"] = json!(leader_class);
+        let wish = json!({"id":"wish","card":"GFD01-022EN"});
+        let seven = json!({"id":"seven","card":"BP02-003"});
+        let six = json!({"id":"six","card":"BP03-001"});
+        let hand = if searches { json!([wish]) } else { json!([wish, seven.clone()]) };
+        let deck = if searches { json!([six, seven]) } else { json!([six]) };
+        initial["players"]["P1"]["zones"]["hand"] = hand;
+        initial["players"]["P1"]["zones"]["deck"] = deck;
+        let mut game = game(&initial);
+        let played = game.play_internal_card("wish", actor()).unwrap();
+        finish(&mut game, Some(played), &[]);
+        let after_fanfare = view(&game);
+        assert_eq!(after_fanfare["P1"]["hand"], json!(["seven"]), "the Runecraft search selects a cost-seven follower and leaves the cost-six follower in the deck");
+        assert_eq!(after_fanfare["P1"]["deck"], json!(["six"]), "the selected follower is removed from the deck");
+        let discounted = game.play_internal_card("seven", actor()).unwrap();
+        finish(&mut game, Some(discounted), &[]);
+        assert_eq!(view(&game)["P1"]["pp"]["current"], 2_u8, "the continuous reduction applies with leader {leader_class}");
+    }
+}
