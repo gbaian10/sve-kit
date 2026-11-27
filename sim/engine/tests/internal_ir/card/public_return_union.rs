@@ -294,3 +294,95 @@ fn public_move_receipts_use_the_same_destination_authority_as_object_moves() {
         assert_eq!(result.is_ok(), accepted, "{who} {zone} to {to}: {result:?}");
     }
 }
+
+fn field_ex_return_tree() -> Value {
+    equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[{"move":{
+            "ref":{"any_of":[
+                {"who":"opp","zone":"field","kind":"follower"},
+                {"who":"opp","zone":"ex"}
+            ]},
+            "to":"hand"
+        }}]}}),
+        "unit-amulet",
+    )
+}
+
+#[test]
+fn field_and_ex_return_together_to_their_owners_hands() {
+    let program = lowerer()
+        .lower(&field_ex_return_tree())
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"unit-amulet"},
+        {"id":"ally","card":"unit-follower"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"borrowed","card":"unit-follower","owner":"P1"},
+        {"id":"enemy-amulet","card":"unit-amulet"}
+    ]);
+    initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"enemy-ex","card":"unit-spell"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "field-ex-return",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &program).unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let activated = resolved(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let batches = activated
+        .progress
+        .receipts
+        .values()
+        .filter_map(|outcome| {
+            if let InstructionOutcome::Move(movement) = outcome {
+                Some(movement)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(batches.len(), 1);
+    assert_eq!(batches[0].moved.len(), 2);
+    assert!(batches[0].moved.iter().all(|member| member.after.is_some()));
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!(["borrowed"]));
+    assert_eq!(state["P2"]["hand"], json!(["enemy-ex"]));
+    assert_eq!(state["P1"]["field"], json!(["source", "ally"]));
+    assert_eq!(state["P2"]["field"], json!(["enemy-amulet"]));
+    assert_eq!(state["P2"]["ex"], json!([]));
+}
+
+#[test]
+fn field_ex_return_rejects_private_sources_unrelated_destinations_and_mixed_players() {
+    for (who, zone, destination) in [
+        ("opp", "hand", "hand"),
+        ("opp", "ex", "deck"),
+        ("opp", "field", "hand"),
+        ("self", "ex", "hand"),
+    ] {
+        let mut candidate = field_ex_return_tree();
+        let movement =
+            &mut candidate["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"][0]["move"];
+        movement["ref"]["any_of"][1] = json!({"who":who,"zone":zone});
+        movement["to"] = json!(destination);
+        lowerer().lower(&candidate).unwrap_err();
+    }
+}

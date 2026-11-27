@@ -741,6 +741,9 @@ impl BodyContext<'_> {
         if let Some(action) = self.hand_departure_self_move(value, path)? {
             return Ok(action);
         }
+        if let Some(ast::MoveObjects::PublicUnion { any_of }) = &value.r#ref {
+            return self.public_field_ex_return(value, any_of, path);
+        }
         if matches!(value.to, ast::Destination::Field) {
             return self.field_move(value, path);
         }
@@ -771,6 +774,34 @@ impl BodyContext<'_> {
             path,
         )?;
         self.observed_destination(value, cards, path)
+    }
+
+    fn public_field_ex_return(
+        &mut self,
+        value: &ast::Move,
+        queries: &[ast::PublicQuery; 2],
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let [first, second] = queries;
+        if !matches!(value.to, ast::Destination::Hand)
+            || first.who != second.who
+            || !matches!(
+                (&first.zone, &second.zone),
+                (ast::PublicZone::Field, ast::PublicZone::Ex)
+                    | (ast::PublicZone::Ex, ast::PublicZone::Field)
+            )
+            || value.top.is_some()
+            || value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        let sets = vec![
+            self.public_move_objects(first, &format!("{path}/ref/any_of/0"))?,
+            self.public_move_objects(second, &format!("{path}/ref/any_of/1"))?,
+        ];
+        Ok(owner_put(Selector::Union { sets }, OwnerZone::Hand))
     }
 
     fn observed_destination(
