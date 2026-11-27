@@ -7,7 +7,7 @@ fn settle(game: &mut Game) {
     }
 }
 fn activate(game: &mut Game, source: &str, card: &str) -> CardPlay {
-    let definition = selection_with_rules().current[card]
+    let definition = selection().current[card]
         .program
         .card()
         .abilities
@@ -75,7 +75,7 @@ fn ninon_stands_after_payment_and_damage_and_cannot_use_the_same_ub_twice_in_a_t
         assert_eq!(state["objects"]["source"]["power"], 2_u8);
         assert_eq!(state["objects"]["other"]["power"], 3_u8);
         assert_eq!(state["objects"]["enemy"]["hp"], 15_u8);
-        let definition = selection_with_rules().current[&card]
+        let definition = selection().current[&card]
             .program
             .card()
             .abilities

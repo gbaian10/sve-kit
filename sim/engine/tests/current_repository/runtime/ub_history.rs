@@ -178,7 +178,7 @@ fn targetless_fanfare_is_cancelled_without_counting_and_other_controller_is_filt
 #[test]
 fn a_second_posture_payment_failure_does_not_record_another_ub() {
     let mut game = prepared_program(&initial("CP04-015", 0, true), &reader(Some("self")));
-    let definition = selection_with_rules().current["CP04-015"]
+    let definition = selection().current["CP04-015"]
         .program
         .card()
         .abilities[0]

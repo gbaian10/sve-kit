@@ -10,7 +10,7 @@ pub(super) fn position(card: &str, form: &str) -> Value {
 }
 pub(super) fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

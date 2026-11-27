@@ -18,7 +18,7 @@ fn position(number: &str) -> Value {
 }
 fn new_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -251,7 +251,7 @@ mod distinct {
         for printing in printings(number) {
             for qualified in [false, true] {
                 let mut game = Game::from_selected_effects(
-                    selection_with_rules().clone(),
+                    selection().clone(),
                     &initial(&printing, qualified),
                     &Value::Null,
                     &Value::Null,

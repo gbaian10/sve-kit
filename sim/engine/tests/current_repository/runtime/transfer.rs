@@ -28,7 +28,7 @@ fn chaotic_angel_transfer_all_printings_keep_payment_capacity_and_new_owner_evol
         for full in [false, true] {
             let initial = position(number, full);
             let mut game = Game::from_selected_effects(
-                selection_with_rules().clone(),
+                selection().clone(),
                 &initial,
                 &Value::Null,
                 &Value::Null,

@@ -19,7 +19,7 @@ fn position() -> Game {
         {"id":"enemy-a","card":"BP01-037"},{"id":"enemy-b","card":"BP01-037"}
     ]);
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

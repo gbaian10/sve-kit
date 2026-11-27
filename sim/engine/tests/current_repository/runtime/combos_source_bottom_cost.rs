@@ -5,7 +5,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -66,7 +66,7 @@ fn drive(game: &mut Game, mut step: Option<CardPlay>, picks: &[&str]) {
 }
 
 fn ability(line: u32) -> AbilityId {
-    selection_with_rules().current["BP07-012"]
+    selection().current["BP07-012"]
         .program
         .card()
         .abilities

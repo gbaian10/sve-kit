@@ -2,7 +2,7 @@ use super::*;
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -121,7 +121,7 @@ fn named(state: &Value, zone: &Value, name: &str) -> usize {
 }
 
 fn ride(game: &mut Game, card: &str) {
-    let id = selection_with_rules().current[card]
+    let id = selection().current[card]
         .program
         .card()
         .abilities

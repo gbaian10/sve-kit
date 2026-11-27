@@ -14,7 +14,7 @@ pub(super) fn position(number: &str, zone: &str) -> Value {
 
 pub(super) fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

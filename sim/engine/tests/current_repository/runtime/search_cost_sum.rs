@@ -166,7 +166,7 @@ fn ecp01_051_race_searches_mejiro_followers_or_amulets_within_a_total_of_six() {
             {"id":"other","card":"BP01-037"}
         ]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

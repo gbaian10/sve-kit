@@ -17,7 +17,7 @@ fn position(printing: &str, occupied: usize) -> Value {
 }
 
 fn game(initial: &Value) -> Game {
-    Game::from_selected_effects(selection_with_rules().clone(), initial, &Value::Null, &Value::Null, "move-success").unwrap()
+    Game::from_selected_effects(selection().clone(), initial, &Value::Null, &Value::Null, "move-success").unwrap()
 }
 
 fn targets(play: CardPlay) -> DecisionView {

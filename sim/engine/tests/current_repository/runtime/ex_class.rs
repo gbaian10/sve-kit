@@ -18,7 +18,7 @@ fn position(number: &str) -> Value {
 }
 fn build(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -173,7 +173,7 @@ fn gale_fixed_repeat_obeys_live_ex_capacity_without_moving_the_second_top() {
 
 #[test]
 fn an_ex_class_exclusion_requires_its_exact_event_and_the_information_presence_guard() {
-    let program = &selection_with_rules().current["BP21-071"].program;
+    let program = &selection().current["BP21-071"].program;
     for wrong_event in [false, true] {
         let mut raw = program.card().clone();
         let observer = raw

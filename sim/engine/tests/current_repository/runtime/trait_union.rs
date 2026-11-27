@@ -5,7 +5,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn rules_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -189,7 +189,7 @@ fn bp14_107_banishes_a_demon_or_demon_lord_to_destroy_or_gain_storm() {
         while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
             game.resume_internal_card().unwrap();
         }
-        let ability = selection_with_rules().current[printing]
+        let ability = selection().current[printing]
             .program
             .card()
             .abilities[1]

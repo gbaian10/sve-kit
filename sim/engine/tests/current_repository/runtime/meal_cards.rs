@@ -20,7 +20,7 @@ fn position(card: &str, zone: &str) -> Value {
 }
 fn from_position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -128,7 +128,7 @@ fn feed(game: &mut Game, card: &str) {
     settle(game);
 }
 fn activate(game: &mut Game, card: &str) {
-    let ability = selection_with_rules().current[card]
+    let ability = selection().current[card]
         .program
         .card()
         .abilities

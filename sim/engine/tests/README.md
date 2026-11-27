@@ -18,8 +18,8 @@ inputs and accepted selection. Build a fresh initial position for each game.
 Games share the immutable runtime definitions prepared for that accepted selection; their positions, decisions and
 ability uses remain independent. Additional `load_internal_card()` calls affect
 only that game.
-Use `selection_with_rules()` for scenarios that require engine rule bindings;
-clone the returned selection when constructing a game.
+Use `selection()` for full-repository scenarios; it includes engine rule
+bindings. Clone the returned selection when constructing a game.
 
 Tests that change source evidence or catalog contents must clone `inputs()` before
 editing. Build related variants with `repository::select()` or

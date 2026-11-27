@@ -7,7 +7,7 @@ const EVOLVE_PP: u8 = 2;
 
 fn rules_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

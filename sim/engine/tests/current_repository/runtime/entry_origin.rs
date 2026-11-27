@@ -110,7 +110,7 @@ fn star_priestess_returns_a_cemetery_amulet_and_its_fanfare_runs() {
         {"id":"wrong-kind","card":"BP01-037"}
     ]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

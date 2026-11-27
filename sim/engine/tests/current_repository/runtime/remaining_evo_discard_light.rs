@@ -6,7 +6,7 @@ const AMULETS: [&str; 2] = ["ECP01-054", "ECP01-P30"];
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

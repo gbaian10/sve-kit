@@ -102,7 +102,7 @@ fn validate_modes(game: &mut Game, choice: &DecisionView, cap: u64, enemy: bool)
 
 fn run_case(card: &str, other_count: u8, enemy: bool) {
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position(card, other_count, enemy),
         &Value::Null,
         &Value::Null,

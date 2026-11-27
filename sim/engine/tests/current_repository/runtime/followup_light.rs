@@ -3,7 +3,7 @@ use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
 fn aliases(representative: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let identity = &selected.current[representative].card_id;
     selected
         .current
@@ -30,7 +30,7 @@ fn princess(initial: &mut Value) {
 }
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -129,7 +129,7 @@ fn settle(game: &mut Game) {
     }
 }
 fn activation(card: &str) -> AbilityId {
-    selection_with_rules().current[card]
+    selection().current[card]
         .program
         .card()
         .abilities
@@ -165,7 +165,7 @@ fn forbidden(game: &mut Game, card: &str) {
     );
 }
 fn evolve(game: &mut Game, base: &str) {
-    let definition = selection_with_rules().current[base]
+    let definition = selection().current[base]
         .program
         .card()
         .abilities

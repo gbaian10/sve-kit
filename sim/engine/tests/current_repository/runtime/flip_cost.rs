@@ -7,7 +7,7 @@ use sve_engine::game::player::{Input, Viewer};
 
 fn build(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -315,7 +315,7 @@ fn an_unpayable_azi_fanfare_never_turns_over_a_partial_cost() {
 
 #[test]
 fn private_flip_cost_materials_cannot_be_published_before_payment() {
-    let accepted = &selection_with_rules().current["BP17-116"].program;
+    let accepted = &selection().current["BP17-116"].program;
     let mut card = accepted.card().clone();
     let parameter = &mut card.card_play_costs[0]
         .node

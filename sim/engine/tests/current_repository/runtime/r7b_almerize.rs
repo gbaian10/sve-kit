@@ -30,7 +30,7 @@ fn settle(game: &mut Game) -> usize {
 }
 
 fn activate(game: &mut Game, number: &str, mode: u64, super_evolution: bool) {
-    let id = selection_with_rules().current[number]
+    let id = selection().current[number]
         .program
         .card()
         .abilities
@@ -149,7 +149,7 @@ fn position(number: &str) -> Value {
 fn evolved(number: &str, super_evolution: bool) -> Game {
     let initial = position(number);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -246,7 +246,7 @@ fn check_case(number: &str, super_evolution: bool, mode: u64) {
 fn r7b_almerize_all_prints_play_evolve_and_pay_for_both_printed_modes() {
     for number in ["BP22-022", "BP22-SL08", "PR-625"] {
         assert!(
-            selection_with_rules().current.contains_key(number),
+            selection().current.contains_key(number),
             "Every JP printing must be admitted."
         );
         for super_evolution in [false, true] {

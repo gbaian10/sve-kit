@@ -287,7 +287,7 @@ fn witch_position(deck_size: u8) -> Value {
 fn bp08_038_draws_deck_minus_five_then_039_puts_all_other_field_cards_in_cemetery() {
     for size in [3_u8, 5, 8] {
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &witch_position(size),
             &Value::Null,
             &Value::Null,

@@ -9,7 +9,7 @@ fn position(number: &str, zone: &str) -> Value {
 }
 fn fixture(state: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         state,
         &Value::Null,
         &Value::Null,

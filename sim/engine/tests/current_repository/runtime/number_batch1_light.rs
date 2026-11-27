@@ -9,7 +9,7 @@ fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {
 // Collaboration titles (ウマ娘, デレマス) need the repository's rule bindings.
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

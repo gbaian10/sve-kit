@@ -9,10 +9,7 @@ const AMULET: &str = "BP09-102";
 const SPELL: &str = "BP01-024";
 
 fn fixture() -> (&'static SelectedEffects, &'static BattleReferences) {
-    (
-        repository::selection_with_rules(),
-        repository::battle_references(),
-    )
+    (repository::selection(), repository::battle_references())
 }
 
 fn make_start(selected: &SelectedEffects, fillers: [&str; 2]) -> Game {

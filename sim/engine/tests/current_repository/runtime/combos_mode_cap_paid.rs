@@ -14,7 +14,7 @@ fn loaded(pp: u8) -> Game {
         {"id":"lisha","card":"BP12-020"}
     ]);
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
