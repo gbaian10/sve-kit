@@ -59,6 +59,7 @@ pub(super) struct Ability {
     #[serde(rename = "ports")]
     pub _ports: Ports,
     pub imports: Option<IgnoredAny>,
+    #[serde(default, deserialize_with = "fanfare_body")]
     pub fanfare: Option<Body>,
     pub lastword: Option<Body>,
     pub attack_time: Option<Body>,
@@ -430,6 +431,32 @@ pub(super) struct Body {
     pub define: BTreeMap<String, Number>,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum FanfareBody {
+    Instructions(Box<Body>),
+    NoEffect(NoEffectFanfare),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NoEffectFanfare {
+    #[serde(rename = "no_effect")]
+    _no_effect: True,
+}
+
+fn fanfare_body<'de, D>(deserializer: D) -> Result<Option<Body>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Ok(
+        Option::<FanfareBody>::deserialize(deserializer)?.map(|body| match body {
+            FanfareBody::Instructions(body) => *body,
+            FanfareBody::NoEffect(NoEffectFanfare { _no_effect: True }) => Body::default(),
+        }),
+    )
 }
 
 #[derive(Deserialize)]

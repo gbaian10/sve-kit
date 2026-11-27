@@ -462,6 +462,8 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 所有觸發能力都可用 `targets` 宣告正式目標；費用時點依[作者語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)區分頭付款與本文付款。控制者在檢查時點打出待機能力時選擇目標，沒有足夠合法目標就不發動，不執行後續效果。謝幕在來源離場後選擇目標。目標宣告前不執行本體；同一印刷行的入場曲與謝幕仍以不同 `scope` 區分。模式目標、單一目標組的分配傷害，以及 `at: resolution` 公開計數讀值沿用共同打出規則。模式目標（`option: N`）的候選須是不依賴其他選擇的公開集合；「場の他のフォロワー」的 `other: true` 只排除能力持有者自身，可用於模式目標（BP15-114）。
 
+`fanfare: {no_effect: true}` 表示印刷的入場曲確實誘發、進待機並結算，本文無遊戲指示（如 New Year's Soul Devil）。此形狀只接受 `no_effect: true`，費用、目標與指示應使用普通入場曲本文。
+
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
 `enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。同一處也接受 `cost_le: N`，以進場當下的有效費用篩選主體（BP04-063）。

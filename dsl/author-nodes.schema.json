@@ -17006,6 +17006,26 @@
         }
       ]
     },
+    "A.head.fanfare": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "no_effect": {
+              "type": "boolean",
+              "const": true
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "no_effect"
+          ]
+        }
+      ]
+    },
     "A.head.trigger": {
       "type": "object",
       "properties": {
@@ -17483,7 +17503,7 @@
       "type": "object",
       "properties": {
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         },
         "lastword": {
           "$ref": "#/$defs/A.head.trigger"
@@ -18200,7 +18220,7 @@
           "$ref": "#/$defs/Ports"
         },
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         }
       },
       "required": [
@@ -19770,7 +19790,7 @@
       "type": "object",
       "properties": {
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         },
         "lastword": {
           "$ref": "#/$defs/A.head.trigger"
