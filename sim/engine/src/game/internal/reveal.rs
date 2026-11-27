@@ -112,6 +112,7 @@ impl Game {
                     | "trigger"
                     | "equipment"
                     | "evolve_deck"
+                    | "limit_break"
             )
         {
             return Ok(true);
