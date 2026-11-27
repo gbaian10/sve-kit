@@ -74,6 +74,8 @@ pub enum NoticeKind {
     Look,
     /// Cards were revealed for a moment.
     TemporaryReveal,
+    /// The privately chosen and publicly revealed card was placed on top of its owner's deck.
+    DeckTop,
 }
 
 /// One card of a notice, as it was seen; it links to no current object.
@@ -84,7 +86,7 @@ pub struct ShownCard {
     pub card: CardRef,
     /// Its owner.
     pub owner: Seat,
-    /// Position among the cards looked at, when the look was ordered.
+    /// Position in an ordered Look, or the new deck offset zero for a `DeckTop` notice.
     pub position: Option<Nat>,
 }
 
