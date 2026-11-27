@@ -10,30 +10,10 @@ use crate::ir::{
     Bool, ChoiceDomain, Control, Int, PlaySpec, PlayerId, PlayerRef, Resource, ResourceOperation,
     SelectionGroup, Selector,
 };
-use serde_json::{Value, json};
+use serde_json::Value;
 
 mod declaration;
 pub(in crate::game) use declaration::Declaration as EvolutionDeclaration;
-
-fn rule_code(ability: &Ability) -> Result<Value> {
-    let amount = cost(ability)?;
-    let mut code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}]});
-    let mut body = destination_spec(&destination(ability)?);
-    body["op"] = json!("evolve");
-    body["subjects"] = json!("self");
-    code["body"] = body;
-    Ok(code)
-}
-
-pub(super) fn destination_spec(destination: &Destination) -> Value {
-    match destination {
-        Destination::SameName => json!({}),
-        Destination::Names(names) => {
-            json!({"names": names.iter().map(|name| &name.0).collect::<Vec<_>>()})
-        }
-        Destination::Contains(name) => json!({"name_contains": name.0}),
-    }
-}
 
 pub(super) const fn intrinsic(ability: &Ability) -> bool {
     matches!(
@@ -323,12 +303,13 @@ impl Game {
         if !usable(self, holder, &entry.node)? {
             return Ok(false);
         }
-        let code = rule_code(&entry.node)?;
+        let destination = destination(&entry.node)?;
+        let base_pp = cost(&entry.node)?;
         let resource = self.object(string(&decision["evolve_card"]))?;
         if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);
         }
-        self.evolve_with_code(decision, &code, &entry.node, probe)
+        self.evolve_with_destination(decision, &destination, base_pp, &entry.node, probe)
     }
 }
 

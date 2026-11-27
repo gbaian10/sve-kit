@@ -3,22 +3,22 @@
 use crate::session::{LocalSession, SeatControl};
 use crate::wire::{Identity, Region, Seat, viewer_of};
 use alloc::collections::BTreeMap;
+use core::fmt;
 use serde::Deserialize;
+use serde_json::value::RawValue;
 use sha2::{Digest as _, Sha256};
 use sve_engine::battle::{BattleReferences, ReferenceInput};
-use sve_engine::catalog::{
-    Catalog, EngineIdentityInput, ProgramPrinting, SelectedEffects, SnapshotPrograms,
-};
+use sve_engine::catalog::{Catalog, EngineIdentityInput, ProgramPrinting, SnapshotPrograms};
 use sve_engine::game::Game;
-use sve_engine::game::player::{DeckConstruction, PlayerDeck};
+use sve_engine::game::player::{DeckConstruction, PlayerDeck, StrictStartError};
 use sve_engine::host::HostLimits;
 
 /// The trusted host's match parameters. The seed and first chooser stay inside the Worker.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct MatchSetup {
-    /// Host-validated decks in seat order.
-    pub decks: [DeckSetup; 2],
+pub struct MatchSetup<Deck = DeckSetup> {
+    /// Submitted decks in seat order.
+    pub decks: [Deck; 2],
     /// Seat that chooses who goes first.
     pub first_chooser: Seat,
     /// Private randomness seed.
@@ -74,6 +74,12 @@ pub enum LoadError {
     References,
     /// The decks or opening could not start a match.
     Match,
+    /// The submitting seat's deck document is malformed.
+    DeckFormat,
+    /// At least one submitted printing does not exist in the snapshot.
+    DeckPrinting,
+    /// The submitting seat's deck could not enter strict play.
+    DeckAdmission,
 }
 
 impl LoadError {
@@ -86,6 +92,42 @@ impl LoadError {
             Self::Identity => "identity",
             Self::References => "references",
             Self::Match => "match",
+            Self::DeckFormat => "deck_format",
+            Self::DeckPrinting => "deck_printing",
+            Self::DeckAdmission => "deck_admission",
+        }
+    }
+}
+
+/// Opening failure with the detailed code scoped to each submitted deck.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct MatchLoadError {
+    shared: LoadError,
+    seats: [LoadError; 2],
+}
+
+impl fmt::Debug for MatchLoadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MatchLoadError")
+            .field("shared", &self.shared)
+            .finish_non_exhaustive()
+    }
+}
+
+impl MatchLoadError {
+    /// Code safe to use without a seat.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        self.shared.code()
+    }
+
+    /// Code to send only to the channel bound to this seat.
+    #[must_use]
+    pub const fn code_for(self, seat: Seat) -> &'static str {
+        let [p1, p2] = self.seats;
+        match seat {
+            Seat::P1 => p1.code(),
+            Seat::P2 => p2.code(),
         }
     }
 }
@@ -155,29 +197,88 @@ impl PreparedBattle {
     ///
     /// # Errors
     /// Refuses malformed setups, illegal decks or reachable programs the engine cannot admit.
-    pub fn open(&self, setup: &str) -> Result<LocalSession, LoadError> {
-        let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
-        let resolve = |mut input: DeckSetup| {
-            for printing in input.main.iter_mut().chain(&mut input.evolve) {
-                *printing = self
-                    .programs
-                    .native_printing(printing)
-                    .ok_or(LoadError::Match)?
-                    .to_owned();
-            }
-            Ok(deck(input))
-        };
-        let [first, second] = setup.decks.clone();
-        let decks = [resolve(first)?, resolve(second)?];
+    pub fn open(&self, setup: &str) -> Result<LocalSession, MatchLoadError> {
+        let setup: MatchSetup<Box<RawValue>> =
+            serde_json::from_str(setup).map_err(|_error| MatchLoadError {
+                shared: LoadError::Format,
+                seats: [LoadError::Format; 2],
+            })?;
+        let decks = setup.decks.each_ref().map(|input| self.resolve_deck(input));
+        if let [Ok(p1), Ok(p2)] = &decks
+            && let Ok(game) =
+                self.open_game([p1.clone(), p2.clone()], setup.first_chooser, &setup.seed)
+        {
+            return Ok(LocalSession::new(
+                game,
+                self.references.clone(),
+                self.identity.clone(),
+                setup.control.map(|control| match control {
+                    Control::Player => SeatControl::Player,
+                    Control::Policy => SeatControl::Policy,
+                }),
+                HostLimits {
+                    max_submissions: setup.max_submissions,
+                    max_retries: 1,
+                },
+            ));
+        }
+        // A match-level rejection cannot decide another seat's diagnostic. Mirroring
+        // each deck here makes its admission result independent of the other submission.
+        let seats = decks.map(|resolved| {
+            resolved
+                .and_then(|deck| {
+                    self.open_game([deck.clone(), deck], setup.first_chooser, &setup.seed)
+                })
+                .err()
+                .unwrap_or(LoadError::Match)
+        });
+        Err(MatchLoadError {
+            shared: LoadError::Match,
+            seats,
+        })
+    }
+
+    fn resolve_deck(&self, input: &RawValue) -> Result<PlayerDeck, LoadError> {
+        let mut input: DeckSetup =
+            serde_json::from_str(input.get()).map_err(|_error| LoadError::DeckFormat)?;
+        for printing in input.main.iter_mut().chain(&mut input.evolve) {
+            *printing = self
+                .programs
+                .native_printing(printing)
+                .ok_or(LoadError::DeckPrinting)?
+                .to_owned();
+        }
+        Ok(PlayerDeck {
+            construction: match input.construction {
+                Construction::Class(class) => DeckConstruction::Class(class),
+                Construction::Title(title) => DeckConstruction::Title(title),
+            },
+            main: input.main,
+            evolve: input.evolve,
+        })
+    }
+
+    fn open_game(
+        &self,
+        decks: [PlayerDeck; 2],
+        first_chooser: Seat,
+        seed: &str,
+    ) -> Result<Game, LoadError> {
         let selected = Game::select_snapshot_decks(&self.programs, &decks)
             .map_err(|_error| LoadError::Selection)?;
-        open(
-            selected,
-            decks,
-            self.references.clone(),
-            self.identity.clone(),
-            &setup,
-        )
+        let admission = Game::check_battle_decks(&selected, &decks, &self.references)
+            .map_err(|_error| LoadError::References)?;
+        if !admission.is_admitted() {
+            return Err(LoadError::DeckAdmission);
+        }
+        Game::start_player_game(selected, decks, viewer_of(first_chooser), seed).map_err(|error| {
+            match error {
+                StrictStartError::Admission(_) | StrictStartError::OpeningHand(_) => {
+                    LoadError::DeckAdmission
+                }
+                StrictStartError::Initialization(_) => LoadError::Match,
+            }
+        })
     }
 }
 
@@ -224,48 +325,6 @@ fn bind_references(
         return Err(LoadError::References);
     }
     Ok(references)
-}
-
-fn open(
-    selected: SelectedEffects,
-    decks: [PlayerDeck; 2],
-    references: BattleReferences,
-    identity: Identity,
-    setup: &MatchSetup,
-) -> Result<LocalSession, LoadError> {
-    // The selection already loaded, so a failure here is a reference or source gap.
-    let admission = Game::check_battle_decks(&selected, &decks, &references)
-        .map_err(|_error| LoadError::References)?;
-    if !admission.is_admitted() {
-        return Err(LoadError::Match);
-    }
-    let game =
-        Game::start_player_game(selected, decks, viewer_of(setup.first_chooser), &setup.seed)
-            .map_err(|_error| LoadError::Match)?;
-    Ok(LocalSession::new(
-        game,
-        references,
-        identity,
-        setup.control.map(|control| match control {
-            Control::Player => SeatControl::Player,
-            Control::Policy => SeatControl::Policy,
-        }),
-        HostLimits {
-            max_submissions: setup.max_submissions,
-            max_retries: 1,
-        },
-    ))
-}
-
-fn deck(setup: DeckSetup) -> PlayerDeck {
-    PlayerDeck {
-        construction: match setup.construction {
-            Construction::Class(class) => DeckConstruction::Class(class),
-            Construction::Title(title) => DeckConstruction::Title(title),
-        },
-        main: setup.main,
-        evolve: setup.evolve,
-    }
 }
 
 fn hex(text: &str) -> String {

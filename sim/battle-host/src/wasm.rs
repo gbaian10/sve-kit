@@ -4,6 +4,7 @@
 
 use crate::load::PreparedBattle;
 use crate::session::{Delivery, LocalSession};
+use crate::wire::Seat;
 use wasm_bindgen::prelude::{JsError, wasm_bindgen};
 
 /// One local match inside the Worker.
@@ -59,11 +60,15 @@ impl PreparedMatch {
     /// Start a match using the verified inputs and its own setup.
     ///
     /// # Errors
-    /// Throws the host's stable code for the failed stage.
+    /// Throws the stable codes in seat order for the trusted Worker to route.
     pub fn open(&self, setup: &str) -> Result<Session, JsError> {
         self.inner
             .open(setup)
             .map(|inner| Session { inner })
-            .map_err(|error| JsError::new(error.code()))
+            .map_err(|error| {
+                let codes = [Seat::P1, Seat::P2].map(|seat| error.code_for(seat));
+                let message = serde_json::to_string(&codes).unwrap_or_else(|_| error.code().into());
+                JsError::new(&message)
+            })
     }
 }

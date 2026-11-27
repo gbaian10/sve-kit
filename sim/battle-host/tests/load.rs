@@ -11,24 +11,10 @@ mod fixture;
 
 use serde_json::{Value, json};
 use sve_battle_contract::question::{MainIntent, QuestionShape};
-use sve_battle_contract::{Answer, ClientMessage, Command, HostMessage};
+use sve_battle_contract::{Answer, ClientMessage, Command, HostMessage, Seat};
 use sve_battle_host::load::{LoadError, PreparedBattle};
 use sve_battle_host::wire::{BattleInput, BattleUpdate, RequestId, Submit};
 use sve_battle_host::{Delivery, LocalSession};
-
-const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","rule_names":{}}"#;
-
-/// The anchor of the rule evidence and a printing no deck uses.
-fn snapshot() -> String {
-    ["t-anchor", "t-unused"]
-        .map(|number| {
-            json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル",
-                "card_type":"フォロワー","cost":"1","power":"1","hp":"1","traits":[],"text":(number == "t-anchor").then_some("Draw a card twice."),
-                "sections":[],"title":"synthetic"}]})
-            .to_string()
-        })
-        .join("\n")
-}
 
 fn setup(card: &str) -> String {
     let deck = json!({"construction":{"kind":"class","value":"ニュートラル"},
@@ -39,51 +25,7 @@ fn setup(card: &str) -> String {
 }
 
 fn published() -> (Value, String) {
-    let native = snapshot();
-    let card = format!("c:{}", "a".repeat(32));
-    let face = format!("f:{}", "b".repeat(32));
-    let unused = format!("f:{}", "c".repeat(32));
-    let mut rules: Value = serde_json::from_str(&fixture::rules(&native, "t-anchor")).unwrap();
-    *rules.pointer_mut("/input/kind").unwrap() = json!("resolved");
-    *rules.pointer_mut("/titles/0/anchor").unwrap() =
-        json!({"kind":"face-id","region":"jp","face_id":face});
-    let rules = rules.to_string();
-    let mut refs = fixture::references(&native);
-    refs.wording = Some(
-        serde_json::from_value(json!({
-            "manifest_sha256": format!("sha256:{}", fixture::MANIFEST),
-            "faces": [
-                {"card_no":"t-anchor","native_face":0_u8,"face_id":face,
-                    "revisions":[{"revision_id":"revision","fields":[{"kind":"effect"}]}]},
-                {"card_no":"t-unused","native_face":0_u8,"face_id":unused,
-                    "revisions":[{"revision_id":"unused","fields":[]}]}
-            ]
-        }))
-        .unwrap(),
-    );
-    let draw = json!({"line":1_u8,"fanfare":{"do":[{"draw":{"n":1_u8}}]},
-        "ports":{"exports":{},"imports":{}}});
-    let programs = json!({
-        "format_version":"4.2.0",
-        "entries": [{"id":"synthetic","dsl_version":"1.0",
-            "ast":{"card_id":card,"scope":"shared","faces":{(face.clone()):{"abilities":[draw,draw]}}}}],
-        "printings": {(card.clone()):{"representative":"test-t-anchor","tokens":[]}}
-    })
-    .to_string();
-    let identity = fixture::identity(&programs, &rules);
-    let document = json!({
-        "snapshot":native,"keywords":KEYWORDS,"references":refs,"rules":rules,"identity":identity,
-        "engine_identity":{"Resolved":{"region":"jp","snapshot_sha256":refs.snapshot_sha256,
-            "faces":[{"card_no":"t-anchor","face_ordinal":0_u8,"face_id":face,
-                "rules_name_id":"synthetic-name","title_code":"synthetic_empty"}]}},
-        "printings":[
-            {"printing_id":"test-t-anchor","card_no":"t-anchor","card_id":card,
-                "faces":[{"face_id":face,"revision_id":"revision","cost":1_u8,"rules_name":"t-anchor"}]},
-            {"printing_id":"test-t-unused","card_no":"t-unused","card_id":format!("c:{}", "c".repeat(32)),
-                "faces":[{"face_id":unused,"revision_id":"unused","cost":1_u8,"rules_name":"t-unused"}]}
-        ],
-    });
-    (document, programs)
+    serde_json::from_str(include_str!("fixtures/published-battle.json")).unwrap()
 }
 
 #[test]
@@ -96,12 +38,156 @@ fn a_published_program_opens_a_deck_by_permanent_printing() {
             .iter()
             .any(|delivery| matches!(delivery.message, HostMessage::Ready(_)))
     );
-    assert_eq!(prepared.open("{}").err(), Some(LoadError::Format));
+    assert_eq!(prepared.open("{}").unwrap_err().code(), "format");
     for unavailable in ["test-t-unused", "t-anchor"] {
         assert_eq!(
-            prepared.open(&setup(unavailable)).err(),
-            Some(LoadError::Match)
+            prepared.open(&setup(unavailable)).unwrap_err().code(),
+            "match"
         );
+    }
+}
+
+#[test]
+fn rejected_opponent_decks_share_one_status_with_the_other_seat() {
+    let (mut document, programs) = published();
+    let mut programs: Value = serde_json::from_str(&programs).unwrap();
+    let card = document
+        .pointer("/printings/1/card_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let face = document
+        .pointer("/printings/1/faces/0/face_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    programs
+        .pointer_mut("/entries")
+        .unwrap()
+        .as_array_mut()
+        .unwrap()
+        .push(json!({
+            "id":"rejected","dsl_version":"1.0",
+            "ast":{"card_id":card,"scope":"shared","faces":{(face):{"abilities":"invalid"}}}
+        }));
+    programs
+        .pointer_mut("/printings")
+        .unwrap()
+        .as_object_mut()
+        .unwrap()
+        .insert(
+            card.to_owned(),
+            json!({"representative":"test-t-unused","tokens":[]}),
+        );
+    let programs = programs.to_string();
+    *document.pointer_mut("/identity/programs/sha256").unwrap() =
+        json!(fixture::hex(programs.as_bytes()));
+    let prepared = PreparedBattle::new(&document.to_string(), &programs).unwrap();
+
+    let mut setup: Value = serde_json::from_str(&setup("test-t-anchor")).unwrap();
+    *setup.pointer_mut("/control").unwrap() = json!(["player", "player"]);
+    let legal = setup.pointer("/decks/0").unwrap().clone();
+    prepared.open(&setup.to_string()).unwrap();
+    let with_main = |main| {
+        let mut deck = legal.clone();
+        *deck.pointer_mut("/main").unwrap() = main;
+        deck
+    };
+    for (rejected, detail) in [
+        (Value::Null, "deck_format"),
+        (with_main(json!(["unavailable"])), "deck_printing"),
+        (with_main(json!(["test-t-unused"])), "selection"),
+        (with_main(json!([])), "deck_admission"),
+    ] {
+        for (submitter, other, decks) in [
+            (Seat::P1, Seat::P2, [&rejected, &legal]),
+            (Seat::P2, Seat::P1, [&legal, &rejected]),
+        ] {
+            *setup.pointer_mut("/decks").unwrap() = json!(decks);
+            let refusal = prepared.open(&setup.to_string()).unwrap_err();
+            assert_eq!(refusal.code_for(submitter), detail);
+            assert_eq!(refusal.code_for(other), "match");
+            assert_eq!(refusal.code(), "match");
+        }
+    }
+    let duplicate = legal.to_string().replacen('{', r#"{"main":[],"#, 1);
+    *setup.pointer_mut("/decks").unwrap() = json!([legal, "duplicate-deck"]);
+    let setup = setup.to_string().replace(r#""duplicate-deck""#, &duplicate);
+    let refusal = prepared.open(&setup).unwrap_err();
+    assert_eq!(refusal.code_for(Seat::P1), "match");
+    assert_eq!(refusal.code_for(Seat::P2), "deck_format");
+}
+
+fn published_start_amulet() -> PreparedBattle {
+    let (mut document, programs) = published();
+    let (anchor, unused) = document
+        .pointer("/snapshot")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .split_once('\n')
+        .unwrap();
+    let mut anchor: Value = serde_json::from_str(anchor).unwrap();
+    *anchor.pointer_mut("/faces/0/card_type").unwrap() = json!("アミュレット");
+    *anchor.pointer_mut("/faces/0/power").unwrap() = json!("-");
+    *anchor.pointer_mut("/faces/0/hp").unwrap() = json!("-");
+    *anchor.pointer_mut("/faces/0/text").unwrap() = json!("Start amulet.");
+    let snapshot = format!("{anchor}\n{unused}");
+    let digest = fixture::hex(snapshot.as_bytes());
+    *document.pointer_mut("/snapshot").unwrap() = json!(snapshot);
+    for path in [
+        "/references/snapshot_sha256",
+        "/engine_identity/Resolved/snapshot_sha256",
+    ] {
+        *document.pointer_mut(path).unwrap() = json!(digest);
+    }
+    let mut rules: Value =
+        serde_json::from_str(document.pointer("/rules").unwrap().as_str().unwrap()).unwrap();
+    *rules.pointer_mut("/input/snapshot_sha256").unwrap() = json!(digest);
+    *rules.pointer_mut("/titles/0/capabilities").unwrap() =
+        json!([{"kind":"opening_start_amulet"}]);
+    let rules = rules.to_string();
+    *document.pointer_mut("/identity/rules/sha256").unwrap() =
+        json!(fixture::hex(rules.as_bytes()));
+    *document.pointer_mut("/rules").unwrap() = json!(rules);
+
+    let mut programs: Value = serde_json::from_str(&programs).unwrap();
+    let face = document
+        .pointer("/printings/0/faces/0/face_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let abilities = format!("/entries/0/ast/faces/{face}/abilities");
+    *programs.pointer_mut(&abilities).unwrap() = json!([{
+        "line":1_u8,"keywords":["start_amulet"],"ports":{"exports":{},"imports":{}}
+    }]);
+    let programs = programs.to_string();
+    *document.pointer_mut("/identity/programs/sha256").unwrap() =
+        json!(fixture::hex(programs.as_bytes()));
+    PreparedBattle::new(&document.to_string(), &programs).unwrap()
+}
+
+#[test]
+fn reserving_a_start_amulet_leaves_the_submitting_deck_too_short() {
+    let prepared = published_start_amulet();
+    let mut setup: Value = serde_json::from_str(&setup("test-t-anchor")).unwrap();
+    *setup.pointer_mut("/decks/1/main").unwrap() = json!(vec!["test-t-anchor"; 4]);
+    prepared.open(&setup.to_string()).unwrap();
+    for (title, main, expected) in [
+        (
+            "synthetic_empty",
+            vec!["test-t-anchor"; 4],
+            "deck_admission",
+        ),
+        ("unregistered", vec![], "match"),
+    ] {
+        *setup.pointer_mut("/decks/1").unwrap() = json!({
+            "construction":{"kind":"title","value":title},
+            "main":main,"evolve":[]
+        });
+        let refused = prepared.open(&setup.to_string()).unwrap_err();
+        assert_eq!(refused.code_for(Seat::P1), "match");
+        assert_eq!(refused.code_for(Seat::P2), expected);
     }
 }
 

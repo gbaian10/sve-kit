@@ -8,7 +8,7 @@ import type {
   SeatMessage,
   SeatRequest,
 } from "./protocol"
-import { SEATS } from "./protocol"
+import { LOAD_ERROR_CODES, SEATS, SHARED_LOAD_ERROR_CODES } from "./protocol"
 
 /** The wasm-bindgen `Session`; every call is synchronous. */
 export interface EngineSession {
@@ -31,11 +31,25 @@ export interface SeatPort {
   onmessage: ((event: MessageEvent<SeatRequest>) => void) | null
 }
 
-const LOAD_CODES: readonly string[] = ["format", "selection", "identity", "references", "match"]
+function isLoadCode(value: unknown): value is LoadErrorCode {
+  return LOAD_ERROR_CODES.some((code) => code === value)
+}
 
-function loadCode(error: unknown): LoadErrorCode {
+function loadCodes(error: unknown): Readonly<Record<Seat, LoadErrorCode>> {
   const message = error instanceof Error ? error.message : ""
-  return LOAD_CODES.includes(message) ? (message as LoadErrorCode) : "engine"
+  const shared = SHARED_LOAD_ERROR_CODES.find((code) => code === message)
+  if (shared !== undefined) return { p1: shared, p2: shared }
+  try {
+    const codes: unknown = JSON.parse(message)
+    if (Array.isArray(codes) && codes.length === 2) {
+      const p1: unknown = codes[0]
+      const p2: unknown = codes[1]
+      if (isLoadCode(p1) && isLoadCode(p2)) return { p1, p2 }
+    }
+  } catch {
+    // Unknown exceptions have no authorized stage code.
+  }
+  return { p1: "engine", p2: "engine" }
 }
 
 function randomSeed(random: Random): string {
@@ -99,7 +113,10 @@ export class BattleHost {
         this.#session = await this.#create(setup)
       } catch (error) {
         this.#stopped = true
-        this.#broadcast({ kind: "load_error", code: loadCode(error) })
+        const codes = loadCodes(error)
+        for (const [seat, port] of this.#ports) {
+          port.postMessage({ kind: "load_error", code: codes[seat] })
+        }
         return
       }
       this.#call((session) => session.start())

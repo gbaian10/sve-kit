@@ -270,6 +270,62 @@ describe("HotSeat", () => {
       })
     }
   }
+
+  for (const submitter of ["p1", "p2"] as const) {
+    for (const first of ["p1", "p2"] as const) {
+      it(`keeps the ${submitter} load detail on its seat when ${first} stops first`, async () => {
+        const legal = submitter === "p1" ? "p2" : "p1"
+        const { hot, p1, p2, shown } = hotSeat(legal)
+        const ports = { p1, p2 }
+        const unavailable = { kind: "load_error", code: "match" } as const
+        const privateStop = { kind: "load_error", code: "deck_printing" } as const
+        const stopFor = (seat: Seat) => (seat === submitter ? privateStop : unavailable)
+        ports[legal].worker.postMessage(update(legal, 1))
+        await tick()
+        ports[first].worker.postMessage(stopFor(first))
+        await tick()
+        expect(hot.latest).toBeUndefined()
+        expect(shown.at(-1)).toEqual([legal, undefined])
+        expect(hot.stopped).toEqual(unavailable)
+        await expect(hot.submit(concede)).rejects.toMatchObject({ stop: unavailable })
+        hot.setAutoAnswer(true)
+
+        hot.switchTo(submitter)
+        const received = first === submitter ? privateStop : unavailable
+        expect(hot.stopped).toEqual(received)
+        await expect(hot.submit(concede)).rejects.toMatchObject({ stop: received })
+        const second = first === "p1" ? "p2" : "p1"
+        ports[second].worker.postMessage(stopFor(second))
+        await tick()
+        expect(hot.stopped).toEqual(privateStop)
+        await expect(hot.submit(concede)).rejects.toMatchObject({ stop: privateStop })
+
+        hot.switchTo(legal)
+        ports[legal].worker.postMessage(update(legal, 2))
+        await tick()
+        expect(hot.latest).toBeUndefined()
+        expect(hot.stopped).toEqual(unavailable)
+        await expect(hot.submit(concede)).rejects.toMatchObject({ stop: unavailable })
+        expect(p1.requests).toEqual([])
+        expect(p2.requests).toEqual([])
+      })
+    }
+  }
+
+  it("keeps a shared host fault when the viewing channel is still waiting", async () => {
+    const p1 = pair("p1")
+    const p2 = pair("p2")
+    const shown: unknown[] = []
+    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, "p1", () => {
+      shown.push(hot.stopped)
+    })
+    const stopped = { kind: "host_error", format: 1, reason: "budget" } as const
+    p2.worker.postMessage(stopped)
+    await tick()
+    expect(shown).toEqual([stopped])
+    await expect(hot.submit(concede)).rejects.toMatchObject({ stop: stopped })
+    expect(p1.requests).toEqual([])
+  })
 })
 
 describe("startLocalBattle", () => {

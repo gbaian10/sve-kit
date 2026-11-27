@@ -63,7 +63,7 @@ impl Game {
     /// No arbitrary position, anonymous cards, physical identities or prototype programs enter.
     ///
     /// # Errors
-    /// Returns owner-scoped admission gaps or an authority-only initialization failure.
+    /// Returns owner-scoped deck failures or an authority-only initialization failure.
     /// These startup failures are distinct from a later submission's `EngineFault` result.
     pub fn start_player_game(
         selected: SelectedEffects,
@@ -102,7 +102,8 @@ impl Game {
         game.card_runtime = admitted.card_runtime;
         game.initialize_opening()?;
         // Validate the complete opening hand requirement before returning a live game.
-        for player in ["P1", "P2"] {
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let player = seat(viewer);
             let reserved = usize::from(
                 !game.start_amulets(player)?.is_empty()
                     && game.state.flow["queue"]
@@ -110,7 +111,7 @@ impl Game {
                         .is_some_and(|queue| queue.iter().any(|value| value == player)),
             );
             if game.zone_ids(player, "deck").len().saturating_sub(reserved) < 4 {
-                return Err(invalid("opening deck has fewer than four drawable cards").into());
+                return Err(StrictStartError::OpeningHand(viewer));
             }
         }
         game.player_opening_question()?;

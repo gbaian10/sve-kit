@@ -22,9 +22,8 @@ impl Game {
         };
         let source = self.object(execution.object_id(reference)?)?;
         let mut members = Vec::new();
-        let specification = super::evolution::destination_spec(&specification.destination);
         for id in self.zone_ids(&source.controller, "evolve_deck") {
-            if self.evolution_resource_matches(&source.id, &id, 0, &specification)?
+            if self.evolution_resource_matches(&source.id, &id, 0, &specification.destination)?
                 && self.catalog.face(&self.object(&id)?.card, 0)?["card_type"]
                     == "フォロワー・エボルヴ"
             {
