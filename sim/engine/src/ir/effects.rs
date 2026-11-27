@@ -111,6 +111,7 @@ variants!(RuleModifier {
     SpellChainPopulation { player: PlayerRef, population: Selector } => ["rule.spell-chain-population"],
     CounterCap { holder: Holder, kind: CounterKind, cap: Nat } => ["rule.counter-cap"],
     EvolutionPlayLimit { player: PlayerRef } => ["rule.evolution-play-limit"],
+    UnlimitedHand { player: PlayerRef } => ["rule.unlimited-hand"],
     BattleDamageBasis { objects: Selector } => ["rule.battle-damage-basis"],
     TriggerMultiplicity { pattern: EventPattern, controller: PlayerRef, add: Nat } => ["rule.trigger-multiplicity"]
 });

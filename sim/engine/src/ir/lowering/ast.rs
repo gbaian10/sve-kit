@@ -1512,6 +1512,13 @@ pub(super) enum InstalledEffect {
     Cannot(Cannot),
     Prevent(Prevent),
     DamageCap(DamageCap),
+    HandLimit(HandLimit),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HandLimit {
+    Unlimited,
 }
 
 #[derive(Deserialize)]

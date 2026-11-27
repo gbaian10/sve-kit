@@ -115,7 +115,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
 | play_card／play_ability | {ref}（cost?:0；其餘費用覆寫尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until? | 無期限僅一次，有期限預設各次；不收 line/result |
-| player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
+| player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開。apply.capture=play。手牌無上限只由 player_effect 安裝給己方，until 固定 game。 |
 | win／lose／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
 | to.one_of | one_of、by、scope | create 的 scope=each/batch（§13 GAP-A-017） |

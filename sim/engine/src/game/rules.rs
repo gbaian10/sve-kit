@@ -350,6 +350,14 @@ impl Game {
         self.internal_commit_rule_discard(pending)?;
         Ok(())
     }
+
+    pub(in crate::game) fn hand_excess(&self, seat: &str) -> Result<u64> {
+        if self.player(seat)?.unlimited_hand {
+            return Ok(0);
+        }
+        u64::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0)).map_err(invalid)
+    }
+
     fn next_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.close()?;
         self.internal_numeric_end_turn(turn)?;
@@ -534,7 +542,7 @@ impl Game {
         if !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "discard"
-            && self.zone_count(self.active(), "hand") <= 7
+            && self.hand_excess(self.active())? == 0
         {
             self.next_turn()?;
             return self.checks();

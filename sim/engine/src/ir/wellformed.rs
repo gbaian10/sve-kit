@@ -1065,7 +1065,14 @@ impl Checker {
                 capture,
                 effect,
                 duration,
-            } => self.install(subjects, *capture, effect, duration),
+            } => {
+                if super::player_hand_limit::is_modifier(effect)
+                    && *instruction_actor != (PlayerRef::Controller {})
+                {
+                    return self.reject();
+                }
+                self.install(subjects, *capture, effect, duration)
+            }
             Action::Modify {
                 subjects,
                 patch,

@@ -3,6 +3,7 @@ use super::{
     ability_source, ast, numeric, source_span, unsupported,
 };
 use crate::ir::phase_restrictions::{Restriction, affected_player};
+use crate::ir::player_hand_limit;
 use crate::ir::prevention::{holder_counter_step, opponent_controller, own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
@@ -213,6 +214,26 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if matches!(
+            value.effect,
+            ast::InstalledEffect::HandLimit(ast::HandLimit::Unlimited)
+        ) {
+            if !matches!(value.who, ast::Side::Controller)
+                || !matches!(value.until, Some(ast::Until::Game))
+            {
+                return Err(unsupported(path));
+            }
+            let (players, effect, duration) = player_hand_limit::modifier(source.clone());
+            return Ok(Action::InstallEffect {
+                subjects: InstallationSubjects::Players {
+                    players,
+                    affected: Binding::new(1, self.card_allocator.scope(path)?),
+                },
+                capture: InstallationTime::InstructionStart,
+                effect: Box::new(effect),
+                duration,
+            });
+        }
         if let ast::InstalledEffect::Cannot(ast::Cannot::RulePhase(rule)) = &value.effect {
             return self.rule_phase_permission(value, rule.what, path);
         }
@@ -320,6 +341,7 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
+            | ast::InstalledEffect::HandLimit(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
         let limited = next == Some(true);
@@ -422,6 +444,7 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
+            | ast::InstalledEffect::HandLimit(_)
             | ast::InstalledEffect::Cannot(_) => false,
         };
         let subjects = if limited {
@@ -533,6 +556,7 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
+            | ast::InstalledEffect::HandLimit(_)
             | ast::InstalledEffect::Cannot(
                 ast::Cannot::Draw(_)
                 | ast::Cannot::RulePhase(_)

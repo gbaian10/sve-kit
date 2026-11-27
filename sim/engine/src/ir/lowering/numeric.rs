@@ -552,7 +552,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
-            ast::InstalledEffect::PlayPermission(_) => return Err(unsupported(path)),
+            ast::InstalledEffect::PlayPermission(_) | ast::InstalledEffect::HandLimit(_) => {
+                return Err(unsupported(path));
+            }
             ast::InstalledEffect::LoseAbilities(_) => {
                 if !matches!(&installation.on, ast::Objects::This(_))
                     && !matches!(&installation.on, ast::Objects::Bound(name) if self.follower_targets.contains(name))

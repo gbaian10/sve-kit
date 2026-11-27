@@ -196,6 +196,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 `player_effect: {who: self, until: turn, effect: {prevent: {kind: ability}}}` 讓自己的領袖免受指定種類的傷害。`prevent` 不帶 `next_only` 時整回合有效。
 同行若也保護從者，可用本回合的 `grant` 授予場上當時符合條件的從者防傷常在能力。
 
+`player_effect: {who: self, effect: {hand_limit: unlimited}, until: game}` 自此移除己方的規則手牌上限。效果會留到本局結束，能力來源離場後仍有效。結束階段略過該玩家的規則棄牌，卡片效果指定的棄牌仍照常結算。[GFB01a-003EN、Q746](https://en.shadowverse-evolve.com/cards/?cardno=GFB01a-003EN)
+
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
 

@@ -77,6 +77,8 @@ mod played_original_cost;
 mod played_traits;
 #[path = "card/player_declarations.rs"]
 mod player_declarations;
+#[path = "card/player_hand_limit.rs"]
+mod player_hand_limit;
 #[path = "card/player_main_actions.rs"]
 mod player_main_actions;
 #[path = "card/player_policy.rs"]
