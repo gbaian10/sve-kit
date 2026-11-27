@@ -553,6 +553,7 @@ variants!(NatRead {
     ZoneCapacity { player: PlayerRef, zone: CapacityZone, property: CapacityProperty } => ["read.zone-capacity"],
     Combo { player: PlayerRef, execution: ExecutionRef } => ["read.combo"],
     HistoryCount { query: HistoryQuery, count: HistoryCount } => ["read.history.count"],
+    SourceAttacksThisTurn {} => ["read.attack.count.source"],
     TurnOrdinal { player: PlayerRef } => ["read.turn.ordinal"]
 });
 tags!(CapacityZone { Field, Ex });
