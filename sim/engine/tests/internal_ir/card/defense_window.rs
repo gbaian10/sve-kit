@@ -55,15 +55,26 @@ fn window_program() -> WellFormedCardProgram {
                 {"grant":{"on":"this","keywords":["drain"]}}
             ]}),
         ),
+        (
+            "activate",
+            json!({"cost":{"pp":0},"do":[{"damage":{"to":{"leader":"opp"},"n":2}}]}),
+        ),
     ]);
     boxed::program(&input)
 }
 
-fn board(program: &WellFormedCardProgram, extra: Option<&str>) -> Game {
+fn turn_schedules() -> [(Value, usize); 3] {
+    [
+        (Value::Null, 1),
+        (json!({"extra":[{"player":"P1","count":1}],"skipped":[]}), 0),
+        (json!({"extra":[],"skipped":[{"player":"P1","count":1}]}), 2),
+    ]
+}
+
+fn board(program: &WellFormedCardProgram, schedule: Value) -> Game {
     let mut initial = setup(1, json!([]));
-    if let Some(player) = extra {
-        initial["semantic_state"]["turn_schedule"] =
-            json!({"extra":[{"player":player,"count":1}],"skipped":[]});
+    if !schedule.is_null() {
+        initial["semantic_state"]["turn_schedule"] = schedule;
     }
     initial["players"]["P1"]["zones"]["field"] = json!([
         {"id":"source","card":"unit-follower"},
@@ -172,7 +183,7 @@ fn install_lastword(game: &mut Game, program: &WellFormedCardProgram) {
 #[test]
 fn leader_protection_prevents_damage_and_direct_reductions_but_allows_increases() {
     let program = window_program();
-    let mut game = board(&program, None);
+    let mut game = board(&program, Value::Null);
     install_lastword(&mut game, &program);
     let protected = activate_line(&mut game, &program, "s", 1, 3);
     let state = game.projection(View::Referee).unwrap();
@@ -220,8 +231,8 @@ fn leader_protection_prevents_damage_and_direct_reductions_but_allows_increases(
 #[test]
 fn leader_protection_rejects_required_life_payment_until_the_next_own_turn() {
     let program = window_program();
-    for extra in [None, Some("P1")] {
-        let mut game = board(&program, extra);
+    for (schedule, opponent_turns) in turn_schedules() {
+        let mut game = board(&program, schedule);
         install_lastword(&mut game, &program);
         let before = exact_authority(&game);
         let error = game
@@ -238,12 +249,12 @@ fn leader_protection_rejects_required_life_payment_until_the_next_own_turn() {
             "no resource or event is committed when the cost cannot be paid"
         );
         boxed::end_turn(&mut game);
-        if extra.is_none() {
+        for _ in 0..opponent_turns {
             assert_eq!(
                 game.projection(View::Referee).unwrap()["turn"]["active"],
                 "P2"
             );
-            let damage = activate_line(&mut game, &program, "f", 2, 3);
+            let damage = activate_line(&mut game, &program, "f", 2, 7);
             assert!(
                 damage.progress.facts.iter().all(|fact| !matches!(
                     fact, Fact::Damage(hit) if hit.recipient == (RuntimeDamageRecipient::Leader { player: PlayerId { seat: 1 } })
@@ -274,7 +285,7 @@ fn leader_protection_rejects_required_life_payment_until_the_next_own_turn() {
 #[test]
 fn a_drain_attack_against_a_protected_leader_produces_no_damage_or_healing() {
     let program = window_program();
-    let mut game = board(&program, None);
+    let mut game = board(&program, Value::Null);
     install_lastword(&mut game, &program);
     boxed::end_turn(&mut game);
     activate_line(&mut game, &program, "f", 2, 6);
@@ -296,10 +307,10 @@ fn a_drain_attack_against_a_protected_leader_produces_no_damage_or_healing() {
 }
 
 #[test]
-fn next_own_turn_start_grants_expire_after_a_normal_or_immediate_extra_turn() {
+fn next_own_turn_start_grants_follow_normal_extra_and_skipped_turns() {
     let program = window_program();
-    for extra in [None, Some("P1")] {
-        let mut game = board(&program, extra);
+    for (schedule, opponent_turns) in turn_schedules() {
+        let mut game = board(&program, schedule);
         activate_line(&mut game, &program, "s", 1, 5);
         let state = game.projection(View::Referee).unwrap();
         for id in ["s", "source"] {
@@ -329,7 +340,7 @@ fn next_own_turn_start_grants_expire_after_a_normal_or_immediate_extra_turn() {
                 })
         }));
         boxed::end_turn(&mut game);
-        if extra.is_none() {
+        for _ in 0..opponent_turns {
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state["turn"]["active"], "P2");
             assert_eq!(
