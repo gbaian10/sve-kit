@@ -841,11 +841,12 @@ export default {
     shareNote: "リンクは作成時点の内容です。あとでデッキを変えても更新されません。",
     listSeparator: "、",
     importTitle: "デッキを読み込む",
-    importPaste: "デッキのテキストまたは共有コード",
+    importPaste: "デッキのテキスト、共有コードまたはデッキログのコード",
     importHint:
-      "デッキのテキスト（各行「枚数 カード番号」）か共有コード・共有リンクを貼り付けてください。読み取り結果を先に表示します。",
+      "デッキのテキスト（各行「枚数 カード番号」）、共有コード・共有リンク、またはデッキログのコードやURLを貼り付けてください。読み取り結果を先に表示します。",
     importLinkHint: "共有されたデッキです。内容を確認して自分のデッキとして保存できます。",
-    importPlaceholder: "3 BP01-001\n2 BP01-002 …\nまたは SVEK-…",
+    importPlaceholder:
+      "3 BP01-001\n2 BP01-002 …\nまたは SVEK-…\nまたはデッキログのコード（例：6LPM7）",
     importBadCode: "この共有コードは読み取れません。",
     importPreviewTitle: "読み取り結果",
     importCounts: "メインデッキ {{main}} 枚・エボルヴデッキ {{evolve}} 枚・候補 {{side}} 枚",
@@ -855,6 +856,27 @@ export default {
     importCopies: "{{card}} ×{{count}}",
     importUnrecognized: "{{count}} 行を読み取れなかったため、無視しました：",
     importLine: "{{line}}：{{text}}",
+    importDeckLogBareHint:
+      "{{code}} はデッキログのコードのようです。{{edition}}のデッキログで検索します。日本語版と英語版のデッキログは別のシステムで、コードは共通ではありません。先に版を選んでください。",
+    importDeckLogLinkHint: "{{edition}}デッキログのデッキ {{code}} です。",
+    importDeckLogRead: "デッキログから読み込む",
+    importDeckLogLoading: "デッキログに問い合わせています…",
+    importDeckLogSource: "出典：デッキログ {{code}}",
+    importDeckLogSourceClass: "出典：デッキログ {{code}}（{{className}}）",
+    importDeckLogName: "デッキログ {{code}}",
+    importDeckLogErrors: {
+      "invalid-code": "有効なデッキログのコードではありません。",
+      "not-found":
+        "{{edition}}のデッキログにコード {{code}} が見つかりません。もう一方の版のコードなら、版を切り替えてください。",
+      "not-sve": "コード {{code}} は Shadowverse EVOLVE のデッキではありません。",
+      "rate-limited": "問い合わせが多すぎます。1分ほど待ってからお試しください。",
+      "upstream-unavailable": "デッキログが応答しません。しばらくしてからお試しください。",
+      "upstream-invalid":
+        "デッキログから読み取れない内容が返されました。しばらくしてからお試しください。",
+      "not-configured": "現在デッキログからの読み込みは使えません。",
+      "server-error": "読み込みに失敗しました。しばらくしてからお試しください。",
+      offline: "接続できません。ネットワークを確認してください。",
+    },
     importCreate: "デッキを作成",
     importedName: "読み込んだデッキ",
     exportImage: "画像",

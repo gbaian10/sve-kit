@@ -1,5 +1,7 @@
 import { CARD_REPORT_PATH } from "../domain/card-report"
+import { DECKLOG_PATH } from "../domain/decklog"
 import { type CardReportEnv, submitCardReport } from "./card-report"
+import { type DeckLogEnv, lookUpDeckLog } from "./decklog"
 
 interface ObjectMetadata {
   httpEtag: string
@@ -15,7 +17,7 @@ interface ReadObject extends ObjectMetadata {
 }
 
 // Structural binding types keep the Worker independent of browser and generated runtime globals.
-interface Env extends CardReportEnv {
+interface Env extends CardReportEnv, DeckLogEnv {
   SITE_ORIGIN?: string
   PREVIEW_BUCKET: {
     get(key: string): Promise<ReadObject | null>
@@ -146,6 +148,7 @@ export default {
     // URL.pathname normalizes dot segments; check the incoming spelling before that normalization.
     const pathname = /^https?:\/\/[^/?#]+([^?#]*)/.exec(request.url)?.[1] ?? ""
     if (pathname === CARD_REPORT_PATH) return submitCardReport(request, env)
+    if (pathname.startsWith(`${DECKLOG_PATH}/`)) return lookUpDeckLog(request, env, pathname)
     const dataPath =
       pathname === "/cdn-preview" ||
       pathname.startsWith(PREFIX) ||

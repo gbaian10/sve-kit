@@ -1,3 +1,4 @@
+import type { DeckLogDeck } from "../decklog"
 import { NEUTRAL_CLASS } from "../query/model"
 import type { Region } from "../search"
 import { deckCodeOf, decodeDeckCode } from "./code"
@@ -96,10 +97,66 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
     for (const card of payload.side) add(card.intId, card.count, true, false)
   }
 
+  return assemble(references, lookup, { name, edition, format, basis, unrecognized })
+}
+
+// DeckLog's construction codes (docs/sim/deck-construction.md §6); anything else is left Standard.
+const DECKLOG_FORMATS: Readonly<Record<Region, Readonly<Record<string, DeckFormat>>>> = {
+  jp: { N: "standard", X: "crossover" },
+  en: { N: "standard", G: "gloryfinder" },
+}
+
+/**
+ * Reads a DeckLog deck against its edition's cards. DeckLog lists printings by card number, so
+ * each row names one printing of ours; rows that match none are listed as unknown.
+ */
+export function readDeckLogImport(deck: DeckLogDeck, lookup: ImportLookup): ImportedDeck {
+  const references: Reference[] = []
+  for (const [cards, leader] of [
+    [deck.leader, true],
+    [deck.main, false],
+    [deck.evolve, false],
+  ] as const)
+    for (const card of cards)
+      references.push({
+        label: card.cardNo,
+        printing: lookup.printingByCardNo(card.cardNo),
+        count: card.count,
+        side: false,
+        leader,
+      })
+  return assemble(references, lookup, {
+    name: undefined,
+    edition: deck.region,
+    format: deck.format === null ? undefined : DECKLOG_FORMATS[deck.region][deck.format],
+    basis: undefined,
+    unrecognized: [],
+  })
+}
+
+interface Section {
+  readonly cardId: string
+  count: number
+  /** Copies per printing, in the order the source lists them. */
+  readonly printings: Map<string, number>
+}
+
+/**
+ * Puts each card where it belongs. A deck holds one printing per card, so a card listed under
+ * several printings becomes one entry with the printing that has the most copies (the first
+ * listed on a tie); only a printing other than the card's default is kept on the entry.
+ */
+function assemble(
+  references: readonly Reference[],
+  lookup: ImportLookup,
+  meta: Pick<ImportedDeck, "name" | "edition" | "format" | "unrecognized"> & {
+    readonly basis: DeckBasis | undefined
+  },
+): ImportedDeck {
   const parts = {
-    main: new Map<string, DeckEntry>(),
-    evolve: new Map<string, DeckEntry>(),
-    side: new Map<string, DeckEntry>(),
+    main: new Map<string, Section>(),
+    evolve: new Map<string, Section>(),
+    side: new Map<string, Section>(),
   }
   const unknown: { label: string; count: number }[] = []
   let leader: DeckLeader | null = null
@@ -109,37 +166,54 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
       unknown.push({ label: reference.label, count: reference.count })
       continue
     }
-    // The printing named is kept only when it is not the card's default one.
-    const chosen =
-      info.defaultPrintingId === reference.printing.printingId
-        ? {}
-        : { printingId: reference.printing.printingId }
+    const { printingId } = reference.printing
     const placement = placementOf(info)
     if (placement === "leader" && !reference.side) {
-      leader ??= { cardId: info.cardId, ...chosen }
+      leader ??= {
+        cardId: info.cardId,
+        ...(info.defaultPrintingId === printingId ? {} : { printingId }),
+      }
       continue
     }
     const part = reference.side ? parts.side : placement === "evolve" ? parts.evolve : parts.main
-    const existing = part.get(info.cardId)
-    part.set(info.cardId, {
+    const section = part.get(info.cardId) ?? {
       cardId: info.cardId,
-      count: (existing?.count ?? 0) + reference.count,
-      ...(existing?.printingId === undefined ? chosen : { printingId: existing.printingId }),
-    })
+      count: 0,
+      printings: new Map<string, number>(),
+    }
+    section.count += reference.count
+    section.printings.set(printingId, (section.printings.get(printingId) ?? 0) + reference.count)
+    part.set(info.cardId, section)
   }
-  const main = [...parts.main.values()]
-  const evolve = [...parts.evolve.values()]
+  const entries = (part: Map<string, Section>): DeckEntry[] =>
+    [...part.values()].map((section) => {
+      let chosen: string | undefined
+      let most = 0
+      for (const [printingId, count] of section.printings)
+        if (count > most) {
+          chosen = printingId
+          most = count
+        }
+      const isDefault = chosen === lookup.infoOf(section.cardId)?.defaultPrintingId
+      return {
+        cardId: section.cardId,
+        count: section.count,
+        ...(chosen === undefined || isDefault ? {} : { printingId: chosen }),
+      }
+    })
+  const main = entries(parts.main)
+  const evolve = entries(parts.evolve)
   return {
-    name,
-    edition,
-    format,
-    basis: basis ?? inferBasis(leader, [...main, ...evolve], lookup),
+    name: meta.name,
+    edition: meta.edition,
+    format: meta.format,
+    basis: meta.basis ?? inferBasis(leader, [...main, ...evolve], lookup),
     leader,
     main,
     evolve,
-    side: [...parts.side.values()],
+    side: entries(parts.side),
     unknown,
-    unrecognized,
+    unrecognized: meta.unrecognized,
   }
 }
 

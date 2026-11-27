@@ -24,14 +24,14 @@ Access 保護，不建立獨立開發 CDN 網域。
 正式環境維持 **cdn.svekit.app 的 R2 自訂網域直出，不經 Worker**；正式發布與
 網域啟用另行安排，不由本清單自動執行。
 
-| 項目 | 開發 | 正式保留 |
-| --- | --- | --- |
-| 前端 | `dev.svekit.app` | `svekit.app` |
-| 資料入口 | 同源 `/cdn-preview/` | `cdn.svekit.app`，R2 自訂網域直出 |
-| R2 bucket | `svekit-dev` | `svekit-prod` |
-| 前端 Worker | `svekit-web-dev` | `svekit-web-prod` |
-| 存取 | 指定人員、預設拒絕 | 公開前另行確認 |
-| 寫入 token | 只限開發桶 | 另建，不共用開發 token |
+| 項目        | 開發                 | 正式保留                          |
+| ----------- | -------------------- | --------------------------------- |
+| 前端        | `dev.svekit.app`     | `svekit.app`                      |
+| 資料入口    | 同源 `/cdn-preview/` | `cdn.svekit.app`，R2 自訂網域直出 |
+| R2 bucket   | `svekit-dev`         | `svekit-prod`                     |
+| 前端 Worker | `svekit-web-dev`     | `svekit-web-prod`                 |
+| 存取        | 指定人員、預設拒絕   | 公開前另行確認                    |
+| 寫入 token  | 只限開發桶           | 另建，不共用開發 token            |
 
 這些開發名稱可在設定前替換。主站使用 `svekit.app`；查卡、建牌、對戰共用前端與路徑，
 前端與對戰服務分開部署。`svekit.com` 待正式主站就緒後轉址，本清單不啟用轉址或對戰後端。
@@ -123,25 +123,47 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "vars": {
     "SITE_ORIGIN": "https://dev.svekit.app",
     "REPORT_GITHUB_APP_ID": "5853202",
-    "REPORT_GITHUB_INSTALLATION_ID": "184135707"
+    "REPORT_GITHUB_INSTALLATION_ID": "184135707",
   },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
+  "d1_databases": [
+    {
+      "binding": "DECKLOG_DB",
+      "database_name": "svekit-dev-decklog",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
   "ratelimits": [
-    { "name": "CARD_REPORT_LIMITER", "namespace_id": "19901", "simple": { "limit": 3, "period": 60 } }
+    {
+      "name": "CARD_REPORT_LIMITER",
+      "namespace_id": "19901",
+      "simple": { "limit": 3, "period": 60 },
+    },
+    {
+      "name": "DECKLOG_LIMITER",
+      "namespace_id": "19902",
+      "simple": { "limit": 10, "period": 60 },
+    },
+    {
+      "name": "DECKLOG_UPSTREAM_LIMITER",
+      "namespace_id": "19903",
+      "simple": { "limit": 30, "period": 60 },
+    },
   ],
   "observability": { "enabled": true },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": true
-  }
+    "run_worker_first": true,
+  },
 }
 ```
 
 `main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
 配置以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host，
-資料路徑讀 R2，卡片回報由第 11 節的端點處理，其餘委派 `ASSETS.fetch`。
+資料路徑讀 R2，卡片回報由第 11 節、DeckLog 代查由第 12 節的端點處理，其餘委派 `ASSETS.fetch`。
 所有靜態路徑亦會經過 Worker，可能有額外計費。
 `observability.enabled` 開啟 Workers Logs；設定以此檔為準，不在後台手動切換，部署時才不會與後台設定不一致。
 依官方文件（2026-10-25 查核），Workers Logs 免費方案每天 20 萬筆、保留 3 天；2026-12-01 起改用
@@ -293,15 +315,15 @@ WORKER_PREVIEW_URL='https://<version-preview-host-from-dashboard>'
 R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
 ```
 
-| 入口 | 命令的 URL 參數 | 預期／通過條件（平台回應未驗證，需維護者實測） |
-| --- | --- | --- |
-| 開發前端 | "$DEV_URL/cards" | 401／403 或導向已核對 Access 登入的 302；不能匿名回 200 的開發 UI |
-| 同源資料 | "$DEV_URL/cdn-preview/snapshots/versions/index.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
-| workers.dev 前端 | "$WORKERS_URL/cards" | 已關閉者拒絕／不可用；若保留，須同樣受 Access 或 host gate 拒絕，不能 200 |
-| workers.dev 資料 | "$WORKERS_URL/cdn-preview/snapshots/versions/index.json" | 已關閉或 gate 拒絕，不能 200／206 |
-| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"及其 /cdn-preview/snapshots/versions/index.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
-| r2.dev | "$R2_DEV_URL/snapshots/versions/index.json" | 先確認控制台停用，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
-| 其他綁定網域／既有預覽版本 | 依控制台列的完整 host，同樣測 /cards 及資料路徑 | 都要關閉或拒絕；新舊部署不能留下未受保護入口 |
+| 入口                       | 命令的 URL 參數                                                            | 預期／通過條件（平台回應未驗證，需維護者實測）                                                    |
+| -------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 開發前端                   | "$DEV_URL/cards"                                                           | 401／403 或導向已核對 Access 登入的 302；不能匿名回 200 的開發 UI                                 |
+| 同源資料                   | "$DEV_URL/cdn-preview/snapshots/versions/index.json"                       | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON                                            |
+| workers.dev 前端           | "$WORKERS_URL/cards"                                                       | 已關閉者拒絕／不可用；若保留，須同樣受 Access 或 host gate 拒絕，不能 200                         |
+| workers.dev 資料           | "$WORKERS_URL/cdn-preview/snapshots/versions/index.json"                   | 已關閉或 gate 拒絕，不能 200／206                                                                 |
+| 每個 preview URL           | "$WORKER_PREVIEW_URL/cards"及其 /cdn-preview/snapshots/versions/index.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain                                          |
+| r2.dev                     | "$R2_DEV_URL/snapshots/versions/index.json"                                | 先確認控制台停用，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
+| 其他綁定網域／既有預覽版本 | 依控制台列的完整 host，同樣測 /cards 及資料路徑                            | 都要關閉或拒絕；新舊部署不能留下未受保護入口                                                      |
 
 每個表格 URL 都執行一次以下命令，例如：
 
@@ -366,6 +388,7 @@ Worker 會忽略舊版表單送來的 `contact` 欄位。
    `issues: write` 的短效 installation token。參考 [GitHub App JWT](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app)、
    [installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
    及 [App 私鑰格式](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)。
+
 3. 開發部署的 `deploy:dev` 使用 Cloudflare 的可見測試 site key。維護者執行
    `bun x wrangler secret put TURNSTILE_SECRET --config wrangler.dev.jsonc`，
    並輸入對應的 always-pass 測試 secret。正式環境建立只允許正式
@@ -393,3 +416,68 @@ bun run test:all tests/card-report-worker.test.ts src/pages/card/CardReport.test
 指向帶 `card-report` 標籤的 issue。換用 Cloudflare 的 always-fail 測試 secret 可驗證
 人機驗證錯誤，再恢復 always-pass 測試 secret。Worker 測試另驗超頻與缺少 secret 的拒絕。
 送出失敗時可在 Workers Logs 查找 `card-report:`，以固定的階段名稱定位問題。
+
+## 12. DeckLog 代碼匯入
+
+DeckLog 的 API 不開放跨網域，匯入頁經同源 `GET /api/decklog/{jp|en}/{代碼}` 由同一個 Worker 代查。
+API 與前端、R2 讀取共用 Worker、網域與第 4 節的 Access，不另開 Worker 或子網域：只有一個端點，
+沒有獨立的部署節奏，另一支 Worker 只會多一份路由、host gate 與 Access 設定。
+
+- 日版查 `https://decklog.bushiroad.com`，英版查 `https://decklog-en.bushiroad.com`，兩者都是
+  `POST /system/app/api/view/{代碼}`（body `{}`、瀏覽器 User-Agent 與 Referer），回應格式相同；
+  兩套系統的代碼不通用，所以存放與查詢都以「版本＋代碼」為鍵（2026-11-27 實測各一次）。
+- 代碼須是 4～10 個大寫英數字，否則回 400 `invalid-code`，不計入頻率也不查 DeckLog。
+- 發行後的代碼不能改卡，所以第一次查到就存進 D1 `decklog_deck`，之後同一個代碼只讀 D1。
+  只存版本、代碼、賽制代號（`deck_param1`）、職業或作品名（`deck_param2`）、三區的卡號與張數及取得時間；
+  牌組名稱、備註、作者等其餘欄位不存也不回傳。成功回應帶 `private, max-age=31536000, immutable`。
+- DeckLog 對不存在的代碼回 200 與 `[]`，Worker 回 404 `not-found`；`game_title_id` 不是 6 回 422 `not-sve`；
+  連不上、逾時（10 秒）、非 200 或轉址回 502 `upstream-unavailable`；內容讀不懂（非 JSON、缺欄位、卡號或張數不合格式、超過 512 KiB）
+  回 502 `upstream-invalid`。這些結果都不存。綁定缺少回 503 `not-configured`。
+- 頻率限制有兩層：`DECKLOG_LIMITER` 以來源 IP 計數，每 60 秒 10 次，D1 命中也計入，
+  所以不能拿它當公開代理；`DECKLOG_UPSTREAM_LIMITER` 只計真的去問 DeckLog 的查詢，每個版本一個共用鍵、每 60 秒 30 次，
+  限制我們對 DeckLog 的總請求量。兩者超過都回 429 `rate-limited`。Cloudflare 依資料中心各自計數。
+- D1 讀取失敗當作未命中（仍受上游限制），寫入失敗照常回傳結果；Workers Logs 以 `decklog:` 開頭記錄。
+
+### 維護者建立與綁定
+
+Agent 不建立遠端資源；以下由維護者在 `sim/web` 執行。
+
+1. 建立資料庫，記下輸出的 `database_id`：
+
+   ```bash
+   bun x wrangler d1 create svekit-dev-decklog
+   ```
+
+2. 把 `wrangler.dev.jsonc` 的 `database_id` 佔位（全 0）換成上一步的 ID。佔位還在時 `deploy:dev` 會失敗，
+   所以合併後要先完成這一節才能再部署。
+3. 確認 `namespace_id` `19902`、`19903` 在帳號內未被占用，再套用遷移：
+
+   ```bash
+   bun x wrangler d1 migrations apply DECKLOG_DB --remote --config wrangler.dev.jsonc
+   ```
+
+4. 照第 5 節部署後，登入開發站，在 `/decks/import` 貼一個主戰者、主牌組、進化牌組都有的 DeckLog 網址，
+   按「從 DeckLog 讀取」，確認預覽與對不到的卡號；同一個代碼再查一次時 Workers Logs 不應有新的 DeckLog 請求。
+   可用 `bun x wrangler d1 execute DECKLOG_DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
+   確認已存。正式環境另建資料庫與 Rate Limiting namespace，不共用開發的。
+
+### 本機試用
+
+本機用 Wrangler 的本機 D1，不碰遠端。先建置，再於 `sim/web` 起 Worker（`SITE_ORIGIN` 要等於 Vite 轉送時的來源）：
+
+```bash
+bun x wrangler d1 migrations apply DECKLOG_DB --local --config wrangler.dev.jsonc
+bun x wrangler dev --config wrangler.dev.jsonc --local --port 8787 --var SITE_ORIGIN:http://127.0.0.1:8787
+```
+
+另開一個終端機，讓開發伺服器把 `/api/` 轉給它：
+
+```bash
+SVE_DEV_WORKER=http://127.0.0.1:8787 bun run dev:lan
+```
+
+Worker 測試用同一份設定的本機 D1（`getPlatformProxy`，不寫檔），DeckLog 回應是合成資料：
+
+```bash
+bun run test:all tests/decklog-worker.test.ts src/domain/decklog.test.ts src/domain/deck/import.test.ts
+```

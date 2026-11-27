@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router"
 
@@ -9,9 +9,17 @@ import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import { useToast } from "../../components/ui/toast-context"
+import { type DeckLogResult, fetchDeckLogDeck } from "../../data"
 import { DeckCodeError } from "../../domain/deck/code"
-import { type ImportedDeck, importEdition, readImport } from "../../domain/deck/import"
+import {
+  type ImportedDeck,
+  importEdition,
+  type ImportLookup,
+  readDeckLogImport,
+  readImport,
+} from "../../domain/deck/import"
 import { createDeck, totalCount } from "../../domain/deck/model"
+import { deckLogReferenceOf } from "../../domain/decklog"
 import type { Region } from "../../domain/search"
 import { decksStore, useDecks } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -29,8 +37,13 @@ function readSafely(text: string, read: () => ImportedDeck): ImportedDeck | "bad
   }
 }
 
+interface DeckLogLookup {
+  readonly key: string
+  readonly result: DeckLogResult | "loading"
+}
+
 /**
- * Paste a deck list or share code, or arrive from a share link (`?d=`): the preview says what was
+ * Paste a deck list, share code or DeckLog code or link, or arrive from a share link (`?d=`): the preview says what was
  * understood and what was not before a new deck is made.
  */
 export function DeckImportPage() {
@@ -47,8 +60,13 @@ export function DeckImportPage() {
       return undefined
     }
   }, [text])
+  // DeckLog runs one system per edition: a link says which, a bare code is read in the page's edition.
+  const deckLog = useMemo(
+    () => (codeEdition === undefined ? deckLogReferenceOf(text) : undefined),
+    [codeEdition, text],
+  )
   const routeEdition = useRouteEdition()
-  const edition: Region = codeEdition ?? routeEdition
+  const edition: Region = codeEdition ?? deckLog?.region ?? routeEdition
   useEffect(() => {
     if (edition === routeEdition) return
     const next = new URLSearchParams(params)
@@ -61,25 +79,61 @@ export function DeckImportPage() {
   const [saving, setSaving] = useState(false)
   // Creating waits for the saved decks to load, so the new deck is in the list the builder opens on.
   const decks = useDecks()
-  const preview = useMemo(
-    () =>
-      facts === null
-        ? null
-        : readSafely(text, () =>
-            readImport(text, {
-              printingByCardNo: (cardNo) => facts.printingByCardNo(cardNo),
-              printingByIntId: (intId) => facts.printingByIntId(intId),
-              infoOf: (cardId) => facts.factsOf(cardId),
-            }),
-          ),
-    [text, facts],
+  const deckLogKey = deckLog ? `${edition}/${deckLog.code}` : ""
+  const [lookup, setLookup] = useState<DeckLogLookup | null>(null)
+  const deckLogState = lookup !== null && lookup.key === deckLogKey ? lookup.result : null
+  const pending = useRef<AbortController | null>(null)
+  useEffect(
+    () => () => {
+      pending.current?.abort()
+    },
+    [],
   )
+  const readDeckLog = () => {
+    if (!deckLog) return
+    pending.current?.abort()
+    const controller = new AbortController()
+    pending.current = controller
+    const key = deckLogKey
+    setLookup({ key, result: "loading" })
+    fetchDeckLogDeck(edition, deckLog.code, controller.signal).then(
+      (result) => {
+        setLookup({ key, result })
+      },
+      () => undefined,
+    )
+  }
+  const preview = useMemo(() => {
+    if (facts === null) return null
+    const importLookup: ImportLookup = {
+      printingByCardNo: (cardNo) => facts.printingByCardNo(cardNo),
+      printingByIntId: (intId) => facts.printingByIntId(intId),
+      infoOf: (cardId) => facts.factsOf(cardId),
+    }
+    if (deckLog)
+      return deckLogState !== null && deckLogState !== "loading" && "deck" in deckLogState
+        ? readDeckLogImport(deckLogState.deck, importLookup)
+        : null
+    return readSafely(text, () => readImport(text, importLookup))
+  }, [text, facts, deckLog, deckLogState])
+  const deckLogDeck =
+    deckLogState !== null && deckLogState !== "loading" && "deck" in deckLogState
+      ? deckLogState.deck
+      : undefined
+  const deckLogError =
+    deckLogState !== null && deckLogState !== "loading" && "error" in deckLogState
+      ? deckLogState.error
+      : undefined
   const create = () => {
     if (preview === null || preview === "bad-code") return
     const deck = {
       ...createDeck(
         {
-          name: preview.name ?? t("decks.importedName"),
+          name:
+            preview.name ??
+            (deckLogDeck
+              ? t("decks.importDeckLogName", { code: deckLogDeck.code })
+              : t("decks.importedName")),
           edition,
           format: preview.format ?? "standard",
           basis: preview.basis,
@@ -116,13 +170,16 @@ export function DeckImportPage() {
           setText(event.target.value)
         }}
         rows={8}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         aria-label={t("decks.importPaste")}
         placeholder={t("decks.importPlaceholder")}
         className="w-full rounded-button border border-border bg-surface-1 p-3 font-mono text-13 text-text-1"
       />
       <div className="flex flex-wrap items-center gap-2 text-13 text-text-2">
         <span>{t("account.cardEdition")}</span>
-        {codeEdition === undefined ? (
+        {codeEdition === undefined && deckLog?.region === undefined ? (
           <Segmented
             label={t("account.cardEdition")}
             value={edition}
@@ -154,6 +211,41 @@ export function DeckImportPage() {
           {t("results.dependenciesPending")}
         </p>
       )}
+      {deckLog && (
+        <div className="flex flex-col gap-2 rounded-button border border-border bg-surface-1 p-3 text-13">
+          <p className="text-text-2">
+            {deckLog.region === undefined
+              ? t("decks.importDeckLogBareHint", {
+                  code: deckLog.code,
+                  edition: t(`options.edition.${edition}`),
+                })
+              : t("decks.importDeckLogLinkHint", {
+                  code: deckLog.code,
+                  edition: t(`options.edition.${edition}`),
+                })}
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              disabled={deckLogState === "loading" || deckLogDeck !== undefined}
+              onClick={readDeckLog}
+            >
+              {t("decks.importDeckLogRead")}
+            </Button>
+            <p role="status" className="text-13 text-text-2">
+              {deckLogState === "loading" ? t("decks.importDeckLogLoading") : ""}
+            </p>
+          </div>
+          {deckLogError !== undefined && (
+            <Notice tone="danger" role="alert">
+              {t(`decks.importDeckLogErrors.${deckLogError}`, {
+                code: deckLog.code,
+                edition: t(`options.edition.${edition}`),
+              })}
+            </Notice>
+          )}
+        </div>
+      )}
       {preview === "bad-code" && (
         <Notice tone="danger" role="alert">
           {t("decks.importBadCode")}
@@ -164,6 +256,16 @@ export function DeckImportPage() {
           aria-label={t("decks.importPreviewTitle")}
           className="flex flex-col gap-2 rounded-button border border-border bg-surface-1 p-3 text-13"
         >
+          {deckLogDeck && (
+            <p className="text-text-2">
+              {deckLogDeck.className === null
+                ? t("decks.importDeckLogSource", { code: deckLogDeck.code })
+                : t("decks.importDeckLogSourceClass", {
+                    code: deckLogDeck.code,
+                    className: deckLogDeck.className,
+                  })}
+            </p>
+          )}
           <p className="font-semibold">
             {t("decks.importCounts", {
               main: totalCount(preview.main),

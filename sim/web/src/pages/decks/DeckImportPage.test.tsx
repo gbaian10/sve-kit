@@ -40,7 +40,7 @@ async function openImport(path = "/decks/import") {
 describe("DeckImportPage", () => {
   it("previews a pasted list, lists what it cannot use, and creates the deck", async () => {
     const { router } = await openImport()
-    fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
+    fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
       target: { value: "# 王族\n3 BP01-001\n1 SD01-L01\n2 BP99-999\nhello\n## 候補\n1 BP01-004" },
     })
     const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
@@ -178,7 +178,7 @@ describe("DeckImportPage", () => {
       await act(async () => {
         await router.navigate(route)
       })
-      const input = await screen.findByRole("textbox", { name: "牌組文字或分享碼" })
+      const input = await screen.findByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" })
       // The second pass pastes the text list, whose name line looks like a code.
       if (route === "/decks/import") fireEvent.change(input, { target: { value: list } })
       const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
@@ -198,7 +198,7 @@ describe("DeckImportPage", () => {
 
   it("stays on the page with the pasted list when the deck cannot be saved", async () => {
     await openImport()
-    fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
+    fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
       target: { value: "3 BP01-001" },
     })
     await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
@@ -206,7 +206,9 @@ describe("DeckImportPage", () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole("button", { name: "建立牌組" }))
     expect(await screen.findByText("牌組沒有存成功，請再試一次。")).toBeInTheDocument()
-    expect(screen.getByRole("textbox", { name: "牌組文字或分享碼" })).toHaveValue("3 BP01-001")
+    expect(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" })).toHaveValue(
+      "3 BP01-001",
+    )
     save.mockRestore()
     await user.click(screen.getByRole("button", { name: "建立牌組" }))
     await waitFor(() => {
@@ -232,5 +234,91 @@ describe("DeckImportPage", () => {
     // jsdom has no canvas, as some locked-down browsers do not; the dialog says so instead of hanging.
     await user.click(within(dialog).getByRole("button", { name: "產生圖片" }))
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("圖片產生失敗")
+  }, 60_000)
+
+  it("reads a DeckLog link through the Worker and lists the card numbers it cannot match", async () => {
+    const fixtureFetch = globalThis.fetch
+    const asked: string[] = []
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+      if (!url.startsWith("/api/decklog/")) return fixtureFetch(input, init)
+      asked.push(url)
+      return Promise.resolve(
+        Response.json({
+          region: "jp",
+          code: "AB12C",
+          format: "N",
+          className: "ロイヤル",
+          leader: [{ cardNo: "SD01-L01", count: 1 }],
+          main: [
+            { cardNo: "BP01-001", count: 3 },
+            { cardNo: "BP01-004", count: 2 },
+          ],
+          evolve: [{ cardNo: "BP99-999", count: 2 }],
+        }),
+      )
+    })
+    try {
+      await openImport()
+      const user = userEvent.setup()
+      fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
+        target: { value: "https://decklog.bushiroad.com/view/ab12c" },
+      })
+      expect(await screen.findByText("日版 DeckLog 的牌組 AB12C。")).toBeInTheDocument()
+      // A link names its edition, so there is no edition to pick.
+      expect(screen.queryByRole("radiogroup", { name: "卡片版本" })).not.toBeInTheDocument()
+      await user.click(screen.getByRole("button", { name: "從 DeckLog 讀取" }))
+      const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
+      expect(asked).toEqual(["/api/decklog/jp/AB12C"])
+      expect(within(preview).getByText("來源：DeckLog AB12C（ロイヤル）")).toBeInTheDocument()
+      expect(within(preview).getByText("主牌組 5 張・進化牌組 0 張・候補 0 張")).toBeInTheDocument()
+      expect(within(preview).getByText("BP99-999 ×2")).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "從 DeckLog 讀取" })).toBeDisabled()
+      await user.click(screen.getByRole("button", { name: "建立牌組" }))
+      await waitFor(() => {
+        expect(storedDecks()[0]).toMatchObject({
+          name: "DeckLog AB12C",
+          edition: "jp",
+          format: "standard",
+          leader: { cardId: "c:sd01-001" },
+          main: [
+            { cardId: "c:bp01-001", count: 3 },
+            { cardId: "c:sd01-002", count: 2 },
+          ],
+        })
+      })
+    } finally {
+      vi.stubGlobal("fetch", fixtureFetch)
+    }
+  }, 60_000)
+
+  it("looks a bare DeckLog code up in the chosen edition and explains a miss", async () => {
+    const fixtureFetch = globalThis.fetch
+    const asked: string[] = []
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+      if (!url.startsWith("/api/decklog/")) return fixtureFetch(input, init)
+      asked.push(url)
+      return Promise.resolve(Response.json({ error: "not-found" }, { status: 404 }))
+    })
+    try {
+      await openImport()
+      const user = userEvent.setup()
+      fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
+        target: { value: "zz99z" },
+      })
+      const editions = await screen.findByRole("radiogroup", { name: "卡片版本" })
+      await user.click(within(editions).getByRole("radio", { name: "英版" }))
+      await user.click(screen.getByRole("button", { name: "從 DeckLog 讀取" }))
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "英版 DeckLog 找不到代碼 ZZ99Z；如果是另一版的代碼，請切換版本再試。",
+      )
+      expect(asked).toEqual(["/api/decklog/en/ZZ99Z"])
+      // The text is not also read as a deck list.
+      expect(screen.queryByRole("region", { name: "辨識結果" })).not.toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "建立牌組" })).toBeDisabled()
+    } finally {
+      vi.stubGlobal("fetch", fixtureFetch)
+    }
   }, 60_000)
 })

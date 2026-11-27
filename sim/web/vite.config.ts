@@ -277,6 +277,8 @@ const devHttps = process.env["SVE_DEV_HTTPS"] === "1"
 const tlsCertPath = process.env["SVE_DEV_TLS_CERT"]
 const tlsKeyPath = process.env["SVE_DEV_TLS_KEY"]
 const codecovToken = process.env["CODECOV_TOKEN"]
+// A local `wrangler dev` of the Worker (docs/deployment/cloudflare-development.md §12) answers /api/.
+const devWorker = process.env["SVE_DEV_WORKER"]
 let tlsCertificate: { cert: Buffer; key: Buffer } | undefined
 
 if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
@@ -348,6 +350,9 @@ export default defineConfig({
   ],
   server: {
     ...(tlsCertificate === undefined ? {} : { https: tlsCertificate }),
+    ...(devWorker === undefined
+      ? {}
+      : { proxy: { "/api/": { target: devWorker, changeOrigin: true } } }),
     fs: {
       allow: [
         searchForWorkspaceRoot(process.cwd()),
