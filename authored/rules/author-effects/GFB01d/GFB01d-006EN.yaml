@@ -1,0 +1,32 @@
+cards:
+  GFB01d-006EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          orig_cost_eq: 1
+                          who: self
+                          zone: deck
+                        to: field
+                  - - move:
+                        ref: recovered
+                        to: hand
+          targets:
+            - bind: recovered
+              from:
+                who: self
+                zone: banish
+              n: 1
+              option: 2
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

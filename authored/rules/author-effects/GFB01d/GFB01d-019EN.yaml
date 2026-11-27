@@ -1,0 +1,21 @@
+cards:
+  GFB01d-019EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - aura
+        line: 2
+      - auto:
+          do:
+            - set_stat:
+                hp: 4
+                on: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

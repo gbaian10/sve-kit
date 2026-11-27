@@ -1,0 +1,30 @@
+cards:
+  GFB01d-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  leader_class: ビショップ
+                then:
+                  - search:
+                      groups:
+                        - n: 1
+                          sel:
+                            kind: amulet
+                            orig_cost_eq: 3
+                            who: self
+                            zone: deck
+                        - n: 1
+                          sel:
+                            kind: amulet
+                            orig_cost_eq: 1
+                            who: self
+                            zone: deck
+                      to: field
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

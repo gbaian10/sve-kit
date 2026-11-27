@@ -1,0 +1,55 @@
+cards:
+  GFB01d-024EN:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n:
+                  power_of: ally
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n:
+                  power_of: ally
+                to:
+                  any_of:
+                    - enemy
+                    - leader_of: enemy
+          quick: true
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
