@@ -263,6 +263,9 @@ const fn expiry(value: native::EffectExpiry) -> wire::EffectExpiry {
         native::EffectExpiry::NextTurnEnd(player) => wire::EffectExpiry::NextTurnEnd {
             player: seat(player),
         },
+        native::EffectExpiry::NextTurnStart(player) => wire::EffectExpiry::NextTurnStart {
+            player: seat(player),
+        },
         native::EffectExpiry::SourceLeavesField => wire::EffectExpiry::SourceLeavesField,
         native::EffectExpiry::NextStartEnd(player) => wire::EffectExpiry::NextStartEnd {
             player: seat(player),

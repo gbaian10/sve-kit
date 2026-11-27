@@ -70,6 +70,8 @@ pub enum EffectExpiry {
     TurnEnd,
     /// End of this player's next turn, which has not begun yet.
     NextTurnEnd(Viewer),
+    /// Beginning of this player's next turn.
+    NextTurnStart(Viewer),
     /// When the identified source leaves the field.
     SourceLeavesField,
     /// End of this player's next rule-start procedure.

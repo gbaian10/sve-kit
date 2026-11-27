@@ -17,8 +17,13 @@ impl Game {
         let amount = delta
             .checked_neg()
             .ok_or_else(|| invalid("life cost overflow"))?;
-        let life = self
-            .player(seat_name(execution.context.controller)?)?
+        let payer = self.player(seat_name(execution.context.controller)?)?;
+        if amount > 0 && payer.defense_protected {
+            return Err(EngineFailure::IllegalPlay(
+                "leader cannot lose defense".into(),
+            ));
+        }
+        let life = payer
             .leader
             .get("life")
             .and_then(serde_json::Value::as_i64)
@@ -59,6 +64,11 @@ impl Game {
             NumericChange::SetOriginal {} => {
                 return Err(unsupported("leader life has no printed stat"));
             }
+        };
+        let after = if after < before && self.player(seat)?.defense_protected {
+            before
+        } else {
+            after
         };
         let delta = after
             .checked_sub(before)

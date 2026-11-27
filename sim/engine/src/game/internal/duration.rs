@@ -1,6 +1,6 @@
 use super::{Execution, Game, Result, unsupported};
 use crate::game::player::observation::{EffectExpiry, EffectInterval, viewer};
-use crate::ir::{Duration, DurationEnd, Interval, ObjectOperand, PlayerId, ZoneKind};
+use crate::ir::{Duration, DurationEnd, Edge, Interval, ObjectOperand, PlayerId, ZoneKind};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -9,6 +9,7 @@ pub(super) enum EffectEnd {
     EndResolution,
     Turn(u64),
     NextTurn { player: u32, after: u64 },
+    NextTurnStart { player: u32, after: u64 },
     SourceField { object: u64, generation: u64 },
 }
 
@@ -17,13 +18,22 @@ impl EffectEnd {
         match end {
             DurationEnd::NoTemporalExpiry {} => Ok(Self::NoTemporalExpiry),
             DurationEnd::EndResolution {} => Ok(Self::EndResolution),
-            DurationEnd::CurrentTurnEnd {} | DurationEnd::NextTurnEnd { .. }
-                if game.state.flow["kind"] == "pregame" || game.state.game["ended"] == true =>
-            {
+            DurationEnd::CurrentTurnEnd {}
+            | DurationEnd::NextTurnEnd { .. }
+            | DurationEnd::NextTurnEdge {
+                edge: Edge::Begin, ..
+            } if game.state.flow["kind"] == "pregame" || game.state.game["ended"] == true => {
                 Err(unsupported("turn duration requires an actual running turn"))
             }
             DurationEnd::CurrentTurnEnd {} => Ok(Self::Turn(game.state.schedule.current()?)),
             DurationEnd::NextTurnEnd { player } => Ok(Self::NextTurn {
+                player: execution.player(game, player)?.seat,
+                after: game.state.schedule.current()?,
+            }),
+            DurationEnd::NextTurnEdge {
+                player,
+                edge: Edge::Begin,
+            } => Ok(Self::NextTurnStart {
                 player: execution.player(game, player)?.seat,
                 after: game.state.schedule.current()?,
             }),
@@ -54,6 +64,10 @@ impl EffectEnd {
         }
     }
 
+    pub(super) const fn expires_at_start(self, turn: u64, player: u32) -> bool {
+        matches!(self, Self::NextTurnStart { player: waiting, after } if waiting == player && turn > after)
+    }
+
     pub(super) fn source_expired(self, game: &Game) -> bool {
         if let Self::SourceField { object, generation } = self {
             return !game
@@ -74,6 +88,9 @@ impl EffectEnd {
             Self::Turn(_) => EffectExpiry::TurnEnd,
             Self::NextTurn { player, .. } => {
                 EffectExpiry::NextTurnEnd(viewer(super::seat_name(PlayerId { seat: player })?)?)
+            }
+            Self::NextTurnStart { player, .. } => {
+                EffectExpiry::NextTurnStart(viewer(super::seat_name(PlayerId { seat: player })?)?)
             }
             Self::SourceField { .. } => EffectExpiry::SourceLeavesField,
         })

@@ -1,6 +1,6 @@
 use super::phase_restrictions::affected_player;
 use super::{
-    AbilitySource, Bool, Duration, DurationEnd, Effect, Expr, Interval, PlayerRef, PlayerSet,
+    AbilitySource, Bool, Duration, DurationEnd, Edge, Effect, Expr, Interval, PlayerRef, PlayerSet,
     RuleModifier, TimeAnchor,
 };
 
@@ -8,6 +8,24 @@ use super::{
 pub(crate) enum PlayerRule {
     UnlimitedHand,
     DoubleFanfare,
+    CannotLoseDefense,
+}
+
+pub(crate) const fn next_turn_start(player: PlayerRef) -> DurationEnd {
+    DurationEnd::NextTurnEdge {
+        player,
+        edge: Edge::Begin,
+    }
+}
+
+pub(crate) const fn controller_next_turn_start(end: &DurationEnd) -> bool {
+    matches!(
+        end,
+        DurationEnd::NextTurnEdge {
+            player: PlayerRef::Controller {},
+            edge: Edge::Begin,
+        }
+    )
 }
 
 impl PlayerRule {
@@ -21,6 +39,10 @@ impl PlayerRule {
                 modifier: RuleModifier::DoubleFanfare { .. },
                 ..
             } => Some(Self::DoubleFanfare),
+            Effect::RuleModifier {
+                modifier: RuleModifier::CannotLoseDefense { .. },
+                ..
+            } => Some(Self::CannotLoseDefense),
             Effect::Continuous { .. }
             | Effect::Replacement { .. }
             | Effect::Permission { .. }
@@ -38,6 +60,13 @@ impl PlayerRule {
                     player: player.clone(),
                 },
                 DurationEnd::NoTemporalExpiry {},
+                vec![],
+            ),
+            Self::CannotLoseDefense => (
+                RuleModifier::CannotLoseDefense {
+                    player: player.clone(),
+                },
+                next_turn_start(player.clone()),
                 vec![],
             ),
             Self::DoubleFanfare => (

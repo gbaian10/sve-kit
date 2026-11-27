@@ -113,6 +113,7 @@ variants!(RuleModifier {
     EvolutionPlayLimit { player: PlayerRef } => ["rule.evolution-play-limit"],
     UnlimitedHand { player: PlayerRef } => ["rule.unlimited-hand"],
     DoubleFanfare { player: PlayerRef } => ["rule.double-fanfare"],
+    CannotLoseDefense { player: PlayerRef } => ["rule.cannot-lose-defense"],
     BattleDamageBasis { objects: Selector } => ["rule.battle-damage-basis"],
     TriggerMultiplicity { pattern: EventPattern, controller: PlayerRef, add: Nat } => ["rule.trigger-multiplicity"]
 });

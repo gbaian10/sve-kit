@@ -1299,6 +1299,10 @@ pub(super) enum Until {
     ThisAndNextOppTurn,
     Game,
     #[serde(untagged)]
+    NextTurn {
+        next_turn: TurnBegin,
+    },
+    #[serde(untagged)]
     DuringNextTurn {
         during_next_turn: AttackTurnInterval,
     },
@@ -1324,6 +1328,20 @@ pub(super) struct RulePhaseInterval {
 pub(super) enum RuleWindowPhase {
     Start,
     Main,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TurnBegin {
+    pub who: StandPlayer,
+    #[serde(rename = "edge")]
+    pub _edge: BeginEdge,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BeginEdge {
+    Begin,
 }
 
 #[derive(Deserialize)]
@@ -4144,12 +4162,25 @@ pub(super) struct StaticGrant {
 pub(super) enum Cannot {
     Draw(CannotDraw),
     RulePhase(CannotRulePhase),
+    LoseDefense(CannotLoseDefense),
     Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotLoseDefense {
+    pub what: DefenseAction,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DefenseAction {
+    LoseDefense,
 }
 
 #[derive(Deserialize)]

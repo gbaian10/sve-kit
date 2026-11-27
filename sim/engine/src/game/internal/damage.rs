@@ -359,6 +359,12 @@ impl Game {
             if actual == 0 {
                 continue;
             }
+            // Defense protection applies to the recipient after damage replacements.
+            if let Some(seat) = string(&hit["target"]).strip_suffix(".leader")
+                && self.player(seat)?.defense_protected
+            {
+                continue;
+            }
             self.internal_damage_arithmetic(string(&hit["target"]), actual)?;
             hit["amount"] = json!(actual);
             run.hits.push(hit);

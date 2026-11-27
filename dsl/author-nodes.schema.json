@@ -15779,6 +15779,35 @@
         "until"
       ]
     },
+    "A.act.player-effect.defense": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "const": {
+            "cannot": {
+              "what": "lose_defense"
+            }
+          }
+        },
+        "until": {
+          "const": {
+            "next_turn": {
+              "who": "self",
+              "edge": "begin"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
     "A.act.player-effect.fanfare": {
       "type": "object",
       "properties": {
@@ -16732,6 +16761,9 @@
             },
             {
               "$ref": "#/$defs/A.act.player-effect.fanfare"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.defense"
             }
           ]
         },

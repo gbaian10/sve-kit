@@ -30,6 +30,7 @@ impl Game {
         let seat = seat_name(execution.player(self, &PlayerRef::Controller {})?)?;
         match rule {
             PlayerRule::UnlimitedHand => self.player_mut(seat)?.unlimited_hand = true,
+            PlayerRule::CannotLoseDefense => self.player_mut(seat)?.defense_protected = true,
             PlayerRule::DoubleFanfare => {
                 let next_own_turn = int(&self.state.turn["elapsed_turns"][seat]).saturating_add(1);
                 self.player_mut(seat)?.double_fanfare.insert(next_own_turn);
