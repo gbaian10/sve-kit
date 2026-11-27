@@ -400,6 +400,16 @@ impl BodyContext<'_> {
             },
             ast::Condition::MyTurn(false) => return Err(unsupported(path)),
             ast::Condition::InZone(location) => self.objects_in_play_zone(location, path)?,
+            ast::Condition::PhysicalSourceInZone(zone) => {
+                let zone = match zone.as_str() {
+                    "field" => super::super::PhysicalSourceZone::Field,
+                    "ex" => super::super::PhysicalSourceZone::Ex,
+                    _ => return Err(unsupported(path)),
+                };
+                return Ok(Expr::Live(Box::new(BoolRead::PhysicalSourceInZone {
+                    zone,
+                })));
+            }
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;

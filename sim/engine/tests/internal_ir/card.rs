@@ -1139,3 +1139,6 @@ mod layer3_entry_source;
 
 #[path = "card/spell_chain.rs"]
 mod spell_chain;
+
+#[path = "card/physical_source_zone.rs"]
+mod physical_source_zone;

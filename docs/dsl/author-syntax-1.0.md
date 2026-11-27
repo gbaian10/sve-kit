@@ -145,6 +145,8 @@ to_deck 的材料 payload 必填 shuffle:true。discard 的 random 只接受 `{s
 
 沿用 `count: Sel / count_of / objects_of / bound / power_of / hp_of / cost_of / hand / leader_life / counter / distinct_names / distinct_orig_costs / dice / paid / x_paid / history_count`；算術為 `plus / minus / times / half_up / per: {of, unit}`，二元運算用二元素陣列。增加 `resource / agg / min / max / event / turn_number` 與 `define`，見 §13。`cmp: {left, op: eq|ne|lt|le|gt|ge, right}` 比較數值；Player 同型比較的兩邊須 `{player:PlayerRef}` 且只收 eq/ne。paid、chosen 是 Cond；objects_of 只在列明 operand，不是自由數值；`all / any / not` 組合條件。保留 `exists / on_field / in_zone / leader_life / hand / zone_free / my_turn / opp_turn / construction / standing / acted / evolved / chosen / did / entered_from / played_from` 與 combo、spellchain、necro、awakened、crimson。
 
+`physical_source_in_zone: field|ex` 在結算時讀取能力來源的實體卡是否仍位於能力控制者的指定公開區域。實體卡換區後仍可符合位置條件，其他 `this` 引用沿用原世代。只在卡文明確依實體卡位置決定後續處理時使用。
+
 `define: {X: Expr, …}` 是同一能力內的**純表達式別名**，在每個使用點展開、依該 read 的時點讀；不是 entry 時偷偷 freeze。一般卡文定義 X 為 Live（已同意第 18 族），事件／receipt 值本身固定。自定義 X 與頭的自由 x 不可同名；無限循環定義、型別不明定義載入拒絕。同一步使用 X 多次從同一指示開始視圖讀，跨步驟則重新求值。
 
 | 捕捉         | 規則                                                                                                            |

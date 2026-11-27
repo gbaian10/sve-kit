@@ -29930,6 +29930,9 @@
           "$ref": "#/$defs/DSLNodes.A.cond.in-zone"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.cond.physical-source-in-zone"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.cond.entered-from"
         },
         {
@@ -30483,6 +30486,21 @@
       },
       "required": [
         "paid"
+      ],
+      "type": "object"
+    },
+    "DSLNodes.A.cond.physical-source-in-zone": {
+      "additionalProperties": false,
+      "properties": {
+        "physical_source_in_zone": {
+          "enum": [
+            "field",
+            "ex"
+          ]
+        }
+      },
+      "required": [
+        "physical_source_in_zone"
       ],
       "type": "object"
     },

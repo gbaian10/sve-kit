@@ -1385,6 +1385,19 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
+            BoolRead::PhysicalSourceInZone { zone } => {
+                use crate::ir::PhysicalSourceZone;
+
+                let seat = seat_name(self.context.controller)?;
+                let zone = match zone {
+                    PhysicalSourceZone::Field => "field",
+                    PhysicalSourceZone::Ex => "ex",
+                };
+                // This check identifies the physical source without refreshing its effect references.
+                Ok(Bool(
+                    game.zone_ids(seat, zone).contains(&self.context.source),
+                ))
+            }
             BoolRead::LimitBreak { object, state } => {
                 if let Some(reference) = self.current_limit_break_subject(game, object)? {
                     return game

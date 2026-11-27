@@ -1134,6 +1134,9 @@
           "$ref": "#/$defs/A.cond.in-zone"
         },
         {
+          "$ref": "#/$defs/A.cond.physical-source-in-zone"
+        },
+        {
           "$ref": "#/$defs/A.cond.entered-from"
         },
         {
@@ -3204,6 +3207,16 @@
       "required": [
         "in_zone"
       ],
+      "type": "object"
+    },
+    "A.cond.physical-source-in-zone": {
+      "additionalProperties": false,
+      "properties": {
+        "physical_source_in_zone": {
+          "enum": ["field", "ex"]
+        }
+      },
+      "required": ["physical_source_in_zone"],
       "type": "object"
     },
     "A.cond.entered-from": {
