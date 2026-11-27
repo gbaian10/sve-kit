@@ -747,3 +747,118 @@ fn processing_tracks_the_real_participant_and_stage_round() {
         "the actual procedure ends after both stages"
     );
 }
+
+fn parity_program() -> WellFormedCardProgram {
+    let life = json!({"leader_life":"p"});
+    lowerer()
+        .lower(&tree(
+            "unit-amulet",
+            &json!({"activate":{"cost":{"pp":0},"do":[
+                {"each_player":{"as":"p","stages":[[
+                    {"if":{
+                        "cond":{"cmp":{
+                            "left":{"minus":[life,{"times":[{"per":{"of":life,"unit":2}},2]}]},
+                            "op":"eq","right":1
+                        }},
+                        "then":[
+                            {"if":{
+                                "cond":{"cmp":{
+                                    "left":{"count":{"who":"p","zone":"field","kind":"follower"}},
+                                    "op":"ge","right":1
+                                }},
+                                "then":[
+                                    {"choose":{"bind":"buried","by":"p","from":{"who":"p","zone":"field","kind":"follower"},"n":1}},
+                                    {"move":{"ref":"buried","to":"cemetery"}}
+                                ]
+                            }},
+                            {"life":{"who":"p","delta":-1}}
+                        ],
+                        "else":[{"life":{"who":"p","delta":1}},{"draw":{"who":"p","n":1}}]
+                    }}
+                ]]}}
+            ]}}),
+        ))
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap()
+}
+
+#[test]
+fn each_player_reads_their_own_leader_life_for_the_parity_procedure() {
+    let program = parity_program();
+    let aura = event_paid_damage::aura_follower(vec![]);
+    for (odd, even, odd_seat, follower) in [("P1", "P2", 1, true), ("P2", "P1", 2, false)] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-amulet"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        for player in ["P1", "P2"] {
+            initial["players"][player]["zones"]["hand"] = json!([]);
+            initial["players"][player]["zones"]["deck"] =
+                json!([{"id":format!("draw-{player}"),"card":"unit-spell"}]);
+        }
+        initial["players"][odd]["leader"]["life"] = json!(19);
+        initial["players"][even]["leader"]["life"] = json!(20);
+        if follower {
+            initial["players"][odd]["zones"]["field"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":"aura","card":"unit-follower"}));
+        }
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "leader-parity",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &program).unwrap();
+        game.load_internal_card("unit-follower", &aura).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let activated = game
+            .activate_internal_card(
+                "source",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap();
+        let resolved = if follower {
+            let question = awaiting(activated);
+            assert_eq!(question.actor, PlayerId { seat: odd_seat });
+            let offered = handles(&question);
+            assert_eq!(offered.len(), 1);
+            resolved(
+                game.answer_internal_card(question.actor, question.token, Answer::Targets(offered))
+                    .unwrap(),
+            )
+        } else {
+            resolved(activated)
+        };
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state[odd]["leader"]["life"], 18);
+        assert_eq!(state[even]["leader"]["life"], 21);
+        assert_eq!(state[odd]["hand"], json!([]));
+        assert_eq!(state[even]["hand"], json!([format!("draw-{even}")]));
+        if follower {
+            assert_eq!(state[odd]["cemetery"], json!(["aura"]));
+            assert!(resolved.progress.facts.iter().any(
+                |fact| matches!(fact, Fact::Movement(movement) if movement.method == MoveMethod::Put
+                    && movement.from.kind == ZoneKind::Field)
+            ));
+        }
+    }
+}
+
+#[test]
+fn leader_life_rejects_an_unbound_player_or_multiple_players() {
+    for who in ["p", "all"] {
+        let document = tree(
+            "unit-amulet",
+            &json!({"activate":{"cost":{"pp":0},"do":[
+                {"draw":{"n":{"leader_life":who}}}
+            ]}}),
+        );
+        assert!(lowerer().lower(&document).is_err(), "{who}");
+    }
+}

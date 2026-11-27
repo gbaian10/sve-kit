@@ -1312,7 +1312,18 @@ impl BodyContext<'_> {
             }
             ast::Number::HistorySum { history_sum } => self.history_sum_number(history_sum, path),
             ast::Number::LeaderLife { leader_life } => {
-                Ok(player_resource(*leader_life, PlayerResource::Life))
+                let player = match leader_life {
+                    ast::Side::Controller => PlayerRef::Controller {},
+                    ast::Side::Opponent => super::super::events::timing::opponent(),
+                    ast::Side::Bound(name) => PlayerRef::Bound {
+                        binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+                    },
+                    ast::Side::All => return Err(unsupported(path)),
+                };
+                Ok(Expr::Live(Box::new(IntRead::PlayerResource {
+                    player,
+                    property: PlayerResource::Life,
+                })))
             }
             ast::Number::Alias(name) => {
                 if let Some(binding) = self.declared_numbers.get(name) {
