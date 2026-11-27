@@ -232,6 +232,7 @@ impl BodyContext<'_> {
         }
         let count = ast::Number::Count {
             count: ast::CountQuery {
+                acted: None,
                 face_up: None,
                 class: None,
                 not_class: None,
@@ -1489,6 +1490,9 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if count.acted.is_some() && !matches!(count.zone, ast::CountZone::Field) {
+            return Err(unsupported(path));
+        }
         if matches!(count.kind, Some(ast::CountKind::Crest))
             && (!matches!(count.zone, ast::CountZone::Ex)
                 || !matches!(count.who, ast::Side::Controller))
