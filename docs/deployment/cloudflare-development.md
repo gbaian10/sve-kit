@@ -429,14 +429,21 @@ API 與前端、R2 讀取共用 Worker、網域與第 4 節的 Access，不另�
 - 代碼須是 4～10 個大寫英數字，否則回 400 `invalid-code`，不計入頻率也不查 DeckLog。
 - 發行後的代碼不能改卡，所以第一次查到就存進 D1 `decklog_deck`，之後同一個代碼只讀 D1。
   只存版本、代碼、賽制代號（`deck_param1`）、職業或作品名（`deck_param2`）、三區的卡號與張數及取得時間；
-  牌組名稱、備註、作者等其餘欄位不存也不回傳。成功回應帶 `private, max-age=31536000, immutable`。
+  牌組名稱、備註、作者等其餘欄位不存也不回傳。已存的牌組回應帶 `private, max-age=31536000, immutable`。
 - DeckLog 對不存在的代碼回 200 與 `[]`，Worker 回 404 `not-found`；`game_title_id` 不是 6 回 422 `not-sve`；
-  連不上、逾時（10 秒）、非 200 或轉址回 502 `upstream-unavailable`；內容讀不懂（非 JSON、缺欄位、卡號或張數不合格式、超過 512 KiB）
-  回 502 `upstream-invalid`。這些結果都不存。綁定缺少回 503 `not-configured`。
+  連不上、逾時（10 秒，含讀取內容途中）、狀態不是 200 或轉址回 502 `upstream-unavailable`；
+  內容讀不懂（非 JSON、沒有主牌組 `list` 或主牌組是空的、卡號或張數不合格式、超過 512 KiB）回 502 `upstream-invalid`。
+  主戰者 `p_list` 與進化牌組 `sub_list` 缺少或為 `null` 時視為空。這些結果都不存。綁定缺少回 503 `not-configured`。
 - 頻率限制有兩層：`DECKLOG_LIMITER` 以來源 IP 計數，每 60 秒 10 次，D1 命中也計入，
   所以不能拿它當公開代理；`DECKLOG_UPSTREAM_LIMITER` 只計真的去問 DeckLog 的查詢，每個版本一個共用鍵、每 60 秒 30 次，
-  限制我們對 DeckLog 的總請求量。兩者超過都回 429 `rate-limited`。Cloudflare 依資料中心各自計數。
-- D1 讀取失敗當作未命中（仍受上游限制），寫入失敗照常回傳結果；Workers Logs 以 `decklog:` 開頭記錄。
+  限制我們對 DeckLog 的總請求量。兩者超過都回 429 `rate-limited`。Cloudflare 依資料中心各自計數，
+  計數同步前可能暫時超過設定值，所以這是近似的上限。
+- 只有 D1 確定沒有這一列時才問 DeckLog：D1 讀取失敗回 503 `store-unavailable`，不改問 DeckLog。
+  讀得到但內容讀不回來的列（理論上不會發生）會刪掉並重查一次。
+  同一個代碼同時有兩個未命中時，兩者都會問 DeckLog，先寫入的那一列保留（`ON CONFLICT DO NOTHING`）。
+  寫入失敗時照常回傳牌組，但帶 `no-store`，下次匯入會再查一次並寫入。
+- Workers Logs 以 `decklog:` 開頭：每次真的向 DeckLog 發出請求記一筆 `decklog: upstream jp`／`en`（`console.log`），
+  錯誤記 `decklog: <錯誤碼>`、`decklog: store-write`、`decklog: unreadable-row`（`console.error`）。
 
 ### 維護者建立與綁定
 
@@ -457,9 +464,11 @@ Agent 不建立遠端資源；以下由維護者在 `sim/web` 執行。
    ```
 
 4. 照第 5 節部署後，登入開發站，在 `/decks/import` 貼一個主戰者、主牌組、進化牌組都有的 DeckLog 網址，
-   按「從 DeckLog 讀取」，確認預覽與對不到的卡號；同一個代碼再查一次時 Workers Logs 不應有新的 DeckLog 請求。
-   可用 `bun x wrangler d1 execute DECKLOG_DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
-   確認已存。正式環境另建資料庫與 Rate Limiting namespace，不共用開發的。
+   按「從 DeckLog 讀取」，確認預覽與對不到的卡號。Workers Logs 應有一筆 `decklog: upstream`。
+   用 `bun x wrangler d1 execute DECKLOG_DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
+   確認已存。再查同一個代碼前，先在瀏覽器開發者工具勾選停用快取（或用無痕視窗），否則瀏覽器會直接用一年快取、
+   不會進 Worker；這次 Workers Logs 應有該路徑的請求，但不會多出 `decklog: upstream`。
+   正式環境另建資料庫與 Rate Limiting namespace，不共用開發的。
 
 ### 本機試用
 

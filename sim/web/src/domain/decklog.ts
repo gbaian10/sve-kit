@@ -66,6 +66,7 @@ export const DECKLOG_ERRORS = [
   "upstream-unavailable",
   "upstream-invalid",
   "not-configured",
+  "store-unavailable",
   "server-error",
 ] as const
 
@@ -76,9 +77,8 @@ const CARD_NO = /^[A-Z0-9][A-Za-z0-9]*-[A-Za-z0-9Ⓢ]{1,16}$/u
 const MAX_COPIES = 60
 const MAX_ROWS = 120
 
-/** A list section in DeckLog's shape or ours, or `undefined` when any row is malformed. */
+/** A list section in DeckLog's shape or ours, or `undefined` unless every row is well formed. */
 export function readDeckLogCards(value: unknown): DeckLogCard[] | undefined {
-  if (value === undefined || value === null) return []
   if (!Array.isArray(value) || value.length > MAX_ROWS) return undefined
   const cards: DeckLogCard[] = []
   for (const row of value as unknown[]) {

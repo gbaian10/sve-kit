@@ -38,14 +38,14 @@ describe("deckLogReferenceOf", () => {
 })
 
 describe("readDeckLogCards", () => {
-  it("reads DeckLog's rows and ours, and an absent section as empty", () => {
+  it("reads DeckLog's rows and ours", () => {
     expect(readDeckLogCards([{ card_number: "BP09-R047EN", num: 3, name: "x" }])).toEqual([
       { cardNo: "BP09-R047EN", count: 3 },
     ])
     expect(readDeckLogCards([{ cardNo: "PR-339", count: 1 }])).toEqual([
       { cardNo: "PR-339", count: 1 },
     ])
-    expect(readDeckLogCards(null)).toEqual([])
+    expect(readDeckLogCards([])).toEqual([])
   })
 
   it("rejects the whole section when any row is malformed", () => {
@@ -54,6 +54,8 @@ describe("readDeckLogCards", () => {
       [{ card_number: "BP01 001", num: 1 }],
       [null],
       {},
+      null,
+      undefined,
       Array.from({ length: 121 }, () => ({ card_number: "BP01-001", num: 1 })),
     ])
       expect(readDeckLogCards(rows)).toBeUndefined()

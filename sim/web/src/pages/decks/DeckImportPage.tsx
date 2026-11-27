@@ -83,11 +83,13 @@ export function DeckImportPage() {
   const [lookup, setLookup] = useState<DeckLogLookup | null>(null)
   const deckLogState = lookup !== null && lookup.key === deckLogKey ? lookup.result : null
   const pending = useRef<AbortController | null>(null)
+  // A lookup for a code or edition the page has moved away from is dropped, unmounting included.
   useEffect(
     () => () => {
       pending.current?.abort()
+      pending.current = null
     },
-    [],
+    [deckLogKey],
   )
   const readDeckLog = () => {
     if (!deckLog) return
@@ -98,6 +100,9 @@ export function DeckImportPage() {
     setLookup({ key, result: "loading" })
     fetchDeckLogDeck(edition, deckLog.code, controller.signal).then(
       (result) => {
+        // Only the latest lookup may settle the state; an older one finishing late is ignored.
+        if (pending.current !== controller) return
+        pending.current = null
         setLookup({ key, result })
       },
       () => undefined,
@@ -258,12 +263,14 @@ export function DeckImportPage() {
         >
           {deckLogDeck && (
             <p className="text-text-2">
-              {deckLogDeck.className === null
-                ? t("decks.importDeckLogSource", { code: deckLogDeck.code })
-                : t("decks.importDeckLogSourceClass", {
-                    code: deckLogDeck.code,
-                    className: deckLogDeck.className,
-                  })}
+              {t("decks.importDeckLogSource", { code: deckLogDeck.code })}
+            </p>
+          )}
+          {deckLogDeck && deckLogDeck.className !== null && (
+            <p className="text-text-2">
+              {t("decks.importDeckLogClass")}
+              {/* DeckLog's own wording, in its edition's language. */}
+              <span lang={deckLogDeck.region === "jp" ? "ja" : "en"}>{deckLogDeck.className}</span>
             </p>
           )}
           <p className="font-semibold">
@@ -280,6 +287,18 @@ export function DeckImportPage() {
           </p>
           {preview.name !== undefined && (
             <p className="text-text-2">{t("decks.importName", { name: preview.name })}</p>
+          )}
+          {preview.extraLeaders.length > 0 && (
+            <div className="text-danger">
+              {t("decks.importExtraLeaders", { count: preview.extraLeaders.length })}
+              <ul className="mt-1 flex flex-wrap gap-1 font-mono text-12">
+                {preview.extraLeaders.map((item) => (
+                  <li key={item.label} className="rounded-badge bg-danger-soft px-1.5">
+                    {t("decks.importCopies", { card: item.label, count: item.count })}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {preview.unknown.length > 0 && (
             <div className="text-danger">

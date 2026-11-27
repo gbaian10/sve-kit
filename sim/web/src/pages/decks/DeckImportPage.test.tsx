@@ -11,7 +11,7 @@ import type { Deck } from "../../domain/deck/types"
 import { decksStore, DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
-import { stubFixtureFetch } from "../../test-utils/fixture-fetch"
+import { routeFixtureFetch, stubFixtureFetch } from "../../test-utils/fixture-fetch"
 
 beforeEach(() => vi.stubGlobal("Worker", TestAppWorker))
 beforeAll(async () => {
@@ -237,11 +237,9 @@ describe("DeckImportPage", () => {
   }, 60_000)
 
   it("reads a DeckLog link through the Worker and lists the card numbers it cannot match", async () => {
-    const fixtureFetch = globalThis.fetch
     const asked: string[] = []
-    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-      if (!url.startsWith("/api/decklog/")) return fixtureFetch(input, init)
+    routeFixtureFetch((url) => {
+      if (!url.startsWith("/api/decklog/")) return undefined
       asked.push(url)
       return Promise.resolve(
         Response.json({
@@ -270,7 +268,9 @@ describe("DeckImportPage", () => {
       await user.click(screen.getByRole("button", { name: "從 DeckLog 讀取" }))
       const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
       expect(asked).toEqual(["/api/decklog/jp/AB12C"])
-      expect(within(preview).getByText("來源：DeckLog AB12C（ロイヤル）")).toBeInTheDocument()
+      expect(within(preview).getByText("來源：DeckLog AB12C")).toBeInTheDocument()
+      // DeckLog's own wording is marked as Japanese inside the Chinese sentence.
+      expect(within(preview).getByText("ロイヤル")).toHaveAttribute("lang", "ja")
       expect(within(preview).getByText("主牌組 5 張・進化牌組 0 張・候補 0 張")).toBeInTheDocument()
       expect(within(preview).getByText("BP99-999 ×2")).toBeInTheDocument()
       expect(screen.getByRole("button", { name: "從 DeckLog 讀取" })).toBeDisabled()
@@ -288,16 +288,14 @@ describe("DeckImportPage", () => {
         })
       })
     } finally {
-      vi.stubGlobal("fetch", fixtureFetch)
+      routeFixtureFetch(undefined)
     }
   }, 60_000)
 
   it("looks a bare DeckLog code up in the chosen edition and explains a miss", async () => {
-    const fixtureFetch = globalThis.fetch
     const asked: string[] = []
-    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
-      if (!url.startsWith("/api/decklog/")) return fixtureFetch(input, init)
+    routeFixtureFetch((url) => {
+      if (!url.startsWith("/api/decklog/")) return undefined
       asked.push(url)
       return Promise.resolve(Response.json({ error: "not-found" }, { status: 404 }))
     })
@@ -318,7 +316,54 @@ describe("DeckImportPage", () => {
       expect(screen.queryByRole("region", { name: "辨識結果" })).not.toBeInTheDocument()
       expect(screen.getByRole("button", { name: "建立牌組" })).toBeDisabled()
     } finally {
-      vi.stubGlobal("fetch", fixtureFetch)
+      routeFixtureFetch(undefined)
+    }
+  }, 60_000)
+
+  it("lets only the latest DeckLog lookup settle the page", async () => {
+    const answers = new Map<string, (response: Response) => void>()
+    routeFixtureFetch((url) => {
+      if (!url.startsWith("/api/decklog/")) return undefined
+      return new Promise<Response>((resolve) => {
+        answers.set(url, resolve)
+      })
+    })
+    try {
+      await openImport()
+      const user = userEvent.setup()
+      const box = screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" })
+      fireEvent.change(box, { target: { value: "https://decklog.bushiroad.com/view/AAAA1" } })
+      await user.click(await screen.findByRole("button", { name: "從 DeckLog 讀取" }))
+      fireEvent.change(box, { target: { value: "https://decklog.bushiroad.com/view/BBBB2" } })
+      await user.click(screen.getByRole("button", { name: "從 DeckLog 讀取" }))
+      expect([...answers.keys()]).toEqual(["/api/decklog/jp/AAAA1", "/api/decklog/jp/BBBB2"])
+
+      // The first lookup, already left behind, finishes late with an error.
+      answers.get("/api/decklog/jp/AAAA1")?.(
+        Response.json({ error: "server-error" }, { status: 500 }),
+      )
+      await act(async () => {
+        await Promise.resolve()
+      })
+      expect(screen.getByRole("status")).toHaveTextContent("正在查詢 DeckLog…")
+      expect(screen.getByRole("button", { name: "從 DeckLog 讀取" })).toBeDisabled()
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+
+      answers.get("/api/decklog/jp/BBBB2")?.(
+        Response.json({
+          region: "jp",
+          code: "BBBB2",
+          format: "N",
+          className: null,
+          leader: [],
+          main: [{ cardNo: "BP01-001", count: 3 }],
+          evolve: [],
+        }),
+      )
+      const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
+      expect(within(preview).getByText("來源：DeckLog BBBB2")).toBeInTheDocument()
+    } finally {
+      routeFixtureFetch(undefined)
     }
   }, 60_000)
 })

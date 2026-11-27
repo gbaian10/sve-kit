@@ -7,6 +7,7 @@ import {
 } from "../domain/card-report"
 import { officialCardUrl } from "../domain/cardRoute"
 import { isUiLanguage } from "../i18n/languages"
+import { readJsonBody } from "./body"
 
 export interface CardReportEnv {
   readonly TURNSTILE_SECRET?: string
@@ -57,25 +58,8 @@ function failure(stage: FailureStage, error: string, status: number): Response {
 }
 
 async function readReport(request: Request): Promise<CardReportInput | null> {
-  const reader = request.body?.getReader()
-  if (!reader) return null
-
   try {
-    const buffer = new Uint8Array(MAX_BODY_BYTES)
-    let size = 0
-    for (;;) {
-      const { value, done } = await reader.read()
-      if (done) break
-      if (size + value.byteLength > MAX_BODY_BYTES) {
-        await reader.cancel()
-        return null
-      }
-      buffer.set(value, size)
-      size += value.byteLength
-    }
-    const value: unknown = JSON.parse(
-      new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, size)),
-    )
+    const value = await readJsonBody(request.body, MAX_BODY_BYTES)
     if (typeof value !== "object" || value === null || Array.isArray(value)) return null
     const { cardNo, printingIntId, edition, uiLanguage, dataVersion, type, description, token } =
       value as Record<string, unknown>

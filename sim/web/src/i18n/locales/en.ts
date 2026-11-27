@@ -880,7 +880,8 @@ export default {
     importDeckLogRead: "Read from DeckLog",
     importDeckLogLoading: "Asking DeckLog…",
     importDeckLogSource: "From DeckLog {{code}}",
-    importDeckLogSourceClass: "From DeckLog {{code}} ({{className}})",
+    importDeckLogClass: "Class or title: ",
+    importExtraLeaders: "A deck holds one leader; these {{count}} were left out:",
     importDeckLogName: "DeckLog {{code}}",
     importDeckLogErrors: {
       "invalid-code": "This is not a valid DeckLog code.",
@@ -891,6 +892,7 @@ export default {
       "upstream-unavailable": "DeckLog is not answering; try again later.",
       "upstream-invalid": "DeckLog answered something unreadable; try again later.",
       "not-configured": "DeckLog import is not available right now.",
+      "store-unavailable": "Saved DeckLog decks cannot be read right now; try again later.",
       "server-error": "The lookup failed; try again later.",
       offline: "Cannot connect; check your network and try again.",
     },

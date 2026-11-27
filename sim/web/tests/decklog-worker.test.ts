@@ -3,14 +3,16 @@ import { readdirSync, readFileSync } from "node:fs"
 import path from "node:path"
 
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it, vi } from "vitest"
-import { getPlatformProxy } from "wrangler"
+import { getPlatformProxy, unstable_splitSqlQuery } from "wrangler"
 
 import worker from "../src/cloudflare/worker"
 
-// The local D1 from wrangler.dev.jsonc (Miniflare, in memory); DeckLog itself is a stubbed fetch.
+// The local D1 and rate limiters of wrangler.dev.jsonc (Miniflare, in memory); DeckLog itself is a
+// stubbed fetch answering synthetic decks.
 type Proxy = Awaited<ReturnType<typeof getPlatformProxy<Record<string, unknown>>>>
 type Env = Parameters<typeof worker.fetch>[1]
 type Database = NonNullable<Env["DECKLOG_DB"]>
+type Limiter = NonNullable<Env["DECKLOG_LIMITER"]>
 
 const root = path.resolve(import.meta.dirname, "..")
 let proxy: Proxy
@@ -24,12 +26,13 @@ beforeAll(async () => {
     envFiles: [],
   })
   db = proxy.env["DECKLOG_DB"] as Database
+  // Statements split as `wrangler d1 migrations apply` splits them.
   const migrations = path.join(root, "migrations")
-  for (const file of readdirSync(migrations).sort()) {
-    const sql = readFileSync(path.join(migrations, file), "utf8").replace(/^\s*--.*$/gmu, "")
-    for (const statement of sql.split(";").map((part) => part.trim()))
-      if (statement !== "") await db.prepare(statement).run()
-  }
+  for (const file of readdirSync(migrations).sort())
+    for (const statement of unstable_splitSqlQuery(
+      readFileSync(path.join(migrations, file), "utf8"),
+    ))
+      await db.prepare(statement).run()
 }, 60_000)
 
 afterAll(async () => {
@@ -72,16 +75,13 @@ const deck = {
 
 let address = 0
 let upstream: ReturnType<typeof vi.fn<typeof fetch>>
-let upstreamLimit: ReturnType<
-  typeof vi.fn<(input: { key: string }) => Promise<{ success: boolean }>>
->
 
 beforeEach(async () => {
   await db.prepare("DELETE FROM decklog_deck").run()
   upstream = vi.fn<typeof fetch>()
   vi.stubGlobal("fetch", upstream)
-  upstreamLimit = vi.fn().mockResolvedValue({ success: true })
   vi.spyOn(console, "error").mockImplementation(() => undefined)
+  vi.spyOn(console, "warn").mockImplementation(() => undefined)
 })
 
 afterEach(() => {
@@ -89,7 +89,12 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-/** The test bindings; an override of `undefined` leaves that binding out. */
+const passing: Limiter = { limit: () => Promise.resolve({ success: true }) }
+
+/**
+ * The test bindings: local D1 and the real per-address limiter; the shared upstream limiter passes
+ * unless a test gives its own. An override of `undefined` leaves that binding out.
+ */
 function environment(overrides: { [K in keyof Env]?: Env[K] | undefined } = {}): Env {
   const env: Record<string, unknown> = {
     PREVIEW_BUCKET: {
@@ -99,7 +104,7 @@ function environment(overrides: { [K in keyof Env]?: Env[K] | undefined } = {}):
     ASSETS: { fetch: () => Promise.reject(new Error("Unexpected asset request")) },
     DECKLOG_DB: db,
     DECKLOG_LIMITER: proxy.env["DECKLOG_LIMITER"],
-    DECKLOG_UPSTREAM_LIMITER: { limit: upstreamLimit },
+    DECKLOG_UPSTREAM_LIMITER: passing,
     ...overrides,
   }
   for (const [name, value] of Object.entries(env))
@@ -107,7 +112,7 @@ function environment(overrides: { [K in keyof Env]?: Env[K] | undefined } = {}):
   return env as unknown as Env
 }
 
-/** Each test asks from its own address, so the real per-address limiter starts fresh. */
+/** Each client asks from its own address, so the real per-address limiter starts fresh. */
 function client(env: Env = environment()) {
   address += 1
   const ip = `192.0.2.${String(address)}`
@@ -122,9 +127,14 @@ function client(env: Env = environment()) {
     )
 }
 
-function stored(code = "AB12C") {
-  return db.prepare("SELECT * FROM decklog_deck WHERE code = ?1").bind(code).first()
+function stored(region = "jp", code = "AB12C") {
+  return db
+    .prepare("SELECT * FROM decklog_deck WHERE region = ?1 AND code = ?2")
+    .bind(region, code)
+    .first()
 }
+
+const storedCards = JSON.stringify({ leader: deck.leader, main: deck.main, evolve: deck.evolve })
 
 it("fetches a missing deck from DeckLog once, keeps only its cards, then serves it from D1", async () => {
   upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
@@ -150,7 +160,7 @@ it("fetches a missing deck from DeckLog once, keeps only its cards, then serves 
     code: "AB12C",
     format: "N",
     class_name: "ナイトメア",
-    cards: JSON.stringify({ leader: deck.leader, main: deck.main, evolve: deck.evolve }),
+    cards: storedCards,
     fetched_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/u) as unknown,
   })
   expect(JSON.stringify(row)).not.toMatch(/Someone|memo|comment|img/u)
@@ -159,7 +169,6 @@ it("fetches a missing deck from DeckLog once, keeps only its cards, then serves 
   expect(second.status).toBe(200)
   expect(await second.json()).toEqual(deck)
   expect(upstream).toHaveBeenCalledOnce()
-  expect(upstreamLimit).toHaveBeenCalledOnce()
 })
 
 it("asks English DeckLog for English codes and keeps the editions apart", async () => {
@@ -190,7 +199,6 @@ it("asks English DeckLog for English codes and keeps the editions apart", async 
   expect(upstream.mock.calls[0]?.[0]).toBe(
     "https://decklog-en.bushiroad.com/system/app/api/view/AB12C",
   )
-  expect(upstreamLimit).toHaveBeenCalledWith({ key: "decklog-upstream:en" })
 
   // The same code in the Japanese system is another deck.
   upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
@@ -234,11 +242,23 @@ it("says when a code does not exist or is not a Shadowverse: EVOLVE deck, and st
 })
 
 it("tells an unreachable DeckLog from one that answers something unexpected", async () => {
-  const get = client()
+  // More attempts than one address may make, so each comes from its own.
+  const get = (target: string) => client()(target)
+  const stalled = () =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('{"game_title_id":6,'))
+          controller.error(new DOMException("The operation timed out.", "TimeoutError"))
+        },
+      }),
+    )
   const unavailable = [
     () => Promise.reject(new TypeError("network")),
     () => Promise.resolve(new Response("busy", { status: 503 })),
     () => Promise.resolve(new Response(null, { status: 302, headers: { Location: "/" } })),
+    () => Promise.resolve(Response.json(deckLogAnswer(), { status: 201 })),
+    () => Promise.resolve(stalled()),
   ]
   for (const answer of unavailable) {
     upstream.mockImplementationOnce(answer)
@@ -249,7 +269,9 @@ it("tells an unreachable DeckLog from one that answers something unexpected", as
 
   const invalid = [
     new Response("<html>", { status: 200 }),
-    Response.json({ list: [] }),
+    Response.json({ game_title_id: 6 }),
+    Response.json(deckLogAnswer({ list: [] })),
+    Response.json(deckLogAnswer({ list: null })),
     Response.json(deckLogAnswer({ list: [{ card_number: "BP01-001", num: 0 }] })),
     Response.json(deckLogAnswer({ list: [{ card_number: "<script>", num: 1 }] })),
     Response.json(deckLogAnswer({ sub_list: "BP01-001" })),
@@ -284,48 +306,106 @@ it("limits each address, stored decks included", async () => {
   expect((await client()("jp/AB12C")).status).toBe(200)
 })
 
-it("stops asking DeckLog once the shared upstream limit is spent but still serves stored decks", async () => {
-  upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
-  const get = client()
-  expect((await get("jp/AB12C")).status).toBe(200)
-  upstreamLimit.mockResolvedValue({ success: false })
-
-  const limited = await get("jp/ZZ99Z")
+it("caps DeckLog requests per edition, from any address, but still serves stored decks", async () => {
+  const env = environment({
+    DECKLOG_UPSTREAM_LIMITER: proxy.env["DECKLOG_UPSTREAM_LIMITER"] as Limiter,
+  })
+  upstream.mockImplementation(() => Promise.resolve(Response.json([])))
+  // 30 misses in a minute from 30 addresses spend the English allowance.
+  for (let attempt = 0; attempt < 30; attempt += 1)
+    expect((await client(env)("en/ZZ99Z")).status).toBe(404)
+  const limited = await client(env)("en/ZZ99Z")
   expect(limited.status).toBe(429)
   expect(await limited.json()).toEqual({ error: "rate-limited" })
-  expect((await get("jp/AB12C")).status).toBe(200)
-  expect(upstream).toHaveBeenCalledOnce()
+  expect(upstream).toHaveBeenCalledTimes(30)
+
+  // The Japanese allowance is separate, and a stored English deck needs no DeckLog request.
+  await db
+    .prepare(
+      "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('en', 'AB12C', 'N', NULL, ?1, 'x')",
+    )
+    .bind(storedCards)
+    .run()
+  expect((await client(env)("en/AB12C")).status).toBe(200)
+  upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
+  expect((await client(env)("jp/AB12C")).status).toBe(200)
+  expect(upstream).toHaveBeenCalledTimes(31)
 })
 
 it("fetches again when a stored row no longer reads back, and replaces it", async () => {
-  await db
-    .prepare(
-      "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('jp', 'AB12C', 'N', NULL, '{\"main\":7}', 'x')",
-    )
-    .run()
-  upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
+  for (const cards of ['{"main":7}', "[]", '{"leader":[],"main":[],"evolve":[]}']) {
+    await db.prepare("DELETE FROM decklog_deck").run()
+    await db
+      .prepare(
+        "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('jp', 'AB12C', 'N', NULL, ?1, 'x')",
+      )
+      .bind(cards)
+      .run()
+    upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
 
-  const response = await client()("jp/AB12C")
+    const response = await client()("jp/AB12C")
 
-  expect(await response.json()).toEqual(deck)
-  expect(((await stored()) as Record<string, unknown>)["cards"]).toBe(
-    JSON.stringify({ leader: deck.leader, main: deck.main, evolve: deck.evolve }),
-  )
+    expect(await response.json(), cards).toEqual(deck)
+    expect(((await stored()) as Record<string, unknown>)["cards"]).toBe(storedCards)
+  }
+  expect(upstream).toHaveBeenCalledTimes(3)
 })
 
-it("still answers when D1 fails, and refuses to run without its bindings", async () => {
-  const broken = {
-    prepare: () => {
-      throw new Error("D1 down")
-    },
+it("keeps the first stored row when two lookups of a code miss at once", async () => {
+  const answers: ((response: Response) => void)[] = []
+  upstream.mockImplementation(
+    () =>
+      new Promise<Response>((resolve) => {
+        answers.push(resolve)
+      }),
+  )
+  const first = client()("jp/AB12C")
+  const second = client()("jp/AB12C")
+  await vi.waitFor(() => {
+    expect(answers).toHaveLength(2)
+  })
+  answers[0]?.(Response.json(deckLogAnswer()))
+  expect((await first).status).toBe(200)
+  // A different answer arriving second (DeckLog never sends one) must not replace the row.
+  answers[1]?.(Response.json(deckLogAnswer({ sub_list: [] })))
+  expect((await second).status).toBe(200)
+  expect(((await stored()) as Record<string, unknown>)["cards"]).toBe(storedCards)
+})
+
+it("never asks DeckLog while D1 cannot be read, and does not let the browser keep an unsaved deck", async () => {
+  const unreadable = await client(
+    environment({
+      DECKLOG_DB: {
+        prepare: () => {
+          throw new Error("D1 down")
+        },
+      },
+    }),
+  )("jp/AB12C")
+  expect(unreadable.status).toBe(503)
+  expect(await unreadable.json()).toEqual({ error: "store-unavailable" })
+  expect(upstream).not.toHaveBeenCalled()
+
+  // Reads work, writes fail: the deck is answered but not cached, so a later import stores it.
+  const readOnly: Database = {
+    prepare: (query) =>
+      query.startsWith("INSERT")
+        ? {
+            bind: () => readOnly.prepare(query),
+            first: () => Promise.reject(new Error("D1 down")),
+            run: () => Promise.reject(new Error("D1 down")),
+          }
+        : db.prepare(query),
   }
   upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
-  const response = await client(environment({ DECKLOG_DB: broken }))("jp/AB12C")
-  expect(response.status).toBe(200)
-  expect(await response.json()).toEqual(deck)
-  expect(console.error).toHaveBeenCalledWith("decklog: store-read")
-  expect(console.error).toHaveBeenCalledWith("decklog: store-write")
+  const unsaved = await client(environment({ DECKLOG_DB: readOnly }))("jp/AB12C")
+  expect(unsaved.status).toBe(200)
+  expect(unsaved.headers.get("Cache-Control")).toBe("no-store")
+  expect(await unsaved.json()).toEqual(deck)
+  expect(await stored()).toBeNull()
+})
 
+it("refuses to run without its bindings", async () => {
   for (const missing of ["DECKLOG_DB", "DECKLOG_LIMITER", "DECKLOG_UPSTREAM_LIMITER"] as const) {
     const unconfigured = await client(environment({ [missing]: undefined }))("jp/AB12C")
     expect(unconfigured.status).toBe(503)
@@ -337,4 +417,5 @@ it("still answers when D1 fails, and refuses to run without its bindings", async
   )("jp/AB12C")
   expect(failing.status).toBe(500)
   expect(await failing.json()).toEqual({ error: "server-error" })
+  expect(upstream).not.toHaveBeenCalled()
 })

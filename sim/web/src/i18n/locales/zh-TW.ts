@@ -825,7 +825,8 @@ const zhTW = {
     importDeckLogRead: "從 DeckLog 讀取",
     importDeckLogLoading: "正在查詢 DeckLog…",
     importDeckLogSource: "來源：DeckLog {{code}}",
-    importDeckLogSourceClass: "來源：DeckLog {{code}}（{{className}}）",
+    importDeckLogClass: "職業／作品：",
+    importExtraLeaders: "牌組只能有一位主戰者，以下 {{count}} 個沒有加入：",
     importDeckLogName: "DeckLog {{code}}",
     importDeckLogErrors: {
       "invalid-code": "這不是有效的 DeckLog 代碼。",
@@ -835,6 +836,7 @@ const zhTW = {
       "upstream-unavailable": "DeckLog 沒有回應，請稍後再試。",
       "upstream-invalid": "DeckLog 回傳了無法辨識的內容，請稍後再試。",
       "not-configured": "目前無法使用 DeckLog 匯入。",
+      "store-unavailable": "暫時讀不到已保存的 DeckLog 牌組，請稍後再試。",
       "server-error": "查詢失敗，請稍後再試。",
       offline: "無法連線，請確認網路後再試。",
     },

@@ -8,6 +8,7 @@ import {
   readDeckLogCards,
 } from "../domain/decklog"
 import type { Region } from "../domain/search"
+import { BodyFormatError, readJsonBody } from "./body"
 
 interface Limiter {
   limit(input: { key: string }): Promise<{ success: boolean }>
@@ -49,6 +50,7 @@ const STATUS: Readonly<Record<DeckLogError, number>> = {
   "upstream-unavailable": 502,
   "upstream-invalid": 502,
   "not-configured": 503,
+  "store-unavailable": 503,
   "server-error": 500,
 }
 
@@ -58,10 +60,13 @@ function failure(error: DeckLogError): Response {
   return Response.json({ error }, { status, headers: { "Cache-Control": "no-store" } })
 }
 
-function success(deck: DeckLogDeck): Response {
-  // The deck behind a code never changes; the browser may keep it as long as it likes.
+function success(deck: DeckLogDeck, stored: boolean): Response {
+  // The deck behind a code never changes, so a stored one may stay in the browser for good. One
+  // that could not be stored is not cached, so the next import asks again and stores it then.
   return Response.json(deck, {
-    headers: { "Cache-Control": "private, max-age=31536000, immutable" },
+    headers: {
+      "Cache-Control": stored ? "private, max-age=31536000, immutable" : "no-store",
+    },
   })
 }
 
@@ -88,6 +93,9 @@ function readSections(leader: unknown, main: unknown, evolve: unknown): Sections
   return sections as Sections
 }
 
+// DeckLog leaves an empty leader or evolve section out or null; a deck always has a main deck.
+const orEmpty = (value: unknown): unknown => value ?? []
+
 type Lookup = DeckLogDeck | "not-found" | "not-sve" | "invalid"
 
 /** DeckLog's answer reduced to the cards; no title, memo, comment or owner survives. */
@@ -98,8 +106,12 @@ function reduce(region: Region, code: string, value: unknown): Lookup {
   const record = value as Record<string, unknown>
   if (typeof record["game_title_id"] !== "number") return "invalid"
   if (record["game_title_id"] !== SVE_GAME_TITLE_ID) return "not-sve"
-  const sections = readSections(record["p_list"], record["list"], record["sub_list"])
-  if (!sections) return "invalid"
+  const sections = readSections(
+    orEmpty(record["p_list"]),
+    record["list"],
+    orEmpty(record["sub_list"]),
+  )
+  if (!sections || sections.main.length === 0) return "invalid"
   return {
     region,
     code,
@@ -107,30 +119,6 @@ function reduce(region: Region, code: string, value: unknown): Lookup {
     className: shownText(record["deck_param2"]),
     ...sections,
   }
-}
-
-async function readLimited(response: Response): Promise<unknown> {
-  const reader = response.body?.getReader()
-  if (!reader) throw new Error("Empty DeckLog answer")
-  const chunks: Uint8Array[] = []
-  let size = 0
-  for (;;) {
-    const { value, done } = await reader.read()
-    if (done) break
-    size += value.byteLength
-    if (size > MAX_UPSTREAM_BYTES) {
-      await reader.cancel()
-      throw new Error("DeckLog answer too large")
-    }
-    chunks.push(value)
-  }
-  const bytes = new Uint8Array(size)
-  let offset = 0
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes))
 }
 
 async function fetchDeckLog(region: Region, code: string): Promise<Lookup | "unavailable"> {
@@ -154,17 +142,51 @@ async function fetchDeckLog(region: Region, code: string): Promise<Lookup | "una
   } catch {
     return "unavailable"
   }
-  if (!response.ok) {
+  // DeckLog answers 200 for every code it knows, and for unknown ones too (with `[]`).
+  if (response.status !== 200) {
     await response.body?.cancel().catch(() => undefined)
     return "unavailable"
   }
+  // Every request DeckLog gets from us is logged, so a deployment can show stored codes are not
+  // asked again (docs/deployment/cloudflare-development.md §12).
+  console.warn(`decklog: upstream ${region}`)
   try {
-    return reduce(region, code, await readLimited(response))
-  } catch {
-    return "invalid"
+    return reduce(region, code, await readJsonBody(response.body, MAX_UPSTREAM_BYTES))
+  } catch (error) {
+    // A body that stalls past the timeout or breaks off is DeckLog not answering, not bad content.
+    return error instanceof BodyFormatError ? "invalid" : "unavailable"
   }
 }
 
+/** A stored row in our own shape; `undefined` when it does not read back. */
+function readRow(
+  region: Region,
+  code: string,
+  row: Record<string, unknown>,
+): DeckLogDeck | undefined {
+  let cards: unknown
+  try {
+    cards = JSON.parse(typeof row["cards"] === "string" ? row["cards"] : "")
+  } catch {
+    return undefined
+  }
+  if (typeof cards !== "object" || cards === null || Array.isArray(cards)) return undefined
+  const stored = cards as Record<string, unknown>
+  const sections = readSections(stored["leader"], stored["main"], stored["evolve"])
+  if (!sections || sections.main.length === 0) return undefined
+  return {
+    region,
+    code,
+    format: shownText(row["format"], FORMAT),
+    className: shownText(row["class_name"]),
+    ...sections,
+  }
+}
+
+/**
+ * The stored deck, or null when there is none. A row that does not read back is removed, so the
+ * code is fetched once more and stored again; any D1 failure rejects.
+ */
 async function readStored(db: Database, region: Region, code: string): Promise<DeckLogDeck | null> {
   const row = await db
     .prepare(
@@ -173,37 +195,25 @@ async function readStored(db: Database, region: Region, code: string): Promise<D
     .bind(region, code)
     .first()
   if (row === null) return null
-  // D1 rows are untyped; a row that does not read back is treated as missing and fetched again.
-  const record = row as Record<string, unknown>
-  let cards: unknown
-  try {
-    cards = JSON.parse(typeof record["cards"] === "string" ? record["cards"] : "")
-  } catch {
-    return null
-  }
-  if (typeof cards !== "object" || cards === null) return null
-  const stored = cards as Record<string, unknown>
-  const sections = readSections(stored["leader"], stored["main"], stored["evolve"])
-  if (!sections) return null
-  return {
-    region,
-    code,
-    format: shownText(record["format"], FORMAT),
-    className: shownText(record["class_name"]),
-    ...sections,
-  }
+  // D1 rows are untyped; they are checked here and never leave this module unchecked.
+  const deck = readRow(region, code, row as Record<string, unknown>)
+  if (deck) return deck
+  console.error("decklog: unreadable-row")
+  await db
+    .prepare("DELETE FROM decklog_deck WHERE region = ?1 AND code = ?2")
+    .bind(region, code)
+    .run()
+  return null
 }
 
 async function store(db: Database, deck: DeckLogDeck): Promise<void> {
-  // A row is replaced only when it no longer read back (see readStored).
+  // Codes are immutable, so when two lookups of one code race, the first row stays.
   const cards = JSON.stringify({ leader: deck.leader, main: deck.main, evolve: deck.evolve })
   await db
     .prepare(
       `INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at)
        VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-       ON CONFLICT (region, code) DO UPDATE SET
-         format = excluded.format, class_name = excluded.class_name, cards = excluded.cards,
-         fetched_at = excluded.fetched_at`,
+       ON CONFLICT (region, code) DO NOTHING`,
     )
     .bind(deck.region, deck.code, deck.format, deck.className, cards, new Date().toISOString())
     .run()
@@ -235,22 +245,28 @@ export async function lookUpDeckLog(
     const address = request.headers.get("CF-Connecting-IP") ?? "unknown"
     if (!(await limiter.limit({ key: `decklog:${address}` })).success)
       return failure("rate-limited")
-    const stored = await readStored(db, region, code).catch(() => {
-      // An unreadable store only costs a DeckLog request, still bounded by the upstream limit.
-      console.error("decklog: store-read")
-      return null
-    })
-    if (stored) return success(stored)
+    // A code is asked of DeckLog only when D1 says it has no row; a D1 failure is not that answer.
+    let stored: DeckLogDeck | null
+    try {
+      stored = await readStored(db, region, code)
+    } catch {
+      return failure("store-unavailable")
+    }
+    if (stored) return success(stored, true)
     if (!(await upstream.limit({ key: `decklog-upstream:${region}` })).success)
       return failure("rate-limited")
     const result = await fetchDeckLog(region, code)
     if (result === "unavailable") return failure("upstream-unavailable")
     if (result === "invalid") return failure("upstream-invalid")
     if (result === "not-found" || result === "not-sve") return failure(result)
-    await store(db, result).catch(() => {
-      console.error("decklog: store-write")
-    })
-    return success(result)
+    const saved = await store(db, result).then(
+      () => true,
+      () => {
+        console.error("decklog: store-write")
+        return false
+      },
+    )
+    return success(result, saved)
   } catch {
     return failure("server-error")
   }

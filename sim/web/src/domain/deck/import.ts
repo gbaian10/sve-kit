@@ -34,6 +34,11 @@ export interface ImportedDeck {
   readonly side: readonly DeckEntry[]
   /** Cards the snapshot has no printing for: card numbers, or `#<int id>` from a code. */
   readonly unknown: readonly { readonly label: string; readonly count: number }[]
+  /**
+   * Leaders after the first, left out because a deck holds one (a Crossover deck names two):
+   * card numbers, or `#<int id>`.
+   */
+  readonly extraLeaders: readonly { readonly label: string; readonly count: number }[]
   readonly unrecognized: readonly { readonly line: number; readonly text: string }[]
 }
 
@@ -100,6 +105,35 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
   return assemble(references, lookup, { name, edition, format, basis, unrecognized })
 }
 
+// DeckLog's class and title choices (`deck_param2`) as listed by both editions on 2026-11-27; the
+// English "Class" (no class picked) and anything new are left to inference from the cards.
+const DECKLOG_BASES: Readonly<Record<string, DeckBasis>> = {
+  エルフ: { kind: "class", classCode: "elf" },
+  ロイヤル: { kind: "class", classCode: "royal" },
+  ウィッチ: { kind: "class", classCode: "witch" },
+  ドラゴン: { kind: "class", classCode: "dragon" },
+  ナイトメア: { kind: "class", classCode: "nightmare" },
+  ビショップ: { kind: "class", classCode: "bishop" },
+  Forestcraft: { kind: "class", classCode: "elf" },
+  Swordcraft: { kind: "class", classCode: "royal" },
+  Runecraft: { kind: "class", classCode: "witch" },
+  Dragoncraft: { kind: "class", classCode: "dragon" },
+  Abysscraft: { kind: "class", classCode: "nightmare" },
+  Havencraft: { kind: "class", classCode: "bishop" },
+  "ウマ娘 プリティーダービー": { kind: "title", titleCode: "umamusume_pretty_derby" },
+  "Umamusume: Pretty Derby": { kind: "title", titleCode: "umamusume_pretty_derby" },
+  "アイドルマスター シンデレラガールズ": {
+    kind: "title",
+    titleCode: "idolmaster_cinderella_girls",
+  },
+  "THE IDOLM@STER CINDERELLA GIRLS": { kind: "title", titleCode: "idolmaster_cinderella_girls" },
+  "カードファイト!! ヴァンガード": { kind: "title", titleCode: "cardfight_vanguard" },
+  "Cardfight!! Vanguard": { kind: "title", titleCode: "cardfight_vanguard" },
+  "プリンセスコネクト！Re:Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
+  "Princess Connect! Re: Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
+  グランブルーファンタジー: { kind: "title", titleCode: "granblue_fantasy" },
+}
+
 // DeckLog's construction codes (docs/sim/deck-construction.md §6); anything else is left Standard.
 const DECKLOG_FORMATS: Readonly<Record<Region, Readonly<Record<string, DeckFormat>>>> = {
   jp: { N: "standard", X: "crossover" },
@@ -129,7 +163,7 @@ export function readDeckLogImport(deck: DeckLogDeck, lookup: ImportLookup): Impo
     name: undefined,
     edition: deck.region,
     format: deck.format === null ? undefined : DECKLOG_FORMATS[deck.region][deck.format],
-    basis: undefined,
+    basis: deck.className === null ? undefined : DECKLOG_BASES[deck.className],
     unrecognized: [],
   })
 }
@@ -159,6 +193,7 @@ function assemble(
     side: new Map<string, Section>(),
   }
   const unknown: { label: string; count: number }[] = []
+  const extraLeaders: { label: string; count: number }[] = []
   let leader: DeckLeader | null = null
   for (const reference of references) {
     const info = reference.printing && lookup.infoOf(reference.printing.cardId)
@@ -169,10 +204,12 @@ function assemble(
     const { printingId } = reference.printing
     const placement = placementOf(info)
     if (placement === "leader" && !reference.side) {
-      leader ??= {
-        cardId: info.cardId,
-        ...(info.defaultPrintingId === printingId ? {} : { printingId }),
-      }
+      if (leader === null)
+        leader = {
+          cardId: info.cardId,
+          ...(info.defaultPrintingId === printingId ? {} : { printingId }),
+        }
+      else extraLeaders.push({ label: reference.label, count: reference.count })
       continue
     }
     const part = reference.side ? parts.side : placement === "evolve" ? parts.evolve : parts.main
@@ -213,6 +250,7 @@ function assemble(
     evolve,
     side: entries(parts.side),
     unknown,
+    extraLeaders,
     unrecognized: meta.unrecognized,
   }
 }

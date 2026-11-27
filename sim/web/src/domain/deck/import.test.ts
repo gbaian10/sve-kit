@@ -152,14 +152,46 @@ describe("readDeckLogImport", () => {
       name: undefined,
       edition: "jp",
       format: "standard",
-      basis: { kind: "class", classCode: "forest" },
+      // DeckLog's declared class, not one inferred from the cards.
+      basis: { kind: "class", classCode: "elf" },
       leader: { cardId: "c:leader" },
       main: [{ cardId: "c:1", count: 3, printingId: "p:1a" }],
       evolve: [{ cardId: "c:evo", count: 2 }],
       side: [],
       unknown: [{ label: "BP99-001", count: 3 }],
+      extraLeaders: [],
       unrecognized: [],
     })
+  })
+
+  it("keeps a declared title, and infers the basis when DeckLog's choice is unknown", () => {
+    const basis = (className: string | null) =>
+      readDeckLogImport({ ...deckLog, className }, lookup).basis
+    expect(basis("Umamusume: Pretty Derby")).toEqual({
+      kind: "title",
+      titleCode: "umamusume_pretty_derby",
+    })
+    expect(basis("グランブルーファンタジー")).toEqual({
+      kind: "title",
+      titleCode: "granblue_fantasy",
+    })
+    expect(basis("Class")).toEqual({ kind: "class", classCode: "forest" })
+    expect(basis(null)).toEqual({ kind: "class", classCode: "forest" })
+  })
+
+  it("lists a second leader instead of dropping it silently", () => {
+    const imported = readDeckLogImport(
+      {
+        ...deckLog,
+        leader: [
+          { cardNo: "BP01-LD01", count: 1 },
+          { cardNo: "BP01-LD01", count: 1 },
+        ],
+      },
+      lookup,
+    )
+    expect(imported.leader).toEqual({ cardId: "c:leader" })
+    expect(imported.extraLeaders).toEqual([{ label: "BP01-LD01", count: 1 }])
   })
 
   it("maps DeckLog's construction codes per edition and leaves unknown ones Standard", () => {

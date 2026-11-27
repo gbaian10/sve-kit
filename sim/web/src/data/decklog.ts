@@ -57,7 +57,9 @@ export async function fetchDeckLogDeck(
   let body: unknown
   try {
     body = await response.json()
-  } catch {
+  } catch (error) {
+    // A lookup the page gave up on stays given up, even when it fails while reading the body.
+    if (signal?.aborted) throw error
     return { error: response.ok ? "upstream-invalid" : "server-error" }
   }
   if (response.ok) {

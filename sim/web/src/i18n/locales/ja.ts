@@ -862,7 +862,8 @@ export default {
     importDeckLogRead: "デッキログから読み込む",
     importDeckLogLoading: "デッキログに問い合わせています…",
     importDeckLogSource: "出典：デッキログ {{code}}",
-    importDeckLogSourceClass: "出典：デッキログ {{code}}（{{className}}）",
+    importDeckLogClass: "クラス／作品：",
+    importExtraLeaders: "リーダーは1枚だけです。次の {{count}} 件は追加されません：",
     importDeckLogName: "デッキログ {{code}}",
     importDeckLogErrors: {
       "invalid-code": "有効なデッキログのコードではありません。",
@@ -874,6 +875,7 @@ export default {
       "upstream-invalid":
         "デッキログから読み取れない内容が返されました。しばらくしてからお試しください。",
       "not-configured": "現在デッキログからの読み込みは使えません。",
+      "store-unavailable": "保存済みのデッキを読み出せません。しばらくしてからお試しください。",
       "server-error": "読み込みに失敗しました。しばらくしてからお試しください。",
       offline: "接続できません。ネットワークを確認してください。",
     },
