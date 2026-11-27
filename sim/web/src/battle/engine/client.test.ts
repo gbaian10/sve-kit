@@ -311,6 +311,21 @@ describe("HotSeat", () => {
       })
     }
   }
+
+  it("keeps a shared host fault when the viewing channel is still waiting", async () => {
+    const p1 = pair("p1")
+    const p2 = pair("p2")
+    const shown: unknown[] = []
+    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, "p1", () => {
+      shown.push(hot.stopped)
+    })
+    const stopped = { kind: "host_error", format: 1, reason: "budget" } as const
+    p2.worker.postMessage(stopped)
+    await tick()
+    expect(shown).toEqual([stopped])
+    await expect(hot.submit(concede)).rejects.toMatchObject({ stop: stopped })
+    expect(p1.requests).toEqual([])
+  })
 })
 
 describe("startLocalBattle", () => {

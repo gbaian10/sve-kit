@@ -44,6 +44,10 @@ export class ChannelStoppedError extends Error {
 
 type StopMessage = Extract<SeatMessage, { kind: "host_error" | "load_error" }>
 
+function stopBeforeOwnDelivery(message: StopMessage): StopMessage {
+  return message.kind === "host_error" ? message : { kind: "load_error", code: "match" }
+}
+
 /** One seat's ordered channel; at most one rules command is in flight, never retried. */
 export class SeatChannel {
   readonly seat: Seat
@@ -210,7 +214,7 @@ export class HotSeat {
   #viewer: Seat
   #latest: BattleUpdate | undefined
   #awaiting: string | undefined
-  #halted: boolean
+  #stopFallback: StopMessage | undefined
 
   constructor(
     channels: Record<Seat, SeatChannel>,
@@ -220,8 +224,9 @@ export class HotSeat {
     this.#channels = channels
     this.#viewer = viewer
     this.#onChange = onChange
-    this.#halted = SEATS.some((seat) => channels[seat].stopped !== undefined)
     for (const seat of SEATS) {
+      const stopped = channels[seat].stopped
+      if (stopped !== undefined) this.#stopFallback ??= stopBeforeOwnDelivery(stopped)
       channels[seat].listen((message) => {
         this.#receive(seat, message)
       })
@@ -238,16 +243,14 @@ export class HotSeat {
 
   /** The current viewer's stop, or a generic stop until that channel hears from the host. */
   get stopped(): StopMessage | undefined {
-    return (
-      this.#channels[this.#viewer].stopped ??
-      (this.#halted ? { kind: "load_error", code: "match" } : undefined)
-    )
+    return this.#channels[this.#viewer].stopped ?? this.#stopFallback
   }
 
   switchTo(viewer: Seat): void {
     this.#viewer = viewer
     this.#latest = undefined
-    this.#awaiting = this.#halted ? undefined : this.#channels[viewer].baseline()
+    this.#awaiting =
+      this.#stopFallback === undefined ? this.#channels[viewer].baseline() : undefined
     this.#onChange(
       viewer,
       undefined,
@@ -256,7 +259,7 @@ export class HotSeat {
   }
 
   setAutoAnswer(enabled: boolean): void {
-    if (!this.#halted) this.#channels[this.#viewer].setAutoAnswer(enabled)
+    if (this.#stopFallback === undefined) this.#channels[this.#viewer].setAutoAnswer(enabled)
   }
 
   dismissNotice(id: string): void {
@@ -275,8 +278,8 @@ export class HotSeat {
 
   #receive(seat: Seat, message: SeatMessage): void {
     if (message.kind === "host_error" || message.kind === "load_error") {
-      const firstStop = !this.#halted
-      this.#halted = true
+      const firstStop = this.#stopFallback === undefined
+      this.#stopFallback ??= stopBeforeOwnDelivery(message)
       this.#awaiting = undefined
       this.#latest = undefined
       if (firstStop || seat === this.#viewer) {
@@ -284,7 +287,7 @@ export class HotSeat {
       }
       return
     }
-    if (this.#halted || seat !== this.#viewer) return
+    if (this.#stopFallback !== undefined || seat !== this.#viewer) return
     if (message.kind === "baseline_start") {
       if (message.request_id === this.#awaiting) this.#awaiting = undefined
       return

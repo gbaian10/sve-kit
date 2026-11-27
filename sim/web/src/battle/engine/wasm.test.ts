@@ -42,10 +42,19 @@ function inputs(programHash = sha256(programs)): string {
   })
 }
 
-function receive(port: MessagePort): Promise<SeatMessage> {
+function receive(channel: MessageChannel): Promise<SeatMessage[]> {
   return new Promise((resolve) => {
-    port.onmessage = (event: MessageEvent<SeatMessage>) => {
-      resolve(event.data)
+    const messages: SeatMessage[] = []
+    channel.port1.onmessage = (event: MessageEvent<SeatMessage>) => {
+      if (event.data.kind === "baseline_start" && event.data.request_id === "test-barrier") {
+        resolve(messages)
+        return
+      }
+      messages.push(event.data)
+      if (messages.length === 1) {
+        // A marker sent on the same port arrives after the complete failure delivery.
+        channel.port2.postMessage({ kind: "baseline_start", request_id: "test-barrier" })
+      }
     }
   })
 }
@@ -84,7 +93,7 @@ describe("engine WebAssembly", () => {
         const p1 = new MessageChannel()
         const p2 = new MessageChannel()
         try {
-          const received = Promise.all([receive(p1.port1), receive(p2.port1)])
+          const received = Promise.all([receive(p1), receive(p2)])
           const host = new BattleHost((setup) => Promise.resolve(prepared.open(setup)))
           host.init({
             kind: "init",
@@ -98,8 +107,8 @@ describe("engine WebAssembly", () => {
             ports: { p1: p1.port2, p2: p2.port2 },
           })
           await expect(received).resolves.toEqual([
-            { kind: "load_error", code: "match" },
-            { kind: "load_error", code },
+            [{ kind: "load_error", code: "match" }],
+            [{ kind: "load_error", code }],
           ])
         } finally {
           for (const channel of [p1, p2]) {
