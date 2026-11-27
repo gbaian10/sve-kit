@@ -23,9 +23,9 @@ use crate::ir::{
     InstallationSubjects, Instruction, Int, IntOperation, IntRead, Located, LookOutcome,
     LookPurpose, MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand,
     ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef,
-    PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet, Requirements,
-    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView, Selector, SnapshotId,
-    SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    PlayerRelation, PlayerSet, Position, Predicate, Program, ReceiptLocation, RecipientSet,
+    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView,
+    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -540,6 +540,18 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
                 mask_numeric_union(subjects)?;
                 mask_public_number_patch(patch);
             }
+            Action::Move {
+                objects: Selector::Union { sets },
+                movement,
+                ..
+            } if movement.to
+                == (MoveDestination::Owners {
+                    zone: OwnerZone::Hand,
+                })
+                && public_field_ex_union(sets) =>
+            {
+                mask_checked_public_union(sets)?;
+            }
             _ => {}
         },
         _ => {}
@@ -569,6 +581,35 @@ fn mask_public_number_change(change: &mut NumericChange) {
     }
 }
 
+pub(super) fn public_field_ex_union(sets: &[Selector]) -> bool {
+    matches!(sets, [first, second] if matches!(
+        (current_public_zone(first), current_public_zone(second)),
+        (Some((ZoneKind::Field, left)), Some((ZoneKind::Ex, right)))
+            | (Some((ZoneKind::Ex, left)), Some((ZoneKind::Field, right))) if left == right
+    ))
+}
+
+fn current_public_zone(selector: &Selector) -> Option<(ZoneKind, &PlayerSet)> {
+    let selector = match selector {
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(), Selector::Objects { objects }
+                if objects == &[ObjectOperand::SourceHolder {}]) =>
+        {
+            input.as_ref()
+        }
+        _ => selector,
+    };
+    match selector {
+        Selector::Zone {
+            zone,
+            players,
+            view: SelectionView::Current {},
+            ..
+        } => Some((*zone, players)),
+        _ => None,
+    }
+}
+
 fn mask_numeric_union(selector: &mut Selector) -> Result<()> {
     let Selector::Union { sets } = selector else {
         return Ok(());
@@ -584,6 +625,10 @@ fn mask_numeric_union(selector: &mut Selector) -> Result<()> {
     {
         return Ok(());
     }
+    mask_checked_public_union(sets)
+}
+
+fn mask_checked_public_union(sets: &mut [Selector]) -> Result<()> {
     for set in sets.iter() {
         super::card::selection::public_zone_selector(set)?;
     }

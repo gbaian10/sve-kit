@@ -48,8 +48,27 @@ class RuleName(RecordData):
     aliases: tuple[Text, ...] = ()
 
 
-class NamedRule(RuleName):
+class NamedRule(RecordData):
     role: Literal["keyword", "ability-label", "counter"]
+    ja: Text | None = None
+    en: Text | None = None
+    rule: Text | None = None
+    aliases: tuple[Text, ...] = ()
+
+    @model_validator(mode="after")
+    def _localized_name(self) -> NamedRule:
+        if self.role == "counter":
+            if self.ja is None and self.en is None:
+                raise ValueError("A counter needs a Japanese or English rules name")
+        elif self.ja is None or self.en is not None:
+            raise ValueError("This rule role needs a Japanese rules name")
+        return self
+
+    def spellings(self) -> tuple[str, ...]:
+        """Share the accepted author operands with the collision check."""
+        return tuple(
+            name for name in (self.ja, self.en, *self.aliases) if name is not None
+        )
 
 
 class Keyword(RecordData):
@@ -103,9 +122,23 @@ class Registry(RecordData):
                 raise ValueError("Duplicate keyword registration " + field)
         if self.rule_names.keys() & {record.code for record in self.records}:
             raise ValueError("A rule name may only be registered once per code")
+        self._check_rule_spellings()
         if len({record.id for record in self.suppressions}) != len(self.suppressions):
             raise ValueError("Duplicate mechanic suppression ID")
         return self
+
+    def _check_rule_spellings(self) -> None:
+        spellings = {record.code: record.code for record in self.records}
+        spellings.update({code: code for code in self.rule_names})
+        for record in self.records:
+            if record.rule_name is not None:
+                for name in (record.rule_name.ja, *record.rule_name.aliases):
+                    if spellings.setdefault(name, record.code) != record.code:
+                        raise ValueError("Ambiguous rule name: " + name)
+        for code, rule in self.rule_names.items():
+            for name in rule.spellings():
+                if spellings.setdefault(name, code) != code:
+                    raise ValueError("Ambiguous rule name: " + name)
 
 
 @dataclass(frozen=True)

@@ -684,6 +684,8 @@ impl Game {
                 "movement member validation needs a movement instruction",
             ));
         };
+        let field_ex_return = method == MoveMethod::Put
+            && matches!(objects, Selector::Union { sets } if super::ordering::public_field_ex_union(sets));
         for &member in members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
@@ -716,8 +718,11 @@ impl Game {
                     && member.generation == execution.context.generation
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
+                let public_departure =
+                    matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
+                        || (field_ex_return && object.zone == "ex");
                 if kind == ZoneKind::Hand
-                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
+                    && !public_departure
                     && !private_observed_move
                     && !resolving_source
                 {

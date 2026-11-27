@@ -790,15 +790,33 @@ impl BodyContext<'_> {
         if matches!(history.event, ast::HistoryEvent::Banished) {
             return Err(unsupported(path));
         }
-        let query = self.history_query(history, path)?;
-        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-            value: Expr::Live(Box::new(NatRead::HistoryCount {
-                query,
+        let read = if matches!(
+            &history.r#where,
+            Some(ast::HistoryWhere::AttackSource { .. })
+        ) {
+            if !matches!(history.event, ast::HistoryEvent::Attacked)
+                || history.who.is_some()
+                || history.sel.is_some()
+                || history.from.is_some()
+                || history.to.is_some()
+                || history.at_least.is_some()
+                || history.exclude.is_some()
+                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+            {
+                return Err(unsupported(path));
+            }
+            NatRead::SourceAttacksThisTurn {}
+        } else {
+            NatRead::HistoryCount {
+                query: self.history_query(history, path)?,
                 count: match history.distinct {
                     Some(ast::HistoryDistinct::Subjects) => super::super::HistoryCount::Subjects,
                     None | Some(ast::HistoryDistinct::Facts) => super::super::HistoryCount::Facts,
                 },
-            })),
+            }
+        };
+        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Live(Box::new(read)),
         })))
     }
 

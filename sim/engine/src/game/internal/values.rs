@@ -895,6 +895,18 @@ impl Execution {
         )
     }
 
+    fn source_attacks_this_turn(&self, game: &Game) -> Result<Nat> {
+        let count = game
+            .state
+            .objects
+            .get(&self.context.source)
+            .filter(|object| {
+                object.generation == self.context.generation.0 && object.zone == "field"
+            })
+            .map_or(0, |object| int(&object.state["attacks_this_turn"]));
+        Ok(Nat(u64::try_from(count).map_err(invalid)?))
+    }
+
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {
         match read {
             NatRead::TurnOrdinal { player } => {
@@ -920,6 +932,7 @@ impl Execution {
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }
+            NatRead::SourceAttacksThisTurn {} => self.source_attacks_this_turn(game),
             NatRead::HistoryCount { query, count } => {
                 let plan = HistoryPlan::compile(query).ok_or_else(|| {
                     unsupported(if *count == HistoryCount::Facts {
