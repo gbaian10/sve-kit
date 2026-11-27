@@ -2,7 +2,7 @@
 
 本入口由 #500 實作，沿 [翻譯契約](translation-contract.md) 的 JP 優先政策；
 只有已確認無同卡 JP 來源的 EN 卡可使用。換皮關係 `same_rules_reskin` 不自動變成同卡來源。
-此處的 target 是顯示譯文，不建立 EN normalizer、Frame、SourceBinding 或 DSL 規則資格。
+此處的 target 是顯示譯文。DSL 來源資格依[作者契約](../../dsl/author-contract-1.0.md#21-封套與分片)判斷。
 
 ## authored 入口
 

@@ -18,7 +18,9 @@
 
 主檔 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，預設 shared／1.0。每卡必填 `abilities`，可含 `meta, admission, ignored, rule_sections, note, deck_rule, token, token_sources`。`meta` 保存審查與裁定，`status` 預設 draft，`reviewed_by` 與 `rulings` 預設空。卡片貢獻者記在 Git 歷史與 PR trailer。
 
-作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。作者主檔的 scope 為 shared，來源為日文卡文。
+作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。作者主檔的 scope 為 shared。
+
+來源以已確認的永久 CardId 選取。同卡在身分登錄有 JP 版次時，一律使用 JP 官網版次、目前 JP face_revision 和 JP 主要規則名稱。卡片只有 EN 版次且登錄已確認無 JP 版次時，使用 EN 官網版次、目前 EN face_revision 和 EN 主要規則名稱。缺原文或身分尚未確認時，准入失敗。卡號字尾、卡名、文字相似度和換皮關係都不決定來源。
 
 ### 2.2 材料化 companion record
 
