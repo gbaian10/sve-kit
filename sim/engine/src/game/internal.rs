@@ -1863,7 +1863,7 @@ impl Game {
         instruction: Box<Instruction>,
     ) -> Result<()> {
         match &instruction.action {
-            Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
+            Action::GameResult { .. } => self.internal_game_result(execution, &instruction)?,
             Action::Transfer { .. } => self.internal_transfer(execution, &instruction)?,
             Action::ScheduleTurn { .. } => self.internal_schedule_turn(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,

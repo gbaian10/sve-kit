@@ -2336,7 +2336,21 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Delayed(value) => self.delayed(value, path, source, span),
             ast::Step::Declare(value) => self.declare(value, path),
             ast::Step::Dice(value) => self.dice(value, path),
-            ast::Step::Win(_) => Ok(effect_victory(source)),
+            ast::Step::Win(_) => Ok(effect_result(
+                source,
+                super::Outcome::Win,
+                PlayerRelation::SelfPlayer,
+                TextQuantifier::Implicit,
+            )),
+            ast::Step::Lose(loss) => Ok(effect_result(
+                source,
+                super::Outcome::Lose,
+                PlayerRelation::Opponents,
+                match loss.who {
+                    ast::DefeatedPlayers::Opponent => TextQuantifier::Implicit,
+                    ast::DefeatedPlayers::Opponents => TextQuantifier::All,
+                },
+            )),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
             ast::Step::ExtraTurn(_) => Ok(extra_turn(Binding::new(
                 self.allocator.id(path)?,
@@ -2510,18 +2524,20 @@ fn source_span(
     })
 }
 
-fn effect_victory(source: &AbilitySource) -> Action {
+fn effect_result(
+    source: &AbilitySource,
+    result: super::Outcome,
+    relation: PlayerRelation,
+    text_quantifier: TextQuantifier,
+) -> Action {
     Action::GameResult {
         players: PlayerSet {
-            relation: PlayerRelation::SelfPlayer,
+            relation,
             relative_to: PlayerRef::Controller {},
-            cardinality: Cardinality {
-                minimum: Nat(1),
-                maximum: Some(Nat(1)),
-            },
-            text_quantifier: TextQuantifier::Implicit,
+            cardinality: super::victory::result_cardinality(text_quantifier),
+            text_quantifier,
         },
-        result: super::Outcome::Win,
+        result,
         source: source.clone(),
     }
 }

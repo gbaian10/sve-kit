@@ -709,17 +709,10 @@ impl Checker {
             Action::Delay { .. } => self.delay(action),
             Action::GameResult {
                 players,
-                result: super::Outcome::Win,
+                result,
                 source,
             } if *instruction_actor == (PlayerRef::Controller {})
-                && players.relative_to == (PlayerRef::Controller {})
-                && players.relation == PlayerRelation::SelfPlayer
-                && players.cardinality
-                    == (Cardinality {
-                        minimum: Nat(1),
-                        maximum: Some(Nat(1)),
-                    })
-                && players.text_quantifier == super::TextQuantifier::Implicit
+                && super::victory::effect_players(players, *result)
                 && self.ability_source.as_ref() == Some(source) =>
             {
                 self.players(players)?;

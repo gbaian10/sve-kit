@@ -459,6 +459,7 @@ pub(super) enum Step {
     Choose(Choose),
     Draw(Draw),
     Win(Win),
+    Lose(Lose),
     ExtraTurn(ExtraTurn),
     Pp(PpChange),
     Discard(Discard),
@@ -931,6 +932,20 @@ impl Discard {
 pub(super) struct Win {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Lose {
+    pub who: DefeatedPlayers,
+}
+
+#[derive(Deserialize)]
+pub(super) enum DefeatedPlayers {
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "opponents")]
+    Opponents,
 }
 
 #[derive(Deserialize)]

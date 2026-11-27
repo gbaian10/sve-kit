@@ -1045,6 +1045,7 @@ fn supported(code: &str) -> bool {
             | "internal.ObjectProperty.Cost"
             | "internal.ObjectProperty.Names"
             | "internal.Outcome.Win"
+            | "internal.Outcome.Lose"
             | "internal.OwnerZone.Banish"
             | "internal.OwnerZone.Cemetery"
             | "internal.OwnerZone.Deck"

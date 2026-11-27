@@ -116,7 +116,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | play_card／play_ability | {ref}（cost?:0；其餘費用覆寫尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until? | 無期限僅一次，有期限預設各次；不收 line/result |
 | player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
-| win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
+| win／lose／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
 | to.one_of | one_of、by、scope | create 的 scope=each/batch（§13 GAP-A-017） |
 | to.partition | order=printed、partition:[{zone,n / upto}…] | n 與 upto 互斥；順序與份額保留，upto 可任選且受目的區空位限制 |

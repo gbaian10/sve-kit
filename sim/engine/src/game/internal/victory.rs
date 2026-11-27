@@ -1,9 +1,9 @@
-//! Effect victory shares the rules result and immediately releases typed continuations.
+//! Effect results share the rules outcome and immediately release typed continuations.
 
 use super::{Execution, Game, Result, seat_name, unsupported};
 use crate::ir::{
-    Ability, AbilityQualification, AbilitySource, Action, Cardinality, Instruction, Located, Nat,
-    ObjectOperand, Outcome, PlayerRef, PlayerRelation, TextQuantifier, ZoneKind, victory,
+    Ability, AbilityQualification, AbilitySource, Action, Instruction, Located, ObjectOperand,
+    Outcome, PlayerRef, PlayerRelation, ZoneKind, victory,
 };
 
 pub(super) fn check_action(action: &Action, expected: &AbilitySource) -> Result<()> {
@@ -12,18 +12,9 @@ pub(super) fn check_action(action: &Action, expected: &AbilitySource) -> Result<
         result,
         source,
     } = action
-        && (*result != Outcome::Win
-            || source != expected
-            || players.relative_to != (PlayerRef::Controller {})
-            || players.relation != PlayerRelation::SelfPlayer
-            || players.cardinality
-                != (Cardinality {
-                    minimum: Nat(1),
-                    maximum: Some(Nat(1)),
-                })
-            || players.text_quantifier != TextQuantifier::Implicit)
+        && (source != expected || !victory::effect_players(players, *result))
     {
-        return Err(unsupported("controller-only effect victory"));
+        return Err(unsupported("effect result player or source"));
     }
     Ok(())
 }
@@ -70,13 +61,27 @@ impl Game {
         Ok(false)
     }
 
-    pub(super) fn internal_victory(
+    pub(super) fn internal_game_result(
         &mut self,
         execution: &Execution,
         instruction: &Instruction,
     ) -> Result<()> {
         check_action(&instruction.action, &instruction.source)?;
-        let player = execution.player(self, &PlayerRef::Controller {})?;
-        self.win_for_players(vec![seat_name(player)?.to_owned()], &execution.frame())
+        let Action::GameResult {
+            players, result, ..
+        } = &instruction.action
+        else {
+            return Err(unsupported("effect result instruction"));
+        };
+        let seats = execution
+            .players(self, players)?
+            .into_iter()
+            .map(|player| seat_name(player).map(str::to_owned))
+            .collect::<Result<Vec<_>>>()?;
+        let frame = execution.frame();
+        match result {
+            Outcome::Win => self.win_for_players(seats, &frame),
+            Outcome::Lose => self.lose_for_players(seats, &frame),
+        }
     }
 }
