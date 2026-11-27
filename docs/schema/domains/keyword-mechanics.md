@@ -34,6 +34,8 @@ decision 是 mapping 的明示採納，不是逐卡真人審核、DSL review 或
 registry hash 與各 adapter 版本。
 共用關鍵字的日文規則名稱登錄在 `records[].rule_name`。指示物、能力標記與其他僅供引擎使用的名稱登錄在 `rule_names`。`ward` 是採納代碼，Rust 將它轉成對戰狀態既有的 `guard` 鍵。
 
+整份登錄中的專案自有貢獻採 CC0-1.0，官方詞彙及其他第三方內容依 [LICENSING.md](../../../LICENSING.md) 排除。
+
 ## 由 DSL 推導的四種關係
 
 `dsl-keyword-relations-v1` 讀已准入的整卡程式（`dsl_document.ast`，已展開），不比對卡文。

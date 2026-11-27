@@ -22,6 +22,10 @@ use `products/{family,product,inclusion,identities}/`; catalog data lives under
 `digital/policies/{names,links}.yaml`. Rules also include `rules/keyword-registry.yaml`
 and `rules/engine/index.yaml`; source-bound crops are `images/crops.yaml`.
 
+Project contributions throughout `rules/keyword-registry.yaml` use CC0-1.0.
+Official vocabulary and other third-party material are excluded under
+[LICENSING.md](../LICENSING.md).
+
 The identity registry format is defined in [authored layout](../docs/schema/domains/authored-layout.md).
 The former `card-ids.yaml` proposal is replaced by `registry/` and `ids/`.
 Run the offline generator with `python -m sve_carddb.domains.registry --help` through the carddb uv environment.
