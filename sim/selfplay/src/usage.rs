@@ -3,7 +3,7 @@
 use alloc::collections::BTreeMap;
 use serde::Serialize;
 use sve_battle_contract::event::{EventBody, EventCard, EventDelivery};
-use sve_battle_contract::{BattleUpdate, Seat, SourceRef, Zone};
+use sve_battle_contract::{Seat, SourceRef, Zone};
 
 /// Things a printing did, counted per event.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
@@ -76,71 +76,71 @@ const fn known(card: &EventCard) -> &str {
 }
 
 /// The printing an event counts for, and as what.
-fn counted(body: &EventBody) -> Option<(&str, Kind)> {
+fn counted(body: &EventBody) -> Option<(&str, Kind, Option<Seat>)> {
     if let EventBody::CardPlayed {
-        card: Some(card), ..
+        card: Some(card),
+        player,
     } = body
     {
-        return Some((known(card), Kind::Played));
+        return Some((known(card), Kind::Played, Some(*player)));
     }
     if let EventBody::AbilityPlayed {
         source: Some(source),
+        player,
         ..
     } = body
     {
-        return Some((text_printing(source), Kind::Ability));
+        return Some((text_printing(source), Kind::Ability, Some(*player)));
     }
-    if let EventBody::TriggerPending { source, .. } = body {
-        return Some((text_printing(source), Kind::Trigger));
+    if let EventBody::TriggerPending {
+        source, controller, ..
+    } = body
+    {
+        return Some((text_printing(source), Kind::Trigger, Some(*controller)));
     }
     if let EventBody::Evolved {
         form: Some(card), ..
     } = body
     {
-        return Some((known(card), Kind::Evolved));
+        return Some((known(card), Kind::Evolved, None));
     }
     if let EventBody::Movement { after, .. } = body
         && let Some(card) = &after.card
     {
         if after.zone == Some(Zone::Field) {
-            return Some((known(card), Kind::Entered));
+            return Some((known(card), Kind::Entered, Some(after.player)));
         }
         if after.zone == Some(Zone::Cemetery) {
-            return Some((known(card), Kind::Cemetery));
+            return Some((known(card), Kind::Cemetery, Some(after.player)));
         }
     }
     None
 }
 
-/// Each seat's own count by wire printing.
-///
-/// A public event reaches both seats and a private one only its owner, so the per-printing
-/// maximum over the two feeds counts every event once.
+/// Each viewer's counts by wire printing and playing or destination seat, if supplied.
 #[derive(Debug, Default)]
 pub struct Tally {
-    seats: [BTreeMap<String, Uses>; 2],
+    first: BTreeMap<(String, Option<Seat>), Uses>,
+    second: BTreeMap<(String, Option<Seat>), Uses>,
 }
 
 impl Tally {
     /// Count the events one update delivers.
-    pub fn update(&mut self, update: &BattleUpdate) {
-        let EventDelivery::Available { batches, .. } = &update.events else {
+    pub fn update(&mut self, viewer: Seat, events: &EventDelivery) {
+        let EventDelivery::Available { batches, .. } = events else {
             return;
         };
-        let seat = match update.viewer {
-            Seat::P1 => self.seats.first_mut(),
-            Seat::P2 => self.seats.last_mut(),
-        };
-        let Some(seat) = seat else {
-            return;
-        };
-        let mut count = |printing: &str, kind: Kind| {
-            let uses = seat.entry(printing.to_owned()).or_default().field(kind);
-            *uses = uses.saturating_add(1);
+        let seat = match viewer {
+            Seat::P1 => &mut self.first,
+            Seat::P2 => &mut self.second,
         };
         for event in batches.iter().flat_map(|batch| &batch.events) {
-            if let Some((printing, kind)) = counted(&event.body) {
-                count(printing, kind);
+            if let Some((printing, kind, player)) = counted(&event.body) {
+                let count = seat
+                    .entry((printing.to_owned(), player))
+                    .or_default()
+                    .field(kind);
+                *count = count.saturating_add(1);
             }
         }
     }
@@ -148,10 +148,62 @@ impl Tally {
     /// Both feeds merged, by wire printing.
     #[must_use]
     pub fn merged(self) -> BTreeMap<String, Uses> {
-        let [mut first, second] = self.seats;
-        for (printing, uses) in second {
-            first.entry(printing).or_default().widest(&uses);
+        let Self { mut first, second } = self;
+        for (key, uses) in second {
+            first.entry(key).or_default().widest(&uses);
         }
-        first
+        // The two private Start Amulet placements in a mirror have different destinations.
+        let mut by_printing = BTreeMap::<String, Uses>::new();
+        for ((printing, _), uses) in first {
+            by_printing.entry(printing).or_default().add(&uses);
+        }
+        by_printing
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Tally, Uses};
+    use serde_json::{Value, json};
+    use sve_battle_contract::{Seat, event::EventDelivery};
+
+    fn feed(viewer: Seat) -> EventDelivery {
+        let events = [(Seat::P1, "e1"), (Seat::P2, "e2"), (Seat::P1, "e3")]
+            .into_iter()
+            .map(|(player, id)| {
+                let card = if player == viewer || id == "e3" {
+                    json!({"card": {"printing_id": "test-amulet", "face": 0_u8}, "object": null})
+                } else {
+                    Value::Null
+                };
+                json!({
+                    "id": id, "cause": "c", "parent": null, "about": [], "presentation_id": null,
+                    "body": {
+                        "kind": "movement", "method": "put", "by_effect": false,
+                        "before": {"player": player, "zone": "deck", "position": null, "card": null},
+                        "after": {"player": player, "zone": "field", "position": null, "card": card}
+                    }
+                })
+            })
+            .collect::<Vec<_>>();
+        serde_json::from_value(json!({
+            "status": "available", "batches": [{"id": "b", "events": events}], "animate": []
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn private_placements_on_both_sides_count_alongside_shared_events() {
+        let mut tally = Tally::default();
+        for viewer in [Seat::P1, Seat::P2] {
+            tally.update(viewer, &feed(viewer));
+        }
+        assert_eq!(
+            tally.merged().get("test-amulet"),
+            Some(&Uses {
+                entered: 3,
+                ..Uses::default()
+            })
+        );
     }
 }

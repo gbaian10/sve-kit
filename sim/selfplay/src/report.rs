@@ -200,24 +200,17 @@ impl Report {
         let failed = matches!(played.end, End::Failed(_));
         let mut either = BTreeSet::new();
         for deck in &played.record.setup.decks {
-            let numbers: BTreeSet<&str> = deck
-                .main
-                .iter()
-                .chain(&deck.evolve)
-                .map(|reference| {
-                    arena
-                        .printings
-                        .get(reference)
-                        .map_or(reference.as_str(), |printing| arena.number(printing))
-                })
-                .collect();
-            for number in &numbers {
-                bump(self.built.entry((*number).to_owned()).or_default());
-            }
+            let numbers = deck.main.iter().chain(&deck.evolve).map(|reference| {
+                arena
+                    .printings
+                    .get(reference)
+                    .map_or(reference.as_str(), |printing| arena.number(printing))
+            });
             either.extend(numbers);
         }
-        if failed {
-            for number in either {
+        for number in either {
+            bump(self.built.entry(number.to_owned()).or_default());
+            if failed {
                 bump(self.failed.entry(number.to_owned()).or_default());
             }
         }
@@ -251,11 +244,16 @@ impl Report {
         }
     }
 
-    /// Every card number that entered a deck or did something: decks that held it, matches
-    /// where it was public, its event counts and the failed matches whose decks held it.
+    /// Each observed card number, its event counts and the matches where it was in a deck
+    /// or publicly visible, including failed matches whose decks held it.
     #[must_use]
     pub fn cards(&self) -> Value {
-        let numbers: BTreeSet<&String> = self.built.keys().chain(self.uses.keys()).collect();
+        let numbers: BTreeSet<&String> = self
+            .built
+            .keys()
+            .chain(self.seen.keys())
+            .chain(self.uses.keys())
+            .collect();
         let count =
             |map: &BTreeMap<String, u64>, number: &String| map.get(number).copied().unwrap_or(0);
         numbers
@@ -278,11 +276,12 @@ impl Report {
     pub fn summary(&self, arena: &Arena) -> Value {
         let eligible = arena.pools.eligible();
         let lineup: Vec<Value> = arena.lineup.as_ref().map_or_else(Vec::new, |lineup| {
-            self.listed
-                .iter()
-                .map(|(position, seated)| {
+            (0..lineup.len())
+                .map(|position| {
+                    let empty = Seated::default();
+                    let seated = self.listed.get(&position).unwrap_or(&empty);
                     json!({
-                        "label": lineup.label(*position),
+                        "label": lineup.label(position),
                         "seats": seated.seats,
                         "wins": seated.wins,
                         "losses": seated.losses,

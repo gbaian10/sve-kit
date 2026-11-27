@@ -28,14 +28,14 @@ cargo run --locked --release -p sve-selfplay -- \
 many of the first seeds also keep their record (default 0). `--decks <decks.json>` before the
 other arguments plays listed decks instead of random ones (see below). It writes:
 
-| File                 | Content                                                                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `summary.json`       | Outcomes, failure groups with seeds and cards, receipt counts, cost percentiles, the 20 slowest submissions, cards never built or never seen |
-| `failures.jsonl`     | One line per failed match: the failure, both seats' last updates and the record                                                              |
-| `records.jsonl`      | Records of the first seeds, for timing replays                                                                                               |
-| `excluded.json`      | Printings with a program that entered no deck, or no deck of their title: failed lowering or admission, or in no construction pool           |
-| `cards.json`         | Per card number: decks that held it, matches where it was public, its event counts and the failed matches whose decks held it                |
-| `refused-decks.json` | With `--decks`: listed decks left out, with the reason                                                                                       |
+| File                 | Content                                                                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `summary.json`       | Outcomes, failure groups with seeds and cards, receipt counts, cost percentiles, the 20 slowest submissions, cards never built or never seen  |
+| `failures.jsonl`     | One line per failed match: the failure, both seats' last updates and the record                                                               |
+| `records.jsonl`      | Records of the first seeds, for timing replays                                                                                                |
+| `excluded.json`      | Printings with a program excluded from random construction, or from random construction for their title                                       |
+| `cards.json`         | Per card number: matches where it was in either deck or publicly visible at an update, event counts and failed matches with it in either deck |
+| `refused-decks.json` | With `--decks`: listed decks left out, with the reason                                                                                        |
 
 ### Deck lists
 
@@ -57,15 +57,18 @@ A deck list names each deck by card number and count, with a relative integer we
 
 `construction` is a printed class or a registered title code; `label` and `evolve` are
 optional. Each match draws both seats' decks independently by weight, so a heavy deck also
-meets itself. A deck is played only when it keeps the construction sizes, every number is a
-printing some construction pool holds, it lowers and is admitted whole, and the host opens it
-against itself; the rest go to `refused-decks.json`, and a list with nothing left is an error.
-The summary's `lineup` gives each played deck's seats, results and mirror matches.
+meets itself. The tool checks base construction, whole-deck admission and host startup
+in a mirror. In a mixed list it also checks each class deck against an admitted title deck
+because control transfers can require additional Drive icon facts. It writes skipped decks
+and their reasons to `refused-decks.json` before returning an error for an all-refused list.
+The summary's `lineup` gives each admitted deck's seats, results and mirror matches.
 
 `cards.json` counts, per card number, the played cards, the ability plays and pending
 triggers from its text, the moves onto a field or into a cemetery, and the evolutions that
-placed it. Each seat's feed is counted separately and the larger count kept, so an event both
-seats saw counts once and one only its owner saw still counts.
+placed it. Counts use identities the host disclosed in committed events. The tool takes the
+larger count from the two feeds for each printing, event kind and playing or destination seat
+where available. The current host sends zero pending-trigger events, so `triggers` is zero
+until the host projects them. `built` and `failed` count a card at most once per match.
 
 `replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>` submits each record's
 commands again and writes the cost of every submission. A record holds the host's setup and

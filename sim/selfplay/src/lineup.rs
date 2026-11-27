@@ -3,7 +3,7 @@
 //! A list names each deck by card number and count only. Every match draws both seats'
 //! decks independently by weight, so a heavy deck also meets itself.
 
-use crate::pool::{Basis, Deck};
+use crate::pool::{Basis, Deck, EVOLVE_MAXIMUM, MAIN_MAXIMUM, MAIN_MINIMUM, NAME_LIMIT};
 use alloc::collections::BTreeMap;
 use rand::RngExt as _;
 use rand_chacha::ChaCha8Rng;
@@ -47,10 +47,14 @@ pub struct Refused {
 /// Admitted decks with their cumulative weights.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Lineup {
-    labels: Vec<String>,
-    decks: Vec<Deck>,
-    /// Running total of weights; strictly increasing.
-    bounds: Vec<u64>,
+    entries: Vec<WeightedDeck>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct WeightedDeck {
+    label: String,
+    deck: Deck,
+    bound: u128,
 }
 
 impl Lineup {
@@ -59,42 +63,44 @@ impl Lineup {
         if weight == 0 {
             return;
         }
-        let total = self.bounds.last().copied().unwrap_or(0);
-        self.bounds.push(total.saturating_add(weight));
-        self.labels.push(label);
-        self.decks.push(deck);
+        let total = self.entries.last().map_or(0, |entry| entry.bound);
+        self.entries.push(WeightedDeck {
+            label,
+            deck,
+            bound: total.saturating_add(u128::from(weight)),
+        });
     }
 
     /// Whether no deck can be drawn.
     #[must_use]
     pub const fn is_empty(&self) -> bool {
-        self.decks.is_empty()
+        self.entries.is_empty()
     }
 
     /// Number of admitted decks.
     #[must_use]
     pub const fn len(&self) -> usize {
-        self.decks.len()
+        self.entries.len()
     }
 
     /// The label of a drawn deck.
     #[must_use]
     pub fn label(&self, index: usize) -> &str {
-        self.labels.get(index).map_or("", String::as_str)
+        self.entries
+            .get(index)
+            .map_or("", |entry| entry.label.as_str())
     }
 
     /// One deck drawn by weight, with its position.
     pub fn draw(&self, rng: &mut ChaCha8Rng) -> Option<(usize, Deck)> {
-        let total = *self.bounds.last()?;
+        let total = self.entries.last()?.bound;
         let point = rng.random_range(0..total);
-        let index = self.bounds.partition_point(|bound| *bound <= point);
-        Some((index, self.decks.get(index)?.clone()))
+        let index = self.entries.partition_point(|entry| entry.bound <= point);
+        Some((index, self.entries.get(index)?.deck.clone()))
     }
 }
 
 /// Main deck of 40 to 50 cards, an evolve deck of at most ten, one to three of each entry.
-///
-/// The three-copy limit across printings of one rules name is the host's to enforce.
 ///
 /// # Errors
 /// The first rule the deck breaks.
@@ -108,16 +114,16 @@ pub fn shape(deck: &ListedDeck) -> Result<(), String> {
         .main
         .iter()
         .chain(&deck.evolve)
-        .find(|(_, count)| !(1..=3).contains(*count))
+        .find(|(_, count)| !(1..=NAME_LIMIT).contains(*count))
     {
         return Err(format!("{number} has {count} copies"));
     }
     let main = size(&deck.main);
-    if !(40..=50).contains(&main) {
+    if !(MAIN_MINIMUM..=MAIN_MAXIMUM).contains(&main) {
         return Err(format!("main deck has {main} cards"));
     }
     let evolve = size(&deck.evolve);
-    if evolve > 10 {
+    if evolve > EVOLVE_MAXIMUM {
         return Err(format!("evolve deck has {evolve} cards"));
     }
     Ok(())
@@ -127,6 +133,8 @@ pub fn shape(deck: &ListedDeck) -> Result<(), String> {
 mod tests {
     use super::{DeckList, Lineup, shape};
     use crate::pool::{Basis, Deck};
+    use alloc::collections::BTreeSet;
+    use core::iter::repeat_with;
     use rand::SeedableRng as _;
     use rand_chacha::ChaCha8Rng;
 
@@ -157,6 +165,18 @@ mod tests {
         }
         // Three to one, within a generous margin.
         assert!((2_700..3_300).contains(&drawn[0]), "{drawn:?}");
+    }
+
+    #[test]
+    fn equal_maximum_weights_can_both_be_drawn() {
+        let mut lineup = Lineup::default();
+        lineup.push("first".into(), u64::MAX, deck("first"));
+        lineup.push("second".into(), u64::MAX, deck("second"));
+        let mut rng = ChaCha8Rng::seed_from_u64(0);
+        let drawn: BTreeSet<_> = repeat_with(|| lineup.draw(&mut rng).unwrap().0)
+            .take(64)
+            .collect();
+        assert_eq!(drawn, BTreeSet::from([0, 1]));
     }
 
     #[test]

@@ -415,7 +415,7 @@ impl Table<'_> {
                     .sum()
             });
         absorbed.events = absorbed.events.max(events);
-        progress.tally.update(update);
+        progress.tally.update(update.viewer, &update.events);
         progress.seen.extend(
             update
                 .observation
@@ -758,7 +758,7 @@ pub fn play(arena: &Arena, seed: u64, limits: Limits) -> Match {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     let drawn = lineup.draw(&mut rng).zip(lineup.draw(&mut rng));
     let Some(((first, first_deck), (second, second_deck))) = drawn else {
-        return play_random(arena, seed, limits);
+        return no_decks(arena, seed, "no admitted listed deck");
     };
     let setup = seated(seed, [first_deck, second_deck], &mut rng);
     let mut played = drive(arena, seed, setup, Source::Random(Box::new(rng)), limits);
@@ -782,23 +782,25 @@ fn play_random(arena: &Arena, seed: u64, limits: Limits) -> Match {
             break;
         }
     }
-    last.unwrap_or_else(|| {
-        let empty = Deck {
-            construction: Basis::Class(String::new()),
-            main: Vec::new(),
-            evolve: Vec::new(),
-        };
-        let setup = Setup {
-            decks: [empty.clone(), empty],
-            first_chooser: Seat::P1,
-            seed: seed.to_string(),
-            control: [Control::Player, Control::Player],
-            max_submissions: 0,
-        };
-        let progress = Progress::default();
-        let failure = progress.fail("load", "no construction pool".into());
-        finish(arena, seed, setup, progress, End::Failed(*failure))
-    })
+    last.unwrap_or_else(|| no_decks(arena, seed, "no construction pool"))
+}
+
+fn no_decks(arena: &Arena, seed: u64, reason: &str) -> Match {
+    let empty = Deck {
+        construction: Basis::Class(String::new()),
+        main: Vec::new(),
+        evolve: Vec::new(),
+    };
+    let setup = Setup {
+        decks: [empty.clone(), empty],
+        first_chooser: Seat::P1,
+        seed: seed.to_string(),
+        control: [Control::Player, Control::Player],
+        max_submissions: 0,
+    };
+    let progress = Progress::default();
+    let failure = progress.fail("load", reason.into());
+    finish(arena, seed, setup, progress, End::Failed(*failure))
 }
 
 /// Submit a record's commands again; any receipt that differs is a `replay` failure.
