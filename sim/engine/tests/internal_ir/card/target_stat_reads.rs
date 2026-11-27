@@ -95,3 +95,16 @@ fn a_chosen_cemetery_follower_lends_its_attack_before_it_returns() {
     assert_eq!(state["P2"]["leader"]["life"], 18_u8);
     assert_eq!(state["P1"]["field"], json!(["p", "fallen"]));
 }
+
+#[test]
+fn a_cemetery_target_lends_only_its_attack() {
+    let tree = equipment_played::tree(
+        &json!({"activate":{
+            "cost":{"pp":0},
+            "targets":[{"bind":"fallen","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1}],
+            "do":[{"damage":{"to":{"leaders":"opponents"},"n":{"orig_cost_of":"fallen"}}}]
+        }}),
+        "unit-amulet",
+    );
+    lowerer().lower(&tree).unwrap_err();
+}

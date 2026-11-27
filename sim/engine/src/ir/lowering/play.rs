@@ -608,16 +608,15 @@ impl BodyContext<'_> {
         if ability_holder_target(target, cardinality) {
             self.ability_holders.insert(target.bind.clone());
         }
-        // Public zones whose single chosen object a later read may name (GFB01c-021EN: cemetery).
         let public = |query: &ast::TargetQuery| {
             query
                 .zone
                 .as_ref()
                 .and_then(target_zones)
                 .is_some_and(|zones| {
-                    zones.iter().all(|zone| {
-                        matches!(zone, ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery)
-                    })
+                    zones
+                        .iter()
+                        .all(|zone| matches!(zone, ZoneKind::Field | ZoneKind::Ex))
                 })
         };
         if cardinality.maximum == Some(Nat(1))
@@ -629,6 +628,16 @@ impl BodyContext<'_> {
                 .all(public)
         {
             self.single_targets.insert(target.bind.clone());
+        }
+        // A single cemetery target lends only its printed attack (GFB01c-021EN); other reads stay closed.
+        if cardinality.maximum == Some(Nat(1))
+            && target.any_of.is_none()
+            && matches!(
+                &target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+            )
+        {
+            self.cemetery_targets.insert(target.bind.clone());
         }
         match &target.from.zone {
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
@@ -1386,6 +1395,7 @@ impl BodyContext<'_> {
                 target_roles: BTreeMap::new(),
                 ability_holders: BTreeSet::new(),
                 single_targets: BTreeSet::new(),
+                cemetery_targets: BTreeSet::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
                 resolution_scope: self.resolution_scope,
@@ -1431,6 +1441,7 @@ impl BodyContext<'_> {
                 context.target_roles.clone_from(&self.target_roles);
                 context.ability_holders.clone_from(&self.ability_holders);
                 context.single_targets.clone_from(&self.single_targets);
+                context.cemetery_targets.clone_from(&self.cemetery_targets);
                 context
                     .recipient_targets
                     .clone_from(&self.recipient_targets);
