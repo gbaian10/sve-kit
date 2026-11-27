@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 
+use crate::game::effects::RevealAccess;
 use serde_json::{Value, json};
 
 use super::{Frame, Game, int, list, scalar, string};
@@ -148,7 +149,12 @@ impl Game {
             return Ok(true);
         }
         self.object_mut(evolve)?.state["face"] = json!(face);
-        self.reveal(&[evolve.into()], "all", &frame, false)?;
+        self.reveal(
+            &[evolve.into()],
+            "all",
+            &frame,
+            RevealAccess::ExistingLocation,
+        )?;
         if self.object(source)?.zone != "field" {
             return Err(EngineFailure::Unsupported(
                 "evolution cost moved its source".into(),

@@ -74,7 +74,7 @@ impl Game {
         ids: &[String],
         source: impl Fn(&Self, Viewer) -> Option<EffectSource>,
     ) -> Result<()> {
-        let ordered = kind == NoticeKind::Look;
+        let ordered = kind != NoticeKind::TemporaryReveal;
         if !ordered && ids.is_empty() {
             return Ok(());
         }
@@ -151,7 +151,7 @@ impl Game {
                         Ok(ShownCard {
                             card: references.resolve(&self.catalog, &card.face)?,
                             owner: card.owner,
-                            position: (notice.kind == NoticeKind::Look)
+                            position: (notice.kind != NoticeKind::TemporaryReveal)
                                 .then(|| Nat::try_from(index))
                                 .transpose()?,
                         })

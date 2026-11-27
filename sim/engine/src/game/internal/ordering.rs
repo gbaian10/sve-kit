@@ -965,6 +965,16 @@ impl Game {
             return Err(unsupported("order continuation placement"));
         };
         self.internal_reorder_deck(seat, &wait.deck, &ids, placement.position)?;
+        if let [member] = ordered.as_slice()
+            && execution.reveals_top_placement(wait.instruction.receipt, *member)
+        {
+            execution.record_notice(
+                self,
+                &[Viewer::P1, Viewer::P2],
+                super::NoticeKind::DeckTop,
+                &ids,
+            )?;
+        }
         let snapshot = SnapshotId(self.state.ir_epoch);
         let successful = ordered
             .into_iter()

@@ -4,7 +4,7 @@ use super::{
     EventSubject, MovementBefore, MovementMethod, NumberFacet, Viewer,
 };
 use crate::game::Game;
-use crate::game::player::observation::{seat, viewer, zone};
+use crate::game::player::observation::{seat, viewer, zone, zone_positions_visible};
 use crate::ir::EvolutionState;
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::Value;
@@ -113,15 +113,13 @@ impl Game {
             Some(zone(&object.zone).map_err(|_authority_error| EventError::ProjectionGap)?)
         };
         let card = self.event_card(perspective, id, false)?;
-        let position = if card.is_some()
-            && object.zone != "limit_break"
-            && (object.zone != "hand" || perspective == player)
-        {
-            self.object_position(id)
-                .map_err(|_authority_error| EventError::ProjectionGap)?
-        } else {
-            None
-        };
+        let position =
+            if card.is_some() && zone_positions_visible(&object.zone, perspective == player) {
+                self.object_position(id)
+                    .map_err(|_authority_error| EventError::ProjectionGap)?
+            } else {
+                None
+            };
         Ok(EventLocation {
             player,
             zone: kind,
@@ -400,6 +398,26 @@ impl Game {
                     }
                     (view, Err(error)) => *view = Err(*error),
                     _ => {}
+                }
+            }
+        }
+    }
+
+    pub(in crate::game) fn player_reveal_link_only(&mut self, step: &str, controller: &str) {
+        if let Some(entry) = self
+            .player_events
+            .pending
+            .last_mut()
+            .filter(|entry| entry.step.as_deref() == Some(step))
+        {
+            for (perspective, view) in [Viewer::P1, Viewer::P2].into_iter().zip(&mut entry.views) {
+                if seat(perspective) != controller
+                    && let Ok(Some(EventKind::Action(action))) = view
+                    && let [Some(EventSubject::Card(card))] = action.subjects.as_mut_slice()
+                {
+                    // A different viewer's prior knowledge cannot identify the private choice.
+                    card.handle = None;
+                    card.properties.state = None;
                 }
             }
         }

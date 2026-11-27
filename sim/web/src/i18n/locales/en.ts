@@ -1121,6 +1121,7 @@ export default {
       title: "Card notices ({{count}})",
       look: "Cards you looked at",
       temporary_reveal: "Cards revealed",
+      deck_top: "Card placed on top of the deck",
       empty: "No cards were seen.",
       dismiss: "Dismiss",
     },
