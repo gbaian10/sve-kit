@@ -411,12 +411,14 @@ fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
         Game::start_player_game(selection().clone(), absent, Viewer::P1, "opening").unwrap_err(),
         StrictStartError::Admission(_)
     ));
-    let mut short = decks();
-    short[0].main.truncate(3);
-    assert!(matches!(
-        Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
-        StrictStartError::OpeningHand(Viewer::P1)
-    ));
+    for (index, viewer) in [(0, Viewer::P1), (1, Viewer::P2)] {
+        let mut short = decks();
+        short[index].main.truncate(3);
+        assert!(matches!(
+            Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
+            StrictStartError::OpeningHand(short_viewer) if short_viewer == viewer
+        ));
+    }
     let mut changed = selection().clone();
     changed.current.remove("BP01-P25");
     assert!(matches!(
