@@ -106,11 +106,14 @@ pub enum EvolutionAnswer {
 }
 
 impl Game {
-    pub(super) fn player_evolution_question(&self, viewer: Viewer) -> Result<Option<Input>> {
+    pub(super) fn player_evolution_question(
+        &self,
+        viewer: Option<Viewer>,
+    ) -> Result<Option<Input>> {
         let Some(actor) = self.evolution_actor() else {
             return Ok(None);
         };
-        if actor != viewer {
+        if viewer.is_some_and(|viewer| actor != viewer) {
             return Ok(Some(Input::Waiting(super::Waiting { actor, dice: None })));
         }
         let token = QuestionToken {
@@ -133,11 +136,12 @@ impl Game {
         actor: Viewer,
         token: QuestionToken,
         answer: EvolutionAnswer,
+        inputs: &super::InputCache,
     ) -> SubmissionKind {
         if self.player_fault.is_some() {
             return SubmissionKind::EngineFault;
         }
-        let Input::Question(question) = self.input(actor) else {
+        let Input::Question(question) = inputs.read(self, actor) else {
             return SubmissionKind::Rejected;
         };
         if question.actor != actor
@@ -186,7 +190,7 @@ impl Game {
             }
         };
         self.player_epoch = next;
-        self.advance_player_input();
+        self.advance_player_input_cached(inputs.enabled());
         if self.player_fault.is_some() {
             SubmissionKind::EngineFault
         } else {

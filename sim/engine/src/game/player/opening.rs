@@ -201,6 +201,7 @@ impl Game {
         actor: Viewer,
         token: QuestionToken,
         answer: OpeningAnswer,
+        inputs: &super::InputCache,
     ) -> SubmissionKind {
         if self.player_fault.is_some() {
             return SubmissionKind::EngineFault;
@@ -208,7 +209,7 @@ impl Game {
         if self.state.game["ended"] == true || self.state.flow["kind"] != "pregame" {
             return SubmissionKind::Rejected;
         }
-        let input = self.input(actor);
+        let input = inputs.read(self, actor);
         let super::Input::Question(question) = input else {
             return if matches!(input, super::Input::EngineFault) {
                 SubmissionKind::EngineFault
@@ -242,7 +243,7 @@ impl Game {
             return SubmissionKind::EngineFault;
         }
         self.player_epoch = next;
-        self.advance_player_input();
+        self.advance_player_input_cached(inputs.enabled());
         if self.player_fault.is_some() {
             SubmissionKind::EngineFault
         } else {
