@@ -720,3 +720,77 @@ fn a_stolen_follower_destroyed_by_lethal_damage_still_offers_its_lastword_to_the
         .expect("the stolen follower's Lastword is pending");
     assert_eq!(pending.actor, PlayerId { seat: 1 });
 }
+
+#[test]
+fn transferring_the_source_amulet_keeps_its_generation_and_state() {
+    let program = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[{"give":{"ref":"this","to":"opp"}}]}}),
+            "unit-amulet",
+        ))
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    for full in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"source","card":"unit-amulet","owner":"P2",
+             "state":{"acted":true,"counters":{"test":3}}}
+        ]);
+        initial["players"]["P2"]["zones"]["field"] = if full {
+            json!(
+                (0..5)
+                    .map(|n| json!({"id":format!("blocker-{n}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            )
+        } else {
+            json!([])
+        };
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "source-transfer",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &program).unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        let before = game.projection(View::Referee).unwrap();
+        let result = resolved(
+            game.activate_internal_card(
+                "source",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap(),
+        );
+        assert!(result.progress.receipts.values().any(
+            |outcome| matches!(outcome, InstructionOutcome::Transferred(members)
+                if members.len() == usize::from(!full))
+        ));
+        assert!(
+            !result
+                .progress
+                .facts
+                .iter()
+                .any(|fact| matches!(fact, Fact::Movement(_)))
+        );
+        let after = game.projection(View::Referee).unwrap();
+        let controller = if full { "P1" } else { "P2" };
+        assert!(
+            after[controller]["field"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("source"))
+        );
+        for field in ["generation", "owner", "acted", "counters"] {
+            assert_eq!(
+                after["objects"]["source"][field],
+                before["objects"]["source"][field]
+            );
+        }
+    }
+}
