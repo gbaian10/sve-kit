@@ -1,0 +1,51 @@
+cards:
+  GFD02-002EN:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  leader_class: ドラゴン
+                else:
+                  - pp_max:
+                      delta: 1
+                      who: self
+                then:
+                  - pp_max:
+                      delta: 3
+                      who: self
+        line: 1
+      - auto:
+          do:
+            - destroy: enemy
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: eq
+                    right: 10
+                then:
+                  - buff:
+                      hp:
+                        hp_of: this
+                      on: this
+                      power:
+                        power_of: this
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

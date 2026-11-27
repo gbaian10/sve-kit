@@ -1,0 +1,30 @@
+cards:
+  GFD01-023EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - destroy: amulet
+            - draw:
+                n: 1
+                who: self
+            - if:
+                cond:
+                  leader_class: ビショップ
+                then:
+                  - evolve:
+                      ref: this
+          targets:
+            - bind: amulet
+              from:
+                kind: amulet
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
