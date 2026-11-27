@@ -6,6 +6,7 @@ use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
 
 use super::{Frame, Game, Object, other};
+use crate::ir::Position;
 use crate::{EngineFailure, Result};
 
 pub(super) struct Placement {
@@ -58,18 +59,7 @@ fn insert_at(items: &mut Vec<Value>, id: &str, offset: u64) {
 }
 
 impl Game {
-    pub(super) fn seats(&self, side: &str, frame: &Frame) -> Vec<String> {
-        match side {
-            "both" => vec!["P1".into(), "P2".into()],
-            "opponent" => vec![other(&frame.controller).into()],
-            "active" => vec![self.active().into()],
-            "P1" | "P2" => vec![side.into()],
-            _ => vec![frame.controller.clone()],
-        }
-    }
-
     pub(super) fn placement_controller(
-        &self,
         object: &Object,
         destination: &str,
         side: Option<&str>,
@@ -81,13 +71,7 @@ impl Game {
         let controller = if frame.values.get("owner_destination") == Some(&json!(true)) {
             object.owner.clone()
         } else if let Some(side) = side {
-            let seats = self.seats(side, frame);
-            if seats.len() != 1 {
-                return Err(EngineFailure::Unsupported(
-                    "one movement needs one destination per object".into(),
-                ));
-            }
-            seats.into_iter().next().unwrap_or_default()
+            side.to_owned()
         } else {
             object.controller.clone()
         };
@@ -134,7 +118,7 @@ impl Game {
         ids: &[String],
         destinations: &BTreeMap<String, String>,
         side: Option<&str>,
-        position: Option<&Value>,
+        position: Option<Position>,
         frame: &Frame,
     ) -> Result<Vec<Placement>> {
         let mut plans = Vec::new();
@@ -146,7 +130,7 @@ impl Game {
                     "ordered placement outside the deck".into(),
                 ));
             }
-            let controller = self.placement_controller(&previous, &destination, side, frame)?;
+            let controller = Self::placement_controller(&previous, &destination, side, frame)?;
             if previous.zone == destination && position.is_none() {
                 continue;
             }
@@ -174,15 +158,16 @@ impl Game {
                 .zones
                 .entry(plan.destination.clone())
                 .or_default();
-            if let Some(position) = position.filter(|pos| **pos != "bottom") {
+            let index = match position {
+                Some(Position::Top {}) => Some(0),
+                Some(Position::Index { index }) => Some(index.0.get().saturating_sub(1)),
+                Some(Position::Bottom {}) | None => None,
+            };
+            if let Some(index) = index {
                 let added = offsets
                     .entry((plan.controller.clone(), plan.destination.clone()))
                     .or_default();
-                let index = position
-                    .as_u64()
-                    .unwrap_or(1)
-                    .saturating_sub(1)
-                    .saturating_add(*added);
+                let index = index.saturating_add(*added);
                 insert_at(items, &plan.previous.id, index);
                 *added = added.saturating_add(1);
             } else {

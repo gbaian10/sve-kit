@@ -1542,11 +1542,6 @@ impl Game {
                 .values
                 .insert("banish_instruction".into(), json!(true));
         }
-        let placement = position.map(|position| match position {
-            Position::Top {} => json!(1_u8),
-            Position::Bottom {} => json!("bottom"),
-            Position::Index { index } => json!(index.0.get()),
-        });
         let player_mark = self.player_event_mark();
         if method == MoveMethod::Discard {
             self.discard(&ids, &frame)?;
@@ -1559,7 +1554,7 @@ impl Game {
                 } else {
                     None
                 },
-                placement.as_ref(),
+                position,
                 &frame,
             )?;
         }

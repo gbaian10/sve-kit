@@ -260,7 +260,6 @@ impl Game {
     }
 
     fn departure_destination(
-        &self,
         previous: &Object,
         destination: &str,
         side: Option<&str>,
@@ -275,8 +274,12 @@ impl Game {
             "evolve_deck" => ZoneKind::Evolve,
             _ => return Err(unsupported("departure destination")),
         };
-        let to_player =
-            player_id(&self.placement_controller(previous, destination, side, frame)?)?;
+        let to_player = player_id(&Self::placement_controller(
+            previous,
+            destination,
+            side,
+            frame,
+        )?)?;
         Ok(RuntimeZoneRef {
             player: to_player,
             kind,
@@ -410,7 +413,7 @@ impl Game {
                     object_before: object,
                     controller,
                     lki,
-                    to: self.departure_destination(&previous, destination, side, frame)?,
+                    to: Self::departure_destination(&previous, destination, side, frame)?,
                 };
                 let mut pending = self.new_pending(
                     &holder,

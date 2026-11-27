@@ -63,6 +63,7 @@ mod alternatives;
 mod battle_damage_basis;
 mod by_kind;
 mod card;
+pub(super) use card::prevention::Label;
 mod cost;
 mod counters;
 mod declaration;

@@ -3,6 +3,7 @@ use super::super::observation::{EffectOrigin, ObjectLink};
 use super::super::source::SourceSnapshot;
 use super::super::{Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
+use crate::game::damage::DamageReplacement;
 use crate::game::internal::duration::{EffectEnd, TurnInterval};
 use crate::game::player::ObjectHandle;
 use crate::game::player::Viewer;
@@ -123,10 +124,10 @@ enum Rewrite {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct Label {
-    card: String,
-    name: String,
-    line: Option<u64>,
+pub(in crate::game) struct Label {
+    pub(in crate::game) card: String,
+    pub(in crate::game) name: String,
+    pub(in crate::game) line: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -740,7 +741,7 @@ impl Game {
         &self,
         hit: &Value,
         snapshot: Option<&SourceSnapshot>,
-    ) -> Result<Vec<Value>> {
+    ) -> Result<Vec<DamageReplacement>> {
         let target = hit["target"]
             .as_str()
             .ok_or_else(|| crate::invalid("damage target"))?;
@@ -786,18 +787,30 @@ impl Game {
                 Some(_) => false,
             };
             if target_matches && source_matches {
-                let mut reference = json!({"reference":{"kind":"ir-damage-prevention", "effect":effect.effect},"remaining":effect.remaining});
-                match effect.rewrite {
-                    Rewrite::Prevent => reference["prevent"] = json!(true),
-                    Rewrite::Add(amount) => reference["delta"] = json!(amount),
-                    Rewrite::Cap(threshold, amount) => {
-                        reference["cap"] = json!([threshold, amount]);
-                    }
-                }
-                reference["reference"]["card"] = json!(effect.label.card);
-                reference["reference"]["name"] = json!(effect.label.name);
-                reference["reference"]["line"] = json!(effect.label.line);
-                references.push(reference);
+                let (delta, cap, prevent) = match effect.rewrite {
+                    Rewrite::Prevent => (0, None, true),
+                    Rewrite::Add(amount) => (amount, None, false),
+                    Rewrite::Cap(threshold, amount) => (
+                        0,
+                        Some((
+                            i64::try_from(threshold).unwrap_or_default(),
+                            i64::try_from(amount).unwrap_or_default(),
+                        )),
+                        false,
+                    ),
+                };
+                references.push(DamageReplacement {
+                    reference: json!({"effect":effect.effect}),
+                    label: effect.label.clone(),
+                    delta,
+                    multiply: None,
+                    cap,
+                    prevent,
+                    consumption: effect
+                        .remaining
+                        .filter(|remaining| *remaining > 0)
+                        .map(|_| effect.effect),
+                });
             }
         }
         self.static_prevention_references(hit, snapshot, &mut references)?;
@@ -814,11 +827,66 @@ impl Game {
         )
     }
 
+    fn static_damage_replacement(
+        &self,
+        provider: &str,
+        generation: u64,
+        located: &EffectiveAbility,
+        id: u64,
+        card: &str,
+        rewrite: &EventRewrite,
+    ) -> Result<DamageReplacement> {
+        let mut label = Label {
+            card: card.to_owned(),
+            name: self.card_name(provider)?,
+            line: Some(u64::from(located.source.line)),
+        };
+        let mut reference = json!({"source":provider, "generation":generation, "definition":id, "line":located.source.line});
+        self.granted_prevention_label(located, &mut label, &mut reference)?;
+        let (delta, multiply, cap, prevent) = match rewrite {
+            EventRewrite::PreventDamage { .. } => (0, None, None, true),
+            EventRewrite::AddDamage {
+                amount: Expr::Literal(amount),
+            } => (amount.0, None, None, false),
+            EventRewrite::AddDamage { amount } => {
+                (self.counter_delta(provider, amount)?, None, None, false)
+            }
+            EventRewrite::CapDamage {
+                threshold: Expr::Literal(threshold),
+                replacement: Expr::Literal(amount),
+            } => (
+                0,
+                None,
+                Some((
+                    i64::try_from(threshold.0).unwrap_or_default(),
+                    i64::try_from(amount.0).unwrap_or_default(),
+                )),
+                false,
+            ),
+            EventRewrite::MultiplyDamage { .. } => (
+                0,
+                Some(damage_multiplier(rewrite).ok_or_else(|| unsupported("damage multiplier"))?),
+                None,
+                false,
+            ),
+            _ => return Err(unsupported("damage rewrite arithmetic")),
+        };
+        Ok(DamageReplacement {
+            reference,
+            label,
+            delta,
+            multiply,
+            cap,
+            prevent,
+            consumption: None,
+        })
+    }
+
     fn static_prevention_references(
         &self,
         hit: &Value,
         snapshot: Option<&SourceSnapshot>,
-        references: &mut Vec<Value>,
+        references: &mut Vec<DamageReplacement>,
     ) -> Result<()> {
         let target = hit["target"]
             .as_str()
@@ -884,31 +952,14 @@ impl Game {
                     let Effect::Replacement { id, .. } = effect else {
                         return Err(unsupported("prevention definition"));
                     };
-                    let mut replacement = json!({"reference":{"kind":"ir-damage-prevention", "source":provider, "generation":object.generation, "definition":id.0,"line":located.source.line,"card":card,"name":self.card_name(&provider)?}});
-                    self.granted_prevention_label(&located, &mut replacement)?;
-                    match shape.rewrite {
-                        EventRewrite::PreventDamage { .. } => {
-                            replacement["prevent"] = json!(true);
-                        }
-                        EventRewrite::AddDamage {
-                            amount: Expr::Literal(amount),
-                        } => replacement["delta"] = json!(amount.0),
-                        EventRewrite::AddDamage { amount } => {
-                            replacement["delta"] = json!(self.counter_delta(&provider, amount)?);
-                        }
-                        EventRewrite::CapDamage {
-                            threshold: Expr::Literal(threshold),
-                            replacement: Expr::Literal(amount),
-                        } => replacement["cap"] = json!([threshold.0, amount.0]),
-                        EventRewrite::MultiplyDamage { .. } => {
-                            replacement["multiply"] = json!(
-                                damage_multiplier(shape.rewrite)
-                                    .ok_or_else(|| unsupported("damage multiplier"))?
-                            );
-                        }
-                        _ => return Err(unsupported("damage rewrite arithmetic")),
-                    }
-                    references.push(replacement);
+                    references.push(self.static_damage_replacement(
+                        &provider,
+                        object.generation,
+                        &located,
+                        id.0,
+                        &card,
+                        shape.rewrite,
+                    )?);
                 }
             }
         }
@@ -928,14 +979,15 @@ impl Game {
     fn granted_prevention_label(
         &self,
         located: &EffectiveAbility,
-        replacement: &mut Value,
+        label: &mut Label,
+        reference: &mut Value,
     ) -> Result<()> {
         if let Some(origin) = &located.grant {
             let text = origin.provider();
             let face = self.printed_face_ordinal(&text.card, &FaceId(text.span.face.clone()))?;
-            replacement["reference"]["card"] = json!(text.card);
-            replacement["reference"]["name"] = json!(self.catalog.rules_label(&text.card, face)?);
-            replacement["reference"]["grant"] = origin.public_stamp();
+            label.card.clone_from(&text.card);
+            label.name = self.catalog.rules_label(&label.card, face)?;
+            reference["grant"] = origin.public_stamp();
         }
         Ok(())
     }
@@ -1073,10 +1125,6 @@ impl Game {
                 .iter()
                 .find(|effect| effect.effect == id)
                 .map(|effect| effect.origin.clone()));
-        }
-        if reference["kind"].as_str() != Some("ir-damage-prevention") {
-            // Legacy replacements can resolve without admitted typed text provenance.
-            return Ok(None);
         }
         let holder = reference["source"]
             .as_str()
