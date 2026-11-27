@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, object_value, parse, string
+from sve_carddb.core.json import array, object_value, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
+from tests.support.repository_current import repository_inputs
 
 from ..support.time_budget import slow_fixture
 
@@ -27,17 +28,7 @@ def read_tree(path: Path) -> dict[str, JsonValue]:
 
 @pytest.fixture(scope="session")
 def authoring_inputs() -> authoring.Inputs:
-    batch = string(
-        object_value(parse((REPO / "tests/engine/card-input.json").read_bytes()))[
-            "batch_id"
-        ]
-    )
-    return authoring.Inputs(
-        profile="public",
-        repo=REPO,
-        jp_batch_id=batch,
-        revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
-    )
+    return repository_inputs(REPO)
 
 
 @pytest.fixture(scope="session")

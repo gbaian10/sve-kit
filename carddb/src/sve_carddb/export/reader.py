@@ -453,25 +453,26 @@ def _program_printings(view: View, programs: Row, entries: list[Row]) -> None:
     bindings = object_value(programs["printings"])
     if len(owners) != len(entries) or set(bindings) != owners:
         raise ValueError("Program printing owners differ from DSL owners")
+    japanese = {
+        string(row["card_id"]) for row in view["printing"] if row["region"] == "jp"
+    }
     printings = {
         string(row["id"]): row
         for row in view["printing"]
-        if row["region"] == "jp" and row["card_no_state"] == "official"
+        if row["card_no_state"] == "official"
+        and row["region"] == ("jp" if row["card_id"] in japanese else "en")
     }
     token_revisions = {
-        string(row["id"])
+        (string(row["id"]), string(row["region"]))
         for row in view["face_revision"]
-        if row["region"] == "jp" and "token" in array(row["special_kinds"])
+        if "token" in array(row["special_kinds"])
     }
     token_faces = {
-        string(face["id"])
+        (string(face["id"]), string(current["region"]))
         for face in view["face"]
         if face["ordinal"] == 0
-        and any(
-            object_value(current)["revision_id"] in token_revisions
-            for current in array(face["current"])
-            if object_value(current)["region"] == "jp"
-        )
+        for current in map(object_value, array(face["current"]))
+        if (current["revision_id"], current["region"]) in token_revisions
     }
     for card, raw in bindings.items():
         entry = object_value(raw)
@@ -485,13 +486,14 @@ def _program_printings(view: View, programs: Row, entries: list[Row]) -> None:
             if (
                 printing is None
                 or string(printing["card_id"]) not in owners
+                or (representative["region"] == "jp" and printing["region"] != "jp")
                 or not any(
-                    string(object_value(face)["face_id"]) in token_faces
+                    (object_value(face)["face_id"], printing["region"]) in token_faces
                     for face in array(printing["faces"])
                 )
             ):
                 raise ValueError(
-                    "Program dependency is not an admitted JP token printing"
+                    "Program dependency is not an admitted token printing in the source closure"
                 )
 
 

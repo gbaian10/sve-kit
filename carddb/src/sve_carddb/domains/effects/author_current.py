@@ -1,4 +1,4 @@
-"""Admit author cards against current JP identities and visible rule lines."""
+"""Admit author cards against current identities and their native rule lines."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -15,14 +15,21 @@ from sve_carddb.domains.effects.author_inputs import (
 from sve_carddb.domains.effects.author_lint import lint
 from sve_carddb.domains.effects.author_resolution import handwriting
 from sve_carddb.domains.effects.author_set import validate_author_set
+from sve_carddb.domains.registry.records import (
+    CardData,
+    MappingReviewData,
+    PrintingData,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Row, Value
     from sve_carddb.contracts.author_leaves import AuthorIndexRecord
+    from sve_carddb.core.regions import Region
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
     from sve_carddb.domains.effects.author_set import AuthorInputSet
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 
 @dataclass(frozen=True)
@@ -64,27 +71,54 @@ def _one(db: Database, table: str, where: Mapping[str, Value]) -> Mapping[str, V
     return rows[0].values
 
 
+def english_only_cards(registry: RegistrySnapshot) -> frozenset[str]:
+    """Require a reviewed absence and check against every Japanese printing."""
+    japanese: set[str] = set()
+    english: set[str] = set()
+    confirmed: set[str] = set()
+    reviewed: set[str] = set()
+    for record in registry.records.values():
+        data = record.data
+        if isinstance(data, PrintingData):
+            (japanese if data.region == "jp" else english).add(data.card_id)
+        if isinstance(data, CardData) and data.identity_state == "confirmed":
+            confirmed.add(data.id)
+        if isinstance(data, MappingReviewData) and data.target_region == "jp":
+            reviewed.add(data.card_id)
+    return frozenset((reviewed & english & confirmed) - japanese)
+
+
 class CurrentAuthorSources:
     """Resolve whole-card author coordinates from the selected build."""
 
-    def __init__(self, db: Database) -> None:
+    def __init__(
+        self, db: Database, english_cards: frozenset[str] = frozenset()
+    ) -> None:
         self.db = db
-        self._jp_printings: tuple[int, dict[object, list[Row]]] | None = None
+        self.english_cards = english_cards
+        self._source_printings: tuple[int, dict[Value, list[Row]]] | None = None
+
+    def source_region(self, card_id: str) -> Region:
+        """Use EN only for identities with a confirmed absence of JP printings."""
+        return "en" if card_id in self.english_cards else "jp"
 
     def _printings(self, number: str) -> list[Row]:
         # One scan per database revision replaces a full table scan per lookup.
         revision = self.db.revision()
-        if self._jp_printings is None or self._jp_printings[0] != revision:
-            numbers: dict[object, list[Row]] = {}
+        if self._source_printings is None or self._source_printings[0] != revision:
+            numbers: dict[Value, list[Row]] = {}
             for row in self.db.select(
-                "printing", self.db.columns("printing"), where={"region": "jp"}
+                "printing", ("id", "card_id", "card_no", "region", "card_no_state")
             ):
-                numbers.setdefault(row.values["card_no"], []).append(row)
-            self._jp_printings = revision, numbers
-        return self._jp_printings[1].get(number, [])
+                if row.values["region"] == self.source_region(
+                    _text(row.values["card_id"])
+                ):
+                    numbers.setdefault(row.values["card_no"], []).append(row)
+            self._source_printings = revision, numbers
+        return self._source_printings[1].get(number, [])
 
     def printing_card(self, number: str) -> str:
-        """Resolve an official JP printing only when all rows agree on identity."""
+        """Resolve an official source printing only when all rows agree on identity."""
         rows = self._printings(number)
         identities = {_text(row.values["card_id"]) for row in rows}
         if len(identities) != 1:
@@ -93,12 +127,28 @@ class CurrentAuthorSources:
             raise SourceError("provisional_record_key")
         return identities.pop()
 
+    def printing_id(self, number: str, *, region: Region | None = None) -> str:
+        """Bind a program dependency or representative to one official printing."""
+        rows = [
+            row
+            for row in self._printings(number)
+            if row.values["card_no_state"] == "official"
+            and (region is None or row.values["region"] == region)
+        ]
+        if len(rows) != 1:
+            raise ValueError(f"Program printing is missing or ambiguous: {number}")
+        return _text(rows[0].values["id"])
+
     def printing_numbers(self, card_id: str) -> list[str]:
-        """Resolve official JP aliases through permanent identity, never number spelling."""
+        """Resolve official source-region aliases through permanent identity."""
         rows = self.db.select(
             "printing",
             self.db.columns("printing"),
-            where={"region": "jp", "card_id": card_id, "card_no_state": "official"},
+            where={
+                "region": self.source_region(card_id),
+                "card_id": card_id,
+                "card_no_state": "official",
+            },
         )
         numbers = sorted({_text(row.values["card_no"]) for row in rows})
         for number in numbers:
@@ -107,7 +157,7 @@ class CurrentAuthorSources:
         return numbers
 
     def construction_names(self, card_id: str) -> list[JsonValue]:
-        """JP primary construction name per face ordinal; None where none is derived.
+        """Native primary construction name per face ordinal; None where none is derived.
 
         The engine compares these, so a collab printing's site name stays display text.
         """
@@ -118,11 +168,12 @@ class CurrentAuthorSources:
             )
         }
         names: list[JsonValue] = []
+        region = self.source_region(card_id)
         for ordinal in range(len(faces)):
             primary = self.db.select(
                 "face_rules_name",
                 ("rules_name_id",),
-                where={"face_id": faces[ordinal], "region": "jp", "role": "primary"},
+                where={"face_id": faces[ordinal], "region": region, "role": "primary"},
             )
             names.append(
                 _text(

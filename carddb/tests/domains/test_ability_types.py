@@ -24,6 +24,8 @@ if TYPE_CHECKING:
             {"act", "fusion"},
         ),
         ("en", "On Evolve/Strike - Synthetic.", {"on_evolve", "on_attack"}),
+        ("en", "{icon_q|[q]}{icon_act|[act]} Synthetic.", {"quick", "act"}),
+        ("en", "On Super-Evolve - Synthetic.", {"on_super_evolve"}),
         (
             "jp",
             "{ファンファーレ}それは「\n【攻撃時】Synthetic.\n」を持つ。",

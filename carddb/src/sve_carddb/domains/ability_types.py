@@ -28,6 +28,7 @@ _JP = {
 }
 _EN_ICONS = {
     "quick": "quick",
+    "q": "quick",
     "fanfare": "fanfare",
     "lastword": "last_words",
     "lastwords": "last_words",
@@ -54,13 +55,19 @@ _EN_NAMES = "|".join(
 _EN_HEAD = re.compile(
     rf"(?P<names>(?:{_EN_NAMES})(?:/(?:{_EN_NAMES}))*)(?:\s*[-–—:.,]|\s*\()"
 )
+_EN_EVOLUTION = re.compile(r"^\{icon_evolve\|\[evolve\]\}")
 
 
 def parse(text: str, region: str) -> tuple[set[str], bool]:
     """Inspect headers before body text; quoted abilities and token supplements stay with their owner."""
-    result: set[str] = set()
+    line_heads, balanced = _heads(text, region)
+    return {head for heads in line_heads.values() for head in heads}, balanced
+
+
+def _heads(text: str, region: str) -> tuple[dict[int, set[str]], bool]:
+    result: dict[int, set[str]] = {}
     quoted = False
-    for raw in text.splitlines():
+    for number, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
         was_quoted = quoted
         quoted = quote_after(quoted, line)
@@ -81,8 +88,17 @@ def parse(text: str, region: str) -> tuple[set[str], bool]:
                 line_types.update(_EN_HEADS[name] for name in head["names"].split("/"))
             if "act" in line_types and re.match(r"Fuse\s+[^:]+:", rest):
                 line_types.add("fusion")
-        result.update(line_types)
+        result[number] = line_types
     return result, not quoted
+
+
+def english_author_headers(text: str) -> dict[int, set[str]]:
+    """Include the Evolve action marker alongside the English timing headers."""
+    lines, _ = _heads(text, "en")
+    for number, raw in enumerate(text.splitlines(), 1):
+        if number in lines and _EN_EVOLUTION.match(raw.strip()):
+            lines[number].add("evolve")
+    return lines
 
 
 def apply(
