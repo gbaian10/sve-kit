@@ -193,6 +193,10 @@ fn evolved_elysian_saint_hares_rewards_the_higher_roller() {
         let after = state(&board);
         assert_eq!(after["P1"]["leader"]["life"], mine, "{dice:?}");
         assert_eq!(after["P2"]["leader"]["life"], theirs, "{dice:?}");
+        // Saint-Hares draws first; each highest roller draws again.
+        let hand = |seat: &str| after[seat]["hand"].as_array().unwrap().len();
+        assert_eq!(hand("P1"), 2, "{dice:?}");
+        assert_eq!(hand("P2"), usize::from(theirs == 23), "{dice:?}");
     }
 }
 
@@ -362,4 +366,34 @@ fn garula_summons_a_three_and_a_one_cost_amulet_for_a_havencraft_leader() {
         };
         assert_eq!(field, expected, "{class}");
     }
+}
+
+#[test]
+fn milnard_evolves_only_with_two_or_fewer_cards_in_hand() {
+    for (held, allowed) in [(2_usize, true), (3, false)] {
+        let mut initial = position("GFB01c-001EN");
+        initial["players"]["P1"]["zones"]["hand"] = goblins("held", held);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"GFB01c-001EN"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] =
+            json!([{"id":"form","card":"GFB01c-002EN"}]);
+        let mut board = game(&initial);
+        let outcome = board.internal_rule_action(
+            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}),
+        );
+        let resolved = outcome.is_ok_and(|result| result.outcome == "resolved");
+        assert_eq!(resolved, allowed, "{held} in hand");
+    }
+}
+
+#[test]
+fn elysian_saint_hares_can_summon_a_one_cost_follower_from_the_deck() {
+    let mut initial = position("GFB01d-006EN");
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"big","card":"BP01-037"},{"id":"goblin","card":"BP01-171"}]);
+    let mut board = game(&initial);
+    let step = board.play_internal_card("source", actor()).unwrap();
+    finish(&mut board, Some(step), &[ModeId(1)]);
+    let after = state(&board);
+    assert_eq!(after["P1"]["field"], json!(["source", "goblin"]));
+    assert_eq!(after["P1"]["deck"], json!(["big"]));
 }
