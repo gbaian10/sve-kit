@@ -1,0 +1,34 @@
+cards:
+  GFB01c-001EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: hand
+              op: le
+              right: 2
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: hand
+                    op: ge
+                    right: 7
+                then:
+                  - discard:
+                      n: 3
+                      who: opp
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

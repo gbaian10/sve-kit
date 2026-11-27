@@ -1,19 +1,65 @@
 //! Scenario helpers shared by the English-only card batches.
 use super::admission_bp_cp_fixture::{finish, settle};
 use super::*;
+use sve_engine::game::internal::SearchAnswer;
 
 pub(super) fn state(board: &Game) -> Value {
     board.projection(View::Referee).unwrap()
 }
 
-/// Answers unbounded target choices with every candidate; other questions use the fixture.
+/// Answers target and grouped search choices with as many candidates as allowed; other
+/// questions use the fixture.
 pub(super) fn take_all(board: &mut Game, mut step: CardPlay) {
     while let CardPlay::Awaiting(question) = &step {
+        if let InputDomain::Search(domain) = &question.domain
+            && let Some(groups) = &domain.groups
+        {
+            let mut used = Vec::new();
+            let picks = groups
+                .iter()
+                .map(|group| {
+                    let allowed = group
+                        .cardinality
+                        .maximum
+                        .map_or(group.handles.len(), |maximum| {
+                            usize::try_from(maximum.0).unwrap()
+                        });
+                    let pick = group
+                        .handles
+                        .iter()
+                        .copied()
+                        .filter(|handle| !used.contains(handle))
+                        .take(allowed)
+                        .collect::<Vec<_>>();
+                    used.extend(&pick);
+                    pick
+                })
+                .collect();
+            step = board
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Search(SearchAnswer::Grouped(picks)),
+                )
+                .unwrap();
+            continue;
+        }
         let InputDomain::Targets(domain) = &question.domain else {
             finish(board, step);
             return;
         };
-        let chosen = domain.members.iter().map(|member| member.handle).collect();
+        let allowed = domain
+            .cardinality
+            .maximum
+            .map_or(domain.members.len(), |maximum| {
+                usize::try_from(maximum.0).unwrap()
+            });
+        let chosen = domain
+            .members
+            .iter()
+            .take(allowed)
+            .map(|member| member.handle)
+            .collect();
         step = board
             .answer_internal_card(question.actor, question.token, Answer::Targets(chosen))
             .unwrap();

@@ -1,0 +1,41 @@
+cards:
+  GFB01c-005EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  leader_class: ナイトメア
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+                  - draw:
+                      n: 1
+                      who: self
+                  - discard:
+                      n: 1
+                      who: opp
+                  - choose:
+                      bind: buried
+                      by: opp
+                      from:
+                        kind: follower
+                        who: opp
+                        zone: field
+                      n: 1
+                  - move:
+                      ref: buried
+                      to: cemetery
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

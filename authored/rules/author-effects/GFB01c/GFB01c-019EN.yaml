@@ -1,0 +1,18 @@
+cards:
+  GFB01c-019EN:
+    abilities:
+      - keywords:
+          - storm
+          - drain
+        line: 1
+      - attack_time:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
