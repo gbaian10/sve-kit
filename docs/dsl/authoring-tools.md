@@ -6,17 +6,18 @@
 
 ## 輸入 profile
 
-公開 profile 讀取已審查的 card-data 與身分登錄，指定 JP 批次即可；`revision` 可省略，不要求作者固定 Git SHA。
+公開 profile 讀取已審查的 card-data 與身分登錄。指定 JP 批次，處理英版獨有卡或對本專案執行整庫 `author check` 時也指定 EN 批次。`revision` 可省略，不要求作者固定 Git SHA。
 
 ```json
 {
   "profile": "public",
   "repo": "/absolute/project",
-  "jp_batch_id": "<已審 JP batch id>"
+  "jp_batch_id": "<已審 JP batch id>",
+  "en_batch_id": "<已審 EN batch id>"
 }
 ```
 
-`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 仍需 `database`、`recipe`、`frozen_inputs` 以確認建置與 JP 批次，依 CLI 型別接受配置；一般作者使用公開 profile 即可。來源歸檔及已審解析輸入的完整性契約不變。
+`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 另需 `database`、`recipe`、`frozen_inputs`，並核對指定的地區批次與建置 recipe 相符。整庫檢查所用的公開批次列在 [card-input.json](../../tests/engine/card-input.json)。
 
 ## 查詢與手寫
 
@@ -25,9 +26,9 @@ uv --directory /absolute/project/carddb run sve-carddb author inspect \
   --inputs /absolute/work/public.json --card SYN-01
 ```
 
-`inspect` 顯示永久身分、各卡面的規則行、已存作者檔及具名本體，並回報該卡的定位或材料化錯誤。
+`inspect` 顯示永久身分、各卡面的規則行、已存作者檔及具名本體，並回報該卡的定位或材料化錯誤。EN 規則行另外列出可辨識的印刷能力標記與獨立關鍵字。Quick 法術的獨立圖示對應 `keywords: [quick]`；起動能力的 Q 圖示修飾同一個 `activate`。
 
-主檔與索引只登錄每張永久卡片的一個代表 `record_key`；同卡的 JP 印刷別名由 current 選用依永久身分展開，不重複寫入主檔。
+主檔與索引只登錄每張永久卡片的一個代表 `record_key`。同卡在來源地區的印刷別名由 current 選用依永久身分展開。英版獨有卡以 EN 官網卡文的行與補充段落對應 DSL，能力頭與印刷關鍵字依該卡及[英文綜合規則](https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf)判讀。
 
 主檔可直接寫整卡 DSL，也可引用具名本體：
 

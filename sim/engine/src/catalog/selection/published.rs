@@ -239,6 +239,12 @@ impl<'input> PrintingIndex<'input> {
                 .printings
                 .get(card_id)
                 .ok_or_else(|| invalid("program printing references missing"))?;
+            // The verified package covers both regions, while this catalogue is JP.
+            if !self.by_card.contains_key(card_id)
+                && !self.by_id.contains_key(bindings.representative.as_str())
+            {
+                continue;
+            }
             let representative = self
                 .by_id
                 .get(bindings.representative.as_str())

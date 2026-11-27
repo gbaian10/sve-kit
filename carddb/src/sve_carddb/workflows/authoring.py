@@ -16,11 +16,16 @@ from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
+from sve_carddb.domains.ability_types import english_author_headers
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
 from sve_carddb.domains.effects.author_counters import check_counter_registration
-from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
+from sve_carddb.domains.effects.author_current import (
+    CardRejected,
+    CurrentAuthorSources,
+    english_only_cards,
+)
 from sve_carddb.domains.effects.author_direct import inventory, materialize
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_handwritten import ConfigurationError
@@ -35,6 +40,9 @@ from sve_carddb.domains.effects.author_resolution import (
     review_states,
 )
 from sve_carddb.domains.effects.author_set import load_author_set
+from sve_carddb.domains.keyword_self import english_printed_keywords
+from sve_carddb.domains.mechanics import load as load_mechanics
+from sve_carddb.domains.parsed_cards.batches import selection
 from sve_carddb.domains.parsed_cards.reader import read as read_parsed
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.products import (
@@ -44,10 +52,16 @@ from sve_carddb.domains.products import (
     plan_official_products,
     populate_product_preview,
 )
-from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
+from sve_carddb.domains.registry.preview import (
+    FrozenEN,
+    FrozenJP,
+    FrozenRegions,
+    plan_preview,
+)
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.domains.text_observations import FrozenTexts, TextObservations
+from sve_carddb.domains.text_observations.archive import RegionalTexts
 from sve_carddb.domains.text_observations.closure import close_preview
 from sve_carddb.domains.translations.four_layer_sources import card_field
 from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, write
@@ -55,9 +69,11 @@ from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, writ
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    from sve_carddb.core.regions import Region
     from sve_carddb.domains.parsed_cards.storage import Catalog
     from sve_carddb.domains.products import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.text_observations.vocabulary import Vocabulary
 
 __all__ = [
     "AuthorInputError",
@@ -80,6 +96,7 @@ class Inputs(RecordData):
     profile: Literal["public", "database"]
     repo: Path
     jp_batch_id: str
+    en_batch_id: str | None = None
     revision: Revision | None = None
     authored: Path | None = None
     card_data: Path | None = None
@@ -94,6 +111,7 @@ class Workspace:
     current: CurrentAuthorSources
     expander: AuthorExpander
     authored: Path
+    vocabulary: Vocabulary | None = None
 
 
 def _configuration(inputs: Inputs) -> None:
@@ -134,6 +152,7 @@ def _public_products(
     identity: PreviewPlan,
     batches: ParsedBatches,
     store: Path,
+    pins: dict[Region, str],
 ) -> OfficialProducts:
     assert inputs.revision is not None
     identities = load_product_identities(
@@ -145,13 +164,17 @@ def _public_products(
     )
     return plan_official_products(
         identities,
-        FrozenProducts(
-            store,
-            "public-authoring",
-            inputs.jp_batch_id,
-            region="jp",
-            sources=batches.batch(store, "public-authoring", inputs.jp_batch_id),
-        ).pages(),
+        tuple(
+            page
+            for region, batch in pins.items()
+            for page in FrozenProducts(
+                store,
+                "public-authoring",
+                batch,
+                region=region,
+                sources=batches.batch(store, "public-authoring", batch),
+            ).pages()
+        ),
         identity,
     )
 
@@ -164,7 +187,7 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
     main: Path | None = None,
     parsed: Catalog | None = None,
 ) -> Generator[Workspace]:
-    """Prepare the current JP identities, source texts and construction names."""
+    """Prepare current source-region identities, texts and construction names."""
     from sve_carddb.domains.catalog.loader import prepare as prepare_catalog  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before catalog imports
 
     _configuration(inputs)
@@ -184,58 +207,56 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
         inputs = inputs.model_copy(update={"revision": revision})
     assert inputs.revision is not None
     authored = inputs.authored or inputs.repo / "authored"
+    pins: dict[Region, str] = {
+        "jp": inputs.jp_batch_id,
+        **({"en": inputs.en_batch_id} if inputs.en_batch_id is not None else {}),
+    }
+    store = inputs.card_data or inputs.repo / "card-data"
+    parsed = parsed if parsed is not None else read_parsed(store)
+    for region, batch in pins.items():
+        if selection(parsed, batch).region != region:
+            raise ConfigurationError(f"Authoring {region.upper()} batch mismatch")
     expander = AuthorExpander(inputs.repo / "dsl")
-    batches = ParsedBatches(
-        parsed
-        if parsed is not None
-        else read_parsed(inputs.card_data or inputs.repo / "card-data")
+    registry = load_identity_registry(
+        authored,
+        repository=inputs.repo,
+        include_mapping_reviews=inputs.en_batch_id is not None,
     )
+    english = english_only_cards(registry)
     capabilities = (*MINIMUM_CAPABILITIES, "en", "translation_evidence")
     if inputs.profile == "database":
-        assert inputs.database is not None
-        assert inputs.recipe is not None
-        assert inputs.frozen_inputs is not None
-        recipe = object_value(parse(inputs.recipe.read_bytes()))
-        BuildContext.model_validate_json(
-            canonical(object_value(parse(inputs.frozen_inputs.read_bytes()))["context"])
-        )
-        if [
-            pin["card_batch"]
-            for value in array(recipe["sources"])
-            if (pin := object_value(value))["region"] == "jp"
-        ] != [inputs.jp_batch_id]:
-            raise ConfigurationError("Authoring JP batch mismatch")
-        schema = compile_build(
-            (
-                *capabilities,
-                "translation_names",
-                "translation_templates",
-                "rulings",
-                "keyword",
-            )
-        )
-        with open_database(schema, inputs.database) as db:
-            yield Workspace(
-                inputs,
-                CurrentAuthorSources(db),
-                expander,
-                authored,
-            )
+        with _database_workspace(
+            inputs, pins, capabilities, english, expander, authored
+        ) as workspace:
+            yield workspace
         return
-    store = inputs.card_data or inputs.repo / "card-data"
-    frozen = batches.batch(store, "public-authoring", inputs.jp_batch_id)
-    identity = plan_preview(
-        authored,
-        FrozenJP(
-            store,
-            "public-authoring",
-            inputs.jp_batch_id,
-            parser_version="official-jp-exact-v1",
-            sources=frozen,
-        ),
-        regions=("jp",),
-        snapshot=load_identity_registry(authored, repository=inputs.repo),
+    batches = ParsedBatches(parsed)
+    frozen = {
+        region: batches.batch(store, "public-authoring", batch)
+        for region, batch in pins.items()
+    }
+    jp = FrozenJP(
+        store,
+        "public-authoring",
+        inputs.jp_batch_id,
+        parser_version="official-jp-exact-v1",
+        sources=frozen["jp"],
     )
+    provider = (
+        jp
+        if inputs.en_batch_id is None
+        else FrozenRegions(
+            jp=jp,
+            en=FrozenEN(
+                store,
+                "public-authoring",
+                inputs.en_batch_id,
+                parser_version="official-en-exact-v1",
+                sources=frozen["en"],
+            ),
+        )
+    )
+    identity = plan_preview(authored, provider, regions=tuple(pins), snapshot=registry)
     from sve_carddb.domains.effects.author_handwritten import read as read_handwritten  # ruff: ignore[import-outside-top-level] -- only public profile needs to discover shorthand card identities
 
     numbers = (
@@ -261,18 +282,24 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
             (printing.card_id, printing.region)
             for printing in printings
             if printing.card_id not in identifiers
+            or (printing.region == "en" and printing.card_id not in english)
         ),
     )
     adoptions = load_adoptions(authored, entry="catalog/adoptions")
     observations = TextObservations(
         selected,
-        FrozenTexts(
-            store,
-            "public-authoring",
-            inputs.jp_batch_id,
-            region="jp",
-            parser_version="official-jp-exact-v1",
-            sources=frozen,
+        RegionalTexts(
+            {
+                region: FrozenTexts(
+                    store,
+                    "public-authoring",
+                    batch,
+                    region=region,
+                    parser_version=f"official-{region}-exact-v1",
+                    sources=frozen[region],
+                )
+                for region, batch in pins.items()
+            }
         ),
         collab_names=collab_hashes((adoptions,)),
     )
@@ -286,7 +313,7 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
         batches=batches,
     )
     vocabulary = prepared.projection.vocabulary
-    official = _public_products(inputs, authored, identity, batches, store)
+    official = _public_products(inputs, authored, identity, batches, store, pins)
     context = BuildContext.from_inputs(
         inputs.revision,
         observations.configuration(vocabulary, ())
@@ -311,16 +338,63 @@ def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered bound
             populate_rules_names(db, evaluate(prepared.names, observations.plan)[0])
         yield Workspace(
             inputs,
-            CurrentAuthorSources(db),
+            CurrentAuthorSources(db, english),
             expander,
             authored,
+            vocabulary,
         )
 
 
+@contextmanager
+def _database_workspace(
+    inputs: Inputs,
+    pins: dict[Region, str],
+    capabilities: tuple[str, ...],
+    english: frozenset[str],
+    expander: AuthorExpander,
+    authored: Path,
+) -> Generator[Workspace]:
+    assert inputs.database is not None
+    assert inputs.recipe is not None
+    assert inputs.frozen_inputs is not None
+    recipe = object_value(parse(inputs.recipe.read_bytes()))
+    BuildContext.model_validate_json(
+        canonical(object_value(parse(inputs.frozen_inputs.read_bytes()))["context"])
+    )
+    for region, batch in pins.items():
+        if [
+            pin["card_batch"]
+            for value in array(recipe["sources"])
+            if (pin := object_value(value))["region"] == region
+        ] != [batch]:
+            raise ConfigurationError(f"Authoring {region.upper()} batch mismatch")
+    schema = compile_build(
+        (
+            *capabilities,
+            "translation_names",
+            "translation_templates",
+            "rulings",
+            "keyword",
+        )
+    )
+    with open_database(schema, inputs.database) as db:
+        yield Workspace(inputs, CurrentAuthorSources(db, english), expander, authored)
+
+
 def _inspection_lines(
-    current: CurrentAuthorSources, payload: dict[str, JsonValue]
+    workspace: Workspace, payload: dict[str, JsonValue]
 ) -> list[JsonValue]:
+    current = workspace.current
     fields: list[JsonValue] = []
+    region = current.source_region(string(payload["card_id"]))
+    spellings = (
+        {
+            record.code: record.english or record.code.title()
+            for record in load_mechanics(workspace.authored).registry.records
+        }
+        if region == "en"
+        else {}
+    )
     for raw_face in array(payload["faces"]):
         face = object_value(raw_face)
         owner = FaceRevisionOwner(
@@ -335,15 +409,26 @@ def _inspection_lines(
                 field="effect" if ordinal is None else "section",
                 ordinal=ordinal,
             )
-            text = card_field(current.db, address).text
+            text = card_field(
+                current.db, address, "ja" if region == "jp" else "en"
+            ).text
+            lines: list[JsonValue] = [
+                {"line": index, "text": line}
+                for index, line in enumerate(text.splitlines(), 1)
+            ]
+            if region == "en":
+                for number, heads in english_author_headers(text).items():
+                    line = object_value(lines[number - 1])
+                    keywords = english_printed_keywords(string(line["text"]), spellings)
+                    if heads:
+                        line["ability_types"] = list[JsonValue](sorted(heads))
+                    if keywords:
+                        line["keywords"] = list[JsonValue](sorted(keywords))
             fields.append(
                 {
                     "owner": address.model_dump(mode="json"),
                     "face_id": face["face_id"],
-                    "lines": [
-                        {"line": index + 1, "text": line}
-                        for index, line in enumerate(text.splitlines())
-                    ],
+                    "lines": lines,
                 }
             )
 
@@ -389,7 +474,7 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
         "card_no": card,
         "card_id": card_id,
         "payload": payload,
-        "fields": _inspection_lines(current, payload),
+        "fields": _inspection_lines(workspace, payload),
         "existing": existing,
         "handwritten": handwritten,
         "resolution_diagnostic": resolution_diagnostic,

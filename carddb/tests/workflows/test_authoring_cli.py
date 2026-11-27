@@ -49,7 +49,12 @@ def test_cli_public_check_writes_the_report(
     (authored / "products/identities").mkdir(parents=True)
     parsed, batch = synthetic_card_inputs(tmp_path / "card-inputs")
     inputs = authoring_inputs.model_copy(
-        update={"authored": authored, "card_data": parsed, "jp_batch_id": batch}
+        update={
+            "authored": authored,
+            "card_data": parsed,
+            "jp_batch_id": batch,
+            "en_batch_id": None,
+        }
     )
     path = tmp_path / "inputs.json"
     path.write_text(inputs.model_dump_json())
@@ -78,7 +83,12 @@ def test_check_reports_index_location_and_card_without_wording(
     missing = "rules/author-effects/BP06/000.yaml"
     (authored / missing).unlink()
     inputs = authoring_inputs.model_copy(
-        update={"authored": authored, "card_data": parsed, "jp_batch_id": batch}
+        update={
+            "authored": authored,
+            "card_data": parsed,
+            "jp_batch_id": batch,
+            "en_batch_id": None,
+        }
     )
     path = tmp_path / "inputs.json"
     path.write_text(inputs.model_dump_json())

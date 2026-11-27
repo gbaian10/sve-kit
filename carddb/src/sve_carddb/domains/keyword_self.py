@@ -26,6 +26,17 @@ _SECTION_DECLARATIONS = frozenset(
 )
 
 
+def english_printed_keywords(line: str, spellings: Mapping[str, str]) -> set[str]:
+    """Read only standalone English declarations, including the spell Quick icon."""
+    line = line.strip()
+    if line == _QUICK_ICON["en"]:
+        return {"quick"}
+    if not _EN_DECLARATION.fullmatch(line):
+        return set()
+    declarations = {name.strip() for name in line.split("(", 1)[0].split(".")}
+    return {code for code, spelling in spellings.items() if spelling in declarations}
+
+
 def _acquired(line: str, region: str, spellings: Mapping[str, str]) -> set[str]:
     if region == "jp":
         matches = re.finditer(

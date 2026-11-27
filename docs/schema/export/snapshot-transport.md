@@ -222,9 +222,9 @@ DSL 1.0 的公開 AST 由 `dsl/program.schema.json` 定義，重用 `dsl/author-
 
 4.2.0 在 4.1.0 能力集合上增加 `dsl-program-dependencies-v1`，最低 reader 版本為 4.2.0。程式包封套為 `{format_version:"4.2.0",entries,printings}`。entries 沿用 DSL 1.0 的 AST、內容定址 ID 與 ProgramRef。printings 以 AST 的永久 CardId 為鍵，與 entries 的卡片一一對應。每筆恰含 `representative` 與 `tokens`。
 
-- representative 是同一張卡在作者准入時的效果登錄版次，以快照中的官網 JP 永久版次 ID 保存。對戰依該版次檢查程式來源與規則事實，衍生物的別名亦解析至原效果登錄版次。
-- tokens 保存已准入的開局閉包關聯，值為唯一且排序的官網 JP 永久版次 ID 陣列。目標必須存在於該快照，其採納的面須為衍生物，且所屬卡片須有 DSL 程式。允許自身關聯。空陣列表示此程式無明示關聯。
-- 此封套的 manifest File hash 涵蓋程式和版次關聯。其他地區不得自行推導這些 JP 版次的對應版次，跨區讀取仍適用 region_blocks。
+- representative 是同一張卡在作者准入時的官網永久版次 ID。有 JP 版次的卡使用 JP 版次，英版獨有卡使用 EN 版次。來源選取依 [DSL 承載契約](../../dsl/author-contract-1.0.md#21-封套與分片)。對戰依該版次檢查程式來源與規則事實，衍生物的別名亦解析至原效果登錄版次。
+- tokens 保存已准入的開局閉包關聯，值為唯一且排序的官網永久版次 ID 陣列，依各衍生物的 DSL 來源地區解出。JP 程式的關聯限 JP 版次。目標必須存在於該快照，其採納的面須為衍生物，且所屬卡片須有 DSL 程式。允許自身關聯。空陣列表示此程式無明示關聯。
+- 此封套的 manifest File hash 涵蓋程式和版次關聯。完整快照驗證全部程式的版次閉包。JP 對戰目錄只綁定自己的 CardId 及版次，並驗證範圍內的關聯。跨區讀取適用 region_blocks。
 
 打包範圍是 effects-index 的全部准入卡，包含 light；來源／展開驗證失敗即拒絕建置，不能靜默漏卡。公開支援度依指定引擎目標與實跑紀錄。尚無紀錄時，status 依作者候選維持 draft 或 reviewed，reasons=[engine_unassigned]。本機對戰宿主以實際載入的程式、規則與版次完成嚴格准入。EN 是否可自動執行仍受既有 region_blocks 限制。AST 是另行下載的對戰附件；文字分片不以它為強依賴，查卡不用下載 AST。容量帳依 size-budget 分別報告程式包 raw／Brotli 與原有逐區文字閉包，不把 AST 計成首屏或基本目錄。
 

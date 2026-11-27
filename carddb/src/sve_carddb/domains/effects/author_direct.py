@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Value
+    from sve_carddb.core.regions import Region
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
     from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 
@@ -64,6 +65,7 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
     if card_id is not None and card_id != selected_id:
         raise SourceError("record_key_identity_mismatch")
     card_id = selected_id
+    region = current.source_region(card_id)
     db = current.db
     if [
         row.values["identity_state"]
@@ -77,27 +79,26 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
         selected = db.select(
             "face_current",
             ("revision_id",),
-            where={"face_id": face["id"], "region": "jp"},
+            where={"face_id": face["id"], "region": region},
         )
         if len(selected) != 1:
             raise SourceError("source_current_missing")
-        revision_id = selected[0].values["revision_id"]
-        if not isinstance(revision_id, str):
+        revision = selected[0].values["revision_id"]
+        if not isinstance(revision, str):
             raise SourceError("source_current_missing")
         revisions = db.select(
-            "face_revision", ("cost", "face_id", "region"), where={"id": revision_id}
+            "face_revision", ("cost", "face_id", "region"), where={"id": revision}
         )
         if (
             len(revisions) != 1
             or revisions[0].values["face_id"] != face["id"]
-            or revisions[0].values["region"] != "jp"
+            or revisions[0].values["region"] != region
         ):
             raise SourceError("source_current_mismatch")
         sections = db.select(
-            "face_text_section", ("ordinal", "kind"), where={"revision_id": revision_id}
+            "face_text_section", ("ordinal", "kind"), where={"revision_id": revision}
         )
-        ordinals = [s.values["ordinal"] for s in sections]
-        if ordinals != list(range(len(sections))):
+        if [s.values["ordinal"] for s in sections] != list(range(len(sections))):
             raise SourceError("source_sections_incomplete")
         fields: list[JsonValue] = []
         for ordinal in (None, *range(len(sections))):
@@ -105,12 +106,11 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
             selected_field = card_field(
                 db,
                 OwnerField(
-                    owner=FaceRevisionOwner(
-                        kind="face_revision", revision_id=revision_id
-                    ),
+                    owner=FaceRevisionOwner(kind="face_revision", revision_id=revision),
                     field=field,
                     ordinal=ordinal,
                 ),
+                "ja" if region == "jp" else "en",
             )
             entry: dict[str, JsonValue] = {
                 "field": field,
@@ -126,14 +126,19 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
             if face["ordinal"] == 0:
                 deck_rules.extend(
                     _deck_rules(
-                        current, face, revision_id, field, ordinal, selected_field.text
+                        current,
+                        face,
+                        revision,
+                        ordinal,
+                        selected_field.text,
+                        region=region,
                     )
                 )
             fields.append(entry)
         faces.append(
             {
                 "face_id": _scalar(face["id"]),
-                "revision_id": revision_id,
+                "revision_id": revision,
                 "ordinal": _scalar(face["ordinal"]),
                 "side": _scalar(face["side"]),
                 "cost": _scalar(revisions[0].values["cost"]),
@@ -149,17 +154,20 @@ def _deck_rules(
     current: CurrentAuthorSources,
     face: Mapping[str, Value],
     revision: str,
-    field: str,
     ordinal: int | None,
     text: str,
+    *,
+    region: Region,
 ) -> list[JsonValue]:
-    conditional = any(conditional_copy_rule(line) for line in text.splitlines())
-    if not has_copy_rule(text, "jp") and not conditional:
+    conditional = region == "jp" and any(
+        conditional_copy_rule(line) for line in text.splitlines()
+    )
+    if not has_copy_rule(text, region) and not conditional:
         return []
     names = current.db.select(
         "face_rules_name",
         ("rules_name_id",),
-        where={"face_id": face["id"], "region": "jp", "role": "primary"},
+        where={"face_id": face["id"], "region": region, "role": "primary"},
     )
     if len(names) != 1:
         raise SourceError("source_rules_name_mismatch")
@@ -172,10 +180,10 @@ def _deck_rules(
     result: list[JsonValue] = []
     for line_no, line in enumerate(text.splitlines(), 1):
         try:
-            rule = copy_rule(line, "jp", name)
+            rule = copy_rule(line, region, name)
         except ValueError:
             raise SourceError("source_deck_rule_name_mismatch") from None
-        conditional_rule = conditional_copy_rule(line)
+        conditional_rule = conditional_copy_rule(line) if conditional else None
         if rule is None and conditional_rule is None:
             continue
         if rule is not None:
@@ -189,7 +197,7 @@ def _deck_rules(
                 "source": {
                     "owner": {"kind": "face_revision", "revision_id": revision},
                     "face_id": _scalar(face["id"]),
-                    "field": field,
+                    "field": "effect" if ordinal is None else "section",
                     "ordinal": ordinal,
                     "line": line_no,
                     "scope": "deck_rule",

@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.core.regions import Region
+
 
 def card(rule: JsonValue) -> Handwritten:
     tree: dict[str, JsonValue] = {
@@ -31,19 +33,30 @@ def card(rule: JsonValue) -> Handwritten:
 
 
 @pytest.mark.parametrize(
-    ("text", "deck", "maximum"),
+    ("region", "text", "deck", "maximum"),
     [
-        ("『Synthetic name』は自分のデッキに6枚まで入れることができる。", "main", 6),
-        ("これはエボルヴデッキに10枚まで入れることができる。", "evolve", 10),
+        (
+            "jp",
+            "『Synthetic name』は自分のデッキに6枚まで入れることができる。",
+            "main",
+            6,
+        ),
+        ("jp", "これはエボルヴデッキに10枚まで入れることができる。", "evolve", 10),
+        (
+            "en",
+            "You can put up to 10 of this card into your evolve deck.",
+            "evolve",
+            10,
+        ),
     ],
-    ids=["main_limit", "evolve_limit"],
+    ids=["jp_main_limit", "jp_evolve_limit", "en_evolve_limit"],
 )
 def test_printed_rule_covers_its_line_without_an_in_game_ability(
-    tmp_path: Path, text: str, deck: str, maximum: int
+    tmp_path: Path, region: Region, text: str, deck: str, maximum: int
 ) -> None:
     rule: JsonValue = {"deck": deck, "same_name_max": maximum}
     with synthetic_current(
-        tmp_path, page("jp", f'<div class="detail">{text}</div>')
+        tmp_path, page(region, f'<div class="detail">{text}</div>'), region=region
     ) as current:
         result = materialize(current, "SYN-01", card(rule))
     assert result["deck_rule"] == rule

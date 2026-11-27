@@ -91,7 +91,7 @@ registry hash 與各 adapter 版本。
   同樣提交完整檢查（`source_kind=manual`、無 `dsl_id`）。有任何卡文卻沒有程式的卡不提交檢查。
 - 身分未確認的卡不產標籤也不提交檢查。
 
-程式的範圍是 shared，由日文卡文寫成。EN 的自身關鍵字、能力種類與印刷機制由英文卡文各自檢查並寫入
+程式的範圍是 shared，來源依[作者契約](../../dsl/author-contract-1.0.md#21-封套與分片)選取。EN 的自身關鍵字、能力種類與印刷機制由英文卡文各自檢查並寫入
 `en_override`；consumer 與 manifest coverage 只要該卡有 `en_override` 列就選用它、不讀 shared，
 因此 EN 的授予／提到／計數目前一律是未知。要讓 EN 沿用 shared 的推導，須先有英日卡文核對紀錄，
 並讓範圍選擇能按關係分開；不能只因 JP 有程式就套用到 EN。

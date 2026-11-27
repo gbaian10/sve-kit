@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.domains.ability_types import parse
+from sve_carddb.domains.ability_types import english_author_headers, parse
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
@@ -24,6 +24,8 @@ if TYPE_CHECKING:
             {"act", "fusion"},
         ),
         ("en", "On Evolve/Strike - Synthetic.", {"on_evolve", "on_attack"}),
+        ("en", "{icon_q|[q]}{icon_act|[act]} Synthetic.", {"act"}),
+        ("en", "On Super-Evolve - Synthetic.", {"on_super_evolve"}),
         (
             "jp",
             "{ファンファーレ}それは「\n【攻撃時】Synthetic.\n」を持つ。",
@@ -40,6 +42,12 @@ def test_unclosed_quote_does_not_claim_complete() -> None:
         set(),
         False,
     )
+
+
+def test_english_author_headers_include_the_quick_activation_modifier() -> None:
+    assert english_author_headers("{icon_q|[q]}{icon_act|[act]} Synthetic.") == {
+        1: {"act", "quick"},
+    }
 
 
 def test_regions_faces_and_token_sections(

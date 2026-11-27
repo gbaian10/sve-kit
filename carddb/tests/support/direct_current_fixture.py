@@ -1,4 +1,4 @@
-"""Build a small current JP source database for direct author tests."""
+"""Build a small native source database for direct author tests."""
 
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from pathlib import Path
 
+    from sve_carddb.core.regions import Region
 
 CARD = "c:" + "1" * 32
 FACE = "f:" + "2" * 32
@@ -29,11 +30,13 @@ def synthetic_current(
     root: Path,
     raw: bytes | None = None,
     *,
+    region: Region = "jp",
     kind: str = "follower",
     capabilities: tuple[str, ...] = (),
 ) -> Generator[CurrentAuthorSources]:
-    card = card_from_raw(root, page("jp") if raw is None else raw)
+    card = card_from_raw(root, page(region) if raw is None else raw, region)
     source = card.source
+    lang = "ja" if region == "jp" else "en"
     assert source.archive is not None
     schema = compile_build(
         (*MINIMUM_CAPABILITIES, "translation_evidence", *capabilities)
@@ -41,15 +44,15 @@ def synthetic_current(
     with create_database(schema) as db:
         with db.transaction():
             insert_raw_sources(db, (source,))
-            for lang in ("ja", "en", "zh-Hant"):
+            for code in ("ja", "en", "zh-Hant"):
                 db.insert(
                     "language",
-                    {"code": lang, "display_name": lang, "fallback_order": Json([])},
+                    {"code": code, "display_name": code, "fallback_order": Json([])},
                 )
             texts = TextInterner(db)
-            name = texts.intern(LocalizedText(lang="ja", text=card.faces[0].name))
+            name = texts.intern(LocalizedText(lang=lang, text=card.faces[0].name))
             effect = texts.intern(
-                LocalizedText(lang="ja", text=card.faces[0].effect or "")
+                LocalizedText(lang=lang, text=card.faces[0].effect or "")
             )
             db.insert(
                 "product_family", rows()["product_family"] | {"name_unit_id": name}
@@ -69,13 +72,19 @@ def synthetic_current(
             db.insert(
                 "printing",
                 rows()["printing"]
-                | {"card_id": CARD, "card_no": "SYN-01", "source_id": source.id},
+                | {
+                    "card_id": CARD,
+                    "card_no": "SYN-01",
+                    "source_id": source.id,
+                    "region": region,
+                },
             )
             db.insert(
                 "face_revision",
                 rows()["face_revision"]
                 | {
                     "face_id": FACE,
+                    "region": region,
                     "name_unit_id": name,
                     "effect_unit_id": effect,
                     "type_code": kind,
@@ -90,10 +99,12 @@ def synthetic_current(
                 "face_current",
                 {
                     "face_id": FACE,
-                    "region": "jp",
+                    "region": region,
                     "revision_id": "revision",
                     "basis": "latest_observed_no_errata",
                 },
             )
             populate_rules_names(db)
-        yield CurrentAuthorSources(db)
+        yield CurrentAuthorSources(
+            db, frozenset({CARD}) if region == "en" else frozenset()
+        )
