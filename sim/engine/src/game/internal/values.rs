@@ -879,14 +879,18 @@ impl Execution {
                 if current.zone == "field" {
                     return super::aggregates::numeric_value(game, id, property);
                 }
-                if current.zone != "ex" {
-                    return Ok(0);
-                }
                 let field = if property == NumericProperty::Attack {
                     "power"
                 } else {
                     "hp"
                 };
+                // A cemetery follower carries no modifiers, so its printed stats are its stats.
+                if current.zone == "cemetery" {
+                    return super::cost::printed_cost(&game.face(id)?[field]);
+                }
+                if current.zone != "ex" {
+                    return Ok(0);
+                }
                 current.state[field]
                     .as_i64()
                     .ok_or_else(|| invalid("public follower stat"))

@@ -11,7 +11,10 @@ use crate::ir::{
 #[derive(Clone)]
 pub(crate) struct DiscardSource {
     pub(crate) binding: Binding<ObjectRef>,
-    pub(crate) trait_id: TraitId,
+    /// Whether the discarding ability belongs to the observer's controller or an opponent.
+    pub(crate) own: bool,
+    /// Required trait of the discarding ability's source; an enemy ability may have none.
+    pub(crate) trait_id: Option<TraitId>,
 }
 
 impl DiscardSource {
@@ -21,7 +24,11 @@ impl DiscardSource {
             predicates: vec![
                 Expr::Compute(Box::new(Predicate::PlayerEquals {
                     left: Expr::Frozen(Box::new(PlayerFrozen::HeaderActor { event: context })),
-                    right: Expr::Literal(PlayerRef::Controller {}),
+                    right: Expr::Literal(if self.own {
+                        PlayerRef::Controller {}
+                    } else {
+                        opponent()
+                    }),
                 })),
                 Expr::Compute(Box::new(Predicate::EventCause {
                     event: context,
@@ -29,19 +36,24 @@ impl DiscardSource {
                         source: EffectSource::Matching {
                             predicate: Box::new(SourcePredicate {
                                 binding: self.binding,
-                                condition: Expr::Compute(Box::new(Predicate::HasTrait {
-                                    traits: Expr::Live(Box::new(TraitsRead::Traits {
-                                        object: ObjectView::EventSnapshot {
-                                            object: Box::new(ObjectOperand::Bound {
-                                                binding: self.binding,
-                                            }),
-                                            event: context,
-                                            policy: EventSnapshotPolicy::BeforeExit,
-                                        },
-                                        view: CharacteristicView::Effective,
-                                    })),
-                                    trait_id: self.trait_id.clone(),
-                                })),
+                                condition: self.trait_id.as_ref().map_or(
+                                    Expr::Literal(Bool(true)),
+                                    |trait_id| {
+                                        Expr::Compute(Box::new(Predicate::HasTrait {
+                                            traits: Expr::Live(Box::new(TraitsRead::Traits {
+                                                object: ObjectView::EventSnapshot {
+                                                    object: Box::new(ObjectOperand::Bound {
+                                                        binding: self.binding,
+                                                    }),
+                                                    event: context,
+                                                    policy: EventSnapshotPolicy::BeforeExit,
+                                                },
+                                                view: CharacteristicView::Effective,
+                                            })),
+                                            trait_id: trait_id.clone(),
+                                        }))
+                                    },
+                                ),
                             }),
                         },
                     },
@@ -58,9 +70,17 @@ impl DiscardSource {
         let Predicate::And { predicates } = outer.as_ref() else {
             return None;
         };
-        let [_, Expr::Compute(cause)] = predicates.as_slice() else {
+        let [Expr::Compute(actor), Expr::Compute(cause)] = predicates.as_slice() else {
             return None;
         };
+        let Predicate::PlayerEquals {
+            right: Expr::Literal(actor),
+            ..
+        } = actor.as_ref()
+        else {
+            return None;
+        };
+        let own = *actor == (PlayerRef::Controller {});
         let Predicate::EventCause {
             pattern:
                 CausePattern::Effect {
@@ -71,15 +91,20 @@ impl DiscardSource {
         else {
             return None;
         };
-        let Expr::Compute(condition) = &predicate.condition else {
+        let trait_id = if !own && predicate.condition == Expr::Literal(Bool(true)) {
+            None
+        } else if let Expr::Compute(condition) = &predicate.condition
+            && let Predicate::HasTrait { trait_id, .. } = condition.as_ref()
+            && !trait_id.0.trim().is_empty()
+        {
+            Some(trait_id.clone())
+        } else {
             return None;
         };
-        let Predicate::HasTrait { trait_id, .. } = condition.as_ref() else {
-            return None;
-        };
-        (!trait_id.0.trim().is_empty()).then(|| Self {
+        Some(Self {
             binding: predicate.binding,
-            trait_id: trait_id.clone(),
+            own,
+            trait_id,
         })
     }
 }

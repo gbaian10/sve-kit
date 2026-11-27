@@ -3069,8 +3069,8 @@ pub(super) struct DiscardBy {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct DiscardAbility {
-    pub who: SelfPlayer,
-    pub r#trait: String,
+    pub who: EntryPlayer,
+    pub r#trait: Option<String>,
 }
 
 #[derive(Deserialize)]

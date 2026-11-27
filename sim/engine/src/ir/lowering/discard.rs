@@ -200,16 +200,22 @@ pub(super) fn subscription(
         .by
         .as_ref()
         .map(|by| {
-            let ast::SelfPlayer::Controller = by.ability_of.who;
+            let own = matches!(by.ability_of.who, ast::EntryPlayer::Controller);
+            // Own sources name a trait (CP05-076); an enemy source may be any ability (GFB01d-023EN).
+            let trait_id = match &by.ability_of.r#trait {
+                Some(name) if !name.trim().is_empty() => Some(TraitId(name.clone())),
+                None if !own => None,
+                _ => return Err(unsupported(path)),
+            };
             if discard.reference.is_none()
                 || !matches!(discard.who, Some(ast::EntryPlayer::Controller))
-                || by.ability_of.r#trait.trim().is_empty()
             {
                 return Err(unsupported(path));
             }
             Ok(DiscardSource {
                 binding: Binding::new(source_id, scope),
-                trait_id: TraitId(by.ability_of.r#trait.clone()),
+                own,
+                trait_id,
             })
         })
         .transpose()?;

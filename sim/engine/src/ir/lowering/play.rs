@@ -608,15 +608,16 @@ impl BodyContext<'_> {
         if ability_holder_target(target, cardinality) {
             self.ability_holders.insert(target.bind.clone());
         }
+        // Public zones whose single chosen object a later read may name (GFB01c-021EN: cemetery).
         let public = |query: &ast::TargetQuery| {
             query
                 .zone
                 .as_ref()
                 .and_then(target_zones)
                 .is_some_and(|zones| {
-                    zones
-                        .iter()
-                        .all(|zone| matches!(zone, ZoneKind::Field | ZoneKind::Ex))
+                    zones.iter().all(|zone| {
+                        matches!(zone, ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery)
+                    })
                 })
         };
         if cardinality.maximum == Some(Nat(1))
