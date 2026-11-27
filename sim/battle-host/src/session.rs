@@ -15,7 +15,9 @@ use sve_battle_contract::observation::BattleObservation;
 use sve_battle_contract::{Format, NoAdvice};
 use sve_engine::battle::{BattleReferences, EventFeed, InputProjection, ProjectionError};
 use sve_engine::game::Game;
-use sve_engine::game::player::{Input, QuestionToken, Submission, SubmissionKind, Viewer};
+use sve_engine::game::player::{
+    HostedGame, Input, QuestionToken, Submission, SubmissionKind, Viewer,
+};
 use sve_engine::host::{HostLimits, HostOutcome, PolicyHost};
 use sve_engine::policy::PolicyFailure;
 
@@ -86,7 +88,7 @@ impl fmt::Debug for Channel {
 
 /// A local match: the authority, its references, its policies and both seat channels.
 pub struct LocalSession {
-    game: Game,
+    game: HostedGame,
     references: BattleReferences,
     identity: Identity,
     ready: bool,
@@ -122,7 +124,7 @@ impl LocalSession {
         limits: HostLimits,
     ) -> Self {
         Self {
-            game,
+            game: HostedGame::new(game),
             references,
             identity,
             ready: false,
@@ -136,7 +138,7 @@ impl LocalSession {
     /// Read-only authority access for native comparisons; never exposed to a seat.
     #[must_use]
     pub const fn game(&self) -> &Game {
-        &self.game
+        self.game.game()
     }
 
     /// Whether a host error has stopped interaction.
@@ -258,7 +260,7 @@ impl LocalSession {
             out.push(receipt(seat, request_id, SubmissionKind::Rejected));
             return out;
         };
-        let kind = self.game.submit_player(viewer, command).kind;
+        let kind = self.game.submit(viewer, command).kind;
         out.push(receipt(seat, request_id, kind));
         if kind == SubmissionKind::Rejected {
             return out;
@@ -276,7 +278,7 @@ impl LocalSession {
     /// Answer every consecutive policy-seat question.
     fn advance_policies(&mut self) -> Result<(), HostErrorReason> {
         loop {
-            let viewer = match self.game.input(Viewer::P1) {
+            let viewer = match self.game().input(Viewer::P1) {
                 Input::Question(_) => Viewer::P1,
                 Input::Waiting(waiting) => waiting.actor,
                 Input::Finished { .. } | Input::EngineFault => return Ok(()),
@@ -284,18 +286,18 @@ impl LocalSession {
             if self.control_of(viewer) == SeatControl::Player {
                 return Ok(());
             }
-            let Input::Question(question) = self.game.input(viewer) else {
+            let Input::Question(question) = self.game().input(viewer) else {
                 return Err(HostErrorReason::Projection);
             };
             let observation = self
-                .game
+                .game()
                 .observe(viewer)
                 .map_err(|_error| HostErrorReason::Projection)?;
             let command = self
                 .policy
                 .prepare(&observation, &question)
                 .map_err(stop_reason)?;
-            let submission = self.game.submit_player(viewer, command);
+            let submission = self.game.submit(viewer, command);
             self.record(&submission)?;
         }
     }
@@ -354,6 +356,7 @@ impl LocalSession {
         };
         let projection = self
             .game
+            .game()
             .battle_input(viewer, &id, &self.references)
             .map_err(projection_reason)?;
         let seen = Seen {
@@ -366,18 +369,16 @@ impl LocalSession {
             .game
             .take_battle_notices(viewer, &self.references)
             .map_err(projection_reason)?;
-        let news = !notices.is_empty() || (!force && channel.feed.has_news(&self.game));
+        let news = !notices.is_empty() || (!force && channel.feed.has_news(self.game.game()));
         if !(force || changed || news) {
             return Ok(None);
         }
         if changed || news {
             channel.update_seq = safe_increment(channel.update_seq)?;
         }
-        let feed = if force {
-            channel.feed.baseline(&mut self.game)
-        } else {
-            channel.feed.deliver(&mut self.game, &self.references)
-        };
+        let feed = self
+            .game
+            .deliver_events(&mut channel.feed, &self.references, force);
         let update = BattleUpdate {
             format: Format,
             viewer: seat_of(viewer),
@@ -396,7 +397,7 @@ impl LocalSession {
     /// The host-issued id of this seat's current question: kept while the native occurrence
     /// stays the same, fresh for every new occurrence. Only a question reads it.
     fn question_id(&mut self, viewer: Viewer) -> Result<QuestionId, HostErrorReason> {
-        let input = self.game.input(viewer);
+        let input = self.game().input(viewer);
         let channel = self.channel(viewer);
         let Input::Question(question) = input else {
             channel.current = None;
