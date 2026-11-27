@@ -122,6 +122,10 @@ fn field_counts_read_current_posture_for_the_requested_player_and_kind() {
         |acted| json!({"count":{"who":"opp","zone":"field","kind":"follower","acted":acted}});
     let program = lowered(&json!({"cost":{"pp":0},"do":[
         {"draw":{"n":count(true)}},
+        {"if":{
+            "cond":{"cmp":{"left":count(false),"op":"eq","right":1_u8}},
+            "then":[{"life":{"who":"self","delta":1_u8}}]
+        }},
         {"act":{"ref":{"who":"opp","zone":"field","kind":"follower"}}},
         {"draw":{"n":count(false)}}
     ]}));
@@ -156,6 +160,7 @@ fn field_counts_read_current_posture_for_the_requested_player_and_kind() {
     activate(&mut game, 1);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["first"]));
+    assert_eq!(state["P1"]["leader"]["life"], 21_u8);
     assert_eq!(state["objects"]["standing"]["acted"], true);
 }
 
