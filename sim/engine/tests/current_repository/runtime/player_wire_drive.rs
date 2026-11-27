@@ -142,7 +142,7 @@ fn the_cards_returned_by_twin_drive_are_public_face_down_at_the_bottom() {
             .zip([(2_u32, "BP01-037"), (3, "BP01-006")])
         {
             assert_eq!(member.position, Some(WireNat::from(position)));
-            let object = board.objects.get(&member.object).unwrap();
+            let object = &board.objects[&member.object];
             assert_eq!(object.card.printing_id, printing);
             assert_eq!(object.facing, Facing::Down);
             assert_eq!(object.knowledge, Knowledge::Public);
