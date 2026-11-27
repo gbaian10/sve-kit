@@ -40,7 +40,7 @@ fn encounter(number: &str, order: &[&str], take: usize, occupied: usize) {
         ])
     };
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &json!({"shuffles":[{"player":"P1","result":order}]}),

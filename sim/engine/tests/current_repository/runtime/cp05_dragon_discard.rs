@@ -4,7 +4,7 @@ use super::*;
 const ACTOR: PlayerId = PlayerId { seat: 1 };
 
 fn activation_id(printing: &str) -> AbilityId {
-    selection_with_rules().current[printing]
+    selection().current[printing]
         .program
         .card()
         .abilities
@@ -77,7 +77,7 @@ fn cp05_071_requires_a_dark_discard_before_spending_its_source() {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy_amulet","card":"BP13-087"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

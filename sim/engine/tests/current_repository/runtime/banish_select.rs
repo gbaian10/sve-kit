@@ -4,7 +4,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn rules_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -249,7 +249,7 @@ fn cp03_060_ride_returns_a_banished_card_and_buffs_the_source() {
             json!([{"id":"point","card":"CSD03a-017"}]);
         let mut game = rules_game(&initial);
         let before = game.projection(View::Referee).unwrap();
-        let id = selection_with_rules().current[card]
+        let id = selection().current[card]
             .program
             .card()
             .abilities

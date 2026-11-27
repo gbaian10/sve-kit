@@ -38,7 +38,7 @@ fn play(card: &str, looked: &str, take: bool) -> Value {
         {"id":"tail","card":"CP03-052"}
     ]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

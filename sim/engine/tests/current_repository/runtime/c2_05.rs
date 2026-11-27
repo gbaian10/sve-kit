@@ -97,7 +97,7 @@ fn bp17_t12_blank_steelclad_knight_fights_as_its_printed_vanilla_body() {
 }
 
 fn game_with_engine_rules(initial: &Value) -> Game {
-    let selected = selection_with_rules().clone();
+    let selected = selection().clone();
     Game::from_selected_effects(selected, initial, &Value::Null, &Value::Null, "c2-05").unwrap()
 }
 

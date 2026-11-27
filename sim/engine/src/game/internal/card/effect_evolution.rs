@@ -1,5 +1,6 @@
 use super::super::Slot;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
+use crate::game::effects::RevealAccess;
 use crate::game::internal::{Fact, InstructionOutcome};
 use crate::game::player::events::{ActionDetails, ActionKind, EventError};
 use crate::ir::effect_evolution;
@@ -216,7 +217,12 @@ impl Game {
         self.numeric_evolution_allowed(&source, false)?;
         let before = self.internal_characteristics(&source)?;
         let mut frame = execution.frame();
-        self.reveal(from_ref(&resource), "all", &frame, false)?;
+        self.reveal(
+            from_ref(&resource),
+            "all",
+            &frame,
+            RevealAccess::ExistingLocation,
+        )?;
         self.apply_evolution(&source, &resource, 0, 0, &mut frame)?;
         let event = EvolveEvent {
             subject: execution.reference(self, &source)?,

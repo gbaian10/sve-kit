@@ -42,7 +42,7 @@ fn phantom_blaster_dragon_can_pay_with_a_follower_who_has_ridden() {
     initial["players"]["P1"]["zones"]["deck"] = json!(cards("top", "BP01-037", 4));
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"fafnir","card":"BP18-061"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

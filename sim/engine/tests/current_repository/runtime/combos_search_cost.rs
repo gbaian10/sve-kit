@@ -5,7 +5,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

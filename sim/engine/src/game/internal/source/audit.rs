@@ -39,7 +39,7 @@ fn source_position(empty: &Value, number: &str, face: u64, kind: &str) -> Value 
 
 #[test]
 fn every_registered_printed_source_in_the_current_catalogue_binds_an_owner() {
-    let selected = repository::selection_with_rules();
+    let selected = repository::selection();
     let empty = position();
     let admitted = Game::from_selected_effects(
         selected.clone(),

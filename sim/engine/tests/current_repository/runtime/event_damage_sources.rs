@@ -4,7 +4,7 @@ use super::*;
 
 fn actual(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -157,7 +157,7 @@ fn all_takumi_printings_observe_a_real_demas_fanfare_and_one_two_recipient_lesso
         resolve_printed(&mut game, "CP02-069", 2);
         resolve_printed(&mut game, printing, 2);
         no_pending(&mut game);
-        let definition = selection_with_rules().current["CP02-069"]
+        let definition = selection().current["CP02-069"]
             .program
             .card()
             .abilities

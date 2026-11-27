@@ -48,7 +48,7 @@ fn cp04_067_is_free_only_at_seven_maximum_pp_and_retains_ward() {
         let mut initial = position("CP04-067");
         initial["players"]["P1"]["pp"] = json!({"current":maximum,"max":maximum});
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

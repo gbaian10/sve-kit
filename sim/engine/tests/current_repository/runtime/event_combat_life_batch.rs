@@ -232,7 +232,7 @@ fn tenmei_counts_real_allies_heals_then_targets_and_cannot_repeat_its_activation
                 "id":"tenmei-ally", "card":card, "state":{"entered_this_turn":false}
             }));
         let mut game = prepared(&value, life(PlayerRef::Controller {}, 0));
-        let id = selection_with_rules().current[*card]
+        let id = selection().current[*card]
             .program
             .card()
             .abilities

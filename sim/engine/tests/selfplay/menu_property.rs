@@ -580,7 +580,7 @@ fn check_games(
     window_limit: Option<usize>,
 ) {
     let started = Instant::now();
-    let selected = repository::selection_with_rules();
+    let selected = repository::selection();
     let pools = selfplay::pools(selected, reprints);
     assert!(!pools.is_empty(), "no legal construction pool");
     let reports = selfplay::run_seeds(seeds, |seed| {

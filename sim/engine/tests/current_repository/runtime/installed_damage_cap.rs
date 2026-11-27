@@ -3,7 +3,7 @@ use sve_engine::game::internal::QuickOption;
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -105,7 +105,7 @@ fn bp08_024_caps_each_damage_this_turn_and_the_next_opposing_turn() {
     initial["players"]["P2"]["zones"]["deck"] =
         json!([{"id":"d1","card":"BP01-037"},{"id":"d2","card":"BP01-037"}]);
     let mut game = game(&initial);
-    let ability = selection_with_rules().current["BP08-024"]
+    let ability = selection().current["BP08-024"]
         .program
         .card()
         .abilities[0]
@@ -147,7 +147,7 @@ fn bp08_024_cap_is_a_gained_ability_lost_with_all_abilities() {
     initial["players"]["P2"]["zones"]["deck"] =
         json!([{"id":"d1","card":"BP01-037"},{"id":"d2","card":"BP01-037"}]);
     let mut game = game(&initial);
-    let ability = selection_with_rules().current["BP08-024"]
+    let ability = selection().current["BP08-024"]
         .program
         .card()
         .abilities[0]

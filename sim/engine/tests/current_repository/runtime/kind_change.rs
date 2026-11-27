@@ -7,7 +7,7 @@ use sve_engine::game::player::observation::{CardState, ObservedZone};
 
 fn build(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

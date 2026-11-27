@@ -3,7 +3,7 @@ use sve_engine::game::internal::SearchAnswer;
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -116,7 +116,7 @@ fn sd05_001_creates_four_bats_and_gives_each_of_their_entries_power_and_ward() {
     let mut game = game(&position("SD05-001"));
     play(&mut game, "source");
     resolve_all(&mut game, "SD05-001");
-    let ability_id = selection_with_rules().current["SD05-001"]
+    let ability_id = selection().current["SD05-001"]
         .program
         .card()
         .abilities

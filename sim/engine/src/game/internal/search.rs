@@ -1,5 +1,6 @@
 //! Search retains its private candidate policy over the shared property-only condition core.
 
+use crate::game::effects::RevealAccess;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::PartitionQuestion;
 use crate::game::player::Viewer;
@@ -807,7 +808,12 @@ impl Game {
             .map(|&object| execution.object_id(object).map(str::to_owned))
             .collect::<Result<Vec<_>>>()?;
         if wait.conditional {
-            self.reveal(&ids, "all", &execution.frame(), false)?;
+            self.reveal(
+                &ids,
+                "all",
+                &execution.frame(),
+                RevealAccess::ExistingLocation,
+            )?;
             execution.record_notice(
                 self,
                 &[Viewer::P1, Viewer::P2],

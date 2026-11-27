@@ -17,7 +17,7 @@ pub(super) fn position(card: &str) -> Value {
 
 pub(super) fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -153,7 +153,7 @@ pub(super) fn play(game: &mut Game, id: &str) {
 }
 
 pub(super) fn activation(card: &str) -> AbilityId {
-    selection_with_rules().current[card]
+    selection().current[card]
         .program
         .card()
         .abilities

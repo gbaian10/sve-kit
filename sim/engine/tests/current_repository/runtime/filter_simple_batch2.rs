@@ -162,7 +162,7 @@ fn cp02_096_banishes_by_life_on_entry_then_pays_five_to_banish_a_healthy_followe
     let mut initial = position_with_source("CP02-096", "hand");
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"damaged","card":"BP04-117","state":{"damage":4_u8}},{"id":"healthy","card":"BP01-037"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

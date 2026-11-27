@@ -4,7 +4,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -62,7 +62,7 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>) {
 }
 
 fn activate(game: &mut Game, card: &str) {
-    let id = selection_with_rules().current[card]
+    let id = selection().current[card]
         .program
         .card()
         .abilities
@@ -234,7 +234,7 @@ fn goldship_activated_buff(card: &str) {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":card}]);
     let mut game = game(&initial);
-    let ability = selection_with_rules().current[card]
+    let ability = selection().current[card]
         .program
         .card()
         .abilities

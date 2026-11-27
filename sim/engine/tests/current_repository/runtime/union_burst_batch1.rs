@@ -167,7 +167,7 @@ pub(super) fn evolve(card: &str, mut initial: Value) -> Game {
     game
 }
 fn evolution_representative(card: &str) -> &str {
-    let identity = &selection_with_rules().current[card].card_id;
+    let identity = &selection().current[card].card_id;
     for representative in [
         "CP04-006",
         "CP04-010",
@@ -181,7 +181,7 @@ fn evolution_representative(card: &str) -> &str {
         "CP04-117",
         "PCS01-005",
     ] {
-        if &selection_with_rules().current[representative].card_id == identity {
+        if &selection().current[representative].card_id == identity {
             return representative;
         }
     }

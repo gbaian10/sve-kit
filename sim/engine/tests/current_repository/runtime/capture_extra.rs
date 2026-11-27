@@ -40,7 +40,7 @@ fn aurora_healing_printings_stand_and_forbid_attacks_and_draw_only_for_original_
             initial["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":ally,"state":{"acted":acted,"cost":cost,"entered_this_turn":false}}]);
             initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"draw","card":"BP01-037"}]);
             initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
-            let mut game = Game::from_selected_effects(selection_with_rules().clone(), &initial, &Value::Null, &Value::Null, "aurora-healing").unwrap();
+            let mut game = Game::from_selected_effects(selection().clone(), &initial, &Value::Null, &Value::Null, "aurora-healing").unwrap();
             let CardPlay::Awaiting(question) = game.play_internal_card("spell", PlayerId{seat:1}).unwrap() else {panic!("ally target")};
             resolved(game.answer_internal_card(question.actor,question.token,Answer::Targets(vec![0])).unwrap());
             event_cemetery::finish_checks(&mut game);

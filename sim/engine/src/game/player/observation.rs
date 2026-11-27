@@ -45,6 +45,10 @@ use sve_battle_contract::{
     observation::{self as wire, LimitBreakStage, TurnView},
 };
 
+pub(in crate::game) fn zone_positions_visible(zone: &str, owned: bool) -> bool {
+    zone != "limit_break" && (zone != "hand" || owned)
+}
+
 /// Player-visible zones, including attached evolution cards.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ObservedZone {
@@ -680,15 +684,14 @@ impl Game {
             if name == "void" {
                 continue;
             }
+            let ordered = zone_positions_visible(name, perspective == player);
             let mut cards = Vec::new();
             let mut offset = 0_u64;
             for item in items {
                 if let Some(id) = item.as_str() {
                     if self.player_knows_object(perspective, id) {
                         cards.push(ZoneCard {
-                            position: (name != "limit_break"
-                                && (name != "hand" || perspective == player))
-                                .then_some(offset),
+                            position: ordered.then_some(offset),
                             card: self.observed_card(perspective, id)?,
                         });
                     }
@@ -705,7 +708,7 @@ impl Game {
                         .ok_or_else(|| invalid("zone count overflow"))?;
                 }
             }
-            if name == "limit_break" || (name == "hand" && perspective != player) {
+            if !ordered {
                 cards.sort_by(|left, right| left.card.handle.cmp(&right.card.handle));
             }
             zones.push(ZoneObservation {

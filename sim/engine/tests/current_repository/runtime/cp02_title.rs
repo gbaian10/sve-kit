@@ -17,7 +17,7 @@ fn position(card: &str, life: u8) -> Value {
 
 fn make_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -102,7 +102,7 @@ fn title_anchor_is_in_the_snapshot_and_rules_bound_selection() {
     assert!(inputs().0.lines().any(|line| {
         serde_json::from_str::<Value>(line).is_ok_and(|card| card["number"] == "ECP02-001")
     }));
-    let catalog = serde_json::to_value(&*selection_with_rules().catalogue).unwrap();
+    let catalog = serde_json::to_value(&*selection().catalogue).unwrap();
     assert!(
         catalog["rule_bindings"]["titles"]["idolmaster_cinderella_girls"]
             .as_array()

@@ -1,8 +1,14 @@
 use super::*;
 use std::sync::OnceLock;
+use sve_battle_contract::event::{EventBody, EventDelivery};
+use sve_battle_contract::observation::{Knowledge, RememberedCard};
+use sve_battle_contract::presentation::{Notice, NoticeKind};
+use sve_battle_contract::{CardRef, Nat as WireNat, Seat};
 use sve_engine::{
     EngineFailure,
+    battle::{BattleReferences, EventFeed, PrintingFaceIdentity, ReferenceInput},
     game::internal::{DecisionView, InputDomain},
+    game::player::Viewer,
 };
 
 fn tree() -> &'static Value {
@@ -39,9 +45,14 @@ fn program(value: &Value) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn catalog_for_spine() -> Arc<Catalog> {
+fn spine_fixture() -> &'static (Arc<Catalog>, BattleReferences) {
+    static FIXTURE: OnceLock<(Arc<Catalog>, BattleReferences)> = OnceLock::new();
+    FIXTURE.get_or_init(build_spine_fixture)
+}
+
+fn build_spine_fixture() -> (Arc<Catalog>, BattleReferences) {
     let (snapshot, registry, legacy) = catalog_documents(&json!("1"));
-    let template: Value = serde_json::from_str(snapshot.lines().nth(1).unwrap()).unwrap();
+    let mut template: Value = serde_json::from_str(snapshot.lines().nth(1).unwrap()).unwrap();
     let mut faces = snapshot.lines().map(str::to_owned).collect::<Vec<_>>();
     let mut effects: Value = serde_json::from_str(&legacy).unwrap();
     for (number, name, kind, cost, traits) in [
@@ -73,14 +84,49 @@ fn catalog_for_spine() -> Arc<Catalog> {
         faces.push(face.to_string());
         effects["cards"][number] = json!({"status":"complete"});
     }
-    Arc::new(
-        Catalog::from_fixture_documents(
-            &faces.join("\n"),
-            &registry,
-            &[("spine".into(), effects.to_string())],
-        )
-        .unwrap(),
+    template["faces"][0]["title"] = json!("synthetic");
+    faces[1] = template.to_string();
+    let snapshot = faces.join("\n");
+    let rules = rule_fixtures::rules(
+        &snapshot,
+        json!([rule_fixtures::title(
+            "synthetic",
+            "unit-follower",
+            json!([])
+        )]),
+        json!([]),
+    );
+    let catalog = rule_fixtures::catalog(
+        &snapshot,
+        &registry,
+        &[("spine".into(), effects.to_string())],
+        &rules.to_string(),
     )
+    .unwrap();
+    let references = BattleReferences::new(
+        &catalog,
+        ReferenceInput {
+            region: "jp".into(),
+            snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+            faces: effects["cards"]
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(|number| PrintingFaceIdentity {
+                    card_no: number.clone(),
+                    native_face: 0,
+                    card: CardRef {
+                        printing_id: number.clone(),
+                        face: WireNat::from(0_u32),
+                    },
+                })
+                .collect(),
+            wording: None,
+            rules: None,
+        },
+    )
+    .unwrap();
+    (Arc::new(catalog), references)
 }
 
 fn board(program: &WellFormedCardProgram, deck: &[&str]) -> Game {
@@ -94,7 +140,7 @@ fn board(program: &WellFormedCardProgram, deck: &[&str]) -> Game {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        catalog_for_spine(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -266,6 +312,214 @@ fn bp14_selected_deck_reveal_hides_other_members_and_forgets_the_top_before_rema
 }
 
 #[test]
+fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
+    let (_, references) = spine_fixture();
+    let deliver = |game: &mut Game, feed: &mut EventFeed| {
+        game.advance_player_input();
+        (
+            game.battle_observation(Viewer::P2, references).unwrap(),
+            feed.deliver(game, references),
+            game.take_battle_notices(Viewer::P2, references).unwrap(),
+        )
+    };
+    let check = |deck: &[&str], pick_index: usize, previously_revealed: bool| {
+        let mut value = document(3);
+        if previously_revealed {
+            value["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+                .as_array_mut()
+                .unwrap()
+                .insert(
+                    0,
+                    json!({"reveal":{"top":{"who":"self","n":1},"bind":"known"}}),
+                );
+        }
+        let program = program(&value);
+        let mut game = board(&program, deck);
+        game.advance_player_input();
+        let mut feed = EventFeed::new(Viewer::P2);
+        feed.baseline(&mut game);
+        let choice = start(&mut game, &program);
+        let before = deliver(&mut game, &mut feed);
+        let InputDomain::Targets(domain) = &choice.domain else {
+            panic!("private Look choice");
+        };
+        let chosen = domain.members[pick_index].handle;
+        let order = question(pick(&mut game, &choice, vec![chosen]));
+        let revealed = deliver(&mut game, &mut feed);
+
+        assert_spine_look(&mut game, references, deck, previously_revealed);
+
+        let known = &revealed.0.players[0].zones.deck.cards;
+        assert_eq!(known.len(), usize::from(previously_revealed));
+        assert_eq!(known, &before.0.players[0].zones.deck.cards);
+        if let [known_top] = known.as_slice() {
+            assert_eq!(known_top.position, Some(WireNat::from(0_u32)));
+        }
+        assert_spine_notice(&revealed.2, NoticeKind::TemporaryReveal, None);
+        assert_spine_memory(&before.0.remembered, &revealed.0.remembered);
+
+        let rest = ordered(&mut game, &order);
+        assert!(matches!(rest, CardPlay::Awaiting(_)));
+        let placed = deliver(&mut game, &mut feed);
+        assert_eq!(placed.0.players[0].zones.deck.cards.as_slice(), &[]);
+        assert_spine_notice(&placed.2, NoticeKind::DeckTop, Some(WireNat::from(0_u32)));
+
+        finish_orders(&mut game, rest);
+        let settled = deliver(&mut game, &mut feed);
+        assert_eq!(settled.0.players[0].zones.deck.cards.as_slice(), &[]);
+        assert_eq!(settled.2.as_slice(), &[]);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["deck"][0],
+            json!(format!(
+                "d{}",
+                deck.iter()
+                    .enumerate()
+                    .filter(|(_, number)| **number == "follower-a")
+                    .nth(pick_index)
+                    .unwrap()
+                    .0
+            ))
+        );
+        assert_spine_disclosed(&settled.1.events, previously_revealed);
+        (before, revealed, placed, settled)
+    };
+    let left = check(
+        &["follower-a", "spell-a", "follower-b", "spell-b"],
+        0,
+        false,
+    );
+    let right = check(
+        &["spell-a", "follower-b", "follower-a", "spell-b"],
+        0,
+        false,
+    );
+    assert_eq!(left, right);
+
+    let duplicate = ["follower-a", "spell-a", "follower-a", "spell-b"];
+    assert_eq!(check(&duplicate, 0, true), check(&duplicate, 1, true));
+}
+
+fn assert_spine_look(
+    game: &mut Game,
+    references: &BattleReferences,
+    deck: &[&str],
+    previously_revealed: bool,
+) {
+    let notices = game.take_battle_notices(Viewer::P1, references).unwrap();
+    let look = notices
+        .iter()
+        .find(|notice| notice.kind == NoticeKind::Look)
+        .unwrap();
+    let actor = game.battle_observation(Viewer::P1, references).unwrap();
+    let members = &actor.players[0].zones.deck.cards;
+    assert_eq!(
+        members.len(),
+        deck.len(),
+        "the actor locates the whole Look"
+    );
+    assert_eq!(
+        look.cards.len(),
+        deck.len(),
+        "the Look notice has all viewed faces"
+    );
+    for (offset, (member, number)) in members.iter().zip(deck).enumerate() {
+        assert_eq!(
+            member.position.unwrap().get(),
+            u64::try_from(offset).unwrap(),
+            "the actor keeps the original offset"
+        );
+        let object = &actor.objects[&member.object];
+        let knowledge = if offset == 0 && previously_revealed {
+            Knowledge::Public
+        } else {
+            Knowledge::Private
+        };
+        assert_eq!(
+            object.knowledge, knowledge,
+            "only the earlier top reveal marked a physical object public"
+        );
+        let card = &object.card;
+        assert_eq!(
+            card.printing_id, *number,
+            "the actor keeps the original deck order"
+        );
+        assert_eq!(
+            look.cards[offset].card, *card,
+            "the Look notice keeps that same order"
+        );
+    }
+}
+
+fn assert_spine_memory(before: &[RememberedCard], after: &[RememberedCard]) {
+    let shown = RememberedCard {
+        card: CardRef {
+            printing_id: "follower-a".into(),
+            face: WireNat::from(0_u32),
+        },
+        owner: Seat::P1,
+    };
+    let added = usize::from(!before.contains(&shown));
+    assert_eq!(
+        after.len(),
+        before.len().checked_add(added).unwrap(),
+        "only the revealed face enters memory"
+    );
+    assert!(
+        after.contains(&shown) && before.iter().all(|card| after.contains(card)),
+        "the reveal preserves all remembered faces"
+    );
+}
+
+fn assert_spine_disclosed(events: &EventDelivery, previously_revealed: bool) {
+    let EventDelivery::Available { batches, .. } = events else {
+        panic!("the waiting seat receives committed events");
+    };
+    let disclosed = batches
+        .iter()
+        .flat_map(|batch| &batch.events)
+        .filter_map(|event| {
+            if let EventBody::Revealed { cards } = &event.body {
+                Some(cards)
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .map(|card| (card.card.printing_id.as_str(), card.object.is_some()))
+        .collect::<Vec<_>>();
+    let expected = if previously_revealed {
+        vec![("follower-a", true), ("follower-a", false)]
+    } else {
+        vec![("follower-a", false)]
+    };
+    assert_eq!(
+        disclosed, expected,
+        "only the direct top reveal carries a link"
+    );
+}
+
+fn assert_spine_notice(notices: &[Notice], kind: NoticeKind, position: Option<WireNat>) {
+    let [notice] = notices else {
+        panic!("expected one notice");
+    };
+    let [shown] = notice.cards.as_slice() else {
+        panic!("the notice shows just the selected face");
+    };
+    assert_eq!(
+        notice.kind, kind,
+        "the notice names the operation at this stop"
+    );
+    assert_eq!(
+        shown.card.printing_id, "follower-a",
+        "the public face follows the choice"
+    );
+    assert_eq!(
+        shown.position, position,
+        "only the completed placement has a public offset"
+    );
+}
+
+#[test]
 fn bp14_empty_short_or_declined_choice_reveals_only_actual_selected_members() {
     let program = program(&document(3));
     for (deck, picked) in [
@@ -387,7 +641,7 @@ fn stale_private_hand_targets_still_skip_reveal_before_deck_hand_classification(
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"h","card":"spell-a"}]);
     let mut game = Game::new(
-        catalog_for_spine(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -751,7 +1005,7 @@ fn failed_ex_moves_are_not_removed_by_an_exclusion_union() {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        catalog_for_spine(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,

@@ -28,7 +28,7 @@ fn zerael() -> Game {
     initial["players"]["P1"]["zones"]["deck"] = json!(deck);
     let random = json!({"shuffles":[{"player":"P1","result":shuffled}]});
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &random,

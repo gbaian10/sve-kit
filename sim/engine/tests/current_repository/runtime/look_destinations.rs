@@ -69,7 +69,7 @@ fn false_formula_chooses_hand_or_ex_from_one_look_and_bottoms_only_the_remainder
         (2, true, true),
     ] {
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &position(full_ex),
             &Value::Null,
             &Value::Null,

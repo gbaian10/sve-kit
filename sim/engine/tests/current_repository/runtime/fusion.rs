@@ -240,7 +240,7 @@ fn bp20_crest_main_phase_reaches_eight_banishes_and_searches_a_thief() {
             {"id":"other-draw","card":"BP01-171"}, {"id":"other-reserve","card":"BP01-171"}
         ]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

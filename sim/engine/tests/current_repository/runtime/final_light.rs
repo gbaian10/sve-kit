@@ -2,7 +2,7 @@ use super::union_burst_batch1::{pending, ub};
 use super::*;
 
 pub(super) fn aliases(representative: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let identity = &selected.current[representative].card_id;
     selected
         .current
@@ -33,7 +33,7 @@ pub(super) fn princess(initial: &mut Value) {
 }
 pub(super) fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -126,7 +126,7 @@ fn settle(game: &mut Game, mode: u64) {
     }
 }
 fn activated(game: &mut Game, source: &str, card: &str) -> CardPlay {
-    let id = selection_with_rules().current[card]
+    let id = selection().current[card]
         .program
         .card()
         .abilities

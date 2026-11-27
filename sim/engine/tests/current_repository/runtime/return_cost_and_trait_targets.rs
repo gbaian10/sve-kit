@@ -10,7 +10,7 @@ fn position(card: &str) -> Value {
 }
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -97,7 +97,7 @@ fn play(game: &mut Game, id: &str) {
     settle(game);
 }
 fn activation(card: &str) -> AbilityId {
-    selection_with_rules().current[card]
+    selection().current[card]
         .program
         .card()
         .abilities

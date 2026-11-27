@@ -197,7 +197,7 @@ fn title_deck_with_drive_check_reports_missing_icons_before_opening() {
         .collect(),
         evolve: vec!["CP03-127".into()],
     };
-    let selected = selection_with_rules();
+    let selected = selection();
     let preflight = Game::check_player_decks(selected, &players).unwrap();
     let Err(StrictStartError::Admission(startup)) =
         Game::start_player_game(selected.clone(), players.clone(), Viewer::P1, "missing-icons")
@@ -237,7 +237,7 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
     players[1].construction = DeckConstruction::Title("cardfight_vanguard".into());
     players[1].main[0] = "CP03-124".into();
 
-    let preflight = Game::check_player_decks(selection_with_rules(), &players).unwrap();
+    let preflight = Game::check_player_decks(selection(), &players).unwrap();
     assert_eq!(
         preflight.gaps(Viewer::P1),
         [AdmissionGap {
@@ -251,7 +251,7 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
     for transfer_card in ["BP13-043", "BP03-109"] {
         let mut receiving_title = players.clone();
         receiving_title[1].main.push(transfer_card.into());
-        let report = Game::check_player_decks(selection_with_rules(), &receiving_title).unwrap();
+        let report = Game::check_player_decks(selection(), &receiving_title).unwrap();
         assert_eq!(report.gaps(Viewer::P1), []);
         assert_eq!(
             report.gaps(Viewer::P2),
@@ -270,7 +270,7 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
     players[0].main[0] = "CSD03a-016".into();
     players[1].construction = DeckConstruction::Title("idolmaster_cinderella_girls".into());
     let mut game = Game::start_player_game(
-        selection_with_rules().clone(),
+        selection().clone(),
         players,
         Viewer::P1,
         "title-opening",
@@ -411,12 +411,14 @@ fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
         Game::start_player_game(selection().clone(), absent, Viewer::P1, "opening").unwrap_err(),
         StrictStartError::Admission(_)
     ));
-    let mut short = decks();
-    short[0].main.truncate(3);
-    assert!(matches!(
-        Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
-        StrictStartError::Initialization(EngineFailure::Invalid(_))
-    ));
+    for (index, viewer) in [(0, Viewer::P1), (1, Viewer::P2)] {
+        let mut short = decks();
+        short[index].main.truncate(3);
+        assert!(matches!(
+            Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
+            StrictStartError::OpeningHand(short_viewer) if short_viewer == viewer
+        ));
+    }
     let mut changed = selection().clone();
     changed.current.remove("BP01-P25");
     assert!(matches!(

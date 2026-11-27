@@ -5,7 +5,7 @@ use super::*;
 const NUMBER: &str = "BP11-112";
 
 fn activation() -> AbilityId {
-    selection_with_rules().current[NUMBER].program.card().abilities.iter()
+    selection().current[NUMBER].program.card().abilities.iter()
         .find(|ability| ability.node.kind == AbilityKind::Activated).unwrap().node.id
 }
 
@@ -64,7 +64,7 @@ fn giant_match_pays_itself_first_and_q1577_requires_one_of_the_two_public_follow
         {"id":"private","card":"BP01-179"}
     ]);
     let script = json!({"random_selections":[{"n":1_u8,"from":"P1.hand","result":["a","b"]}]});
-    let mut board = Game::from_selected_effects(selection_with_rules().clone(), &initial, &Value::Null, &script, "giant-match").unwrap();
+    let mut board = Game::from_selected_effects(selection().clone(), &initial, &Value::Null, &script, "giant-match").unwrap();
     let q = question(board.activate_internal_card("match", activation(), PlayerId { seat: 1 }).unwrap());
     let InputDomain::SearchPartition(domain) = &q.domain else { panic!("capacity choice after paying the amulet"); };
     assert_eq!(domain.cardinality, Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) });

@@ -429,11 +429,13 @@ cancel 只撤實際被內部故障回復丟棄的整 scope；native Cancelled �
 
 Notice 保存獨立授權的 Look／短暫揭露，不能等最後盤面才回推曾看過的卡；沒有選擇題或立即代答也須交付。
 通知是已獲授權的觀看資訊，不是規則事件或額外 confirm，不帶現物件連結或未獲授權牌庫位置。
+私下 Look 選中的單張牌公開揭露後，若緊接著將同一選中牌置頂，`deck_top` 通知在操作完成後交付。
+其中的牌庫位置 0 記錄該次置頂的結果。
 
 ```typescript
 type Notice = {
   id: Opaque;
-  kind: "look" | "temporary_reveal";
+  kind: "look" | "temporary_reveal" | "deck_top";
   source: TextRef | null;
   cards: { card: CardRef; owner: Seat; position: Nat | null }[];
 };

@@ -79,6 +79,9 @@ pub enum StrictStartError {
     /// Deliver only `gaps(viewer)` through each authenticated player channel.
     #[error("strict deck admission failed")]
     Admission(StrictAdmission),
+    /// This seat cannot draw its full opening hand after reserving any start amulet.
+    #[error("opening deck has fewer than four drawable cards")]
+    OpeningHand(Viewer),
     /// Authority-only diagnostics, never player messages.
     #[error("strict game initialization failed")]
     Initialization(#[from] EngineFailure),

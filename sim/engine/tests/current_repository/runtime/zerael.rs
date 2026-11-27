@@ -53,7 +53,7 @@ fn position(card: &str, revealed: &[&str], with_tail: bool) -> (Game, Vec<String
     initial["players"]["P1"]["zones"]["deck"] = json!(deck);
     let random = json!({"shuffles":[{"player":"P1","result":shuffled}]});
     let board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &random,

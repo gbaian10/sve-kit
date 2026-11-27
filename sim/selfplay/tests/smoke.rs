@@ -133,6 +133,7 @@ fn arena() -> Arena {
                 |error| match error {
                     // The stage code that makes the run rebuild the decks with single copies.
                     StrictStartError::Admission(_) => "match".to_owned(),
+                    error @ StrictStartError::OpeningHand(_) => error.to_string(),
                     StrictStartError::Initialization(fault) => fault.to_string(),
                 },
             )?;

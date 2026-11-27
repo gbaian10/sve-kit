@@ -19,7 +19,8 @@
 [開局前支援檢查](battle-contract.md#22-開局前支援檢查)，同時檢查完整當局閉包的卡文來源投影。
 缺少准入時回傳 `StrictStartError::Admission(report)`，宿主只把
 `report.gaps(viewer)` 的卡號與封閉原因交付已認證的該席，不能把對手缺口或整份報告傳給玩家。
-依存已說明的缺口不重複列為產生者不支援。來源不符或權威資料錯誤則回傳
+依存已說明的缺口不重複列為產生者不支援。預留起始護符後無法抽齊起手牌時，
+`StrictStartError::OpeningHand(viewer)` 指定收到牌組失敗原因的席位。來源不符或權威資料錯誤則回傳
 `StrictStartError::Initialization`，原始診斷只留在權威端。
 失敗時尚未交付對局；局內回答的錯誤使用 `SubmissionKind`。
 同版本、同牌組、同先攻選擇席與私密 seed 可重現同一開局。

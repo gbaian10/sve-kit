@@ -8,7 +8,7 @@ use sve_engine::game::player::{
 
 fn loaded(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

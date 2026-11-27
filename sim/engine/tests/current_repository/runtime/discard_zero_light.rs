@@ -65,7 +65,7 @@ fn returned(number: &str, accept: bool, current: u8, maximum: u8) -> Game {
     };
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP20-111"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(), &initial, &Value::Null, &Value::Null, "discard-zero-light",
+        selection().clone(), &initial, &Value::Null, &Value::Null, "discard-zero-light",
     ).unwrap();
     let produced = game.play_internal_card("producer", PlayerId { seat: 1 }).unwrap();
     finish(&mut game, produced, Some(number), true);

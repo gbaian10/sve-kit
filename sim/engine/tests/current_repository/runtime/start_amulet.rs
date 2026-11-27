@@ -39,7 +39,7 @@ fn vanguard_opening(amulet: &str, random: &Value) -> Game {
             "deck_list":filler("P2"),"evolve_deck_list":[]}
     }});
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position,
         &Value::Null,
         random,
@@ -161,14 +161,14 @@ fn csd03_start_amulets_sacrifice_themselves_to_buff_only_a_vanguard_follower() {
             {"id":"plain","card":"BP01-037"}
         ]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
             "start-amulet-act",
         )
         .unwrap();
-        let ability = selection_with_rules().current[card]
+        let ability = selection().current[card]
             .program
             .card()
             .abilities

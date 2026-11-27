@@ -1,4 +1,5 @@
 //! Public prefix observations reuse the deck, printed candidate evaluator and movement receipts.
+use crate::game::effects::RevealAccess;
 use core::slice;
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
@@ -46,8 +47,13 @@ impl Game {
             }
             let object = execution.reference(self, id)?;
             let qualifies = super::search::matches_candidate(self, id, predicate)?;
-            self.internal_record_reveal(execution, object, id)?;
-            self.reveal(slice::from_ref(id), "all", &execution.frame(), true)?;
+            self.internal_record_reveal(execution, object, id, true, None)?;
+            self.reveal(
+                slice::from_ref(id),
+                "all",
+                &execution.frame(),
+                RevealAccess::GrantLocation,
+            )?;
             let member = RuntimeObjectView {
                 object,
                 snapshot: SnapshotId(self.state.ir_epoch),

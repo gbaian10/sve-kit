@@ -11,7 +11,7 @@ const FACE: &str = "f:a7960eb5fd4a5c849344ae37cf90caec";
 
 #[test]
 fn bp16_006_current_covers_both_lines_and_all_registered_jp_printings() {
-    let selected = selection_with_rules();
+    let selected = selection();
     let author = inputs().2["authors"]
         .as_array()
         .unwrap()
@@ -183,7 +183,7 @@ fn assert_finished(game: &Game, total: u64) {
             .as_str()
             .unwrap();
         assert_eq!(
-            selection_with_rules().current[number].card_id,
+            selection().current[number].card_id,
             "c:1c5a74b1e95a5d3594bae80573767824",
             "each created object is the canonical Fairy identity"
         );

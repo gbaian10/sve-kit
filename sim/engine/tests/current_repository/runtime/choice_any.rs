@@ -35,7 +35,7 @@ fn sham_naqoa_crest_choice_any_all_printings_replace_the_real_oceanus_count() {
                 json!([{"id":"form","card":"BP02-119"}]);
             initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
             let mut game = Game::from_selected_effects(
-                selection_with_rules().clone(),
+                selection().clone(),
                 &initial,
                 &Value::Null,
                 &Value::Null,
