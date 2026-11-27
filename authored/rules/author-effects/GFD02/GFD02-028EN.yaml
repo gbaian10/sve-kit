@@ -1,0 +1,20 @@
+cards:
+  GFD02-028EN:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  any_of:
+                    - name: Grimnir, Warring Tempest
+                      who: self
+                      zone: deck
+                    - name: Jafnhar, Warring Flame
+                      who: self
+                      zone: deck
+                to: hand
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

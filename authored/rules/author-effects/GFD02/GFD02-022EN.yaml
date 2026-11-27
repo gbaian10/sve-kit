@@ -1,0 +1,38 @@
+cards:
+  GFD02-022EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                by: opp
+                to: field
+                token: ドラゴン
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: eq
+                    right: 10
+                then:
+                  - create:
+                      to: field
+                      token: ドラゴン
+        line: 3
+      - lastword:
+          do:
+            - life:
+                delta: 5
+                who: self
+        line: 4
+    admission: light
+format: 2
+kind: author_effect_set

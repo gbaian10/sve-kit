@@ -1,0 +1,19 @@
+cards:
+  GFD02-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - fanfare:
+          do:
+            - act: targets
+          targets:
+            - any: true
+              bind: targets
+              from:
+                kind: follower
+                who: opp
+                zone: field
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

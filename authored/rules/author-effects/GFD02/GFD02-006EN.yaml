@@ -1,0 +1,25 @@
+cards:
+  GFD02-006EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - ignore_ward:
+                on: this
+      - auto:
+          do:
+            - pp:
+                to_max: true
+                who: self
+          on:
+            dealt_damage:
+              recipient:
+                leader: opp
+              ref: this
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set
