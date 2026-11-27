@@ -115,7 +115,7 @@ fn build_spine_fixture() -> (Arc<Catalog>, BattleReferences) {
                     card_no: number.clone(),
                     native_face: 0,
                     card: CardRef {
-                        printing_id: number.clone().into(),
+                        printing_id: number.clone(),
                         face: WireNat::from(0_u32),
                     },
                 })
@@ -139,7 +139,7 @@ fn board(program: &WellFormedCardProgram, deck: &[&str]) -> Game {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        spine_fixture().0.clone(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -339,14 +339,14 @@ fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
                 member.position.unwrap().get(),
                 u64::try_from(offset).unwrap()
             );
-            let card = &actor.objects.get(&member.object).unwrap().card;
+            let card = &actor.objects[&member.object].card;
             assert_eq!(card.printing_id, *number);
             assert_eq!(look[0].cards[offset].card, *card);
         }
         assert_eq!(members.len(), deck.len());
 
         let waiting = game.battle_observation(Viewer::P2, references).unwrap();
-        assert!(waiting.players[0].zones.deck.cards.is_empty());
+        assert_eq!(waiting.players[0].zones.deck.cards.as_slice(), &[]);
         let notices = game.take_battle_notices(Viewer::P2, references).unwrap();
         assert_eq!(notices.len(), 1);
         assert_eq!(notices[0].kind, NoticeKind::TemporaryReveal);
@@ -505,7 +505,7 @@ fn stale_private_hand_targets_still_skip_reveal_before_deck_hand_classification(
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"h","card":"spell-a"}]);
     let mut game = Game::new(
-        spine_fixture().0.clone(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -869,7 +869,7 @@ fn failed_ex_moves_are_not_removed_by_an_exclusion_union() {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        spine_fixture().0.clone(),
+        Arc::clone(&spine_fixture().0),
         &initial,
         &Value::Null,
         &Value::Null,
