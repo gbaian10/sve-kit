@@ -589,6 +589,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 自身加另外兩張同名卡時，材料使用 `sel.other: true` 排除來源；正式目標與材料都在付款前固定。
 材料不足或 PP 不足時整份付款不成立，不先扣 PP 或移動任何卡片；場上來源不能冒用 EX 起動。
 
+數值 `{history_count: {event: attacked, window: this_turn, where: {ref: this}}}` 讀取場上來源同一世代本回合的攻擊宣告次數。直立後次數仍保留，換回合或重新入場時重新計算。把此讀值用於 `static.while` 與 `cannot: {what: attack, on: this}`，即可限制每張從者的攻擊上限。
+
 場上的印刷持續禁令可用 `cannot: {what: attack, on: {who: all, zone: field, kind: follower}, target: {leaders: all}, if_can_attack: follower}` 表示「能攻擊從者時不能攻擊領袖」。每個攻擊者各自用正式攻擊合法性查詢判定，求值時只排除該提供者的這條領袖禁令；其他禁攻、入場限制、守護、指定攻擊與威壓照常適用。對手有從者不代表能攻擊該從者，多個同類禁令也不會互相遞迴；來源離場或失能後停止套用。這不要求玩家一定攻擊，也不阻止結束主階段（BP06-113，Q871）。省略 `if_can_attack` 保持原有禁攻行為；目前此條件只接場上印刷能力、領袖目標，不接本文安裝型或一般 `A.cond` 合法攻擊 predicate。
 
 `static: {effects: [{ignore_ward: {on: this}}]}` 讓持有者攻擊時略過守護的目標限制（BP10-055、BP04-006、BP09-056 的第二面）。沿用既有 `IgnoreWard` 權限及攻擊合法性檢查；休息、入場當回合、站立目標、對象種類與禁止攻擊仍照常判斷。能力失效或失去能力後不再略過守護。可搭配既有 `static.while` 的公開條件，每次判斷攻擊時重新讀取；只接受印刷場上常駐能力的 `on: this`，不開放對他者授予、私有區或本文 `apply` 安裝。

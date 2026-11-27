@@ -2483,7 +2483,13 @@ pub(super) enum HistoryExclusion {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum HistoryWhere {
     Life(LifeHistoryFilter),
-    AbilityPlayed { kind: AbilityHistoryKind },
+    AbilityPlayed {
+        kind: AbilityHistoryKind,
+    },
+    AttackSource {
+        #[serde(rename = "ref")]
+        _source: This,
+    },
 }
 
 #[derive(Deserialize)]
