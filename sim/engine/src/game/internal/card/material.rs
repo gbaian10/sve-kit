@@ -9,9 +9,11 @@ use super::selection::constraints::{
 };
 use super::selection::groups::GroupConstraints;
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
+use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
-    DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
+    DecisionToken, DecisionView, DistributionMember, InputDomain, PlayPhase, Slot, Wait, contains,
+    search,
 };
 use crate::game::legal::subsets;
 use crate::ir::quick::{card_permission, printed_activation};
@@ -1028,6 +1030,45 @@ impl Game {
             }),
         ));
         Ok(())
+    }
+
+    pub(in crate::game::internal) fn internal_additional_field_put_authorized(
+        &self,
+        execution: &Execution,
+        material: &Object,
+        destination: &str,
+    ) -> Result<bool> {
+        if !execution.field_entry
+            || execution.play_phase != Some(PlayPhase::Pay)
+            || material.zone != "field"
+            || destination != "cemetery"
+        {
+            return Ok(false);
+        }
+        let source = self.object(&execution.context.source)?;
+        if source.zone != "resolution" || source.generation != execution.context.generation.0 {
+            return Ok(false);
+        }
+        let Some(card) = self.card_runtime.definitions.cards.get(&source.card) else {
+            return Ok(false);
+        };
+        let member = execution.reference(self, &material.id)?;
+        Ok(card.card().card_play_costs.iter().any(|face| {
+            let Some(payment) = &face.node.additional else {
+                return false;
+            };
+            let CostSpec::Ordered { steps } = &payment.node.play.costs else {
+                return false;
+            };
+            steps.iter().any(|step| {
+                matches!(&step.instruction.action,
+                    Action::Move { objects: Selector::Bound { reference }, movement, reason: MoveReason::Put }
+                    if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
+                        && matches!(execution.slots.get(&reference.key()),
+                            Some(Slot::Objects { members, on_field_at_capture: true })
+                            if members.contains(&member)))
+            })
+        }))
     }
 
     #[expect(
