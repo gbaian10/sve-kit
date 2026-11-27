@@ -138,6 +138,11 @@ pub enum EffectExpiry {
         /// Player whose next turn ends the effect.
         player: Seat,
     },
+    /// Beginning of a player's next turn.
+    NextTurnStart {
+        /// Player whose next turn begins after the effect expires.
+        player: Seat,
+    },
     /// When the identified source leaves the field.
     SourceLeavesField,
     /// End of a player's next start procedure.

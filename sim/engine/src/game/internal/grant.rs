@@ -5,6 +5,7 @@ use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::player::Viewer;
 use crate::game::player::observation::{EffectSource, InstalledChange, InstalledEffect};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::player_rules::controller_next_turn_start;
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
     Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
@@ -202,10 +203,12 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     let current_provider = matches!(&provider.provider, ObjectView::Current { object }
         if object.as_ref() == &ObjectOperand::SourceHolder {});
     let valid_interval = match duration.intervals.as_slice() {
-        [] => matches!(
-            duration.end,
-            DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-        ),
+        [] => {
+            matches!(
+                duration.end,
+                DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
+            ) || controller_next_turn_start(&duration.end)
+        }
         [Interval::DuringNextTurn { player }] => {
             matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
         }
@@ -1195,14 +1198,19 @@ impl Game {
     pub(in crate::game) fn internal_keywords_begin_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.current()?;
         let player = super::player_id(self.active())?.seat;
-        for state in self.state.ir_keywords.values_mut() {
-            for grant in &mut state.grants {
+        self.state.ir_keywords.retain(|_, state| {
+            state.grants.retain_mut(|grant| {
+                if grant.end.expires_at_start(turn, player) {
+                    return false;
+                }
                 grant.end.begin(turn, player);
                 if let Some(interval) = grant.interval.as_mut() {
                     interval.begin(turn, player);
                 }
-            }
-        }
+                true
+            });
+            !state.grants.is_empty()
+        });
         Ok(())
     }
 

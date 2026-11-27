@@ -380,6 +380,7 @@ impl Game {
         self.internal_preventions_begin_turn()?;
         self.internal_player_cost_begin_turn()?;
         self.internal_attack_restrictions_begin_turn()?;
+        self.player_mut(&seat)?.defense_protected = false;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =

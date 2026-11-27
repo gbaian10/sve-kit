@@ -51,6 +51,7 @@ pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duratio
         end: match until {
             Some(
                 ast::Until::NextPhase { .. }
+                | ast::Until::NextTurn { .. }
                 | ast::Until::DuringNextTurn { .. }
                 | ast::Until::DuringNextPhase { .. },
             ) => {
@@ -550,7 +551,8 @@ impl BodyContext<'_> {
         match &installation.effect {
             ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::HandLimit(_)
-            | ast::InstalledEffect::FanfareTriggers(_) => {
+            | ast::InstalledEffect::FanfareTriggers(_)
+            | ast::InstalledEffect::Cannot(ast::Cannot::LoseDefense(_)) => {
                 return Err(unsupported(path));
             }
             ast::InstalledEffect::LoseAbilities(_) => {

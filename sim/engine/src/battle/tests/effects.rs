@@ -246,6 +246,14 @@ fn wire_installed_effects_preserve_lifetime_and_interval_independently() {
             json!({"kind":"next_turn_end","player":"p2"}),
         ),
         (
+            native::EffectExpiry::NextTurnStart(Viewer::P1),
+            json!({"kind":"next_turn_start","player":"p1"}),
+        ),
+        (
+            native::EffectExpiry::NextTurnStart(Viewer::P2),
+            json!({"kind":"next_turn_start","player":"p2"}),
+        ),
+        (
             native::EffectExpiry::NextStartEnd(Viewer::P1),
             json!({"kind":"next_start_end","player":"p1"}),
         ),

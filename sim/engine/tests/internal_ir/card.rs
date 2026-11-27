@@ -29,6 +29,8 @@ mod condition_inputs;
 mod current_fixture;
 #[path = "card/deck_edges.rs"]
 mod deck_edges;
+#[path = "card/defense_window.rs"]
+mod defense_window;
 #[path = "card/dice.rs"]
 mod dice;
 #[path = "card/event_batches.rs"]

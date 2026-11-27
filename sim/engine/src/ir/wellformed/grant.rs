@@ -1,4 +1,5 @@
 use super::{Checked, Checker};
+use crate::ir::player_rules::controller_next_turn_start;
 use crate::ir::{
     Duration, DurationEnd, GrantedAbility, Interval, KeywordId, ObjectOperand, ObjectView,
     Selector, TextProvider, TimeAnchor,
@@ -12,10 +13,12 @@ impl Checker {
         provider: &TextProvider,
     ) -> Checked {
         let valid_duration = match duration.intervals.as_slice() {
-            [] => matches!(
-                duration.end,
-                DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-            ),
+            [] => {
+                matches!(
+                    duration.end,
+                    DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
+                ) || controller_next_turn_start(&duration.end)
+            }
             [Interval::DuringNextTurn { player }] => {
                 self.player(player)?;
                 matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
