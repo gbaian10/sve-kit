@@ -1,7 +1,7 @@
 //! The menu and live evolution share the same form, material and payment stages.
 
 use super::super::declarations::probe::{MAX_ANSWERS, cost_selections};
-use super::{intrinsic, non_pp_play, rule_code, usable};
+use super::{cost, destination, intrinsic, non_pp_play, usable};
 use crate::game::int;
 use crate::game::internal::{Context, DeclarationMode, Execution, Game, InputDomain, Result, Wait};
 use crate::game::player::observation::{CardObservation, EffectSource, seat};
@@ -9,6 +9,7 @@ use crate::game::player::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
     ObjectHandle, QuestionToken, Viewer,
 };
+use crate::ir::evolution_destination::Destination;
 use crate::ir::{Ability, AbilityId, CostSpec, Decision, ObjectRef, PlaySpec};
 use crate::{EngineFailure, invalid};
 use serde_json::{Value, json};
@@ -35,7 +36,7 @@ pub(in crate::game) struct Declaration {
     actor: Viewer,
     source: Context,
     definition: AbilityId,
-    code: Value,
+    base_pp: i64,
     play: PlaySpec,
     selection: Execution,
     form: Option<Form>,
@@ -58,13 +59,13 @@ fn illegal(message: &str) -> EngineFailure {
 }
 
 impl Game {
-    fn evolution_quote(&self, source: &str, code: &Value) -> Result<EvolutionPayment> {
+    fn evolution_quote(&self, source: &str, base_pp: i64) -> Result<EvolutionPayment> {
         let actor = &self.object(source)?.controller;
         let probe = self.clone();
         // Current evolution cost readers depend on the source, never the selected form or face.
         let decision = json!({"do":"evolve","source":source,"by":actor,"at":"main"});
-        let frame = probe.start_frame(source, probe.reference(source, code), &decision)?;
-        let total_pp = probe.evolution_pp(code, &frame)?;
+        let frame = probe.start_frame(source, probe.reference(source, &Value::Null), &decision)?;
+        let total_pp = probe.evolution_pp(base_pp, &frame)?;
         let player = self.player(actor)?;
         Ok(EvolutionPayment {
             total_pp,
@@ -74,7 +75,12 @@ impl Game {
         })
     }
 
-    fn evolution_forms(&self, source: &str, actor: Viewer, code: &Value) -> Result<Vec<Form>> {
+    fn evolution_forms(
+        &self,
+        source: &str,
+        actor: Viewer,
+        destination: &Destination,
+    ) -> Result<Vec<Form>> {
         let mut forms = Vec::new();
         for holder in self.zone_ids(seat(actor), "evolve_deck") {
             if !self.player_knows_object(actor, &holder) {
@@ -88,7 +94,7 @@ impl Game {
                 .get(&object.card)
                 .map_or(0, |definition| definition.faces.len());
             for face in 0..count {
-                if self.evolution_pair(source, &holder, face, code)? {
+                if self.evolution_pair(source, &holder, face, destination)? {
                     forms.push(Form {
                         holder: holder.clone(),
                         generation: object.generation,
@@ -223,8 +229,9 @@ impl Game {
         actor: Viewer,
         entry: &Ability,
     ) -> Result<Declaration> {
-        let code = rule_code(entry)?;
-        let forms = self.evolution_forms(holder, actor, &code)?;
+        let destination = destination(entry)?;
+        let base_pp = cost(entry)?;
+        let forms = self.evolution_forms(holder, actor, &destination)?;
         let mut probe = self.clone();
         let selection = probe.evolution_selection(holder, entry.id, actor.player())?;
         let source = selection.context.clone();
@@ -233,7 +240,7 @@ impl Game {
             actor,
             source,
             definition: entry.id,
-            code,
+            base_pp,
             play,
             selection,
             form: None,
@@ -542,7 +549,7 @@ impl Declaration {
             self.stage = Stage::Discard;
             return Ok(());
         }
-        self.stage = Stage::Payment(game.evolution_quote(&self.source.source, &self.code)?);
+        self.stage = Stage::Payment(game.evolution_quote(&self.source.source, self.base_pp)?);
         Ok(())
     }
 }
