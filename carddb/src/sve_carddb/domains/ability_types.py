@@ -28,13 +28,13 @@ _JP = {
 }
 _EN_ICONS = {
     "quick": "quick",
-    "q": "quick",
     "fanfare": "fanfare",
     "lastword": "last_words",
     "lastwords": "last_words",
     "act": "act",
     "adv": "advanced_act",
 }
+_EN_AUTHOR_ICONS = _EN_ICONS | {"q": "quick"}
 _JP_HEAD = re.compile(r"^(?:\{([^{}]+)\}|【([^【】]+)】|《([^《》]+)》)\s*")
 _EN_ICON = re.compile(r"^\{icon_([^{}|]+)\|\[[^\]]+\]\}\s*")
 _EN_HEADS = {
@@ -64,7 +64,12 @@ def parse(text: str, region: str) -> tuple[set[str], bool]:
     return {head for heads in line_heads.values() for head in heads}, balanced
 
 
-def _heads(text: str, region: str) -> tuple[dict[int, set[str]], bool]:
+def _heads(
+    text: str, region: str, *, author: bool = False
+) -> tuple[dict[int, set[str]], bool]:
+    icons = _EN_AUTHOR_ICONS if author else _EN_ICONS
+    if region == "jp":
+        icons = _JP
     result: dict[int, set[str]] = {}
     quoted = False
     for number, raw in enumerate(text.splitlines(), 1):
@@ -79,7 +84,7 @@ def _heads(text: str, region: str) -> tuple[dict[int, set[str]], bool]:
             _JP_HEAD.match(rest) if region == "jp" else _EN_ICON.match(rest)
         ):
             name = next(group for group in match.groups() if group is not None)
-            code = (_JP if region == "jp" else _EN_ICONS).get(name)
+            code = icons.get(name)
             if code is not None:
                 line_types.add(code)
             rest = rest[match.end() :]
@@ -93,8 +98,8 @@ def _heads(text: str, region: str) -> tuple[dict[int, set[str]], bool]:
 
 
 def english_author_headers(text: str) -> dict[int, set[str]]:
-    """Include the Evolve action marker alongside the English timing headers."""
-    lines, _ = _heads(text, "en")
+    """Include author-specific Quick and Evolve markers in English rule lines."""
+    lines, _ = _heads(text, "en", author=True)
     for number, raw in enumerate(text.splitlines(), 1):
         if number in lines and _EN_EVOLUTION.match(raw.strip()):
             lines[number].add("evolve")

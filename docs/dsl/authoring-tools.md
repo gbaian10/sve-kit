@@ -6,7 +6,7 @@
 
 ## 輸入 profile
 
-公開 profile 讀取已審查的 card-data 與身分登錄。指定 JP 批次，處理英版獨有卡時也指定 EN 批次。`revision` 可省略，不要求作者固定 Git SHA。
+公開 profile 讀取已審查的 card-data 與身分登錄。指定 JP 批次，處理英版獨有卡或對本專案執行整庫 `author check` 時也指定 EN 批次。`revision` 可省略，不要求作者固定 Git SHA。
 
 ```json
 {

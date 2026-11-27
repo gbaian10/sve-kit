@@ -49,7 +49,7 @@ fn a_published_program_opens_a_deck_by_permanent_printing() {
 
 #[test]
 fn jp_battle_binds_its_programs_in_a_two_region_package() {
-    let (mut document, programs) = published();
+    let (document, programs) = published();
     let mut programs: Value = serde_json::from_str(&programs).unwrap();
     programs["entries"].as_array_mut().unwrap().push(json!({
         "id":"english-program","dsl_version":"1.0",
@@ -57,11 +57,15 @@ fn jp_battle_binds_its_programs_in_a_two_region_package() {
     }));
     programs["printings"]["english-card"] =
         json!({"representative":"english-printing","tokens":[]});
-    let programs = programs.to_string();
-    document["identity"]["programs"]["sha256"] = json!(fixture::hex(programs.as_bytes()));
+    let load = |package: &Value| {
+        let payload = package.to_string();
+        let mut inputs = document.clone();
+        inputs["identity"]["programs"]["sha256"] = json!(fixture::hex(payload.as_bytes()));
+        PreparedBattle::new(&inputs.to_string(), &payload)
+    };
 
-    let prepared = PreparedBattle::new(&document.to_string(), &programs).unwrap();
-    assert!(prepared.open(&setup("test-t-anchor")).is_ok());
+    let prepared = load(&programs).unwrap();
+    prepared.open(&setup("test-t-anchor")).unwrap();
     assert_eq!(
         prepared
             .open(&setup("english-printing"))
@@ -69,6 +73,12 @@ fn jp_battle_binds_its_programs_in_a_two_region_package() {
             .code(),
         "match"
     );
+    let jp_card = document["printings"][0]["card_id"].as_str().unwrap();
+    let mut wrong_dependency = programs.clone();
+    wrong_dependency["printings"][jp_card]["tokens"] = json!(["english-printing"]);
+    assert_eq!(load(&wrong_dependency).unwrap_err().code(), "selection");
+    programs["printings"][jp_card]["representative"] = json!("english-printing");
+    assert_eq!(load(&programs).unwrap_err().code(), "selection");
 }
 
 #[test]
