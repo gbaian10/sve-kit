@@ -1,0 +1,17 @@
+cards:
+  GFB01a-002EN:
+    abilities:
+      - evolve_time:
+          do:
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 2
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

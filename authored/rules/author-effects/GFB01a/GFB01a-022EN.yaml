@@ -1,0 +1,20 @@
+cards:
+  GFB01a-022EN:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 5
+                to:
+                  class: ニュートラル
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

@@ -1,0 +1,47 @@
+cards:
+  GFB01b-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - choose:
+                any: true
+                bind: moved
+                from:
+                  kind: follower
+                  who: self
+                  zone: hand
+            - move:
+                ref: moved
+                result: placed
+                to: ex
+        line: 3
+      - auto:
+          do:
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 2
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  who: self
+                  zone: ex
+                power: 2
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 4
+    admission: light
+format: 2
+kind: author_effect_set

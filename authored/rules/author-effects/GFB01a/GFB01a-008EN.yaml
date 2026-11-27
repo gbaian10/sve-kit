@@ -1,0 +1,19 @@
+cards:
+  GFB01a-008EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

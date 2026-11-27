@@ -1,0 +1,43 @@
+cards:
+  GFB01a-006EN:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -7
+            if:
+              cmp:
+                left:
+                  count:
+                    who: all
+                    zone: field
+                op: ge
+                right: 10
+      - line: 1
+        section: 1
+        use: evolve.one-pp
+      - keywords:
+          - ward
+        line: 2
+        section: 1
+      - lastword:
+          do:
+            - move:
+                ref: recovered
+                result: entered
+                to: field
+          targets:
+            - bind: recovered
+              from:
+                cost_le: 3
+                kind: follower
+                who: self
+                zone: cemetery
+              upto: 2
+        line: 3
+        section: 1
+    admission: light
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

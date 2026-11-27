@@ -1,0 +1,19 @@
+cards:
+  GFB01b-008EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - player_effect:
+                effect:
+                  fanfare_triggers: 2
+                until:
+                  during_next_turn:
+                    who: self
+                who: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

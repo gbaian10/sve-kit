@@ -1,0 +1,24 @@
+cards:
+  GFB01a-007EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - move:
+                ref: recovered
+                result: entered
+                to: field
+          targets:
+            - bind: recovered
+              from:
+                cost_le: 3
+                kind: follower
+                who: self
+                zone: cemetery
+              upto: 3
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
