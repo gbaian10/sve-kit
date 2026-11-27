@@ -118,6 +118,79 @@ fn rejected_opponent_decks_share_one_status_with_the_other_seat() {
     assert_eq!(refusal.code_for(Seat::P2), "deck_format");
 }
 
+fn published_start_amulet() -> PreparedBattle {
+    let (mut document, programs) = published();
+    let (anchor, unused) = document
+        .pointer("/snapshot")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .split_once('\n')
+        .unwrap();
+    let mut anchor: Value = serde_json::from_str(anchor).unwrap();
+    *anchor.pointer_mut("/faces/0/card_type").unwrap() = json!("アミュレット");
+    *anchor.pointer_mut("/faces/0/power").unwrap() = json!("-");
+    *anchor.pointer_mut("/faces/0/hp").unwrap() = json!("-");
+    *anchor.pointer_mut("/faces/0/text").unwrap() = json!("Start amulet.");
+    let snapshot = format!("{anchor}\n{unused}");
+    let digest = fixture::hex(snapshot.as_bytes());
+    *document.pointer_mut("/snapshot").unwrap() = json!(snapshot);
+    for path in [
+        "/references/snapshot_sha256",
+        "/engine_identity/Resolved/snapshot_sha256",
+    ] {
+        *document.pointer_mut(path).unwrap() = json!(digest);
+    }
+    let mut rules: Value =
+        serde_json::from_str(document.pointer("/rules").unwrap().as_str().unwrap()).unwrap();
+    *rules.pointer_mut("/input/snapshot_sha256").unwrap() = json!(digest);
+    *rules.pointer_mut("/titles/0/capabilities").unwrap() =
+        json!([{"kind":"opening_start_amulet"}]);
+    let rules = rules.to_string();
+    *document.pointer_mut("/identity/rules/sha256").unwrap() =
+        json!(fixture::hex(rules.as_bytes()));
+    *document.pointer_mut("/rules").unwrap() = json!(rules);
+
+    let mut programs: Value = serde_json::from_str(&programs).unwrap();
+    let face = document
+        .pointer("/printings/0/faces/0/face_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let abilities = format!("/entries/0/ast/faces/{face}/abilities");
+    *programs.pointer_mut(&abilities).unwrap() = json!([{
+        "line":1_u8,"keywords":["start_amulet"],"ports":{"exports":{},"imports":{}}
+    }]);
+    let programs = programs.to_string();
+    *document.pointer_mut("/identity/programs/sha256").unwrap() =
+        json!(fixture::hex(programs.as_bytes()));
+    PreparedBattle::new(&document.to_string(), &programs).unwrap()
+}
+
+#[test]
+fn reserving_a_start_amulet_leaves_the_submitting_deck_too_short() {
+    let prepared = published_start_amulet();
+    let mut setup: Value = serde_json::from_str(&setup("test-t-anchor")).unwrap();
+    *setup.pointer_mut("/decks/1/main").unwrap() = json!(vec!["test-t-anchor"; 4]);
+    prepared.open(&setup.to_string()).unwrap();
+    for (title, main, expected) in [
+        (
+            "synthetic_empty",
+            vec!["test-t-anchor"; 4],
+            "deck_admission",
+        ),
+        ("unregistered", vec![], "match"),
+    ] {
+        *setup.pointer_mut("/decks/1").unwrap() = json!({
+            "construction":{"kind":"title","value":title},
+            "main":main,"evolve":[]
+        });
+        let refused = prepared.open(&setup.to_string()).unwrap_err();
+        assert_eq!(refused.code_for(Seat::P1), "match");
+        assert_eq!(refused.code_for(Seat::P2), expected);
+    }
+}
+
 fn update(deliveries: &[Delivery]) -> &BattleUpdate {
     deliveries
         .iter()

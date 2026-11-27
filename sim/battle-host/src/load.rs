@@ -271,11 +271,11 @@ impl PreparedBattle {
         if !admission.is_admitted() {
             return Err(LoadError::DeckAdmission);
         }
-        let too_small = decks.iter().any(|deck| deck.main.len() < 4);
         Game::start_player_game(selected, decks, viewer_of(first_chooser), seed).map_err(|error| {
             match error {
-                StrictStartError::Admission(_) => LoadError::DeckAdmission,
-                StrictStartError::Initialization(_) if too_small => LoadError::DeckAdmission,
+                StrictStartError::Admission(_) | StrictStartError::OpeningHand(_) => {
+                    LoadError::DeckAdmission
+                }
                 StrictStartError::Initialization(_) => LoadError::Match,
             }
         })
