@@ -98,17 +98,21 @@ pub(super) fn board_with_card(
             "cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]
         }]}).to_string());
         let mut baseline: Value = serde_json::from_str(&document).unwrap();
-        baseline["cards"]["unit-form"] = json!({"status":"complete","abilities":[]});
+        baseline["cards"]["unit-form"] = json!({"status":"complete"});
         document = baseline.to_string();
     }
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{
-        "guard":{"ja":"guard","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},
-        "storm":{"ja":"storm","rule":"12.9","expansion":{"op":"keyword","name":"storm"}}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{
+        "guard":{"ja":"guard","rule":"12.8"},
+        "storm":{"ja":"storm","rule":"12.9"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("boxed-fixture".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("boxed-fixture".into(), document)],
+        )
+        .unwrap(),
     );
     let mut game = Game::new(
         catalog,

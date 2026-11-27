@@ -3,7 +3,6 @@ use crate::{expanded, rule_fixtures};
 use alloc::collections::BTreeMap;
 use serde_json::Map;
 use std::{fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn position(card: &str, zone: &str) -> Value {
     let mut initial = draw_position();
@@ -62,10 +61,10 @@ fn evolution_fixture() -> &'static EvolutionFixture {
             });
             snapshot.push('\n');
             snapshot.push_str(&companion.to_string());
-            cards.insert(base.into(), json!({"status":"complete","abilities":[]}));
+            cards.insert(base.into(), json!({"status":"complete"}));
             programs.insert(base.into(), template.clone());
         }
-        let document = json!({"format":1_u8,"kind":"effect_set","cards":cards}).to_string();
+        let document = json!({"format":1_u8,"kind":"fixture_cards","cards":cards}).to_string();
         input["documents"]
             .as_array_mut()
             .unwrap()
@@ -79,7 +78,6 @@ fn evolution_fixture() -> &'static EvolutionFixture {
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         tree["cards"] = Value::Object(programs);

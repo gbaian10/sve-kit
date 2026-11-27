@@ -43,7 +43,7 @@ impl Game {
             .advance_player_rules()
             .and_then(|question| self.validate_player_question(question))
         {
-            Ok(Some(question)) if cache && self.player_authority_ready() => {
+            Ok(Some(question)) if cache => {
                 self.player_inputs = super::InputCache::prepared(question);
             }
             Ok(_) => {}
@@ -64,7 +64,7 @@ impl Game {
     }
 
     pub(super) fn compute_player_input(&self, viewer: Option<Viewer>) -> Input {
-        if self.player_fault.is_some() || !self.player_authority_ready() {
+        if self.player_fault.is_some() {
             return Input::EngineFault;
         }
         if self.state.game["ended"] == true {
@@ -282,11 +282,6 @@ impl Game {
     }
 
     fn advance_player_rules(&mut self) -> Result<Option<Question>> {
-        if !self.player_authority_ready() {
-            return Err(invalid(
-                "prototype continuation cannot enter the typed player interface",
-            ));
-        }
         if self.state.game["ended"] == true || self.player_decision().is_some() {
             return Ok(None);
         }
@@ -375,10 +370,6 @@ impl Game {
             shape: QuestionShape::Decision(shape),
             withdrawable: self.withdrawable_declaration(),
         }
-    }
-
-    const fn player_authority_ready(&self) -> bool {
-        self.state.frame.is_none() && self.state.prompt.is_none() && self.state.pending.is_empty()
     }
 
     fn player_action_purpose(&self) -> Option<QuestionPurpose> {

@@ -32,11 +32,11 @@ pub(crate) fn catalog_documents(cost: &Value) -> (String, String, String) {
     let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("unit-amulet", "アミュレット")].iter().map(|(number, kind)| {
         json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if *kind=="アミュレット" {"-"}else{"2"},"hp":if *kind=="アミュレット" {"-"}else{"3"},"traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
-    let registry = json!({"format":1_i32,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1_i32,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-amulet":{"status":"complete","review":"synthetic","abilities":[]}
+    let registry = json!({"format":1_i32,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document = json!({"format":1_i32,"kind":"fixture_cards","cards":{
+        "unit-spell":{"status":"complete"},
+        "unit-follower":{"status":"complete"},
+        "unit-amulet":{"status":"complete"}
     }})
     .to_string();
     (snapshot, registry, document)
@@ -48,7 +48,8 @@ pub(crate) fn catalog() -> Result<Arc<Catalog>> {
 
 pub(crate) fn catalog_with_cost(cost: &Value) -> Result<Arc<Catalog>> {
     let (snapshot, registry, document) = catalog_documents(cost);
-    Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).map(Arc::new)
+    Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+        .map(Arc::new)
 }
 
 pub(crate) fn exact_authority(game: &Game) -> String {

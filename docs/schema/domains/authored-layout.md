@@ -7,37 +7,37 @@
 
 ## 1. 路徑與共同格式
 
-| 狀態 | 類別 | 實際路徑或提案 |
-| ---- | ---- | -------------- |
-| 定案 | 永久卡、面、版次 | `registry/card/<owner>/001.yaml`、`registry/face/<owner>/001.yaml`、`registry/printing/<owner>/001.yaml` |
-| 定案 | 整數編號配號／全域入口 | `ids/<owner>/001.yaml`、`ids/index.yaml` |
-| 定案 | 英文獨有查核 | `registry/region-mapping-review/<owner>/001.yaml` |
-| 定案 | 插畫同圖分組（含英文原創插畫） | `registry/art/<owner>/001.yaml` |
-| 定案 | 換皮卡 | `registry/card-related/<owner>/001.yaml` |
-| 定案 | 本批來源更正 | `registry/source-correction/active/<owner>/001.yaml`、`registry/source-correction/needs-review/<owner>/001.yaml` |
-| 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
-| 定案（格式） | 官方商品身分對照 | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
-| 定案 | 人工版次（官方資料庫未收錄的 EP／SEP；序號卡待實作） | `manual-printings/printings/<home_set_id>/<sequence>.yaml`，每筆人工指定 `int_id`、可留空號，見 [manual-printings-v1](manual-printings.md) |
-| 已定案（ADR-0009） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
-| 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
-| 部分實作 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 24 筆 main 禁限（含已解除區間與未來生效項）、2 profiles，保留 2026-09-25／2026-10-26 單日 coverage，以 2026-10-26 官方一覽為準；見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
-| 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
-| 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
-| 定案 | 勘誤片段譯文 | `translations/errata/<filing_key>.yaml`，按公告 URL、日期與前後原文 hash 配對；見[勘誤譯文](errata-translations.md) |
-| 定案 | 綜合規則原文（網站顯示用） | `rules/comprehensive/<region>/<version>/{index,chNN,appendix-x}.json`（`jp`、`en` 各自版本），節點以條號或 `<context>:<number>` 為 key；見[該目錄 README](../../../authored/rules/comprehensive/README.md) |
-| 定案 | 綜合規則譯文 | `translations/comprehensive-rules/<language>/<version>/<原文同檔名>.json`，以原文節點 key 對應、`source_sha256` 釘原文；見[該目錄 README](../../../authored/translations/comprehensive-rules/README.md) |
-| 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog/adoptions/<area>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值) |
-| 定案（技術契約） | 同號路由與預設版次覆寫 | `catalog/overrides/<area>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
-| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
-| legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
-| 定案（新格式） | 模板參數辨識規則 | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
-| 技術契約 | 卡面標籤外觀 | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」 |
-| 技術契約 | 再錄版次 | `catalog/reprints.yaml` 單檔，見下方「再錄版次」 |
-| 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md) |
-| 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔 | `rules/author-effects/<卡包>/<record_key>.yaml`（既有數字分片保留）、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index/<卡包>.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md) |
-| 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
-| 定案（技術契約） | 查卡 keyword 登錄 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；四種關係由已准入程式推導，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
+| 狀態                                                                | 類別                                                 | 實際路徑或提案                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 定案                                                                | 永久卡、面、版次                                     | `registry/card/<owner>/001.yaml`、`registry/face/<owner>/001.yaml`、`registry/printing/<owner>/001.yaml`                                                                                                                                                                                                                                                                                                                                             |
+| 定案                                                                | 整數編號配號／全域入口                               | `ids/<owner>/001.yaml`、`ids/index.yaml`                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 定案                                                                | 英文獨有查核                                         | `registry/region-mapping-review/<owner>/001.yaml`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 定案                                                                | 插畫同圖分組（含英文原創插畫）                       | `registry/art/<owner>/001.yaml`                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 定案                                                                | 換皮卡                                               | `registry/card-related/<owner>/001.yaml`                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 定案                                                                | 本批來源更正                                         | `registry/source-correction/active/<owner>/001.yaml`、`registry/source-correction/needs-review/<owner>/001.yaml`                                                                                                                                                                                                                                                                                                                                     |
+| 定案（格式）                                                        | 歸檔類別、人工商品與收錄                             | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器                                                                                                                                                                                                                                                                                                                                                      |
+| 定案（格式）                                                        | 官方商品身分對照                                     | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納                                                                                                                                                                                                                                                                                                                                                                                  |
+| 定案                                                                | 人工版次（官方資料庫未收錄的 EP／SEP；序號卡待實作） | `manual-printings/printings/<home_set_id>/<sequence>.yaml`，每筆人工指定 `int_id`、可留空號，見 [manual-printings-v1](manual-printings.md)                                                                                                                                                                                                                                                                                                           |
+| 已定案（ADR-0009）                                                  | 裁定                                                 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用)                                                                                                                                                                                                                                                                                    |
+| 定案（格式）                                                        | 身分修復與決定續版                                   | `identity-transitions/<sequence>.yaml`，見 §12                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 部分實作                                                            | Standard 構築／禁限／角色與必要 CR 引用              | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 24 筆 main 禁限（含已解除區間與未來生效項）、2 profiles，保留 2026-09-25／2026-10-26 單日 coverage，以 2026-10-26 官方一覽為準；見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
+| 提案                                                                | 其他策展、標誌                                       | `curation/BP01/001.yaml`                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 待審（技術契約）                                                    | 數位對應與查核覆蓋採納                               | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作                                                                                                                                                                                                                                                                       |
+| 定案（技術契約）                                                    | 模板、詞彙、翻譯採納                                 | `translations/templates/{definitions,values}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6                                                                                                                                                                                                                                  |
+| 定案                                                                | 勘誤片段譯文                                         | `translations/errata/<filing_key>.yaml`，按公告 URL、日期與前後原文 hash 配對；見[勘誤譯文](errata-translations.md)                                                                                                                                                                                                                                                                                                                                  |
+| 定案                                                                | 綜合規則原文（網站顯示用）                           | `rules/comprehensive/<region>/<version>/{index,chNN,appendix-x}.json`（`jp`、`en` 各自版本），節點以條號或 `<context>:<number>` 為 key；見[該目錄 README](../../../authored/rules/comprehensive/README.md)                                                                                                                                                                                                                                           |
+| 定案                                                                | 綜合規則譯文                                         | `translations/comprehensive-rules/<language>/<version>/<原文同檔名>.json`，以原文節點 key 對應、`source_sha256` 釘原文；見[該目錄 README](../../../authored/translations/comprehensive-rules/README.md)                                                                                                                                                                                                                                              |
+| 定案（技術契約）                                                    | 詞彙、記號、搜尋別名、特殊構築名稱、語言             | `catalog/adoptions/<area>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值)                                                                                                                                                                                                                                                                                                                                            |
+| 定案（技術契約）                                                    | 同號路由與預設版次覆寫                               | `catalog/overrides/<area>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions                                                                                                                                                                                                                                                                                               |
+| 定案（新格式）                                                      | 數位名字／同名瀏覽政策                               | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md)                                                                                                                                                                                                                                                                                                     |
+| legacy，僅供轉換                                                    | 模板採納政策／核可收據                               | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用                                                                                                                                                                                           |
+| 定案（新格式）                                                      | 模板參數辨識規則                                     | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval                                                                                                                                                                                                                                                                                                                                                   |
+| 技術契約                                                            | 卡面標籤外觀                                         | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」                                                                                                                                                                                                                                                                                                                                                                                            |
+| 技術契約                                                            | 再錄版次                                             | `catalog/reprints.yaml` 單檔，見下方「再錄版次」                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 定案（技術契約）                                                    | 來源綁定的插畫裁切覆寫                               | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md)                                                                                                                                                                                                                                                                                                                |
+| 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔                                 | `rules/author-effects/<卡包>/<record_key>.yaml`（既有數字分片保留）、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index/<卡包>.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md)                                                                                                                                                          |
+| 定案（技術契約）                                                    | 引擎規則設定                                         | `rules/engine/index.yaml` 保存作品、資源的 JP 定位座標，由 carddb 匯出永久身分                                                                                                                                                                                                                                                                                                                                                                       |
+| 定案（技術契約）                                                    | 查卡與引擎關鍵字登錄                                 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；四種關係由已准入程式推導，見[關鍵字機制契約](keyword-mechanics.md)                                                                                                                                                                                                                                                                                                       |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
@@ -55,17 +55,17 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 
 所有 YAML 頂層為 mapping，format 與 kind 必填、不依鍵序讀取。format 只接受該 kind 的指定正整數，拒絕 bool、字串、float、未知值、舊 *_format／version 及混合封套。record.kind、永久 ID、配號、policy_id、人工對應與語義 payload 不變。
 
-| kind | format |
-| --- | --- |
-| registry_shard、product_shard、product_identity_shard、identity_transition_shard | 1 |
-| translation_shard | 3 |
-| ruling | 2 |
-| registry_index、catalog_adoption_shard、display_override_shard | 2 |
-| digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules | 2 |
-| author_effect_set、effect_body_shard、effects_index、frame_semantics_index、frame_semantics_shard | 1 |
-| effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides | 1 |
+| kind                                                                                                 | format |
+| ---------------------------------------------------------------------------------------------------- | ------ |
+| registry_shard、product_shard、product_identity_shard、identity_transition_shard                     | 1      |
+| translation_shard                                                                                    | 3      |
+| ruling                                                                                               | 2      |
+| registry_index、catalog_adoption_shard、display_override_shard                                       | 2      |
+| digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules                | 2      |
+| author_effect_set、effect_body_shard、effects_index、frame_semantics_index、frame_semantics_shard    | 1      |
+| keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides | 1      |
 
-`effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[DSL 承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
+DSL 1.0 使用 `author_effect_set` 與 `effect_body_shard`，資源映射及已實作驗證邊界依[DSL 承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
 [#476](https://github.com/gbaian10/sve-kit/issues/476) 使用新封套及路徑重建私人 source-record ID／provenance，Rust authored／settings／schemas fingerprints 亦如實重算。舊私人 provenance、序列化背景與回放指紋不相容，不保留舊 reader。各種 exact／canonical authored source hash 包含封套；raw 來源 hash、record-level 語義 hash 與公開匯出契約不因此改變。公開 323 JSON、媒體及 token 必須逐 byte 同值。
 
@@ -194,15 +194,15 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同類�
 
 `card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-11-09-v3` 決定（v2 切出官方未收錄號段，v3 改為人工指定未收錄 `int_id`；官方版次配號不變），程式唯一定義在 `sve_carddb.domains.registry.allocation`：
 
-| 號段（閉區間） | 用途 |
-| -------------- | ---- |
-| 1..20000 | 保留；一般配號器不得使用，特殊用途須另定放行程序（尚未定義） |
-| 20001..54999 | `region=jp` 的官方卡表 printing |
-| 55000..59999 | `region=jp` 的官方未收錄人工版次（[manual-printings](manual-printings.md#4-配號政策-v3region-ranges-2026-11-09-v3)） |
-| 60000 | 未分配 |
-| 60001..94999 | `region=en` 的官方卡表 printing |
-| 95000..99999 | `region=en` 的官方未收錄人工版次 |
-| 100000..4294967295 | 未分配；新地區開新的、不重疊的號段 |
+| 號段（閉區間）     | 用途                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| 1..20000           | 保留；一般配號器不得使用，特殊用途須另定放行程序（尚未定義）                                                         |
+| 20001..54999       | `region=jp` 的官方卡表 printing                                                                                      |
+| 55000..59999       | `region=jp` 的官方未收錄人工版次（[manual-printings](manual-printings.md#4-配號政策-v3region-ranges-2026-11-09-v3)） |
+| 60000              | 未分配                                                                                                               |
+| 60001..94999       | `region=en` 的官方卡表 printing                                                                                      |
+| 95000..99999       | `region=en` 的官方未收錄人工版次                                                                                     |
+| 100000..4294967295 | 未分配；新地區開新的、不重疊的號段                                                                                   |
 
 號段依 printing 登錄的 `region` 查詢，**不從號碼反推地區**。官方版次新增只從該區游標往後追加，不回填空號、不依最新卡號排序重編。配發前先算出本批各區需求，任一區超出區段即整批失敗，不部分寫入、不溢出到其他號段；擴區規則日後另定。驗證要求每號落在所屬 printing 地區的閉區間、全域唯一且與 printing 一對一，各區游標等於該區最大號＋1（空區為起點），游標不得回退。
 
@@ -279,14 +279,14 @@ same_cards 是保留 card_id → `region:exact_card_no` 成員陣列，記人工
 
 每批在 repo 外的 `SVE_DATA_DIR/derived/registry/<batch-id>/` 建立新的永久目錄；不可覆寫舊批次。保存以下 exact bytes，不重新序列化或排序既有輸入：
 
-| 檔名 | 取得方式與內容 |
-| ---- | -------------- |
-| jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 workflows/extract.py 產生；本工具不讀 manifest、不執行萃取 |
-| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。EN 萃取由 `archive extract-cards --region en` 從凍結批次產生；不可假定重新解析 HTML 能還原舊批次 exact bytes |
-| candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
-| confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |
-| original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據 |
-| decisions.json | 本批使用的初始化決定檔，欄位見 §3.5 |
+| 檔名               | 取得方式與內容                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| jp.jsonl           | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 workflows/extract.py 產生；本工具不讀 manifest、不執行萃取                                           |
+| en.jsonl           | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。EN 萃取由 `archive extract-cards --region en` 從凍結批次產生；不可假定重新解析 HTML 能還原舊批次 exact bytes |
+| candidates.jsonl   | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應                                        |
+| confirmations.tsv  | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排                                                                                        |
+| original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據                                                                                                     |
+| decisions.json     | 本批使用的初始化決定檔，欄位見 §3.5                                                                                                                                             |
 
 舊批次的取得方式是從保存目錄或其備份複製上述檔案，使用 SHA256SUMS 驗證；不依賴 session 暫存檔、個人草稿或重新生成候選。舊批次搭配當時的 Git commit 重現。inventory.json 記各檔 hash、大小與來源。SHA256SUMS 與決定檔都需納入批次備份；git 不存官方原文。
 
@@ -426,12 +426,12 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 **使用者 2026-10-01 核可本節暫顯規則**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本)。
 
-| 情況 | 行為 |
-| --- | --- |
-| 初始全體 exact 相同、主文可表示且通過既有完整性、勘誤／更正檢查 | 沿 build-db §4 機械 current；不要求逐卡 authored 記錄 |
-| 未核對差異或順序未解，但舊 current 可重建且仍有效 | 保留舊 current；公開標「表記未定」，各版次仍顯示自己的觀測，另列未採納候選 |
-| 有差異、無可用舊 current | 各 printing 顯示該版次可表示的觀測；face／card 摘要按下述發售日規則暫顯並標「表記未定」，不能決定時列候選；手動使用，不整卡排除 |
-| 已知更正／勘誤衝突使舊 current 無效 | 不再當有效 current；觀測保留且標明衝突，已知有誤的內容不當無警告摘要或規則自動執行依據；按既有更正／勘誤閘門處理 |
+| 情況                                                            | 行為                                                                                                                            |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 初始全體 exact 相同、主文可表示且通過既有完整性、勘誤／更正檢查 | 沿 build-db §4 機械 current；不要求逐卡 authored 記錄                                                                           |
+| 未核對差異或順序未解，但舊 current 可重建且仍有效               | 保留舊 current；公開標「表記未定」，各版次仍顯示自己的觀測，另列未採納候選                                                      |
+| 有差異、無可用舊 current                                        | 各 printing 顯示該版次可表示的觀測；face／card 摘要按下述發售日規則暫顯並標「表記未定」，不能決定時列候選；手動使用，不整卡排除 |
+| 已知更正／勘誤衝突使舊 current 無效                             | 不再當有效 current；觀測保留且標明衝突，已知有誤的內容不當無警告摘要或規則自動執行依據；按既有更正／勘誤閘門處理                |
 
 暫顯優先使用仍有效的 current。沒有 current 時，由正式 product／printing_product 的可信發售／收錄日選**已知完整日精度日期中的最新版次**；多重收錄須能證明該 printing 的首次取得日；若其他未知日期收錄使首次日無法判定，該 printing 也列日期未定，不用後來再錄商品日期讓同一 printing 變新。最大日期的觀測均可表示且無更正衝突，並只對應一個 exact 內容，顯示該內容並標「依已知發售日暫顯、表記未定」。同內容的代表 revision ID 只為去重定位，不宣稱某來源年代更晚。最新版次本身有多種尚未定序內容、同日最新版次內容不同或最新日仍有主文待確認／更正衝突、或沒有完整日精度日期時，display 為空、列出全部候選，不任選。日期未知／月年精度的版次另列，不因較晚抓到而排在最後；即使另有已知日期可暫顯，也明示這些版本尚未參與排序，交 #146 詢問使用者。
 
@@ -447,14 +447,14 @@ printing 的觀測不是印刷原文：保留自己的 revision／sections 與�
 
 `effect-presence-v1` 的結果是建置期證據，不是新的 DB 表或公開欄位。每筆恰有 `{recipe,source_version_id,source_index,parser_version,template_id,container_locator,state,reason_code}`，recipe 固定 `effect-presence-v1`；source_index 是該來源面的零起算 UInt，parser_version 與 template_id 必須由 F1 程式／依賴 pin 重現，container_locator 是非空、可重現的來源區塊定位（缺容器時定位應在的父區塊）。state／reason_code 配對固定如下：
 
-| state | reason_code | 判別要求與結果 |
-| --- | --- | --- |
-| `present` | `nonempty_container` | 完整已識別頁面、正確 face 的主文容器有內容，原字串保留；空白本身不能被本 recipe 刪成空字串 |
-| `absent` | `empty_container` | 完整已識別版型中主文容器存在、確實無文字或承載規則的子節點；允許的純排版節點由該 template_id 的 parser recipe 明列，不能略過未識別圖片／icon |
-| `absent` | `template_omits_empty_effect` | 完整已識別版型依已驗結構契約在無主文時省略容器；所有必需區塊／face 均完整，能排除截斷與選錯面，不能僅因查不到 selector 成功 |
-| `unknown` | `unrecognized_template` | 版型或 face 文字區辨識失敗；template_id=null，保留可定位父區塊 |
-| `unknown` | `incomplete_source` | 頁面／面或必需區塊不完整，不能推 absent |
-| `unknown` | `ambiguous_container` | 多個可能容器、未識別子節點或不符合已知省略規則，不能任取／略過 |
+| state     | reason_code                   | 判別要求與結果                                                                                                                               |
+| --------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `present` | `nonempty_container`          | 完整已識別頁面、正確 face 的主文容器有內容，原字串保留；空白本身不能被本 recipe 刪成空字串                                                   |
+| `absent`  | `empty_container`             | 完整已識別版型中主文容器存在、確實無文字或承載規則的子節點；允許的純排版節點由該 template_id 的 parser recipe 明列，不能略過未識別圖片／icon |
+| `absent`  | `template_omits_empty_effect` | 完整已識別版型依已驗結構契約在無主文時省略容器；所有必需區塊／face 均完整，能排除截斷與選錯面，不能僅因查不到 selector 成功                  |
+| `unknown` | `unrecognized_template`       | 版型或 face 文字區辨識失敗；template_id=null，保留可定位父區塊                                                                               |
+| `unknown` | `incomplete_source`           | 頁面／面或必需區塊不完整，不能推 absent                                                                                                      |
+| `unknown` | `ambiguous_container`         | 多個可能容器、未識別子節點或不符合已知省略規則，不能任取／略過                                                                               |
 
 除 unknown 的 template_id 可明示 null 外，所有識別／定位欄位非空；每種 parser 的版型簽章、容器定位與省略條件須釘住、附獨立完整／截斷／錯面／未知節點反例，#145 實作時驗收。text=null、sections=[]、卡種是 follower 或另一版次沒有文字，均不能代替上述來源證據。若需核圖／補來源才能判斷就維持 unknown，不要求使用者對全部 null 觀測猜答案。
 
@@ -489,11 +489,11 @@ F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；
 
 以下是 **product-authored-v1 新定的格式選擇**；不修改 `ids/index.yaml`、`registry_shard`、永久配號或身分登錄的內容。
 
-| 路徑（相對 authored 根目錄） | 內容 |
-| --- | --- |
-| `products/family/<filing_key>/001.yaml` | `product_family` 記錄 |
-| `products/product/<filing_key>/001.yaml` | 人工 `product` 記錄與選填的家族關係 |
-| `products/inclusion/<filing_key>/001.yaml` | 人工 `printing_product` 記錄 |
+| 路徑（相對 authored 根目錄）               | 內容                                |
+| ------------------------------------------ | ----------------------------------- |
+| `products/family/<filing_key>/001.yaml`    | `product_family` 記錄               |
+| `products/product/<filing_key>/001.yaml`   | 人工 `product` 記錄與選填的家族關係 |
+| `products/inclusion/<filing_key>/001.yaml` | 人工 `printing_product` 記錄        |
 
 `filing_key` 僅分檔，使用 `[A-Za-z0-9_-]+`，可以沿用既有 owner；不產生任何家族或收錄關係。無家族商品可用 `unassigned` 分檔，不能據此建立同名家族。檔名採只增的三位以上十進位序號；依 §1 的 512 KiB 目標及單檔嚴格小於 1 MiB 切檔。新分片按 `record_key` 字典序排列，不重排既有分片。
 
@@ -507,11 +507,11 @@ F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；
 
 下表是輸入欄位；資料語意、enum 及 FK 沿 build-db，不直接儲存建置產生的 text_unit ID。`name` 與可空 `note` 使用 `{lang: Lang, text: Text}`，語言必須在建置的 language 登錄；名稱不可空。原文 exact bytes 保留，不以名稱分配永久 ID；其他語言名稱仍由翻譯流程處理。
 
-| kind | data 的完整欄位 |
-| --- | --- |
-| `product_family` | `id, code, public_code, kind, name`；kind 七選一：`booster/promo/deck/collaboration/special_pack/special/other`；code 為穩定小寫搜尋碼 `[a-z][a-z0-9_-]*`，public_code 保留人工確認的公開代號大小寫 |
-| `product` | `id, region, family_id?, product_code?, name, product_type, released_on?, date_precision, date_raw?` |
-| `printing_product` | `printing_id, product_id, first_available_on?, first_available_precision?, first_available_raw?, inclusion_kind, note?` |
+| kind               | data 的完整欄位                                                                                                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `product_family`   | `id, code, public_code, kind, name`；kind 七選一：`booster/promo/deck/collaboration/special_pack/special/other`；code 為穩定小寫搜尋碼 `[a-z][a-z0-9_-]*`，public_code 保留人工確認的公開代號大小寫 |
+| `product`          | `id, region, family_id?, product_code?, name, product_type, released_on?, date_precision, date_raw?`                                                                                                |
+| `printing_product` | `printing_id, product_id, first_available_on?, first_available_precision?, first_available_raw?, inclusion_kind, note?`                                                                             |
 
 family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的家族須保留該 ID。product.id 是人工首次採納時指定的永久非空 ID，全域唯一，不由當下排序／名稱／URL 重算；product_code 不是 ID，也不假定兩區相同。`product_type` 沿 build-db 的 Code，不把家族的七種 kind 偷換成商品型別 enum。 **使用者核可 2026-10-01**：本節人工 product 的 `product_type` 仍必填 Code、不接受 null；官方萃取商品使用 confirmed 家族 `public_code` 精確對應的 kind，無對應則在 DB 留 null 並診斷，見 [build-db §3.2](../build/build-db.md#32-商品與發行)。兩種輸入不共用 nullable 的人工採納規則。`inclusion_kind` 僅 `pack/box/first_edition_campaign/qr_redemption/event_prize/other`，無證據時不得由家族 kind 猜配布方式。
 
@@ -541,8 +541,8 @@ DB 不設 product／printing_product／product_family 的 decision_id 欄。匯�
 
 使用獨立入口，避免擴充 §10 的 `product-authored-v1` kind 白名單或把 ID-only 輸入當成人工商品內容。
 
-| 路徑（相對 authored 根目錄） | 完整頂層欄位 |
-| --- | --- |
+| 路徑（相對 authored 根目錄）                   | 完整頂層欄位                                       |
+| ---------------------------------------------- | -------------------------------------------------- |
 | `products/identities/<region>/<sequence>.yaml` | `format: 1, kind: product_identity_shard, records` |
 
 region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔大小、YAML 限制、路徑安全及新分片排序沿 §1、§10.2；不改舊分片。讀取掃描 `products/identities/` 下全部 YAML，只允許本表路徑；目錄不存在、其他路徑或副檔名的 YAML、未知格式／欄位、重複鍵均拒絕。先驗全區分片與全部證據，再作建置地區投影。
@@ -561,11 +561,11 @@ product_id 完整比對 §10.3 的 `[a-z][a-z0-9_-]*`。首次**建議**用 regi
 
 match 是下表三選一的封閉物件；每種只接受列出的欄位，`?` 欄仍必須存在，可填 null。來源區塊是正式 parser 辨識的單一商品區塊，不能跨區塊拼接線索。
 
-| match.kind | 完整欄位與限制 |
-| --- | --- |
-| `product_link` | `kind, product_url, expansion_code?`；product_url 是區塊中該 region 正式官網商品連結解析後的 URL，expansion_code 是同區塊搜尋連結的官方 expansion 原值；區塊確無該代號才為 null |
-| `expansion_link` | `kind, search_url, expansion_code`；僅供區塊沒有正式站商品連結時使用。search_url 為該 region 官網搜尋連結解析後的完整 URL，expansion_code 為其中非空的官方 expansion 原值 |
-| `source_block` | `kind, source_version_id, product_block_ordinal`；來源版本沿 source-archive，ordinal 為依 HTML 文件順序列出的商品區塊零起算 UInt。僅匹配此版本此區塊，不跨 raw 版本泛化 |
+| match.kind       | 完整欄位與限制                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `product_link`   | `kind, product_url, expansion_code?`；product_url 是區塊中該 region 正式官網商品連結解析後的 URL，expansion_code 是同區塊搜尋連結的官方 expansion 原值；區塊確無該代號才為 null |
+| `expansion_link` | `kind, search_url, expansion_code`；僅供區塊沒有正式站商品連結時使用。search_url 為該 region 官網搜尋連結解析後的完整 URL，expansion_code 為其中非空的官方 expansion 原值       |
+| `source_block`   | `kind, source_version_id, product_block_ordinal`；來源版本沿 source-archive，ordinal 為依 HTML 文件順序列出的商品區塊零起算 UInt。僅匹配此版本此區塊，不跨 raw 版本泛化         |
 
 連結先解 HTML attribute entity，再以 descriptor.url 為 base 解析相對 href，保留原 href 作萃取追溯；解析後的字串 exact 比對。不移除 query、不重排 query、不改尾斜線、不將 dev host 改成正式 host；expansion 依 URL query 解碼一次，保留大小寫與完整複合代號，不切 `BP12-BP13`，不由卡號或 owner 補值。parser 必須驗連結用途與地區：JP 正式 host 為 `shadowverse-evolve.com`，EN 為 `en.shadowverse-evolve.com`；正式商品路徑為 `/products/` 下，搜尋路徑分別為 `/cardlist/cardsearch` 與 `/cards/searchresults`。非 HTTPS、其他 host 或用途不符只保留診斷線索，不當正式商品／搜尋 URL。新增來源版型需更新並釘住 parser，不放寬為任意 query 中有 expansion 就算商品證據。
 
@@ -583,12 +583,12 @@ evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、�
 
 對每個已驗凍結來源中的商品區塊，正式 extractor 在產生解析輸入或明示 `archive` 模式產生可用的 product_link；預設 `parsed` 建置直接讀取這些解析結果。沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的對照，不作 fuzzy 比較：
 
-| 結果 | 建置行為 |
-| --- | --- |
-| 命中一個 product_id（多種 match 同指此 ID 亦可） | 沿用永久 ID；官方內容及收錄由已審查解析輸入取得（`archive` 模式從 raw 萃取），另驗地區／printing 身分閘門 |
-| 零命中 | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
-| 命中多個不同 product_id | 商品身分衝突，整筆匯入交易失敗；不得任選第一筆、較新一筆或較短 ID |
-| 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺所需解析輸入（產生器／`archive` 模式另拒絕缺 raw／hash 錯） | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略 |
+| 結果                                                                                                                | 建置行為                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 命中一個 product_id（多種 match 同指此 ID 亦可）                                                                    | 沿用永久 ID；官方內容及收錄由已審查解析輸入取得（`archive` 模式從 raw 萃取），另驗地區／printing 身分閘門                                |
+| 零命中                                                                                                              | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
+| 命中多個不同 product_id                                                                                             | 商品身分衝突，整筆匯入交易失敗；不得任選第一筆、較新一筆或較短 ID                                                                        |
+| 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺所需解析輸入（產生器／`archive` 模式另拒絕缺 raw／hash 錯） | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略                                                                                     |
 
 相同 ID 的多次官方觀測可以去重，但名稱、日期、商品型別等內容不一致時依既有商品衝突規則處理，不以身分 confirmed 當作選內容的授權。同名不等於同商品，同代號跨 region 亦不合併；owner 只作歸檔，不能參與商品識別或補收錄。
 
@@ -634,7 +634,7 @@ A／B 兩種名稱語意見 [引擎規則能力與資料身分](../../dsl/engine
 的固定 JP 批次產生暫存檔，確定性產物 SHA 由引擎設定釘選。
 記憶體載入必須顯式傳入規則與身分背景，不能暗讀工作目錄；未知／錯區、
 缺必要模板、歧義或 pin 不符都拒絕，沒有官方名稱預設。
-本專案在新路徑的可執行原創資料採 Apache-2.0，來源內容的排除仍依 LICENSING。
+本專案在 `authored/rules/engine/index.yaml` 的自有貢獻採 Apache-2.0，來源內容的排除依 [LICENSING.md](../../../LICENSING.md)。
 格式合法不等於執行器支援或資料已採納，實際載入能力由 engine 契約與測試驗證。
 
 ## 卡文判定

@@ -14,19 +14,19 @@ use std::sync::{Mutex, OnceLock};
 mod published;
 pub use published::{ProgramPrinting, SnapshotPrograms};
 
-/// Disjoint prototype programs and complete, current-source checked D0 candidates.
+/// An immutable catalogue and complete candidates checked against current sources.
 #[derive(Clone, Debug)]
 #[expect(
     clippy::partial_pub_fields,
     reason = "The public candidates are checked against private accepted copies before use."
 )]
 pub struct SelectedEffects {
-    /// Existing prototype runtime, without any switched card's prototype program.
-    pub prototypes: Arc<Catalog>,
+    /// Snapshot facts, rule bindings and any synthetic fixture metadata.
+    pub catalogue: Arc<Catalog>,
     /// Whole-card candidates; selection does not grant execution or use qualification.
     pub current: BTreeMap<String, Arc<CurrentCardProgram>>,
     accepted: Arc<BTreeMap<String, Arc<CandidateAdmission>>>,
-    accepted_prototypes: Arc<Catalog>,
+    accepted_catalogue: Arc<Catalog>,
     runtime: Arc<OnceLock<Result<Arc<RuntimeCards>>>>,
 }
 
@@ -57,12 +57,12 @@ impl fmt::Debug for RuntimeCards {
 }
 
 impl SelectedEffects {
-    fn new(prototypes: Catalog, accepted: BTreeMap<String, Arc<CandidateAdmission>>) -> Self {
-        Self::from_shared(Arc::new(prototypes), accepted)
+    fn new(catalogue: Catalog, accepted: BTreeMap<String, Arc<CandidateAdmission>>) -> Self {
+        Self::from_shared(Arc::new(catalogue), accepted)
     }
 
     fn from_shared(
-        prototypes: Arc<Catalog>,
+        catalogue: Arc<Catalog>,
         accepted: BTreeMap<String, Arc<CandidateAdmission>>,
     ) -> Self {
         let current = accepted
@@ -71,8 +71,8 @@ impl SelectedEffects {
             .collect();
         Self {
             runtime: Arc::default(),
-            accepted_prototypes: Arc::clone(&prototypes),
-            prototypes,
+            accepted_catalogue: Arc::clone(&catalogue),
+            catalogue,
             accepted: Arc::new(accepted),
             current,
         }
@@ -86,7 +86,7 @@ impl SelectedEffects {
     }
 
     pub(crate) fn check_runtime(&self) -> Result<()> {
-        if !Arc::ptr_eq(&self.prototypes, &self.accepted_prototypes)
+        if !Arc::ptr_eq(&self.catalogue, &self.accepted_catalogue)
             || self.current.len() != self.accepted.len()
             || self.current.iter().any(|(number, candidate)| {
                 self.accepted
@@ -109,7 +109,7 @@ impl SelectedEffects {
 ///
 /// Exact snapshot records and author inputs share immutable facts and candidates.
 /// A shared candidate also shares the admission work that depends on its program alone.
-/// Snapshot closure, prototype, token and rule checks still run for every selection.
+/// Snapshot closure, fixture, token and rule checks still run for every selection.
 /// Drop the loader when the related selections are no longer needed to release
 /// its cached facts and candidates.
 /// Selection preparation runs concurrently; only cache access holds a lock.
@@ -183,18 +183,17 @@ impl CurrentSelectionLoader {
         rules: Option<(&str, &EngineIdentityInput)>,
     ) -> Result<PendingSelection<'input>> {
         let handoff = read_handoff(handoff)?;
-        let mut prototypes =
-            Catalog::read_documents_using(snapshot, keywords, &handoff.documents, |line| {
-                self.read_card(line)
-            })?;
-        let owners = register_authors(handoff.authors, &mut prototypes, Ok)?;
-        prototypes.validate_token_templates()?;
+        let mut catalogue =
+            Catalog::read_snapshot_using(snapshot, keywords, |line| self.read_card(line))?;
+        catalogue.load_fixtures(&handoff.documents)?;
+        let owners = register_authors(handoff.authors, &mut catalogue, Ok)?;
+        catalogue.validate_token_templates()?;
         if let Some((document, identity)) = rules {
-            prototypes.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
+            catalogue.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
         }
         Ok(PendingSelection {
             loader: self,
-            prototypes,
+            catalogue,
             owners,
             loaded: BTreeMap::new(),
         })
@@ -377,7 +376,7 @@ impl SelectionEntry for Arc<CandidateAdmission> {
 
 fn register_authors<'input, Entry>(
     authors: Vec<Author<'input>>,
-    prototypes: &mut Catalog,
+    catalogue: &mut Catalog,
     mut resolve: impl FnMut(&'input Value) -> Result<Entry>,
 ) -> Result<BTreeMap<String, Entry>>
 where
@@ -393,7 +392,7 @@ where
                 rules_names,
             } => (input, printings, rules_names),
             Author::Rejected { card_no, reason } => {
-                record_rejection(prototypes, card_no, reason)?;
+                record_rejection(catalogue, card_no, reason)?;
                 continue;
             }
         };
@@ -405,7 +404,7 @@ where
             ));
         }
         for number in printings {
-            register_printing(prototypes, &number, &owner, &rules_names)?;
+            register_printing(catalogue, &number, &owner, &rules_names)?;
             if entries.insert(number, entry.clone()).is_some() {
                 return Err(invalid("duplicate current printing"));
             }
@@ -414,32 +413,32 @@ where
     Ok(entries)
 }
 
-fn record_rejection(prototypes: &mut Catalog, card_no: &str, reason: &str) -> Result<()> {
+fn record_rejection(catalogue: &mut Catalog, card_no: &str, reason: &str) -> Result<()> {
     if reason != "source_unresolved_issue" {
         return Err(EngineFailure::Unsupported(format!(
             "current card rejected: {card_no}: {reason}"
         )));
     }
-    if !prototypes.cards.contains_key(card_no)
-        || prototypes.programs.contains_key(card_no)
-        || prototypes
+    if !catalogue.cards.contains_key(card_no)
+        || catalogue.fixtures.contains_key(card_no)
+        || catalogue
             .rejected
             .insert(card_no.into(), vec![reason.into()])
             .is_some()
     {
-        return Err(invalid("unresolved current card overlaps a prototype"));
+        return Err(invalid("invalid or duplicated current rejection"));
     }
     Ok(())
 }
 
 fn check_token_sources(
-    prototypes: &Catalog,
+    catalogue: &Catalog,
     accepted: &BTreeMap<String, Arc<CandidateAdmission>>,
 ) -> Result<()> {
     for admission in accepted.values() {
         let program = admission.candidate();
         for number in &program.token_printings {
-            if prototypes
+            if catalogue
                 .token_definitions
                 .get(number)
                 .is_none_or(|token| !token.complete)
@@ -458,7 +457,7 @@ fn check_token_sources(
 ///
 /// # Errors
 /// Rejects the entire selection on any rejected card, overlap or D0 failure;
-/// callers never receive a partial selection or an implicit prototype fallback.
+/// callers never receive a partial selection.
 fn select_using(
     snapshot: &str,
     keywords: &str,
@@ -468,15 +467,15 @@ fn select_using(
     read_card: impl FnMut(&str) -> Result<Arc<Card>>,
 ) -> Result<SelectedEffects> {
     let handoff = read_handoff(handoff)?;
-    let mut prototypes =
-        Catalog::read_documents_using(snapshot, keywords, &handoff.documents, read_card)?;
-    let accepted = register_authors(handoff.authors, &mut prototypes, compile)?;
-    prototypes.validate_token_templates()?;
-    check_token_sources(&prototypes, &accepted)?;
+    let mut catalogue = Catalog::read_snapshot_using(snapshot, keywords, read_card)?;
+    catalogue.load_fixtures(&handoff.documents)?;
+    let accepted = register_authors(handoff.authors, &mut catalogue, compile)?;
+    catalogue.validate_token_templates()?;
+    check_token_sources(&catalogue, &accepted)?;
     if let Some((document, identity)) = rules {
-        prototypes.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
+        catalogue.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
     }
-    Ok(SelectedEffects::new(prototypes, accepted))
+    Ok(SelectedEffects::new(catalogue, accepted))
 }
 
 /// A checked selection whose authors are lowered only when a printing is requested.
@@ -485,7 +484,7 @@ fn select_using(
 /// token names and rule bindings are complete; unrequested authors stay unverified.
 pub(crate) struct PendingSelection<'input> {
     loader: &'input CurrentSelectionLoader,
-    prototypes: Catalog,
+    catalogue: Catalog,
     owners: BTreeMap<String, &'input Value>,
     loaded: BTreeMap<String, Arc<CandidateAdmission>>,
 }
@@ -500,7 +499,7 @@ impl PendingSelection<'_> {
     ) {
         let Self {
             loader,
-            prototypes,
+            catalogue,
             owners,
             loaded,
         } = self;
@@ -522,31 +521,31 @@ impl PendingSelection<'_> {
             loaded.insert(number.to_owned(), accepted);
             Ok(Some(program))
         };
-        (prototypes, candidate)
+        (catalogue, candidate)
     }
 
     /// Accept exactly the requested printings.
     pub(crate) fn finish(self) -> Result<SelectedEffects> {
-        check_token_sources(&self.prototypes, &self.loaded)?;
-        Ok(SelectedEffects::new(self.prototypes, self.loaded))
+        check_token_sources(&self.catalogue, &self.loaded)?;
+        Ok(SelectedEffects::new(self.catalogue, self.loaded))
     }
 }
 
 fn register_printing(
-    prototypes: &mut Catalog,
+    catalogue: &mut Catalog,
     number: &str,
     owner: &Owner<'_>,
     rules_names: &[Option<String>],
 ) -> Result<()> {
-    if prototypes.programs.contains_key(number) || prototypes.rejected.contains_key(number) {
-        return Err(invalid("current selection identity or prototype overlap"));
+    if catalogue.fixtures.contains_key(number) || catalogue.rejected.contains_key(number) {
+        return Err(invalid("current selection identity or fixture overlap"));
     }
     if !rules_names.is_empty() {
-        prototypes
+        catalogue
             .rules_names
             .insert(number.into(), rules_names.to_vec());
     }
-    let face = prototypes.face(number, 0)?;
+    let face = catalogue.face(number, 0)?;
     let is_token = face["card_type"]
         .as_str()
         .is_some_and(|kind| kind.contains("トークン"));
@@ -558,10 +557,10 @@ fn register_printing(
             .token
             .and_then(|token| token["name"].as_str())
             .or_else(|| rules_names.first()?.as_deref())
-            .or_else(|| prototypes.cards.get(owner.card_no)?.faces.first()?["name"].as_str())
+            .or_else(|| catalogue.cards.get(owner.card_no)?.faces.first()?["name"].as_str())
             .ok_or_else(|| invalid("token requires a rules name"))?
             .to_owned();
-        prototypes.token_definitions.insert(
+        catalogue.token_definitions.insert(
             number.into(),
             super::TokenDefinition {
                 name,

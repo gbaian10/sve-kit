@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgram>) {
     static PREPARED: OnceLock<(SelectedEffects, BTreeMap<String, WellFormedCardProgram>)> =
@@ -26,8 +25,8 @@ fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormed
         snapshot.push('\n');
         let document = json!({
             "format": 1_u8,
-            "kind": "effect_set",
-            "cards": {number: {"status": "complete", "abilities": []}}
+            "kind": "fixture_cards",
+            "cards": {number: {"status": "complete"}}
         });
         input["documents"]
             .as_array_mut()
@@ -46,7 +45,6 @@ fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormed
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         (selected, BTreeMap::from([(number.to_owned(), program)]))

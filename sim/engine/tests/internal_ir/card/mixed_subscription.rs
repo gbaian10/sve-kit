@@ -29,9 +29,9 @@ fn subscription_position(base: &WellFormedCardProgram, observer: &WellFormedCard
         "power":"4","hp":"5","traits":[],"text":null,"sections":[]}]});
     let snapshot = format!("{snapshot}\n{form}");
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-form"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["unit-form"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("mixed.yaml".into(), document.to_string())],

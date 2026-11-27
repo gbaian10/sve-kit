@@ -13,7 +13,7 @@ fn fixture() -> &'static SelectedEffects {
         ] {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー","cost":"0","power":"3","hp":"4","traits":traits,"text":null,"sections":[]}]}).to_string());
             snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         // A blank evolution resource keeps the printed payment test independent of the other face's abilities.
         let mut form = snapshot.lines().map(|line| serde_json::from_str::<Value>(line).unwrap()).find(|row| row["number"] == "CP02-058").unwrap()["faces"][0].clone();
@@ -21,7 +21,7 @@ fn fixture() -> &'static SelectedEffects {
         form["sections"] = json!([]);
         snapshot.push_str(&json!({"number":"ready-form-057","faces":[form]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["ready-form-057.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"ready-form-057":{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["ready-form-057.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{"ready-form-057":{"status":"complete"}}}).to_string()]));
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })
 }

@@ -1,4 +1,4 @@
-"""Write validated author shards and switch prototypes in the same operation."""
+"""Write validated author shards and update the index in the same operation."""
 
 from dataclasses import replace
 from io import StringIO
@@ -177,7 +177,7 @@ def _located_error(
     )
 
 
-def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branches, too-many-statements, too-many-locals] -- validate the complete candidate before performing any write
+def write(  # ruff: ignore[complex-structure, too-many-branches, too-many-statements, too-many-locals] -- validate the complete candidate before performing any write
     workspace: Workspace,
     *,
     main: Path,
@@ -185,7 +185,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     output_root: Path,
     cards: frozenset[str] = frozenset(),
     all_cards: bool = False,
-    remove_prototype: bool = False,
 ) -> dict[str, JsonValue]:
     """Refresh only explicitly selected cards, retaining every recorded review literal."""
     if bool(cards) == all_cards:
@@ -210,7 +209,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             for f in (
                 *reference.author_files,
                 *reference.body_files,
-                *reference.prototype_files,
             )
         }
         actual = {
@@ -218,7 +216,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             for f in (
                 *original.author_files,
                 *original.body_files,
-                *original.prototype_files,
             )
         }
         if expected - actual or {
@@ -228,20 +225,15 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     previous = handwriting(original)
     authors = {f.path: f for f in original.author_files}
     companions = {f.path: f for f in original.body_files}
-    prototypes = {f.path: f for f in original.prototype_files}
     records = list(original.index.records)
     changed = set()
-    removed_prototypes: set[str] = set()
-    prototype_ids: dict[str, str] = {}
-    removed_cards: set[str] = set()
-    # A replaced record may live in another pack's index shard than its replacement.
     affected_owners = {number.split("-", 1)[0] for number in selected}
     for number in sorted(selected):
         card_id = workspace.current.printing_card(number)
         old = next(
             (r for r in records if r.card_id == card_id and r.scope == "shared"), None
         )
-        if isinstance(old, AuthorIndexRecord) and old.record_key != number:
+        if old is not None and old.record_key != number:
             raise AuthorInputError(
                 Diagnostic(
                     "index",
@@ -249,10 +241,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                     card_no=number,
                     expected=old.record_key,
                 )
-            )
-        if old is not None and old.kind != "author_effect_set" and not remove_prototype:
-            raise AuthorInputError(
-                Diagnostic("source", "prototype_author_overlap", card_no=number)
             )
         if number in previous.cards:
             _facts(
@@ -268,7 +256,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
                 )
         path = (
             old.file
-            if isinstance(old, AuthorIndexRecord)
+            if old is not None
             else f"rules/author-effects/{number.split('-', 1)[0]}/{number}.yaml"
         )
         tree: dict[str, JsonValue] = (
@@ -298,37 +286,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             )
             records.insert(offset, replacement)
         else:
-            affected_owners.add(old.record_key.split("-", 1)[0])
             records[records.index(old)] = replacement
-        if remove_prototype:
-            for path, file in tuple(prototypes.items()):
-                tree = object_value(schemas.prototype_tree(file.raw))
-                mapping = object_value(tree["cards"])
-                for alias in mapping:
-                    if alias not in prototype_ids:
-                        prototype_ids[alias] = workspace.current.printing_card(
-                            alias, prototype=True
-                        )
-                aliases = {
-                    alias for alias in mapping if prototype_ids[alias] == card_id
-                }
-                if aliases:
-                    for alias in aliases:
-                        del mapping[alias]
-                    removed_prototypes.update(aliases)
-                    removed_cards.add(card_id)
-                    if mapping:
-                        prototypes[path] = _file(path, tree)
-                    else:
-                        del prototypes[path]
-                    changed.add(path)
-            if card_id not in removed_cards:
-                # A requested removal must find a prototype for its own card.
-                raise AuthorInputError(
-                    Diagnostic(
-                        "source", "prototype_removal_set_mismatch", card_no=number
-                    )
-                )
     for key, definition in supplied.bodies.items():
         used = [
             number
@@ -402,17 +360,12 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         index_files,
         tuple(authors.values()),
         tuple(companions.values()),
-        tuple(prototypes.values()),
     )
     try:
         results = workspace.current.validate_inputs(candidate, workspace.expander)
     except AuthorInputError as error:
         raise _located_error(candidate, supplied, error.diagnostic) from None
-    rejected = [
-        r
-        for r in results
-        if isinstance(r, CardRejected) and isinstance(r.record, AuthorIndexRecord)
-    ]
+    rejected = [r for r in results if isinstance(r, CardRejected)]
     if rejected:
         raise _located_error(candidate, supplied, rejected[0].diagnostic)
     try:
@@ -422,7 +375,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     outputs = {
         **authors,
         **companions,
-        **prototypes,
         **{file.path: file for file in index_files},
     }
     for path in sorted(changed):
@@ -431,10 +383,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     try:
         for path in sorted(changed):
             destination = output_root / path
-            if path not in outputs:
-                destination.unlink()
-                written.append(path)
-                continue
             if destination.exists() and destination.read_bytes() == outputs[path].raw:
                 continue
             destination.parent.mkdir(parents=True, exist_ok=True)

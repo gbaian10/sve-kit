@@ -13,22 +13,16 @@ const FOLLOWERS: [(&str, &str, &str, &str); 4] = [
 fn catalog() -> Arc<Catalog> {
     let mut lines = vec![json!({"number":"unit-spell","faces":[{"name":"unit-spell","card_class":"ニュートラル","card_type":"スペル","cost":"1","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]}).to_string()];
     let mut cards = serde_json::Map::new();
-    cards.insert(
-        "unit-spell".into(),
-        json!({"status":"complete","review":"synthetic","abilities":[]}),
-    );
+    cards.insert("unit-spell".into(), json!({"status":"complete"}));
     for (number, cost, power, traits) in FOLLOWERS {
         let traits: Vec<&str> = traits.split('・').filter(|t| !t.is_empty()).collect();
         lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","cost":cost,"power":power,"hp":"3","traits":traits,"text":null,"sections":[]}]}).to_string());
-        cards.insert(
-            number.into(),
-            json!({"status":"complete","review":"synthetic","abilities":[]}),
-        );
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document = json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &lines.join("\n"),
             &registry,
             &[("unit.yaml".into(), document)],

@@ -229,7 +229,7 @@ impl Game {
 
     fn prepare_quick(&mut self, window: QuickWindow) -> Result<DecisionView> {
         self.check_internal_resources()?;
-        self.internal_prototype_abilities()?;
+        self.check_internal_fixture()?;
         let actor = super::player_id(super::super::super::other(self.active()))?;
         let mut actions = Vec::new();
         let mut options = Vec::new();

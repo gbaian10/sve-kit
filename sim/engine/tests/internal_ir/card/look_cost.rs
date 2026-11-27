@@ -186,7 +186,7 @@ fn literal_trait_position(program: &WellFormedCardProgram) -> Game {
     wrong["faces"][0]["traits"] = json!(["別の特徵"]);
     faces.push(wrong);
     let mut parsed = serde_json::from_str::<Value>(&cards).unwrap();
-    parsed["cards"]["wrong-trait"] = json!({"status":"complete","abilities":[]});
+    parsed["cards"]["wrong-trait"] = json!({"status":"complete"});
     cards = parsed.to_string();
     let snapshot = faces
         .iter()
@@ -194,7 +194,8 @@ fn literal_trait_position(program: &WellFormedCardProgram) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("look.yaml".into(), cards)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("look.yaml".into(), cards)])
+            .unwrap(),
     );
     let mut initial = setup(
         1,

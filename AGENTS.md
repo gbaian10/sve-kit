@@ -11,7 +11,7 @@
 Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，一人專案。
 
 - **卡表**：爬日文與英文官網，合併人工資料，匯出有版號的 JSON 快照
-- **模擬器**：已有引擎原型、scenario runner 與 Web 用戶端；完整網頁對戰服務仍在開發（之後可能打包成 PWA、Tauri）
+- **模擬器**：已有規則引擎、scenario runner 與 Web 用戶端；完整網頁對戰服務仍在開發（之後可能打包成 PWA、Tauri）
 
 不是官方產品，名稱與內容都不要使用 `shadowverse` 當專案名。
 
@@ -77,7 +77,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 此決定不涵蓋 SV1、Worlds Beyond 等其他遊戲的原檔。
 官方內容仍排除於專案的 Apache／CC0 授權之外，依 [LICENSING.md](LICENSING.md) 標示。
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
-`authored/` 依卡包切檔（原型如 `authored/rules/effects/BP01.yaml`；正式 DSL 入口依[DSL 承載契約](docs/dsl/author-contract-1.0.md)分片），單檔不要超過 1 MiB（1024 KiB）。
+`authored/` 依卡包切檔。效果 DSL 的分片依 [DSL 承載契約](docs/dsl/author-contract-1.0.md)，單檔不要超過 1 MiB（1024 KiB）。
 
 16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊。Python 測試使用這些公開 fixture 與合成案例，主 repo 與 fork 跑相同完整範圍及 90% 行／分支覆蓋率門檻，不需要私有 checkout 或憑證。
 引擎測試由 carddb 讀取 `card-data/` 及 `tests/engine/card-input.json` 明示的 JP 批次，產生暫存 JSONL；不提交衍生卡表。引擎仍自行載入 authored 效果、規則名稱與 token 選用，不另造一套卡表規則。

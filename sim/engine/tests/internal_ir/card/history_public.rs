@@ -1,7 +1,6 @@
 use super::*;
 use crate::rule_fixtures;
 use alloc::collections::BTreeMap;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain};
 
 fn history_catalog(lesson_role: bool) -> Arc<Catalog> {
@@ -11,11 +10,11 @@ fn history_catalog(lesson_role: bool) -> Arc<Catalog> {
     snapshot.push('\n');
     snapshot.push_str(&json!({"number":"unit-other","faces":[{"name":"unit-other","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"4","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string());
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-other"] = json!({"status":"complete","abilities":[]});
-    document["cards"]["lesson"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["unit-other"] = json!({"status":"complete"});
+    document["cards"]["lesson"] = json!({"status":"complete"});
     if !lesson_role {
         return Arc::new(
-            Catalog::from_documents(
+            Catalog::from_fixture_documents(
                 &snapshot,
                 &registry,
                 &[("history.yaml".into(), document.to_string())],
@@ -31,12 +30,11 @@ fn history_catalog(lesson_role: bool) -> Arc<Catalog> {
     )]);
     let rules = rule_fixtures::rules(&snapshot, json!([]), resources).to_string();
     Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &snapshot,
             &registry,
             &[("history.yaml".into(), document.to_string())],
             &rules,
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     )

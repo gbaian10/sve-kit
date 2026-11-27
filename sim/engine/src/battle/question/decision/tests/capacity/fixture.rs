@@ -1,7 +1,7 @@
 use super::*;
 use crate::battle::tests::rule_fixtures;
 use crate::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput, build_observation};
-use crate::catalog::{Catalog, EngineIdentityInput};
+use crate::catalog::Catalog;
 use std::sync::OnceLock;
 use sve_battle_contract::{CardRef, Nat as WireNat, observation::BattleObservation};
 
@@ -71,12 +71,11 @@ fn build(shared: bool) -> Fixture {
         json!([]),
     );
     let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &snapshot,
             &keywords,
             &[("synthetic".into(), document.to_string())],
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );

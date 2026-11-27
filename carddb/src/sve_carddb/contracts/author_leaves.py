@@ -21,14 +21,6 @@ RelativeFile = Annotated[
 ]
 
 
-class PrototypeIndexRecord(RecordData):
-    card_id: CardId
-    scope: Literal["shared"]
-    file: RelativeFile
-    kind: Literal["effect_set"]
-    record_key: Text
-
-
 class AuthorIndexRecord(RecordData):
     card_id: CardId
     scope: Literal["shared"]
@@ -37,10 +29,7 @@ class AuthorIndexRecord(RecordData):
     record_key: Text
 
 
-type IndexRecord = PrototypeIndexRecord | AuthorIndexRecord
-
-
 class EffectsIndex(RecordData):
     format: Annotated[Literal[1], BeforeValidator(integer)]
     kind: Literal["effects_index"]
-    records: tuple[IndexRecord, ...]
+    records: tuple[AuthorIndexRecord, ...]

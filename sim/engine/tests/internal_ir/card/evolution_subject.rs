@@ -52,14 +52,14 @@ fn position_with_form(
             .to_string(),
         );
     }
-    let definitions = json!({"format":1,"kind":"effect_set","cards":{
-        "recipient":{"status":"complete","abilities":[]},
-        "recipient-form":{"status":"complete","abilities":[]},
-        "source-form":{"status":"complete","abilities":[]}
+    let definitions = json!({"format":1,"kind":"fixture_cards","cards":{
+        "recipient":{"status":"complete"},
+        "recipient-form":{"status":"complete"},
+        "source-form":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[

@@ -137,7 +137,7 @@ fn synthetic_filter(initial: &Value, from: &Value) -> Game {
     );
     snapshot.push('\n');
     input["documents"].as_array_mut().unwrap().push(json!(["synthetic-filter.yaml",
-        "format: 1\nkind: effect_set\ncards:\n  synthetic-filter:\n    status: complete\n    abilities: []\n"]));
+        "format: 1\nkind: fixture_cards\ncards:\n  synthetic-filter:\n    status: complete\n"]));
     let mut tree = expanded::spell_tree().clone();
     let mut card = tree["cards"]["SD03-005"].clone();
     card["abilities"][0]["spell"] = json!({

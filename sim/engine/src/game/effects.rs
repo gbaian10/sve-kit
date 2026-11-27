@@ -365,30 +365,6 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn modify_historical_numbers(&mut self, id: &str, node: &Value) -> Result<()> {
-        for field in ["power", "hp"] {
-            let set_key = format!("set_{field}");
-            if let Some(expr) = node.get(&set_key) {
-                self.numeric_base_replace_allowed(id)?;
-                let amount = int(expr);
-                self.object_mut(id)?.state[field] = json!(amount);
-                if field == "hp" {
-                    self.object_mut(id)?.state["max_hp"] = json!(amount);
-                }
-            }
-            if let Some(expr) = node.get(field) {
-                self.numeric_prototype_operand(id, expr.is_i64())?;
-                let amount = int(expr);
-                self.numeric_prototype_add_base(
-                    id,
-                    if field == "power" { amount } else { 0 },
-                    if field == "hp" { amount } else { 0 },
-                )?;
-            }
-        }
-        Ok(())
-    }
-
     /// `method` states whether a rule or an effect instruction draws: the move itself looks
     /// the same, and nothing recorded later can tell the two apart.
     pub(super) fn draw(

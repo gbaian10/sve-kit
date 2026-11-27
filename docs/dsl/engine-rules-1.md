@@ -1,8 +1,8 @@
 # 引擎規則能力與資料身分 engine-rules/1
 
 `engine-rules/1` 是可執行規則設定，不是另一份卡表、構築合法性結果或採納決定。
-語法唯一權威為 [engine-rules.schema.json](../../dsl/engine-rules.schema.json)；
-效果語法仍為 [effects.schema.json](../../dsl/effects.schema.json) 的 `astra/1`。
+語法唯一權威為 [engine-rules.schema.json](../../dsl/engine-rules.schema.json)。
+對戰宿主從快照載入已展開的 [DSL 1.0 程式](../../dsl/program.schema.json)。
 通過 schema 不代表執行器已支援、真實綁定正確或資料已通過來源採納。
 
 ## 1. 封套與版本背景
@@ -13,22 +13,22 @@
 依 [LICENSING](../../LICENSING.md)，本專案在此路徑的貢獻採 Apache-2.0；官方及第三方內容仍排除。
 公開設定只記代碼、身分參照、卡號定位器、來源版本及核對紀錄，不複製官方名稱或引文。
 
-| 欄位 | 內容與限制 |
-| --- | --- |
-| `format` | 恰為整數 1 |
-| `kind` | 恰為 `engine_rules`；原 engine-rules/1 設定語意不變 |
-| `scope` | `region` 僅 jp／en，`rules_version` 保留當區官版字串，`rules_source_version_id` 指向該官版的正式凍結來源 |
-| `input` | `kind` 僅 legacy-jp／resolved。引擎讀取的 `snapshot_sha256` 是完整輸入 exact bytes 的 64 位小寫 hex |
-| `titles` | 作品代碼、定位 face、有限能力及 evidence ID；不收顯示名稱欄 |
-| `resources` | 有限角色、規則名稱身分參照、必要 template 及 evidence ID |
-| `evidence` | 核對紀錄的精確全集，不能以 schema valid 冒充人工確認或採納 |
+| 欄位        | 內容與限制                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `format`    | 恰為整數 1                                                                                                         |
+| `kind`      | 恰為 `engine_rules`；原 engine-rules/1 設定語意不變                                                                |
+| `scope`     | `region` 僅 jp／en，`rules_version` 保留當區官版字串，`rules_source_version_id` 指向該官版的正式凍結來源           |
+| `input`     | 作者範本使用 `legacy-jp`。carddb 匯出 `resolved` 給引擎。`snapshot_sha256` 是完整輸入 exact bytes 的 64 位小寫 hex |
+| `titles`    | 作品代碼、定位 face、有限能力及 evidence ID；不收顯示名稱欄                                                        |
+| `resources` | 有限角色、規則名稱身分參照、必要 template 及 evidence ID                                                           |
+| `evidence`  | 核對紀錄的精確全集，不能以 schema valid 冒充人工確認或採納                                                         |
 
 所有 object 禁止未知欄位。陣列不能重複同一完整物件；業務鍵的唯一性仍由載入器檢查，
 不同內容使用同一 title code／role／evidence ID 也必須拒絕，不能靠 `uniqueItems` 當作已驗證。
 輸入 SHA、規則設定 exact bytes 摘要及 authored／schema 版本共同釘入 Catalog 背景；
 載入與 resume 不得悄悄改用最新卡表或設定。
 
-## 2. 身分參照及明示 legacy-jp 轉接
+## 2. 規則設定的身分解析
 
 `faceRef` 恰選其一：
 
@@ -38,17 +38,15 @@
 角色的 `names` 至少一筆，每筆是：
 
 - `legacy-name`：`kind`、`face` 與 `name_source`。`printed` 使用該面印刷名稱；
-  `rules` 使用該面的 program `rules_name` 覆寫，沒有覆寫時才沿用印刷名稱。
+  `rules` 使用該面的有效規則名稱。匯出保留名稱來源，將內含的 face 改成永久 `face-id`。
 - `rules-name-id`：`kind`、`region` 與已採納的 `rules_name_id`。
 
 Catalog 必須驗證參照存在、與 scope 同區、沒有歧義且在輸入背景內；角色名稱可涵蓋
 經資料確認的多個身分。正式資料直接沿用既有 card／face／rules_name／title 登錄，
 不能把舊卡號定位器或私有名稱的 hash 冒稱永久身分。
 
-舊無 region 的 JP JSONL 只經明示 `legacy-jp` 載入邊界使用；該模式的 scope 必為 jp，
-所有 locator 亦須同區。名稱與 title label 從同一份釘版 JP 輸入解析；目前由公開 `card-data/` 的明示批次產生暫存 JSONL，
-不由 EN 後綴去除、卡包、拼字或名稱相似性推導跨區配對。
-`resolved` 模式接受同批正式身分投影；兩種模式皆須驗 SHA 與引用背景，不互相猜測。
+作者範本中的 `legacy-jp` 為 JP 定位座標。carddb 在建置對戰輸入時從同一份快照解析為永久身分，
+輸出 `resolved` 規則設定與 face projection。Rust 以相同卡表的 SHA-256 與身分投影驗證該設定。
 
 作品文字的舊題庫轉接以 title 的 `anchor` face 建立 label ↔ title code 索引，
 同一 label 映到多個 code 應拒絕。未解析、缺採納或跨區資料不能先當正式登錄。
@@ -63,11 +61,11 @@ Catalog 必須驗證參照存在、與 scope 同區、沒有歧義且在輸入�
 
 能力恰為以下三種 object：
 
-| `kind` | 其餘欄位 | 用途 |
-| --- | --- | --- |
-| `opening_start_amulet` | 無 | 開局起始護符選擇 |
-| `opening_ex_resource` | `resource_role: lesson_item`、`count: 5`、`zone: ex`，均固定 | 建立五個開局 EX 資源 |
-| `ub_enabled` | 無 | 作品構築的 UB gate |
+| `kind`                 | 其餘欄位                                                     | 用途                 |
+| ---------------------- | ------------------------------------------------------------ | -------------------- |
+| `opening_start_amulet` | 無                                                           | 開局起始護符選擇     |
+| `opening_ex_resource`  | `resource_role: lesson_item`、`count: 5`、`zone: ex`，均固定 | 建立五個開局 EX 資源 |
+| `ub_enabled`           | 無                                                           | 作品構築的 UB gate   |
 
 同 kind 重複即拒絕。能力只能在 `construction == title` 且該 title code 有綁定時使用，
 class／crossover 不因帶了 code 就獲得能力；玩家輸入不能自帶能力布林。

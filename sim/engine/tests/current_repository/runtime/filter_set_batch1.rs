@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::SearchAnswer;
 
 #[expect(
@@ -206,8 +205,8 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
             }]});
             snapshot.push_str(&row.to_string());
             snapshot.push('\n');
-            let mut document = json!({"format":1_u8,"kind":"effect_set","cards":{}});
-            document["cards"][&number] = json!({"status":"complete","abilities":[]});
+            let mut document = json!({"format":1_u8,"kind":"fixture_cards","cards":{}});
+            document["cards"][&number] = json!({"status":"complete"});
             input["documents"]
                 .as_array_mut()
                 .unwrap()
@@ -229,7 +228,6 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         (selected, programs)

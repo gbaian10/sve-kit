@@ -28,7 +28,7 @@ fn selected() -> &'static SelectedEffects {
             snapshot.push_str(&json!({"number":number,"faces":[material]}).to_string());
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
-                format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
+                format!("{number}.yaml"),format!("format: 1\nkind: fixture_cards\ncards:\n  {number}:\n    status: complete\n")
             ]));
         }
         for (number, power, traits) in [
@@ -47,7 +47,7 @@ fn selected() -> &'static SelectedEffects {
             snapshot.push_str(&json!({"number":number,"faces":[material]}).to_string());
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
-                format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
+                format!("{number}.yaml"),format!("format: 1\nkind: fixture_cards\ncards:\n  {number}:\n    status: complete\n")
             ]));
         }
         repository::selection_with_rules_from(&snapshot, &keywords, &input)

@@ -350,14 +350,14 @@ fn printed_bp16_049_injured_set_fragment_uses_snapshot_follower() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP16-049":{"status":"complete","review":"synthetic Set fragment harness","abilities":[]},
-        "BP01-011":{"status":"complete","review":"synthetic target harness","abilities":[]}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP16-049":{"status":"complete"},
+        "BP01-011":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

@@ -19,8 +19,8 @@ fn selected() -> &'static SelectedEffects {
         );
         input["documents"].as_array_mut().unwrap().push(json!([
             "counter-cost-blade.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "counter-cost-blade":{"status":"complete","abilities":[]}
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                "counter-cost-blade":{"status":"complete"}
             }})
             .to_string()
         ]));

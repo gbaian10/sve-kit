@@ -102,10 +102,10 @@ fn evolution_fixture() -> &'static EvolutionFixture {
             let base = format!("earth-base-{form}");
             snapshot.push('\n');
             snapshot.push_str(&json!({"number":base,"faces":[{"name":record["faces"][0]["name"],"card_class":record["faces"][0]["card_class"],"card_type":"フォロワー","cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]}).to_string());
-            cards.insert(base.clone(), json!({"status":"complete","abilities":[]}));
+            cards.insert(base.clone(), json!({"status":"complete"}));
             programs.insert(base, tree["cards"]["synthetic-evolution"].clone());
         }
-        input["documents"].as_array_mut().unwrap().push(json!(["earth-bases.yaml",json!({"format":1_u8,"kind":"effect_set","cards":cards}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["earth-bases.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":cards}).to_string()]));
         let selected = repository::select(&snapshot, &keywords, &input).unwrap();
         tree["cards"] = Value::Object(programs);
         EvolutionFixture { selected, programs: lowerer().lower(&tree).unwrap() }

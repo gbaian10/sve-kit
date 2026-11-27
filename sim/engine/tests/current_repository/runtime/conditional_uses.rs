@@ -18,7 +18,7 @@ fn selected() -> &'static SelectedEffects {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "gate-goblin.yaml",
-            "format: 1\nkind: effect_set\ncards:\n  gate-goblin:\n    status: complete\n    abilities: []\n"
+            "format: 1\nkind: fixture_cards\ncards:\n  gate-goblin:\n    status: complete\n"
         ]));
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })

@@ -60,7 +60,7 @@ pub(super) fn board(stack: u8, pp: u8) -> Game {
     let (snapshot, _registry, document) = catalog_documents(&json!("4"));
     let selected = stack_selection(
         &snapshot,
-        include_str!("../../../../../authored/rules/keywords.yaml"),
+        include_str!("../../../../../authored/rules/keyword-registry.yaml"),
         &document,
     );
     let mut game = Game::from_selected_effects(

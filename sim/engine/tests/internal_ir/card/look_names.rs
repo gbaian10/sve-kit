@@ -45,11 +45,12 @@ fn catalog_for_names() -> Arc<Catalog> {
         face["faces"][0]["traits"] = json!(traits);
         face["faces"][0]["card_class"] = json!("ナイトメア");
         faces.push(face.to_string());
-        effects["cards"][number] = json!({"status":"complete","abilities":[]});
+        effects["cards"][number] = json!({"status":"complete"});
     }
     legacy = effects.to_string();
     Arc::new(
-        Catalog::from_documents(&faces.join("\n"), &registry, &[("names".into(), legacy)]).unwrap(),
+        Catalog::from_fixture_documents(&faces.join("\n"), &registry, &[("names".into(), legacy)])
+            .unwrap(),
     )
 }
 

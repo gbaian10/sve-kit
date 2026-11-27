@@ -1,4 +1,4 @@
-"""File inventories reject omitted records without changing prototype inputs."""
+"""File inventories reject omitted or mismatched author records."""
 
 from dataclasses import replace
 from pathlib import Path
@@ -8,8 +8,6 @@ import pytest
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_handwritten import read_files
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 from sve_carddb.domains.effects.author_set import (
@@ -25,12 +23,10 @@ from .author_entry_cases import meta, source_use
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from ...support.database_template import DatabaseTemplate
-
 REPO = Path(__file__).resolve().parents[4]
 AUTHOR = "rules/author-effects/FIX/001.yaml"
 BODY = "rules/effect-bodies/FIX/001.yaml"
-PROTOTYPE = "rules/effects/FIX.yaml"
+OTHER_AUTHOR = "rules/author-effects/OLD/001.yaml"
 INDEX = "rules/effects-index/FIX.yaml"
 ABILITY_FILTERS = frozenset(
     {"earth_rite", "fanfare", "lastword", "quick_activation", "quick_spell"}
@@ -90,7 +86,7 @@ def selection(
         "card_id": "c:" + identity * 32,
         "scope": scope,
         "file": path,
-        "kind": "effect_set" if path == PROTOTYPE else "author_effect_set",
+        "kind": "author_effect_set",
         "record_key": key,
     }
 
@@ -99,10 +95,10 @@ def index(root: Path, *records: dict[str, JsonValue]) -> None:
     write(root, INDEX, {"format": 1, "kind": "effects_index", "records": list(records)})
 
 
-def author(root: Path, *keys: str, scope: str = "shared") -> None:
+def author(root: Path, *keys: str, scope: str = "shared", path: str = AUTHOR) -> None:
     write(
         root,
-        AUTHOR,
+        path,
         {
             "format": 2,
             "kind": "author_effect_set",
@@ -113,18 +109,6 @@ def author(root: Path, *keys: str, scope: str = "shared") -> None:
                 }
                 for key in keys
             },
-        },
-    )
-
-
-def prototype(root: Path, *keys: str) -> None:
-    write(
-        root,
-        PROTOTYPE,
-        {
-            "format": 1,
-            "kind": "effect_set",
-            "cards": {key: {"status": "unsupported", "abilities": []} for key in keys},
         },
     )
 
@@ -191,58 +175,15 @@ def test_disk_loader_rejects_legacy_storage(
     assert error.value.diagnostic.path == (path,)
 
 
-def test_prototype_inventory_uses_database_identity(
-    tmp_path: Path, t0_database_template: DatabaseTemplate
-) -> None:
-    expander = AuthorExpander(REPO / "dsl")
-    with t0_database_template.copy() as db:
-        with db.transaction():
-            db.insert("card", dict(db.rows("card")[0].values) | {"id": "c:" + "1" * 32})
-            db.insert(
-                "printing",
-                dict(db.rows("printing")[0].values)
-                | {"id": "prototype", "card_no": "FIX-001", "card_id": "c:" + "1" * 32},
-            )
-        current = CurrentAuthorSources(db)
-        prototype(tmp_path, "FIX-001")
-        index(tmp_path, selection(path=PROTOTYPE))
-        result = current.validate_inputs(
-            load_author_set(tmp_path, expander.schemas), expander
-        )
-        assert len(result) == 1
-        assert isinstance(result[0], CardRejected)
-        assert result[0].diagnostic.reason == "unsupported_prototype"
-        index(tmp_path, selection(path=PROTOTYPE, identity="2"))
-        with pytest.raises(AuthorInputError, match="prototype_index_identity_mismatch"):
-            current.validate_inputs(
-                load_author_set(tmp_path, expander.schemas), expander
-            )
-        index(tmp_path)
-        prototype(tmp_path, "MISSING")
-        with pytest.raises(AuthorInputError, match="prototype_identity_unresolved"):
-            current.validate_inputs(
-                load_author_set(tmp_path, expander.schemas), expander
-            )
-        prototype(tmp_path, "FIX-001")
-        author(tmp_path, "FIX-001")
-        index(tmp_path, selection())
-        with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
-            current.validate_inputs(
-                load_author_set(tmp_path, expander.schemas), expander
-            )
-
-
 def test_complete_inventory_retains_bytes_and_unused_bodies(
     tmp_path: Path, schemas: AuthorSchemas
 ) -> None:
     index(tmp_path, selection(), selection("FIX-002", identity="2"))
     author(tmp_path, "FIX-001", "FIX-002")
     companion(tmp_path)
-    prototype(tmp_path, "OLD-001")
     inputs = load_author_set(tmp_path, schemas)
     assert inputs.author_files[0].raw == (tmp_path / AUTHOR).read_bytes()
     assert inputs.body_files[0].path == BODY
-    assert inputs.prototype_files[0].path == PROTOTYPE
     assert "written_by" not in repr(inputs)
     validate_author_set(inputs, schemas)
 
@@ -294,7 +235,9 @@ def test_unlisted_bad_paths_are_not_skipped(
         load_author_set(tmp_path, schemas)
 
 
-@pytest.mark.parametrize("component", ["rules", "rules/effects", "rules/effects-index"])
+@pytest.mark.parametrize(
+    "component", ["rules", "rules/author-effects", "rules/effects-index"]
+)
 def test_symlinks_are_rejected_before_reading(
     tmp_path: Path, schemas: AuthorSchemas, component: str
 ) -> None:
@@ -312,9 +255,10 @@ def test_symlinks_are_rejected_before_reading(
 def test_pack_indexes_merge_and_retain_exact_bytes(
     tmp_path: Path, schemas: AuthorSchemas
 ) -> None:
-    prototype(tmp_path, "FIX-001", "OLD-001")
-    index(tmp_path, selection(path=PROTOTYPE))
-    other = selection("OLD-001", path=PROTOTYPE, identity="2")
+    author(tmp_path, "FIX-001")
+    author(tmp_path, "OLD-001", path=OTHER_AUTHOR)
+    index(tmp_path, selection())
+    other = selection("OLD-001", path=OTHER_AUTHOR, identity="2")
     write(
         tmp_path,
         "rules/effects-index/OLD.yaml",
@@ -371,15 +315,16 @@ def test_pack_indexes_can_merge_beyond_one_mib(schemas: AuthorSchemas) -> None:
 def test_pack_indexes_reject_wrong_owner_global_duplicates_and_unsorted_rows(
     tmp_path: Path, schemas: AuthorSchemas, failure: str
 ) -> None:
-    prototype(tmp_path, "FIX-001", "OLD-001")
-    index(tmp_path, selection(path=PROTOTYPE))
-    rows = [selection("OLD-001", path=PROTOTYPE, identity="2")]
+    author(tmp_path, "FIX-001")
+    author(tmp_path, "OLD-001", path=OTHER_AUTHOR)
+    index(tmp_path, selection())
+    rows = [selection("OLD-001", path=OTHER_AUTHOR, identity="2")]
     if failure == "owner":
         rows[0]["record_key"] = "OTHER-001"
     elif failure == "identity":
         rows[0]["card_id"] = selection()["card_id"]
     else:
-        rows.insert(0, selection("OLD-002", path=PROTOTYPE, identity="3"))
+        rows.insert(0, selection("OLD-002", path=OTHER_AUTHOR, identity="3"))
     write(
         tmp_path,
         "rules/effects-index/OLD.yaml",

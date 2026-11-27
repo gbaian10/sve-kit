@@ -411,15 +411,6 @@ impl Game {
         })
     }
 
-    pub(in crate::game) fn numeric_base_replace_allowed(&self, id: &str) -> Result<()> {
-        if self.numeric_state(id).is_some() {
-            return Err(unsupported(
-                "prototype kind or base replacement with numeric layers",
-            ));
-        }
-        Ok(())
-    }
-
     pub(in crate::game) fn add_limit_break_bonus(
         &mut self,
         holder: &str,
@@ -489,16 +480,6 @@ impl Game {
         Ok(())
     }
 
-    /// Legacy prototype arithmetic saturates, so only checked-safe operands may meet checked layers.
-    pub(in crate::game) fn numeric_prototype_operand(&self, id: &str, safe: bool) -> Result<()> {
-        if !safe && self.numeric_state(id).is_some() {
-            return Err(unsupported(
-                "saturating prototype arithmetic with numeric layers",
-            ));
-        }
-        Ok(())
-    }
-
     // Only rule evolution supports timed Add expiry across the change (target-evolution-semantics §3).
     pub(in crate::game) fn numeric_evolution_allowed(
         &self,
@@ -517,21 +498,6 @@ impl Game {
             return Err(unsupported("evolution outside supported numeric layers"));
         }
         Ok(())
-    }
-
-    pub(in crate::game) fn numeric_prototype_add_base(
-        &mut self,
-        id: &str,
-        attack: i64,
-        life: i64,
-    ) -> Result<()> {
-        if self
-            .numeric_state(id)
-            .is_some_and(|state| state.effects.iter().any(Modifier::sets_stat))
-        {
-            return Err(unsupported("base delta while Set is active"));
-        }
-        self.numeric_add_base(id, attack, life)
     }
 
     pub(in crate::game) fn numeric_add_base(
@@ -762,13 +728,6 @@ impl Game {
             // R-0020: absent stats cannot receive a new modifier, even when old values survive.
             if !self.object_type(id)?.contains("フォロワー") {
                 continue;
-            }
-            if self.state.continuous.iter().any(|entry| {
-                entry["effect"]["op"] == "pilot"
-                    && entry["generation"].as_u64() == Some(object.generation)
-                    && super::super::list(&entry["applies_to"]).contains(&json!(id))
-            }) {
-                return Err(unsupported("numeric installation during prototype pilot"));
             }
             let before_attack = number(&object.state, "power")?;
             let before_life = number(&object.state, "hp")?;

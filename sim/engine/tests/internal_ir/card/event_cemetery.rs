@@ -69,9 +69,11 @@ fn material_catalog() -> Arc<Catalog> {
     material["faces"][0]["name"] = json!("unit-material");
     snapshot.push('\n');
     snapshot.push_str(&material.to_string());
-    let extra = json!({"format":1,"kind":"effect_set","cards":{"unit-material":{"status":"complete","abilities":[]}}}).to_string();
+    let extra =
+        json!({"format":1,"kind":"fixture_cards","cards":{"unit-material":{"status":"complete"}}})
+            .to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[

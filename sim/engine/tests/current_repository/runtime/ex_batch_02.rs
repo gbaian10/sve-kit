@@ -106,7 +106,7 @@ fn batch_game(initial: &Value) -> Game {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "count-fairy.yaml",
-            "format: 1\nkind: effect_set\ncards:\n  count-fairy:\n    status: complete\n    abilities: []\n"
+            "format: 1\nkind: fixture_cards\ncards:\n  count-fairy:\n    status: complete\n"
         ]));
         repository::select(&snapshot, &keywords, &input).unwrap()
     });

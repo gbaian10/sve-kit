@@ -155,7 +155,7 @@ fn riley_game(initial: &Value) -> Game {
             "traits":[],"cost":"3","power":"1","hp":"3","text":null,"sections":[]
         }]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["filter-base.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"filter-base":{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["filter-base.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{"filter-base":{"status":"complete"}}}).to_string()]));
         repository::select(&snapshot, &keywords, &input).unwrap()
     });
     let mut game = Game::from_selected_effects(

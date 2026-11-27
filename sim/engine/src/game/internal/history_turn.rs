@@ -421,7 +421,7 @@ fn ub_count(
         own.checked_add(other)
             .ok_or_else(|| invalid("UB history overflow"))?
     };
-    // The counter includes prototype plays and explicit starting history as well as IR plays.
+    // The counter includes explicit starting history as well as IR plays.
     if exclude_current
         && game.state.ir_ub_history.iter().any(|fact| {
             fact.execution == execution.id.0

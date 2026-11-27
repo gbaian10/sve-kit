@@ -114,9 +114,9 @@ pub(super) fn documents_for_forms(form_names: &[&str]) -> (String, String, Strin
             let faces = names.iter().map(|name| json!({"name":name,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":power,"hp":hp,"traits":[],"text":null,"sections":[]})).collect::<Vec<_>>();
             json!({"number":number,"faces":faces}).to_string()
         }).collect::<Vec<_>>().join("\n");
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document=json!({"format":1,"kind":"effect_set","cards":{
-        "unit-follower":{"status":"complete","abilities":[]},"unit-form":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"unit-other":{"status":"complete","abilities":[]}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document=json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-follower":{"status":"complete"},"unit-form":{"status":"complete"},"unit-spell":{"status":"complete"},"unit-amulet":{"status":"complete"},"unit-other":{"status":"complete"}
     }}).to_string();
     (snapshot, registry, document)
 }
@@ -131,8 +131,12 @@ fn named_position(
 ) -> Game {
     let (snapshot, registry, document) = documents_for_forms(form_names);
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("evolution.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("evolution.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     position_with_catalog(catalog, seat, base, form, turn_decks, zones)
 }

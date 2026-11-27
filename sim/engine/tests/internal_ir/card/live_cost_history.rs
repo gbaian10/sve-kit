@@ -43,7 +43,8 @@ fn installed_cost_rechecks_current_history_after_the_original_provider_leaves() 
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut game = Game::new(
         catalog,

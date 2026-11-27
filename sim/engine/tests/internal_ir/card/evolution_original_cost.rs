@@ -28,9 +28,11 @@ fn evolution_catalog(cost: u8, plant: bool) -> Arc<Catalog> {
         .map(|row| row.to_string())
         .collect::<Vec<_>>()
         .join("\n");
-    let form_document = json!({"format":1,"kind":"effect_set","cards":{"unit-form":{"status":"complete","abilities":[]}}}).to_string();
+    let form_document =
+        json!({"format":1,"kind":"fixture_cards","cards":{"unit-form":{"status":"complete"}}})
+            .to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[

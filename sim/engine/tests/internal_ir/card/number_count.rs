@@ -661,8 +661,12 @@ fn a_named_trait_count_limits_modes_to_its_actual_field_population() {
             .collect::<Vec<_>>()
             .join("\n");
         let catalog = Arc::new(
-            Catalog::from_documents(&snapshot, &keywords, &[("synthetic.yaml".into(), effects)])
-                .unwrap(),
+            Catalog::from_fixture_documents(
+                &snapshot,
+                &keywords,
+                &[("synthetic.yaml".into(), effects)],
+            )
+            .unwrap(),
         );
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([]);

@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn selected() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
@@ -15,11 +14,11 @@ fn selected() -> &'static SelectedEffects {
         face["hp"] = json!("20");
         snapshot.push_str(&json!({"number":"evolve-enemy","faces":[face]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["evolve-enemy.yaml","format: 1\nkind: effect_set\ncards:\n  evolve-enemy:\n    status: complete\n    abilities: []\n"]));
+        input["documents"].as_array_mut().unwrap().push(json!(["evolve-enemy.yaml","format: 1\nkind: fixture_cards\ncards:\n  evolve-enemy:\n    status: complete\n"]));
         let text = read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml")).unwrap();
         let mut rules:Value = serde_saphyr::from_str(&text).unwrap();
         rules["input"]["snapshot_sha256"] = json!(rule_fixtures::hash(snapshot.as_bytes()));
-        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap()
+        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),).unwrap()
     })
 }
 

@@ -95,10 +95,10 @@ fn board_parts(
             "traits":[],"text":null,"sections":[]}]})
             .to_string(),
         );
-        definitions["cards"][number] = json!({"status":"complete","abilities":[]});
+        definitions["cards"][number] = json!({"status":"complete"});
     }
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("synthetic.yaml".into(), definitions.to_string())],

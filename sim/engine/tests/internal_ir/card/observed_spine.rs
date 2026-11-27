@@ -71,10 +71,10 @@ fn catalog_for_spine() -> Arc<Catalog> {
         face["faces"][0]["cost"] = json!(cost);
         face["faces"][0]["traits"] = json!(traits);
         faces.push(face.to_string());
-        effects["cards"][number] = json!({"status":"complete","abilities":[]});
+        effects["cards"][number] = json!({"status":"complete"});
     }
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &faces.join("\n"),
             &registry,
             &[("spine".into(), effects.to_string())],

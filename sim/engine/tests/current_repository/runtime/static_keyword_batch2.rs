@@ -143,7 +143,7 @@ fn bp04_089_grants_aura_to_both_named_friendly_followers_only() {
             snapshot.push_str(&json!({"number":number,"faces":[synthetic]}).to_string());
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
-                format!("{number}.yaml"), format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
+                format!("{number}.yaml"), format!("format: 1\nkind: fixture_cards\ncards:\n  {number}:\n    status: complete\n")
             ]));
         }
         repository::select(&snapshot, &keywords, &input).unwrap()

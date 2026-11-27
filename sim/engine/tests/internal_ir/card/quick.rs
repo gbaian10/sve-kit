@@ -476,14 +476,14 @@ fn field_quick_activation_admits_amulet_evolved_and_token_faces_with_source_paym
         ]
         .join("\n");
         let catalog = Arc::new(
-            Catalog::from_documents(
+            Catalog::from_fixture_documents(
                 &snapshot,
-                "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+                "format: 1\nkind: keyword_registry\nrule_names: {}\n",
                 &[(
                     "quick.yaml".into(),
-                    json!({"format":1,"kind":"effect_set","cards":{
-                        "unit-follower":{"status":"complete","abilities":[]},
-                        "unit-base":{"status":"complete","abilities":[]}
+                    json!({"format":1,"kind":"fixture_cards","cards":{
+                        "unit-follower":{"status":"complete"},
+                        "unit-base":{"status":"complete"}
                     }})
                     .to_string(),
                 )],
@@ -555,7 +555,18 @@ fn field_quick_activation_admits_amulet_evolved_and_token_faces_with_source_paym
 #[test]
 fn evolved_quick_departure_cost_is_rejected_before_a_window_can_offer_it() {
     let snapshot = json!({"number":"unit-follower","faces":[{"name":"unit-follower","card_type":"フォロワー・エボルヴ","card_class":"ニュートラル","cost":"-","power":"4","hp":"4","traits":[],"text":null,"sections":[]}]}).to_string();
-    let catalog = Arc::new(Catalog::from_documents(&snapshot, "format: 1\nkind: keyword_registry\nkeywords: {}\n", &[("quick.yaml".into(), "format: 1\nkind: effect_set\ncards:\n  unit-follower:\n    status: complete\n    abilities: []\n".into())]).unwrap());
+    let catalog = Arc::new(
+        Catalog::from_fixture_documents(
+            &snapshot,
+            "format: 1\nkind: keyword_registry\nrule_names: {}\n",
+            &[(
+                "quick.yaml".into(),
+                "format: 1\nkind: fixture_cards\ncards:\n  unit-follower:\n    status: complete\n"
+                    .into(),
+            )],
+        )
+        .unwrap(),
+    );
     let mut initial = setup(1, json!([]));
     for seat in ["P1", "P2"] {
         initial["players"][seat]["zones"] = json!({});

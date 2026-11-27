@@ -147,7 +147,7 @@ fn earth_game(initial: &Value) -> Game {
                 // The supporting forms stay in the evolve deck and only their printed traits are read.
                 input["documents"].as_array_mut().unwrap().push(json!([
                     format!("{printing}.yaml"),
-                    json!({"format":1_u8,"kind":"effect_set","cards":{printing:{"status":"complete","abilities":[]}}})
+                    json!({"format":1_u8,"kind":"fixture_cards","cards":{printing:{"status":"complete"}}})
                         .to_string()
                 ]));
             }

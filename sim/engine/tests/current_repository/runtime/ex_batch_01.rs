@@ -88,7 +88,7 @@ fn batch_game(initial: &Value) -> Game {
         ] {
             let mut face=base.clone();face["name"]=json!(name);face["card_type"]=json!(kind);face["card_class"]=json!("ニュートラル");face["traits"]=traits;face["text"]=Value::Null;face["sections"]=json!([]);face["cost"]=json!("1");face["power"]=json!(if kind=="フォロワー"{"1"}else{"-"});face["hp"]=json!(if kind=="フォロワー"{"3"}else{"-"});
             snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),format!("format: 1\nkind: fixture_cards\ncards:\n  {number}:\n    status: complete\n")]));
         }
         repository::select(&snapshot,&keywords,&input).unwrap()
     });

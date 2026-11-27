@@ -26,7 +26,7 @@ fn named_material_game(initial: &Value) -> Game {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "synthetic-zone-material.yaml",
-            "format: 1\nkind: effect_set\ncards:\n  zone-material:\n    status: complete\n    abilities: []\n"
+            "format: 1\nkind: fixture_cards\ncards:\n  zone-material:\n    status: complete\n"
         ]));
         repository::select(&snapshot, &keywords, &input).unwrap()
     });

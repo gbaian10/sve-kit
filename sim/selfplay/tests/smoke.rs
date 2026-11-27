@@ -13,6 +13,9 @@ extern crate alloc;
 #[path = "../../battle-host/tests/support/fixture.rs"]
 mod fixture;
 
+#[path = "../../engine/tests/support/rule_fixtures.rs"]
+mod rule_fixtures;
+
 use alloc::collections::BTreeSet;
 use serde_json::Value;
 use std::env::var_os;
@@ -21,7 +24,7 @@ use std::path::PathBuf;
 use sve_battle_contract::Seat;
 use sve_battle_host::{LocalSession, SeatControl};
 use sve_engine::battle::BattleReferences;
-use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput};
+use sve_engine::catalog::CurrentSelectionLoader;
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, StrictStartError, Viewer};
 use sve_engine::host::HostLimits;
@@ -34,7 +37,7 @@ fn texts() -> [String; 4] {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
     let selection = read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap();
-    let keywords = read_to_string(root.join("authored/rules/keywords.yaml")).unwrap();
+    let keywords = read_to_string(root.join("authored/rules/keyword-registry.yaml")).unwrap();
     let mut rules: Value = serde_saphyr::from_str(
         &read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap(),
     )
@@ -84,7 +87,8 @@ fn cards(snapshot: &str, selection: &Value) -> Vec<PoolCard> {
 }
 
 fn arena() -> Arena {
-    let [snapshot, keywords, selection, rules] = texts();
+    let [snapshot, keywords, selection, rule_source] = texts();
+    let (rules, identity) = rule_fixtures::resolved(&snapshot, &rule_source).unwrap();
     let selection: Value = serde_json::from_str(&selection).unwrap();
     let pool = cards(&snapshot, &selection);
     let printings = pool
@@ -114,12 +118,12 @@ fn arena() -> Arena {
                 &snapshot,
                 &keywords,
                 &selection,
-                Some((&rules, &EngineIdentityInput::LegacyJp)),
+                Some((&rules, &identity)),
                 &decks,
             )
             .map_err(|error| error.to_string())?;
             let references =
-                BattleReferences::new(&selected.prototypes, fixture::references(&snapshot))
+                BattleReferences::new(&selected.catalogue, fixture::references(&snapshot))
                     .map_err(|error| error.to_string())?;
             let chooser = match setup.first_chooser {
                 Seat::P1 => Viewer::P1,

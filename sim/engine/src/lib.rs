@@ -1,4 +1,4 @@
-//! A data-driven, deterministic rules prototype with serializable resolution frames.
+//! Deterministic rules and typed card execution for the battle authority.
 
 #![expect(
     clippy::multiple_crate_versions,

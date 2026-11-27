@@ -7,15 +7,15 @@ fn catalogue() -> Arc<Catalog> {
     let snapshot = [("unit-spell", "スペル", "1"), ("unit-follower", "フォロワー", "3")].iter().map(|(number, kind, cost)| {
         json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
-    let effects = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]}
+    let effects = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-spell":{"status":"complete"},
+        "unit-follower":{"status":"complete"}
     }})
     .to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
-            &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
+            &json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string(),
             &[("cost".into(), effects)],
         )
         .unwrap(),

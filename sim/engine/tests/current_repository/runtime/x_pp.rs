@@ -33,7 +33,7 @@ fn prepared() -> &'static SelectedEffects {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"traits":traits,"cost":cost,"power":if kind=="フォロワー" {"2"} else {"-"},"hp":if kind=="フォロワー" {"8"} else {"-"},"text":null,"sections":[]}]}).to_string());
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
-                format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
+                format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()
             ]));
         }
         repository::selection_with_rules_from(&snapshot, &keywords, &input)

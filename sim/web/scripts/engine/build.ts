@@ -125,7 +125,7 @@ function writeBattleInputs(exportRoot: string, engine: Uint8Array): void {
     const rules = read("rules.json")
     const input = {
       snapshot: read("snapshot.jsonl"),
-      keywords: readFileSync(path.join(repo, "authored/rules/keywords.yaml"), "utf8"),
+      keywords: readFileSync(path.join(repo, "authored/rules/keyword-registry.yaml"), "utf8"),
       rules,
       references,
       printings,

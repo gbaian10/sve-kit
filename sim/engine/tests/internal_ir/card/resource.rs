@@ -504,7 +504,8 @@ fn resource_ir_reads_only_matching_successful_mill_members() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalogue = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     for (deck, requested) in [
         (json!([]), 0),

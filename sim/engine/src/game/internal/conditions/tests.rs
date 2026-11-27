@@ -209,14 +209,18 @@ fn the_same_condition_reads_public_private_printed_and_frozen_candidate_informat
         "power":"2","hp":"3","traits":[],"text":null,"sections":[]
     }]})
     .to_string();
-    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1_u8,"kind":"effect_set","cards":{
-        "unit":{"status":"complete","abilities":[]}
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document = json!({"format":1_u8,"kind":"fixture_cards","cards":{
+        "unit":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("synthetic.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("synthetic.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     let position = json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main","elapsed_turns":{"P1":3_u8,"P2":2_u8}},"players":{
         "P1":{"leader":{"class":"Elf","life":20_u8},"pp":{"current":2_u8,"max":2_u8},"ep":0_u8,"sep":0_u8,"construction":"class","zones":{"field":[{"id":"visible","card":"unit"}],"deck":[{"id":"private","card":"unit"}]}},

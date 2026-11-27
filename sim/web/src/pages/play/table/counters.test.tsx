@@ -15,7 +15,7 @@ beforeEach(() => {
 /** The rules names of the keyword registry's counters: what the authority reports a counter as. */
 function registryCounters(): string[] {
   const registry = readFileSync(
-    path.join(import.meta.dirname, "../../../../../../authored/rules/keywords.yaml"),
+    path.join(import.meta.dirname, "../../../../../../authored/rules/keyword-registry.yaml"),
     "utf8",
   )
   // One entry per two-space key; a counter is an entry whose role says so.

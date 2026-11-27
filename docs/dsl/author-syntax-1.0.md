@@ -46,7 +46,7 @@ cards:
 降低成 `B.ability`、`B.source`。持有者、controller、文字提供者與印刷位置分開；授予不是複製來源身分。共通欄位：`targets? / cost? / optional_cost? / x? / define? / do / per_turn? / ub?`；只有適用的頭可填相應欄位。`per_turn` 為正安全整數；`zone` 只適用 auto／activate／static，接單值或非空列表（field、hand、ex、cemetery、equipment 等已登錄區域），預設依 CR 10.3：場上從者／護符 field、crest ex、equipment equipment。上限解放素材（treasure）的能力只在 EX 區有效，起動頭寫 `zone: ex`。
 
 | 構造 | 內容與降低 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；quick、ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet、final_limit_break_possible。`quick` 表示卡的 Quick 許可，不控制引擎是否開窗口；參數型關鍵字依 CR 12–14 登錄 |
 | `fanfare / lastword / evolve_time / super_evolve_time / attack_time / race_time / drive_time` | `B.trigger` 巨集；分別匹配入場／場到墓地／進化／超進化／攻擊／出走／首次獲 Drive，均以 this 為主體 |
 | `auto: {on, do, …}` | 一般事件能力；`on: {state: Cond}` 是 CR 10.7.6 狀態誘發，保留待機 latch |
@@ -78,7 +78,7 @@ evolve:
 ## 3. 費用、目標與打出程序
 
 | 位置 | 表達 | 時點與依據 |
-| --- | --- | --- |
+| ----------------------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | 起動／進化／憑依／食事、fanfare | 頭的 `cost` | PlayParameter，CR 10.6.2.5、契約 36 |
 | evolve_time、super_evolve_time、attack_time、race_time、drive_time 後直接冒號 | 頭的 `cost` | PlayParameter，R-0001（generalized）；先選目標再付款，拒付或不能付不產生適正 play |
 | lastword、一般長寫 auto 的冒號 | 本文 `pay: {cost, do, result?}` | ResolutionChoice，CR 10.4.7.3、契約 36 |
@@ -103,7 +103,7 @@ choose／search groups 與已定動作欄位見[動作矩陣](author-step-shapes
 `A.cost` 保留 v0 的 pp、ep、act_self、self_to_cemetery、banish_self、discard、banish、to_cemetery、return_to_hand、reveal、counter、flip_down、flip_up、leader_life、lesson、earth_rite、stack_counter_from；增加 §13 的 act、to_ex、to_deck_bottom、to_deck、pp_max、skip_turn、one_of。其中 stack_counter_from 只保留舊名稱登錄、沒有接受形狀，不是獨立付款操作。外層有兩種互斥形狀：
 
 | 形狀 | 費用操作與順序 | 拒絕 |
-| --- | --- | --- |
+| ---------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | 短形 `{<費用鍵>: payload}` | 恰一個費用操作 | 多個費用操作鍵 |
 | 長形 `{steps: [{<費用鍵>: payload}, …]}` | 至少兩項，依卡文排列並按陣列順序付款；重複操作也逐項保留 | 空或單元素 steps、steps 混其他費用操作鍵、每項多個操作鍵或 step 層級 metadata |
 
@@ -202,7 +202,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 四個父動作、choose/search 群組、遞迴 Steps 的接受形狀及限制見[動作矩陣](author-step-shapes-1.0.md)；費用 banish.top 也共用 DeckSlice。下表未接入的規則程序不代表可接受任意欄位。
 
 | 鍵 | payload | 降低成 |
-| -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | draw / discard | `{who?, n}`；discard 另有 all/down_to/any/sel/random | I.draw / I.discard；逐張抽不是批次搬牌 |
 | damage / destroy / banish | `{to,n,distribute?,distribute_at?,instead?}`；後兩者 Ref 或 `{ref}`，banish 另接 top | I.damage / I.destroy / I.banish；distribute 預設打出時 |
 | move | `{ref或top,to,position?,order?,reveal?,by?,acted?,entry_effects?,result?}` | I.move；位置決定與順序 I.order，洗指定集 I.shuffle |
@@ -301,7 +301,7 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history 的欄位依[事件與歷史形狀](author-history-shapes-1.0.md)分工；登錄的 who/zone/from/to/sel 提升到 history 頂層，不留在 where。
 
-`carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的DSL JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust DSL YAML parser。既有 astra/1 Rust 入口不在此變更。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
+`carddb` 的 authored 讀取採 `yamlrocks==0.7.0`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。正式 1.0 由 Python C0 嚴格讀 YAML 並交付已驗且完全展開的DSL JSON 樹，Rust D0 只接該樹降低 IR；不要求第二套 Rust DSL YAML parser。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
 
 Python YAML 載入器必過金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。Rust D0 接入時另驗 JSON 型別化解碼、未知節點／錯型別／scope／版本與能力拒絕，並比較同一份 canonical 展開樹；不以 Python 結果宣稱 Rust 已驗收。
 

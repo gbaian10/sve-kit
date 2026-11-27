@@ -55,8 +55,8 @@ fn prepared() -> &'static SelectedEffects {
             );
             snapshot.push('\n');
             let file = format!("{number}.yaml");
-            let document = json!({"format":1_u8,"kind":"effect_set","cards":{
-                number:{"status":"complete","abilities":[]}
+            let document = json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                number:{"status":"complete"}
             }});
             input["documents"]
                 .as_array_mut()

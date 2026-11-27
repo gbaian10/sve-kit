@@ -4,7 +4,7 @@
 )]
 use serde_json::json;
 
-use super::{Game, Object, Pending, int};
+use super::{Game, Object, int};
 use crate::Result;
 
 impl Game {
@@ -22,73 +22,5 @@ impl Game {
             self.require_ability_sources(&format!("event {field}_{direction} subscriptions"))?;
         }
         Ok(())
-    }
-
-    pub(super) fn disambiguate_unkeyed_pending(&mut self, pending: &mut Pending) {
-        if pending.id.is_some() || !pending.event.is_null() {
-            return;
-        }
-        let related = self
-            .state
-            .pending
-            .iter()
-            .enumerate()
-            .filter(|(_, other)| {
-                other.event.is_null()
-                    && other.controller == pending.controller
-                    && other.reference == pending.reference
-            })
-            .map(|(index, _)| index)
-            .collect::<Vec<_>>();
-        if related.iter().all(|index| {
-            let other = &self.state.pending[*index];
-            other.context == pending.context && other.code == pending.code
-        }) {
-            if let Some(index) = related.first() {
-                pending.id.clone_from(&self.state.pending[*index].id);
-            }
-            return;
-        }
-        for index in &related {
-            if self.state.pending[*index].id.is_some() {
-                continue;
-            }
-            let id = self.fresh_pending_id();
-            let context = self.state.pending[*index].context.clone();
-            let code = self.state.pending[*index].code.clone();
-            for older in &mut self.state.pending {
-                if older.controller == pending.controller
-                    && older.reference == pending.reference
-                    && older.context == context
-                    && older.code == code
-                    && older.event.is_null()
-                {
-                    older.id = Some(id.clone());
-                }
-            }
-        }
-        pending.id = related.iter().find_map(|index| {
-            let other = &self.state.pending[*index];
-            (other.context == pending.context && other.code == pending.code)
-                .then(|| other.id.clone())
-                .flatten()
-        });
-        if pending.id.is_none() {
-            pending.id = Some(self.fresh_pending_id());
-        }
-    }
-
-    fn fresh_pending_id(&mut self) -> String {
-        loop {
-            let id = format!("pending-{}", self.group());
-            if self
-                .state
-                .pending
-                .iter()
-                .all(|pending| pending.id.as_deref() != Some(&id))
-            {
-                return id;
-            }
-        }
     }
 }

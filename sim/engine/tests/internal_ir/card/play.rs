@@ -905,14 +905,14 @@ fn trait_target_ability() -> Located<Ability> {
 fn trait_target_position() -> Game {
     let snapshot = ["unit-follower", "other"].iter().map(|number| json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"3","traits":if *number == "unit-follower" { json!(["兵士"]) } else { json!([]) },"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
-            &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
+            &json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string(),
             &[(
                 "trait-target.yaml".into(),
-                json!({"format":1,"kind":"effect_set","cards":{
-                    "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
-                    "other":{"status":"complete","review":"synthetic","abilities":[]}
+                json!({"format":1,"kind":"fixture_cards","cards":{
+                    "unit-follower":{"status":"complete"},
+                    "other":{"status":"complete"}
                 }})
                 .to_string(),
             )],

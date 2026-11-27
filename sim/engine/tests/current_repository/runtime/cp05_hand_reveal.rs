@@ -20,7 +20,7 @@ fn reveal_game(initial: &Value) -> Game {
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{printing}.yaml"),
-                json!({"format":1_u8,"kind":"effect_set","cards":{printing:{"status":"complete","abilities":[]}}}).to_string(),
+                json!({"format":1_u8,"kind":"fixture_cards","cards":{printing:{"status":"complete"}}}).to_string(),
             ]));
         }
         repository::selection_with_rules_from(&snapshot, &keywords, &input)

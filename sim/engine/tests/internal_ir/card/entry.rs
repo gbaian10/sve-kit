@@ -48,10 +48,11 @@ fn position(
     incoming: bool,
 ) -> Game {
     let snapshot = ["unit-follower", "unit-observer", "unit-spell"].iter().map(|number| json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":if *number=="unit-spell" {"スペル"} else {"フォロワー"},"cost":"1","power":"2","hp":"3","traits":["兵士"],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document=json!({"format":1,"kind":"effect_set","cards":{"unit-follower":{"status":"complete","abilities":[]},"unit-observer":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]}}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document=json!({"format":1,"kind":"fixture_cards","cards":{"unit-follower":{"status":"complete"},"unit-observer":{"status":"complete"},"unit-spell":{"status":"complete"}}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("entry.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("entry.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     for seat in ["P1", "P2"] {
@@ -570,7 +571,8 @@ fn simultaneous_three_facts_select_two_per_instance_before_any_body_resolves() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("quota.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("quota.yaml".into(), document)])
+            .unwrap(),
     );
     let mut game = Game::new(
         catalog,

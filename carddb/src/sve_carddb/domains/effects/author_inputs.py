@@ -28,11 +28,9 @@ PathParts = tuple[str | int, ...]
 Leaf = Literal["A.param", "ParamValue", "ParamDeclarations", "ParamValues"]
 _NODES = "urn:sve-kit:author-nodes:1.0"
 _INDEX = "urn:sve-kit:effects-index:1"
-_PROTOTYPE = "urn:sve-kit:effects:astra:1"
 _RESOURCES = {
     "author-nodes.schema.json": _NODES,
     "effects-index.schema.json": _INDEX,
-    "effects.schema.json": _PROTOTYPE,
     "author-storage.schema.json": "urn:sve-kit:author-storage:2",
     "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
 }
@@ -227,11 +225,11 @@ def _envelope(document: ParsedDocument, expected: str) -> dict[str, JsonValue]:
     return value
 
 
-def _entry_preflight(document: ParsedDocument, expected: str) -> None:
-    value = _envelope(document, expected)
+def _entry_preflight(document: ParsedDocument) -> None:
+    value = _envelope(document, "author_effect_set")
     candidates: list[tuple[PathParts, JsonValue]] = []
     cards = value.get("cards")
-    if expected == "author_effect_set" and isinstance(cards, dict):
+    if isinstance(cards, dict):
         candidates = [
             (("cards", key, "meta"), card.get("meta"))
             for key, card in cards.items()
@@ -638,21 +636,12 @@ class AuthorSchemas:
         self._validate(document, references[kind])
         return document.value
 
-    def prototype_tree(
-        self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> JsonValue:
-        """Validate the separate prototype resource without selecting a runtime."""
-        document = _document(raw, context)
-        _entry_preflight(document, "effect_set")
-        self._validate(document, _PROTOTYPE)
-        return document.value
-
     def expanded(
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
     ) -> JsonValue:
         """Validate the complete expanded AST and keep its exact wire values."""
         document = _document(raw, context)
-        _entry_preflight(document, "author_effect_set")
+        _entry_preflight(document)
         self._validate(document, _NODES + "#/$defs/expanded")
         _keyword_review_metadata(document)
         return document.value

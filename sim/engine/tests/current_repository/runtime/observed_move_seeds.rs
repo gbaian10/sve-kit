@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::DecisionView;
 
 fn prepared() -> &'static SelectedEffects {
@@ -14,8 +13,8 @@ fn prepared() -> &'static SelectedEffects {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "named-writer.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "named-writer":{"status":"complete","abilities":[]}
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                "named-writer":{"status":"complete"}
             }})
             .to_string()
         ]));
@@ -28,7 +27,6 @@ fn prepared() -> &'static SelectedEffects {
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap()
     })

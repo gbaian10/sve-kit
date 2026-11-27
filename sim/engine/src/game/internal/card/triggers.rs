@@ -777,15 +777,7 @@ impl Game {
         let pending = self.card_runtime.pending.remove(position);
         self.card_runtime.question = None;
         let result = (|| {
-            if self.state.frame.is_some()
-                || self.state.prompt.is_some()
-                || !self.state.pending.is_empty()
-                || !self.state.continuous.is_empty()
-                || !self.state.delayed.is_empty()
-            {
-                return Err(unsupported("unadmitted pending intervention"));
-            }
-            self.internal_prototype_abilities()?;
+            self.check_internal_fixture()?;
             self.check_internal_resources()?;
             if pending.header.after.0 < pending.header.before.0
                 || pending.leave.is_some_and(|leave| {

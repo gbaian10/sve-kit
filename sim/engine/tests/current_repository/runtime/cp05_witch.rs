@@ -165,8 +165,8 @@ fn arulumaya_game(initial: &Value) -> Game {
     });
     let snapshot = format!("{}\n{base}", snapshot.trim_end());
     let document = json!({
-        "format":1_u8,"kind":"effect_set",
-        "cards":{"arulumaya-base":{"status":"complete","abilities":[]}}
+        "format":1_u8,"kind":"fixture_cards",
+        "cards":{"arulumaya-base":{"status":"complete"}}
     });
     input["documents"]
         .as_array_mut()

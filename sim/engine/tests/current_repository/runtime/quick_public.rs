@@ -8,7 +8,7 @@ fn prepared() -> &'static SelectedEffects {
         input["authors"].as_array_mut().unwrap().retain(|a| matches!(a["input"]["card_no"].as_str(),Some("BP04-079"|"ECP02-041"|"ECP02-SP08"|"BP04-T01"|"CP02-T01"|"PR-155"|"PR-156"|"BP03-T02")));
         for (number,traits) in [("quick-neutral",json!([])),("quick-triple",json!(["キュート","クール","パッション"])),("quick-cute-cool",json!(["キュート","クール"])),("quick-passion",json!(["パッション"]))] {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","traits":traits,"cost":"1","power":"1","hp":"20","text":null,"sections":[]}]}).to_string());snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         repository::selection_with_rules_from(&snapshot,&keywords,&input)
     })

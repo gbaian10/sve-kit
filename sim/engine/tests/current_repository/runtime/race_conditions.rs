@@ -14,11 +14,11 @@ fn fixture() -> &'static SelectedEffects {
    ("ready-amulet","ready-amulet","アミュレット","1",vec!["ウマ娘"]),
   ] {
    snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if kind=="フォロワー" {"2"} else {"-"},"hp":if kind=="フォロワー" {"20"} else {"-"},"traits":traits,"text":"","sections":[]}]}).to_string());snapshot.push('\n');
-   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
   }
   for (number,name,kind,cost) in [("ready-passion","パッションチャンピオーナ！","アミュレット","7"),("ready-base","サトノクラウン","フォロワー","0"),("ready-hishi","ヒシミラクル","フォロワー","0")] {
    snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if kind=="フォロワー" {"3"} else {"-"},"hp":if kind=="フォロワー" {"3"} else {"-"},"traits":["ウマ娘"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
-   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
   }
   repository::selection_with_rules_from(&snapshot,&keywords,&input)
  })

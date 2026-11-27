@@ -52,10 +52,9 @@ fn source_catalog(source_trait: bool, entrant_trait: bool) -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-source"] =
-        json!({"status":"complete","review":"synthetic","abilities":[]});
+    document["cards"]["unit-source"] = json!({"status":"complete"});
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), document.to_string())],

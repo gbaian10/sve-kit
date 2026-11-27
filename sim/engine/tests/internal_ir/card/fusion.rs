@@ -283,7 +283,7 @@ fn trait_catalog(source_treasure: bool, material_treasure: bool) -> Arc<Catalog>
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("fixture.yaml".into(), document)])
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("fixture.yaml".into(), document)])
             .unwrap(),
     )
 }

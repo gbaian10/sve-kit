@@ -691,7 +691,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     *author_inputs.index_files,
                     *author_inputs.author_files,
                     *author_inputs.body_files,
-                    *author_inputs.prototype_files,
                 )
             },
         }

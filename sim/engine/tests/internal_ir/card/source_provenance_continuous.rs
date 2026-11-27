@@ -48,17 +48,17 @@ fn position(seat: u32) -> Game {
             .to_string(),
         );
     }
-    let extras = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-middle":{"status":"complete","abilities":[]},
-        "middle-form":{"status":"complete","abilities":[]}
+    let extras = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-middle":{"status":"complete"},
+        "middle-form":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[
                 ("units.yaml".into(), document),

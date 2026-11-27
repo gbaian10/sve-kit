@@ -39,12 +39,12 @@ fn position(seat: u32) -> Game {
         }]})
         .to_string(),
     );
-    let form = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-form":{"status":"complete","abilities":[]}
+    let form = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-form":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("units.yaml".into(), document), ("form.yaml".into(), form)],

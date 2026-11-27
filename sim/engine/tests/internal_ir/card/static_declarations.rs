@@ -44,11 +44,11 @@ fn initial(maximum: u8) -> Value {
 fn unloaded(position: &Value) -> Game {
     let (snapshot, _, document) = catalog_documents(&json!("3"));
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )
@@ -383,11 +383,11 @@ fn equipment_mixes_only_existing_unconditional_host_grants_and_damage_modifiers(
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )
@@ -476,13 +476,13 @@ fn a_mixed_static_source_changes_its_actual_evolution_payment() {
     snapshot.push('\n');
     snapshot.push_str(&json!({"number":"unit-form","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]}).to_string());
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-form"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["unit-form"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document.to_string())],
         )

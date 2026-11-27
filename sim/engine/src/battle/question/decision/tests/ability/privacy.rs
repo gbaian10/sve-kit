@@ -1,6 +1,5 @@
 use super::*;
 use crate::battle::tests::{board_fixture, rule_fixtures};
-use crate::catalog::{Catalog, EngineIdentityInput};
 use crate::game::Game;
 use crate::game::player::Input;
 use crate::ir::{self, CardProgram};
@@ -20,12 +19,11 @@ fn private_board(actor: Viewer, source: &str, secret: &str) -> Game {
         json!([]),
     );
     let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &fixture.snapshot,
             &keywords,
             &[("synthetic".into(), document)],
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );

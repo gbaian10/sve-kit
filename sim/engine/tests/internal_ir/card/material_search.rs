@@ -47,7 +47,7 @@ fn catalogue() -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("synthetic.yaml".into(), document.to_string())],

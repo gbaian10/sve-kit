@@ -63,7 +63,7 @@ fn test_battle_references(selected: &SelectedEffects, snapshot: &str) -> BattleR
         })
         .collect();
     BattleReferences::new(
-        &selected.prototypes,
+        &selected.catalogue,
         ReferenceInput {
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
@@ -287,7 +287,8 @@ fn producer_inputs() -> (String, String, Value) {
     snapshot.push_str(&json!({"number":"producer","faces":[face]}).to_string());
     snapshot.push('\n');
     input["documents"].as_array_mut().unwrap().push(json!([
-        "producer.yaml", "format: 1\nkind: effect_set\ncards:\n  producer:\n    status: complete\n    abilities: []\n"
+        "producer.yaml",
+        "format: 1\nkind: fixture_cards\ncards:\n  producer:\n    status: complete\n"
     ]));
     (snapshot, keywords, input)
 }
@@ -724,20 +725,20 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         construct(cleared, "changed").contains("current selection changed after acceptance"),
         "removing an accepted candidate rejects the whole construction"
     );
-    // The prototype closure is part of the accepted selection, even when its content is equal.
+    // The catalogue is part of the accepted selection, even when its content is equal.
     let mut replaced = repository::select(snapshot, keywords, input).unwrap();
     assert_eq!(construct(replaced.clone(), "warm-replaced"), "");
-    replaced.prototypes = repository::select(snapshot, keywords, input)
+    replaced.catalogue = repository::select(snapshot, keywords, input)
         .unwrap()
-        .prototypes;
+        .catalogue;
     assert!(
         construct(replaced, "replaced").contains("current selection changed after acceptance"),
-        "replacing the prototype catalogue rejects the whole construction"
+        "replacing the catalogue rejects the whole construction"
     );
-    // A current candidate cannot gain admission through an unrelated prototype catalogue.
+    // A current candidate cannot gain admission through an unrelated catalogue.
     let accepted = repository::select(snapshot, keywords, input).unwrap();
     let mut plain = Game::new(
-        accepted.prototypes,
+        accepted.catalogue,
         &setup("P1", "P1", [20, 20]),
         &Value::Null,
         &Value::Null,
@@ -746,8 +747,8 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
     .unwrap();
     assert!(
         failure(plain.load_internal_card(NUMBER, &accepted.current[NUMBER].program))
-            .contains("no authored program"),
-        "a plain catalogue has no program to admit the current card against"
+            .contains("card lacks complete fixture metadata"),
+        "a plain catalogue has no fixture metadata to admit the current card against"
     );
     let changed_faces = snapshot
         .lines()
@@ -763,8 +764,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         .join("\n");
     let direct_foreign = repository::select(&changed_faces, keywords, input).unwrap();
     assert!(
-        construct(direct_foreign, "foreign-direct")
-            .contains("current snapshot closure or prototype overlap"),
+        construct(direct_foreign, "foreign-direct").contains("current snapshot closure"),
         "direct candidates still reject a snapshot with an extra face"
     );
 }
@@ -1082,7 +1082,11 @@ fn all_other_followers() -> RecipientSet {
 fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) {
     snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());
     snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+    input["documents"].as_array_mut().unwrap().push(json!([
+        format!("{number}.yaml"),
+        json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}})
+            .to_string()
+    ]));
 }
 
 #[expect(

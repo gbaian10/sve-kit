@@ -26,10 +26,10 @@ fn bp18_104_current_covers_both_lines_and_exactly_the_registered_printings() {
         .map(|p| p.as_str().unwrap())
         .collect::<BTreeSet<_>>();
     assert_eq!(printings, BTreeSet::from([CARD, "BP18-P43"]));
-    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
+    let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
     for printing in printings {
         assert_eq!(selected.current[printing].card_id, CARD_ID);
-        assert!(prototypes["programs"].get(printing).is_none());
+        assert!(catalogue["fixtures"].get(printing).is_none());
     }
     let card = &selected.current[CARD];
     let faces = card.source_payload["faces"].as_array().unwrap();

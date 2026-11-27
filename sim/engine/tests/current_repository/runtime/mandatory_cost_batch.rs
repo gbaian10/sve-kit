@@ -41,7 +41,7 @@ fn selected() -> &'static SelectedEffects {
         for (number,(name,kind,cost,class,traits)) in MATERIALS.into_iter().zip(definitions) {
             if !snapshot.ends_with('\n') { snapshot.push('\n'); }
             snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_type":kind,"cost":cost,"card_class":class,"traits":traits,"power":"1","hp":"20","text":"","sections":[]}]}).to_string());
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         repository::selection_with_rules_from(&snapshot,&keywords,&input)
     })

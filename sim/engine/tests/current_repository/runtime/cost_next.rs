@@ -15,7 +15,7 @@ fn fixture() -> &'static Fixture {
         for (id, cost, traits) in [("cost-academy", 2, vec!["学院"]), ("cost-dragon", 4, vec!["武闘竜人"])] {
             snapshot.push_str(&json!({"number":id,"faces":[{"name":id,"card_type":"フォロワー","card_class":"ニュートラル","cost":cost.to_string(),"power":"1","hp":"1","traits":traits,"text":null,"sections":[]}]}).to_string());
             snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{id}.yaml"), json!({"format":1,"kind":"effect_set","cards":{id:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{id}.yaml"), json!({"format":1,"kind":"fixture_cards","cards":{id:{"status":"complete"}}}).to_string()]));
         }
         Fixture { selection: repository::selection_with_rules_from(&snapshot, &keywords, &input), empty: WellFormedCardProgram::check(CardProgram { abilities: vec![], card_play_costs: vec![] }).unwrap() }
     })

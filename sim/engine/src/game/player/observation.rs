@@ -607,11 +607,6 @@ impl Game {
     }
 
     fn player_observation(&self, perspective: Viewer) -> Result<Observation> {
-        if !self.state.continuous.is_empty() {
-            return Err(invalid(
-                "prototype continuous effects are not a typed observation",
-            ));
-        }
         let turn = &self.state.turn;
         if !turn.is_object() {
             return Err(invalid("invalid turn state"));

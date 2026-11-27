@@ -90,7 +90,7 @@ fn matching_search_grants_end_phase_banish_only_to_the_entered_card() {
     );
     let snapshot = format!("{source}\n{match_card}\n{other_card}\n{alias_card}\n");
     let input = json!({"documents":[],"authors":[source_author,match_author,other_author,alias_author]});
-    let keywords = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let keywords = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
     let selected = repository::select_without_rules(&snapshot, &keywords, &input).unwrap();
 
     for full in [false, true] {

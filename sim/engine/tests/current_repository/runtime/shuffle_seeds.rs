@@ -1,7 +1,6 @@
 use super::*;
 use crate::rule_fixtures;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn selected() -> &'static SelectedEffects {
     static READY: OnceLock<SelectedEffects> = OnceLock::new();
@@ -10,11 +9,11 @@ fn selected() -> &'static SelectedEffects {
         // This added probe is not CP01-073 and grants no admission to that named companion.
         snapshot.push_str(&json!({"number":"shuffle-luck","faces":[{"name":"運の行方","card_class":"ニュートラル","card_type":"アミュレット","cost":"1","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["shuffle-controls.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"shuffle-luck":{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["shuffle-controls.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{"shuffle-luck":{"status":"complete"}}}).to_string()]));
         let path=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml");
         let mut rules:Value=serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"]=rule_fixtures::rules(&snapshot,json!([]),json!([]))["input"].clone();
-        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap()
+        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),).unwrap()
     })
 }
 

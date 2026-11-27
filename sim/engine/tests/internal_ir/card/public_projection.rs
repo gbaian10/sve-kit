@@ -1,7 +1,6 @@
 use super::*;
 use std::env::var;
 use std::fs::read_to_string;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::ObservedZone;
 
@@ -11,12 +10,11 @@ fn position(snapshot: &str) -> Game {
         json!([rule_fixtures::title("synthetic", "TEST-001Ⓢa", json!([]))]),
         json!([]),
     );
-    let catalog = Catalog::from_documents_with_rules(
+    let catalog = rule_fixtures::catalog(
         snapshot,
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
-        &[("synthetic".into(), json!({"format":1,"kind":"effect_set","cards":{"TEST-001Ⓢa":{"status":"complete","abilities":[]},"TEST-002":{"status":"complete","abilities":[]}}}).to_string())],
+        "format: 1\nkind: keyword_registry\nrule_names: {}\n",
+        &[("synthetic".into(), json!({"format":1,"kind":"fixture_cards","cards":{"TEST-001Ⓢa":{"status":"complete"},"TEST-002":{"status":"complete"}}}).to_string())],
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let mut initial = setup(1, json!([]));

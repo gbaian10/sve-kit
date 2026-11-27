@@ -16,7 +16,7 @@ fn selection(steps: &Value) -> (String, String, Value) {
     );
     (
         format!("{creator}\n{member}\n"),
-        json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string(),
+        json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string(),
         json!({"documents":[],"authors":[source,template]}),
     )
 }

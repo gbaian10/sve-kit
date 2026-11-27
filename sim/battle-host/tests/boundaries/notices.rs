@@ -1,3 +1,4 @@
+use super::rule_fixtures;
 use super::*;
 use sve_battle_contract::{
     presentation::NoticeKind,
@@ -28,17 +29,16 @@ fn position(
     warmup: bool,
 ) -> (Game, BattleReferences) {
     let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
-    let registry = json!({"format":1_i32,"kind":"keyword_registry","keywords":{}}).to_string();
-    let effects = json!({"format":1_i32,"kind":"effect_set","cards":{
-        "t-small":{"status":"complete","review":"synthetic","abilities":[]},
-        "t-large":{"status":"complete","review":"synthetic","abilities":[]}
+    let registry = json!({"format":1_i32,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let effects = json!({"format":1_i32,"kind":"fixture_cards","cards":{
+        "t-small":{"status":"complete"},
+        "t-large":{"status":"complete"}
     }});
-    let catalog = Catalog::from_documents_with_rules(
+    let catalog = rule_fixtures::catalog(
         &snapshot,
         &registry,
         &[("synthetic.yaml".into(), effects.to_string())],
         &fixture::rules(&snapshot, "t-small"),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let references = BattleReferences::new(&catalog, fixture::references(&snapshot)).unwrap();

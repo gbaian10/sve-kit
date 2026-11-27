@@ -210,7 +210,8 @@ fn optional_act_materials_filter_class_kind_and_standing_after_targets() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["field"] = json!([
@@ -651,7 +652,8 @@ fn field_ex_material_catalog() -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)])
+            .unwrap(),
     )
 }
 

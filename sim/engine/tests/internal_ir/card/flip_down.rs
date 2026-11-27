@@ -53,13 +53,13 @@ fn board_from_position(program: &WellFormedCardProgram, initial: &Value) -> Game
         snapshot.push('\n');
         snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[attribute],"text":null,"sections":[]}]}).to_string());
     }
-    let forms = json!({"format":1,"kind":"effect_set","cards":{
-        "form":{"status":"complete","abilities":[]},
-        "other-form":{"status":"complete","abilities":[]}
+    let forms = json!({"format":1,"kind":"fixture_cards","cards":{
+        "form":{"status":"complete"},
+        "other-form":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), document), ("form.yaml".into(), forms)],

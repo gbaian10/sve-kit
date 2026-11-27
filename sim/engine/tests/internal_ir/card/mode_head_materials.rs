@@ -57,9 +57,11 @@ fn classed_catalog() -> Arc<Catalog> {
         .map(Value::to_string)
         .collect::<Vec<_>>()
         .join("\n");
-    let extra = json!({"format":1,"kind":"effect_set","cards":{"other-follower":{"status":"complete","review":"synthetic","abilities":[]}}}).to_string();
+    let extra =
+        json!({"format":1,"kind":"fixture_cards","cards":{"other-follower":{"status":"complete"}}})
+            .to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("unit.yaml".into(), document), ("other.yaml".into(), extra)],

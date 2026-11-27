@@ -20,7 +20,7 @@ fn prepared() -> &'static Prepared {
             ("bp20-mage-spell","スペル","1","-","-",vec!["魔法使い"]),
         ] {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"traits":traits,"cost":cost,"power":power,"hp":hp,"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
             programs.push((number.to_owned(),WellFormedCardProgram::check(CardProgram{abilities:vec![],card_play_costs:vec![]}).unwrap()));
         }
         Prepared{selected:repository::selection_with_rules_from(&snapshot,&keywords,&input),programs}

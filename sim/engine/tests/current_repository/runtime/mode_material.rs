@@ -10,7 +10,7 @@ fn prepared() -> &'static SelectedEffects {
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{id}.yaml"),
-                json!({"format":1_u8,"kind":"effect_set","cards":{id:{"status":"complete","abilities":[]}}}).to_string()
+                json!({"format":1_u8,"kind":"fixture_cards","cards":{id:{"status":"complete"}}}).to_string()
             ]));
         }
         repository::selection_with_rules_from(&snapshot, &keywords, &input)

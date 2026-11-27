@@ -205,11 +205,11 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
 pub(super) fn keyword_catalog() -> Arc<Catalog> {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )
@@ -459,11 +459,11 @@ fn power_provider_catalog() -> Arc<Catalog> {
     let mut document: Value = serde_json::from_str(&document).unwrap();
     document["cards"]["unit-provider"] = document["cards"]["unit-follower"].clone();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &format!("{snapshot}\n{provider}"),
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document.to_string())],
         )

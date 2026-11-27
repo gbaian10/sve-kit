@@ -129,7 +129,7 @@ jobs:
               - 'docs/sim/deck-construction-cases.json'
               - 'authored/rules/comprehensive/**'
               - 'authored/translations/comprehensive-rules/**'
-              - 'authored/rules/keywords.yaml'
+              - 'authored/rules/keyword-registry.yaml'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
             scan:
               - 'scan/**'

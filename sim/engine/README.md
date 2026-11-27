@@ -1,4 +1,4 @@
-# Independent rules prototype
+# Rules engine
 
 Card facts come from the versioned card database snapshot. The engine uses one
 `Game` and authority state for typed effects and shared rules.
@@ -44,17 +44,10 @@ follow effect completion and removal from the resolution zone. Remaining engine
 errors and open questions are tracked in
 [the engine tracking issue](https://github.com/gbaian10/sve-kit/issues/478).
 
-Effect documents use `format: 1, kind: effect_set`; keywords use
-`format: 1, kind: keyword_registry`, selecting the astra/1 prototype grammar.
-The private background records each document kind/format and validation Schema
-`schema_id`. This migration rebuilds authored/settings/schema fingerprints and
-does not accept former backgrounds or replay fingerprints.
-
-`Catalog::from_documents_with_rules` accepts an explicit `EngineIdentityInput`
-and verifies the exact snapshot SHA-256 using the supplied bytes. A `Resolved`
-projection supplies the existing face and rules-name IDs, region and snapshot
-hash from that same input.
-See [engine rule identities](../../docs/dsl/engine-rules-1.md) for the contract.
+The [keyword registry](../../authored/rules/keyword-registry.yaml) supplies
+battle rule names, including counter names and aliases. The engine verifies
+resolved face and rules-name IDs against the SHA-256 of the exact snapshot.
+See [engine rule identities](../../docs/dsl/engine-rules-1.md).
 
 Player setup may provide `title_code`. Frozen runner title labels resolve through
 the validated anchor index derived from the same generated JP input; a supplied code and label must agree. Empty
@@ -63,8 +56,8 @@ apply only to title construction. Resource costs match current effective names,
 including valid aliases, against resolved roles. The EX-to-banish counter uses
 only the single rules name after movement, without aliases.
 
-`Catalog::from_documents` remains a filesystem-free entry for generic synthetic
-positions, without special bindings. A rule that requires an unbound role returns
+`Catalog::from_fixture_documents` loads synthetic cards from snapshot facts and
+fixture metadata. `Catalog::from_fixture_documents_with_rules` also binds rules. A rule that requires an unbound role returns
 `Unsupported`. Bound loaders reject missing roles/templates and inconsistent
 references before execution. The resolved input background and required player
 codes are saved with the serialized `Game`; missing fields fail
@@ -74,9 +67,8 @@ does not provide cross-version migration, `save/2`, or server input authorizatio
 `Catalog::from_current_selection` consumes the complete accepted author selection.
 `Game::from_selected_effects` resolves its permanent face identities against the
 snapshot's source text hashes and admits every current whole card before returning
-a game. Replacing the prototype catalogue or any candidate after selection
-rejects the whole construction. Missing, ambiguous or unsupported cards reject the entire construction;
-current cards never acquire prototype programs. Source proof stays inside the
+a game. Replacing the catalogue or any candidate after selection
+rejects the whole construction. Missing, ambiguous or unsupported cards reject the entire construction. Source proof stays inside the
 authority, including after departure. Loaded internal cards still reject saves;
 this entry does not publish capabilities or grant use qualification.
 
@@ -84,8 +76,8 @@ The default `runner` feature enables the evaluation adapters and test
 drivers including `internal_rule_action` and the seat
 packets `View::P1`/`View::P2`. Hosts build without it and use the player interface;
 referee reads (`projection(View::Referee)`, `query`) stay available. The
-library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
-bindings, host time and execution have not been validated.
+browser host builds for `wasm32-unknown-unknown` with `--no-default-features` and
+loads the snapshot's published programs.
 
 New games use `chacha12-sha256-rand09-v1`:
 `ChaCha12Rng` from rand_chacha 0.10.0, with rand 0.10.3's unbiased range sampler

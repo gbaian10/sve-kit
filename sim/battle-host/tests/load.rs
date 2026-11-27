@@ -16,7 +16,7 @@ use sve_battle_host::load::{LoadError, PreparedBattle};
 use sve_battle_host::wire::{BattleInput, BattleUpdate, RequestId, Submit};
 use sve_battle_host::{Delivery, LocalSession};
 
-const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#;
+const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","rule_names":{}}"#;
 
 /// The anchor of the rule evidence and a printing no deck uses.
 fn snapshot() -> String {

@@ -122,13 +122,13 @@ fn raw_keyword_game() -> Game {
 }
 
 fn raw_keyword_game_for(number: &str) -> Game {
-    let document = json!({"format":1_u8,"kind":"effect_set","cards":{
-        number:{"status":"complete","abilities":[]}
+    let document = json!({"format":1_u8,"kind":"fixture_cards","cards":{
+        number:{"status":"complete"}
     }})
     .to_string();
-    let catalog = Catalog::from_documents(
+    let catalog = Catalog::from_fixture_documents(
         &snapshot(),
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        "format: 1\nkind: keyword_registry\nrule_names: {}\n",
         &[("synthetic.yaml".into(), document)],
     )
     .unwrap();

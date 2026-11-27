@@ -56,7 +56,7 @@ fn selection_with_readers(
         &cards.join("\n"),
         include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../../authored/rules/keywords.yaml"
+            "/../../authored/rules/keyword-registry.yaml"
         )),
         &json!({"documents":[],"authors":authors}),
     )

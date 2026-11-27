@@ -32,8 +32,9 @@ def test_unregistered_counter_in_cap_or_token(
     tmp_path: Path, tree: dict[str, JsonValue], path: tuple[str, ...]
 ) -> None:
     (tmp_path / "rules").mkdir()
-    (tmp_path / "rules/keywords.yaml").write_text(
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n"
+    (tmp_path / "rules/keyword-registry.yaml").write_text(
+        "format: 1\nkind: keyword_registry\nrecords: []\n"
+        "decision: {id: synthetic, state: confirmed, note: Synthetic registry}\n"
     )
     result = CardAccepted(
         AuthorIndexRecord(

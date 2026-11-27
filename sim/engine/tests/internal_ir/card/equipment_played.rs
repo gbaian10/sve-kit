@@ -58,7 +58,8 @@ fn game(initial: &Value, steps: Vec<Located<Node>>) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut game = Game::new(
         catalog,

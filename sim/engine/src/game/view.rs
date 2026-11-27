@@ -121,39 +121,11 @@ impl Game {
             selections.retain(|controller, _| controller == viewer);
         }
         normalize_origins(&mut packet["flow"]);
-        if let Some(frame) = &self.state.frame
-            && seat.is_none_or(|seat| frame.controller == seat)
-        {
-            let mut continuation = json!({"frame":frame,"prompt":self.state.prompt});
-            continuation["frame"]["cause"] = Value::Null;
-            if self.visible_references(&continuation, view) {
-                packet["continuation"] = continuation;
-            }
-        }
         Ok(packet)
     }
 
     fn semantic_projection(&self, view: View) -> Value {
-        let pending=self.state.pending.iter().map(|pending|{
-            let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
-            if let Some(id)=&pending.id {value["id"]=json!(id);}
-            if pending.retained {value["event_discriminator"]=json!(true);}
-            if !pending.alternatives.is_empty() {
-                value["alternatives_required"] = json!(true);
-                let alternatives = json!(pending.alternatives);
-                if self.visible_references(&alternatives,view) {
-                    value["event_alternatives"] = alternatives;
-                    value["program"] = pending.code.clone();
-                }
-            }
-            if let Some(context)=&pending.context {
-                let context=json!(context);
-                if self.visible_references(&context,view) {value["program"]=pending.code.clone();value["context"]=context;}
-            }
-            value
-        }).collect::<Vec<_>>();
-        let mut semantic =
-            json!({"pending_triggers":pending,"counters_this_turn":self.state.counters});
+        let mut semantic = json!({"pending_triggers":[],"counters_this_turn":self.state.counters});
         semantic["turn_schedule"] = json!(self.state.schedule);
         for (key, count) in &self.state.counters {
             if let Some((controller, name)) = key.split_once('.')
@@ -162,13 +134,7 @@ impl Game {
                 semantic["counters_this_turn"][controller][name] = json!(count);
             }
         }
-        semantic["continuous_effects"] = json!(
-            self.state
-                .continuous
-                .iter()
-                .filter(|entry| self.visible_references(entry, view))
-                .collect::<Vec<_>>()
-        );
+        semantic["continuous_effects"] = json!([]);
         semantic["event_occurrences"] = json!(
             self.state
                 .event_occurrences
@@ -176,26 +142,8 @@ impl Game {
                 .filter(|entry| self.visible_references(&json!(entry.subject), view))
                 .collect::<Vec<_>>()
         );
-        semantic["delayed_triggers"] = json!(
-            self.state
-                .delayed
-                .iter()
-                .filter(|entry| self.visible_references(entry, view))
-                .collect::<Vec<_>>()
-        );
-        semantic["used_this_turn"] = json!(
-            self.state
-                .used
-                .values()
-                .filter(|entry| {
-                    self.state
-                        .objects
-                        .get(string(&entry.ability["source"]))
-                        .is_some_and(|object| object.generation == entry.generation)
-                        && self.visible_references(&entry.ability, view)
-                })
-                .collect::<Vec<_>>()
-        );
+        semantic["delayed_triggers"] = json!([]);
+        semantic["used_this_turn"] = json!([]);
         // Only the public fact that layers exist; effect and execution identities stay authority-only.
         if self.internal_numeric_active() {
             semantic["typed_numeric_layers"] = json!(true);
@@ -230,11 +178,7 @@ impl Game {
         if view.player().is_some_and(|viewer| viewer != seat) {
             return Ok(json!({"by":seat}));
         }
-        let choices = if let Some(prompt) = &self.state.prompt {
-            prompt.choices.clone()
-        } else {
-            self.legal_actions()?
-        };
+        let choices = self.legal_actions()?;
         Ok(json!({"by":seat,"at":point["at"],"choices":choices}))
     }
 

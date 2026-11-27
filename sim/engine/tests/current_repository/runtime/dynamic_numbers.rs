@@ -28,7 +28,7 @@ fn prepared() -> &'static Prepared {
             ("limit-similar","ブラスター・ダーク亜種","フォロワー","2","ニュートラル"),
         ] {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":class,"card_type":kind,"traits":[],"cost":cost,"power":if kind=="アミュレット"{"-"}else{"1"},"hp":if kind=="アミュレット"{"-"}else{"30"},"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
             programs.push((number.to_owned(),WellFormedCardProgram::check(CardProgram{abilities:vec![],card_play_costs:vec![]}).unwrap()));
         }
         Prepared{selected:repository::selection_with_rules_from(&snapshot,&keywords,&input),programs}

@@ -38,15 +38,15 @@ fn catalog() -> Arc<Catalog> {
         ("filler", "filler", "フォロワー", "1", vec![]),
     ] {
         snapshot.push(json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if kind=="アミュレット" {"-"} else {"1"},"hp":if kind=="アミュレット" {"-"} else {"2"},"traits":traits,"text":null,"sections":[]}]}).to_string());
-        cards.insert(number.into(), json!({"status":"complete","abilities":[]}));
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot.join("\n"),
-            &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
+            &json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string(),
             &[(
                 "next-cost".into(),
-                json!({"format":1,"kind":"effect_set","cards":cards}).to_string(),
+                json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string(),
             )],
         )
         .unwrap(),

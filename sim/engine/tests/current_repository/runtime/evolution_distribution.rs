@@ -28,10 +28,10 @@ fn bp16_006_current_covers_both_lines_and_all_registered_jp_printings() {
         printings,
         BTreeSet::from(["BP16-006", "BP16-P02", "EBD01-011"])
     );
-    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
+    let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
     for printing in printings {
         assert_eq!(selected.current[printing].card_id, CARD_ID);
-        assert!(prototypes["programs"].get(printing).is_none());
+        assert!(catalogue["fixtures"].get(printing).is_none());
     }
     let card = &selected.current[CARD];
     let faces = card.source_payload["faces"].as_array().unwrap();

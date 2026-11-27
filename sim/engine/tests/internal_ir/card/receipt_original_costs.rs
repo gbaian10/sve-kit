@@ -29,7 +29,8 @@ fn game(cards: &[&str]) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut position = setup(1, json!([]));
     position["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower"}]);

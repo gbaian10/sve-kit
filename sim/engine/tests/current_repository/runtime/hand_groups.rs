@@ -1,6 +1,5 @@
 use super::*;
 use alloc::sync::Arc;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InstructionOutcome;
 
 fn payment_catalog() -> Arc<Catalog> {
@@ -11,10 +10,10 @@ fn payment_catalog() -> Arc<Catalog> {
         for number in ["ECP02-039", "ECP02-010", "ECP02-001", "ECP02-008"] {
             cards.insert(
                 number.into(),
-                json!({"status":"complete","review":"payment fixture only","abilities":[]}),
+                json!({"status":"complete"}),
             );
         }
-        let document = json!({"format":1_u8,"kind":"effect_set","cards":cards}).to_string();
+        let document = json!({"format":1_u8,"kind":"fixture_cards","cards":cards}).to_string();
         let rules = rule_fixtures::rules(
             snapshot,
             json!([rule_fixtures::title(
@@ -25,12 +24,11 @@ fn payment_catalog() -> Arc<Catalog> {
             json!([]),
         );
         Arc::new(
-            Catalog::from_documents_with_rules(
+            rule_fixtures::catalog(
                 snapshot,
                 keywords,
                 &[("payment-fixture.yaml".into(), document)],
                 &rules.to_string(),
-                &EngineIdentityInput::LegacyJp,
             )
             .unwrap(),
         )

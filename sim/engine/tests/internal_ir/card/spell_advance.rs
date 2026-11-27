@@ -17,7 +17,8 @@ fn advance_board(zone: &str, kind: &str, cost: &str, active: &str) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
     initial["turn"]["active"] = json!(active);

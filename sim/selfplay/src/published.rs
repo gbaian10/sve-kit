@@ -13,7 +13,7 @@ use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
 
 /// The keyword registry this engine build was written against.
-const KEYWORDS: &str = include_str!("../../../authored/rules/keywords.yaml");
+const KEYWORDS: &str = include_str!("../../../authored/rules/keyword-registry.yaml");
 const NEUTRAL: &str = "ニュートラル";
 
 fn hex(text: &str) -> String {

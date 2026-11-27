@@ -60,8 +60,8 @@ fn prepared_game(initial: &Value) -> Game {
         }]
     });
     let document = json!({
-        "format":1_u8,"kind":"effect_set",
-        "cards":{"lunalu-base":{"status":"complete","abilities":[]}}
+        "format":1_u8,"kind":"fixture_cards",
+        "cards":{"lunalu-base":{"status":"complete"}}
     });
     input["documents"]
         .as_array_mut()

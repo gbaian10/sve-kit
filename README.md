@@ -61,7 +61,7 @@ sve-kit/
 │
 ├── sim/                   Battle simulator
 │   ├── battle-contract/   Wire types shared by the battle host and its clients
-│   ├── engine/            Rust rules-engine prototype
+│   ├── engine/            Rust rules engine
 │   ├── scenario-runner/   Engine-neutral scenario runner
 │   ├── selfplay/          Random self-play over the battle host
 │   └── web/               Web client (React / TypeScript)

@@ -90,14 +90,12 @@ fn variant_game(initial: &Value, admitted_template: bool, cost: &str, token: boo
         .collect::<Vec<_>>()
         .join("\n");
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-second"] =
-        json!({"status":"complete","review":"synthetic","abilities":[]});
+    document["cards"]["unit-second"] = json!({"status":"complete"});
     if !admitted_template {
-        document["cards"]["unit-template"] =
-            json!({"status":"complete","review":"synthetic","token_template":true,"abilities":[]});
+        document["cards"]["unit-template"] = json!({"status":"complete","token_template":true});
     }
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("unit.yaml".into(), document.to_string())],

@@ -734,14 +734,14 @@ fn printed_bp02_destroy_and_protection_predicate_fragments_use_public_inputs() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP02-116":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP02-089":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP02-116":{"status":"complete"},
+        "BP02-089":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

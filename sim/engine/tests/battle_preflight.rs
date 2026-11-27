@@ -26,7 +26,7 @@ use sve_engine::battle::{
     BattleReferences, InputProjection, PrintingFaceIdentity, ReferenceInput, RuleIdentity,
     RuleInput, WordingFaceIdentity, WordingFieldIdentity, WordingInput, WordingRevisionIdentity,
 };
-use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
+use sve_engine::catalog::{CurrentSelectionLoader, SelectedEffects};
 use sve_engine::game::Game;
 use sve_engine::game::player::{
     AdmissionGapReason, DeckConstruction, PlayerDeck, SubmissionKind, Viewer,
@@ -100,19 +100,20 @@ fn fixture(creator: bool, token_kind: &str) -> Fixture {
         });
     }
     let snapshot = snapshot.join("\n");
-    let keywords = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let keywords = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
     let rules = rule_fixtures::rules(
         &snapshot,
         json!([rule_fixtures::title("synthetic", "plain", json!([]))]),
         json!([]),
     );
+    let (rules, identity) = rule_fixtures::resolved(&snapshot, &rules.to_string()).unwrap();
     let selected = loader()
         .select_with_rules(
             &snapshot,
             &keywords,
             &json!({"documents":[],"authors":authors}),
-            &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
+            &rules,
+            &identity,
         )
         .unwrap();
     let manifest = format!("sha256:{}", "a".repeat(64));
@@ -171,7 +172,7 @@ fn submit(game: &mut Game, viewer: Viewer, input: &InputProjection, answer: &Ans
 #[test]
 fn preflight_starts_a_real_wire_game_with_exact_text_but_no_invented_complete_rules() {
     let fixture = fixture(false, "フォロワー・トークン");
-    let references = BattleReferences::new(&fixture.selected.prototypes, fixture.input).unwrap();
+    let references = BattleReferences::new(&fixture.selected.catalogue, fixture.input).unwrap();
     assert!(
         Game::check_battle_decks(&fixture.selected, &decks(), &references)
             .unwrap()
@@ -274,7 +275,7 @@ fn preflight_starts_a_real_wire_game_with_exact_text_but_no_invented_complete_ru
 #[test]
 fn preflight_rejects_the_unsupported_dependency_inside_an_unexecuted_branch_for_its_owner() {
     let fixture = fixture(true, "アミュレット・トークン");
-    let references = BattleReferences::new(&fixture.selected.prototypes, fixture.input).unwrap();
+    let references = BattleReferences::new(&fixture.selected.catalogue, fixture.input).unwrap();
     for owner in [Viewer::P1, Viewer::P2] {
         let mut decks = decks();
         let other = usize::from(owner == Viewer::P1);
@@ -310,7 +311,7 @@ fn preflight_checks_exact_wording_in_the_transitive_closure_without_testing_the_
         .unwrap()
         .revisions
         .clear();
-    let references = BattleReferences::new(&fixture.selected.prototypes, input).unwrap();
+    let references = BattleReferences::new(&fixture.selected.catalogue, input).unwrap();
     assert!(
         Game::check_player_decks(&fixture.selected, &decks())
             .unwrap()

@@ -1,7 +1,6 @@
 use super::*;
 use crate::rule_fixtures;
 use std::sync::OnceLock;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::observation::{
     Observation, ObservedZone, Relationship, RelationshipKind,
@@ -34,12 +33,11 @@ fn resources() -> Arc<Catalog> {
             ]),
         );
         Arc::new(
-            Catalog::from_documents_with_rules(
+            rule_fixtures::catalog(
                 &snapshot,
                 &registry,
                 &[("synthetic.yaml".into(), document)],
                 &rules.to_string(),
-                &EngineIdentityInput::LegacyJp,
             )
             .unwrap(),
         )

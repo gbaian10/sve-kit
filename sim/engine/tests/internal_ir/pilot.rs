@@ -25,8 +25,7 @@ pub(super) fn board(kind: &str, attack: &str, life: &str) -> Game {
     let (snapshot, registry, document) = catalog_documents(&json!("1"));
     let mut registry: Value = serde_json::from_str(&registry).unwrap();
     for (name, japanese) in [("aura", "オーラ"), ("storm", "疾走")] {
-        registry["keywords"][name] =
-            json!({"ja":japanese,"rule":"synthetic","expansion":{"op":"keyword","name":name}});
+        registry["rule_names"][name] = json!({"ja":japanese,"rule":"synthetic"});
     }
     let registry = registry.to_string();
     let mut cards = snapshot
@@ -42,7 +41,8 @@ pub(super) fn board(kind: &str, attack: &str, life: &str) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("pilot.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("pilot.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

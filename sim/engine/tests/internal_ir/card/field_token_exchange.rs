@@ -55,7 +55,7 @@ fn catalogue() -> Arc<Catalog> {
         document["cards"][number] = document["cards"]["unit-follower"].clone();
     }
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &rows
                 .iter()
                 .map(Value::to_string)

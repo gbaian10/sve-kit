@@ -1,6 +1,6 @@
 use super::*;
 use crate::battle::tests::{board_fixture, payment_fixtures, rule_fixtures};
-use crate::catalog::{Catalog, EngineIdentityInput};
+use crate::catalog::Catalog;
 use crate::ir::lowering::ExpandedLowerer;
 use crate::ir::{CardProgram, PlayerId, WellFormedCardProgram, payment_expanded_tree};
 use alloc::sync::Arc;
@@ -25,12 +25,11 @@ pub(super) fn catalog() -> Arc<Catalog> {
             ]),
         );
         Arc::new(
-            Catalog::from_documents_with_rules(
+            rule_fixtures::catalog(
                 snapshot,
                 &keywords,
                 &[("synthetic".into(), document)],
                 &rules.to_string(),
-                &EngineIdentityInput::LegacyJp,
             )
             .unwrap(),
         )

@@ -76,9 +76,9 @@ fn arena_catalog() -> Arc<Catalog> {
     extra["number"] = json!("plain");
     rows.push(extra);
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["plain"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["plain"] = json!({"status":"complete"});
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &rows
                 .iter()
                 .map(Value::to_string)

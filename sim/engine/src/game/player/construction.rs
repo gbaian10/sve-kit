@@ -42,10 +42,10 @@ pub fn check_card_deck_rules(selected: &SelectedEffects, deck: &PlayerDeck) -> R
             };
             let mut names = BTreeMap::<String, Vec<&String>>::new();
             for number in numbers {
-                if !selected.prototypes.cards.contains_key(number) {
+                if !selected.catalogue.cards.contains_key(number) {
                     continue;
                 }
-                let name = selected.prototypes.rules_label(number, 0)?;
+                let name = selected.catalogue.rules_label(number, 0)?;
                 if !name.contains(exclude_name_contains) {
                     names.entry(name).or_default().push(number);
                 }

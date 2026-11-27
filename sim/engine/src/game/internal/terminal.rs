@@ -37,9 +37,6 @@ impl Game {
         self.typed = None;
         self.prepared.clear();
         self.card_runtime.terminate();
-        self.state.pending.clear();
-        self.state.prompt = None;
-        self.state.frame = None;
     }
 
     /// Surrender immediately, including while a play or pending-order question is waiting.

@@ -1,6 +1,5 @@
 use super::*;
 use crate::rule_fixtures;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InputDomain;
 
 fn program(action: Action, count: u64, zone: ZoneKind) -> WellFormedCardProgram {
@@ -156,12 +155,11 @@ fn move_material(action: Action, zone: ZoneKind, destination: &str) {
         )]),
     );
     let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), document)],
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );

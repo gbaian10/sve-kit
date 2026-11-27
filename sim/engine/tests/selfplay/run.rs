@@ -53,7 +53,7 @@ pub(super) fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool>
         if !reprints && candidate.card_no != *number {
             continue;
         }
-        let face = selected.prototypes.face(number, 0).unwrap();
+        let face = selected.catalogue.face(number, 0).unwrap();
         let Some(kind) = face.get("card_type").and_then(Value::as_str) else {
             continue;
         };
@@ -66,7 +66,7 @@ pub(super) fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool>
         }
         let printing = Printing {
             number: number.clone(),
-            name: selected.prototypes.rules_label(number, 0).unwrap(),
+            name: selected.catalogue.rules_label(number, 0).unwrap(),
             start_amulet: candidate.program.card().abilities.iter().any(|ability| {
                 printed_keywords::card_declaration(&ability.node) == Some(KeywordId::StartAmulet)
             }),
@@ -88,7 +88,7 @@ pub(super) fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool>
             }
         }
         if let Some(title) = face.get("title").and_then(Value::as_str)
-            && let Ok(Some(code)) = selected.prototypes.rule_bindings.title_code("", title)
+            && let Ok(Some(code)) = selected.catalogue.rule_bindings.title_code("", title)
         {
             add(titles.entry(code).or_default());
         }
@@ -106,7 +106,7 @@ pub(super) fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool>
         })
         .chain(titles.into_iter().map(|(title, cards)| {
             let mandatory_amulet = selected
-                .prototypes
+                .catalogue
                 .rule_bindings
                 .capability(&title, "opening_start_amulet");
             DeckPool {

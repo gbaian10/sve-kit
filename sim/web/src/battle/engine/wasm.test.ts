@@ -19,7 +19,7 @@ const manifest = "1".repeat(64)
 function inputs(programHash = sha256(programs)): string {
   return JSON.stringify({
     snapshot: "",
-    keywords: JSON.stringify({ format: 1, kind: "keyword_registry", keywords: {} }),
+    keywords: JSON.stringify({ format: 1, kind: "keyword_registry", rule_names: {} }),
     rules: "{}",
     references: {
       region: "jp",
@@ -29,7 +29,7 @@ function inputs(programHash = sha256(programs)): string {
       rules: null,
     },
     printings: [],
-    engine_identity: "LegacyJp",
+    engine_identity: { Resolved: { region: "jp", snapshot_sha256: sha256(""), faces: [] } },
     identity: {
       snapshot: content("snapshot", manifest),
       programs: content("programs", programHash),

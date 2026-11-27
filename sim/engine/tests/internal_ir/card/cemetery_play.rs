@@ -86,7 +86,7 @@ fn cemetery_play_matches_class_without_requiring_the_spells_title_registry() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &titled_snapshot,
             &registry,
             &[("unit.yaml".into(), document)],

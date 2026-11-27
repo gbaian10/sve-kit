@@ -22,7 +22,7 @@ const CARDS: [(&str, &str, &str); 2] = [
 #[test]
 fn bp04_001_and_002_share_one_source_and_every_registered_printing() {
     let selected = selection_with_rules();
-    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
+    let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
     for (number, card_id, face) in CARDS {
         let author = inputs().2["authors"]
             .as_array()
@@ -35,7 +35,7 @@ fn bp04_001_and_002_share_one_source_and_every_registered_printing() {
         for printing in printings {
             let printing = printing.as_str().unwrap();
             assert_eq!(selected.current[printing].card_id, card_id);
-            assert!(prototypes["programs"].get(printing).is_none());
+            assert!(catalogue["fixtures"].get(printing).is_none());
         }
         let card = &selected.current[number];
         assert_eq!(card.source_payload["card_id"], card_id);

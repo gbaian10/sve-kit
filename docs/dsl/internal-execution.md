@@ -17,8 +17,8 @@ owner、field、fragment；這不授予永久來源身分或公開 capability。
 本文，不把依賴 play binding 的本文重新當成封閉 `WellFormedProgram`。
 正式 current 卡由 `Game::from_selected_effects()` 接受完整 accepted selection，先核對來源與
 快照面的唯一對應，再自動呼叫相同整卡准入；不能只傳一份良構程式冒充 accepted 卡。
-原型與 current 維持不相交，current 的永久來源座標不改寫為 `base` 或卡號；
-選用結果的原型 Catalog 與 current 候選以同一份固定集合保存，替換任一者都使整次建立失敗。
+current 保留永久來源座標。選用結果的 Catalog 與整卡候選以同一份固定集合保存，
+替換任一者都使整次建立失敗。
 能力篩選、printed characteristics、事件與離場 LKI 共用 catalog 邊界解析出的面對應；
 沒有對應即拒絕。來源 sidecar 與完整程式保存在 authority，不發布 capability 或新存檔欄位。
 base face 的普通打出費用必須是非負數字；缺欄、null、「-」、其他非數字及負值拒絕，明示的零費用仍有效。
@@ -49,7 +49,7 @@ Printed、Field 起動可帶 `PlaySpec.limit` 的每回合 1／2 次額度；以
 計數，全部付款完成的 AbilityPlayed 才耗次。耗盡回 IllegalPlay，不出題、不付款；失敗回復沿下節。
 current 局面可保存未載入整卡的物件；單純存在或不讀取能力的快照計數，不因缺 program
 整局拒絕。打出、攻擊、指定能力、Quick 許可及完整事件能力資料／LKI 的能力集合查詢仍要求載入，
-真正無印刷能力的普通卡也須明示整卡，不能將缺 program 當空能力集合或回退原型效果。
+真正無印刷能力的普通卡也須明示整卡，缺 program 時能力集合仍未知。
 進化資源沿既有角色准入，可先完成數值與資源程序，再於未准入能力的 pending 邊界停止；
 該角色不代表能力完整載入。typed printed set 與完整事件能力資料／LKI 仍須有 program 或既有的明確空卡文證明。
 
@@ -60,7 +60,7 @@ current 局面可保存未載入整卡的物件；單純存在或不讀取能力
 `Game::query` 的既有公開區域張數路徑（例如 `P1.hand_count`）直接讀取區域，不先建立可能需要能力的完整投影；
 所有視角得到相同公開張數，不回傳隱藏物件身分，也不新增 packet 欄位。
 
-current 不以原型 header 判定未載入卡的 active zones。需要列舉訂閱、限制、取代或交換付款介入時，
+需要列舉訂閱、限制、取代或交換付款介入時，
 若不能證明某物件的能力與該次操作無關，即以卡號、有效面、holder 世代及查詢用途精確拒絕。
 移動取代、關鍵字／能力授予、減費、觸發抑制與重複觸發等直接掃描場上來源的讀取，也須先檢查此能力需求。
 這仍可能使有未載入牌庫／手牌卡的實際事件或回合推進停止，不保證任意局面都可完成；
@@ -68,8 +68,8 @@ current 不以原型 header 判定未載入卡的 active zones。需要列舉訂
 已知 definition 的要求保留 AbilityId；未知能力集合明示定義不可用，不捏造來源行。
 authority 保留完整錯誤，玩家 projection 的 unsupported 錯誤不包含隱藏卡號或物件身分。
 
-未准入的原型 keyword、continuous、delayed 與忙碌 context 仍拒絕。
-已載入 Spell／Fanfare 時封住合成 prepare 與原型打出，不略過正式 producer。
+建局時，待機、持續與延遲效果歷史須由型別化路徑匯入。
+已載入 Spell／Fanfare 時使用正式的整卡打出入口。
 
 上述入口回傳 `CardPlay`：`Awaiting` 只有本次 token、actor 與授權的題目；`Resolved` 含完整
 `Activation`；從者／護符卡片 play 的 `Entered` 含 `CardEntry`（本次 execution、完整付款／card facts、
@@ -840,15 +840,15 @@ BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底�
 
 Look 選擇的作者入口與組合如下；這些是句段能力，不代表整張卡完成准入。
 
-| 入口 | 支援組合 | 仍拒絕 |
-| --- | --- | --- |
-| 不分組的 resolution `choose` | 單一 Look，或同一 Look 的 filtered union；`distinct_by: name` 與既有種類、特徵、職業、單張原費篩選相交 | 超過 10 張候選的名稱互異、名稱互異與 `cost_sum_le` 同時使用、原費等其他互異屬性、其他 target 節點及 hand union 借用此能力 |
-| 既有兩／三組 Look `choose` | 每組至多一張、總量至多組數、可零選、同一物件不可重用；組內非空字面 `name` 可與種類、特徵、職業及單張原費篩選相交 | 多群組加名稱互異、空群組／空名字、只有職業或原費的群組、以 `same_as` 等物件作群組名字 |
-| 群組共用的 `from` | `not_same_name_as_this` 沿封閉的 SourceInformation 名稱快照，套用至每一組；來源離場後仍讀該快照 | 逐組作者欄位 `not_same_name_as_this`、live SourceHolder 名稱、任意其他綁定的名字；同 Look 字面名字除外仍不適用分組 |
-| 私有來源 | 同一 controller 的已授權 Look；現有 viewer、世代、位置及 owner 檢查持續生效 | 任意 Deck Zone、他人 Look、未知綁定、公開或外席的 Look 選擇 |
-| 同一 Look 的多次 `choose` | 前一次移走的牌在候選條件求值前移除；每次仍可獨立拒選，空或不足候選沿原 resolution 基數處理 | 已移走或失去位置證據的牌重新成為候選；藉候選失效跳過完整條件驗證 |
-| Order／觀察移動的 remainder | `except` 接單一觀察 atom 或非空 `any_of` atom 聯集；atom 可再帶 except，每一層沿用排除位置 | 直接巢狀 union、空 union、未知 binding、任意區域來源；Bottom 洗回不接受 union |
-| 已選 Look 牌仍在 deck 的 `reveal` | 實際選中 Bound，重新驗私有 Look 來源及目前自己牌庫的世代、位置證據；重用 scoped reveal／expiry | 未選候選、任意 deck Bound、混合手牌與牌庫、失效觀察；不擴大整 Look／整手牌以外的其他揭露形狀 |
+| 入口                              | 支援組合                                                                                                         | 仍拒絕                                                                                                                    |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 不分組的 resolution `choose`      | 單一 Look，或同一 Look 的 filtered union；`distinct_by: name` 與既有種類、特徵、職業、單張原費篩選相交           | 超過 10 張候選的名稱互異、名稱互異與 `cost_sum_le` 同時使用、原費等其他互異屬性、其他 target 節點及 hand union 借用此能力 |
+| 既有兩／三組 Look `choose`        | 每組至多一張、總量至多組數、可零選、同一物件不可重用；組內非空字面 `name` 可與種類、特徵、職業及單張原費篩選相交 | 多群組加名稱互異、空群組／空名字、只有職業或原費的群組、以 `same_as` 等物件作群組名字                                     |
+| 群組共用的 `from`                 | `not_same_name_as_this` 沿封閉的 SourceInformation 名稱快照，套用至每一組；來源離場後仍讀該快照                  | 逐組作者欄位 `not_same_name_as_this`、live SourceHolder 名稱、任意其他綁定的名字；同 Look 字面名字除外仍不適用分組        |
+| 私有來源                          | 同一 controller 的已授權 Look；現有 viewer、世代、位置及 owner 檢查持續生效                                      | 任意 Deck Zone、他人 Look、未知綁定、公開或外席的 Look 選擇                                                               |
+| 同一 Look 的多次 `choose`         | 前一次移走的牌在候選條件求值前移除；每次仍可獨立拒選，空或不足候選沿原 resolution 基數處理                       | 已移走或失去位置證據的牌重新成為候選；藉候選失效跳過完整條件驗證                                                          |
+| Order／觀察移動的 remainder       | `except` 接單一觀察 atom 或非空 `any_of` atom 聯集；atom 可再帶 except，每一層沿用排除位置                       | 直接巢狀 union、空 union、未知 binding、任意區域來源；Bottom 洗回不接受 union                                             |
+| 已選 Look 牌仍在 deck 的 `reveal` | 實際選中 Bound，重新驗私有 Look 來源及目前自己牌庫的世代、位置證據；重用 scoped reveal／expiry                   | 未選候選、任意 deck Bound、混合手牌與牌庫、失效觀察；不擴大整 Look／整手牌以外的其他揭露形狀                              |
 
 名稱互異沿用完整有效名稱集合，兩張牌只要共享原名或別名就不能同選；不同印刷不會成為不同名稱。
 候選不足、空 Look 與場上空位沿既有 resolution／field entry 的容量計算，不另設 Look 裁切規則。

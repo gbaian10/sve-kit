@@ -1,6 +1,5 @@
 use super::*;
 use sve_battle_contract::observation::{LimitBreakStage, RelationshipKind};
-use sve_engine::catalog::EngineIdentityInput;
 
 const ELEMENTS: [(&str, &str, &str, &str); 6] = [
     ("CP05-T09", "CP05-P93", "fire", "火属性"),
@@ -67,12 +66,11 @@ fn materials() -> &'static (SelectedEffects, BattleReferences) {
             json!([rule_fixtures::title("synthetic", "granblue", json!([]))]),
             json!([]),
         );
-        let selected = Catalog::from_current_selection_with_rules(
+        let selected = rule_fixtures::selection(
             &snapshot,
             keywords,
             &json!({"documents":[],"authors":authors}),
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         let references = test_battle_references(&selected, &snapshot);

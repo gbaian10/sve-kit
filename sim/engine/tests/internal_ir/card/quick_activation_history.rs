@@ -42,7 +42,7 @@ fn sequence_game() -> Game {
     );
     let selection = Catalog::from_current_selection(
         &format!("{quick_spell}\n{primer}\n{gated}"),
-        &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
+        &json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string(),
         &json!({"documents":[],"authors":[spell_author,primer_author,gated_author]}),
     )
     .unwrap();

@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::{SearchAnswer, SearchDomain};
 
 struct Case {
@@ -143,7 +142,7 @@ fn companion(
     input["documents"].as_array_mut().unwrap().push(json!([
         format!("{number}.yaml"),
         json!({
-            "format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}
+            "format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}
         })
         .to_string()
     ]));
@@ -219,7 +218,6 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         (selected, programs)
