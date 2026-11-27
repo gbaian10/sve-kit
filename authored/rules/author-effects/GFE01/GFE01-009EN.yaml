@@ -1,0 +1,45 @@
+cards:
+  GFE01-009EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  class: ロイヤル
+                  kind: spell
+                  who: self
+                  zone: deck
+                to: ex
+            - if:
+                cond:
+                  leader_class: ロイヤル
+                then:
+                  - player_effect:
+                      effect:
+                        cost_mod:
+                          delta: -5
+                          next_only: true
+                          when_playing:
+                            name: Musketeers' Vow
+                            who: self
+                      until: turn
+                      who: self
+        line: 2
+      - auto:
+          do:
+            - evolve:
+                ref: it
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                trait: 兵士
+              who: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

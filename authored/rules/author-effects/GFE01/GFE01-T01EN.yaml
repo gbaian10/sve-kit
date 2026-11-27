@@ -1,0 +1,15 @@
+cards:
+  GFE01-T01EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - life:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

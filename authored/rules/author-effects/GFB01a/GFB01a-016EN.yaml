@@ -1,0 +1,53 @@
+cards:
+  GFB01a-016EN:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - draw:
+                        n: 1
+                        who: self
+                    - damage:
+                        n:
+                          count:
+                            who: self
+                            zone: hand
+                        to: single
+                  - - if:
+                        cond:
+                          leader_class: エルフ
+                        then:
+                          - draw:
+                              n: 1
+                              who: self
+                          - damage:
+                              n:
+                                count:
+                                  who: self
+                                  zone: hand
+                              to: several
+          targets:
+            - bind: single
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: several
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              option: 2
+              upto: 3
+    admission: light
+format: 2
+kind: author_effect_set

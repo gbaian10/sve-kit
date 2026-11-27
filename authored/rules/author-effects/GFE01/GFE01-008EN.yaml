@@ -1,0 +1,19 @@
+cards:
+  GFE01-008EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 3
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
