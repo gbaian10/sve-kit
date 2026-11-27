@@ -14,7 +14,11 @@ from sve_carddb.domains.registry.corrections import (
     Status,
     correction_status,
 )
-from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.registry.records import (
+    CorrectionData,
+    PrintingData,
+    correction_value,
+)
 from sve_carddb.domains.source_corrections.images import evidence_url
 
 if TYPE_CHECKING:
@@ -85,7 +89,9 @@ class Application:
             return None
         return {
             "field": self.data.field,
-            "corrected_from": self.data.expected_raw_value,
+            "corrected_from": correction_value(
+                self.data.field, self.data.expected_raw_value
+            ),
             "is_corrected": True,
             "reason": self.data.reason,
             "source_url": source_url,
@@ -119,6 +125,8 @@ _CONTENT = {"effect": "effect", "card_type": "type_raw", "name": "name"}
 
 
 def _value(item: FaceObservation, field: str) -> str | None:
+    if field == "cost":
+        return item.content.stats[0]
     value = getattr(item.content, _CONTENT[field])
     return value if value is None else str(value)
 
@@ -126,7 +134,7 @@ def _value(item: FaceObservation, field: str) -> str | None:
 def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
     if data.state != "active":
         return None
-    return correction_status(
+    status = correction_status(
         _value(item, data.field),
         item.card.observation.observation_hash,
         expected=data.expected_raw_value,
@@ -140,6 +148,13 @@ def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
         if data.sections is not None
         else SectionComparison(),
     )
+    if (
+        status == "applied"
+        and data.expected_source_version_id is not None
+        and data.expected_source_version_id != item.card.source.id
+    ):
+        return "conflict"
+    return status
 
 
 def _verify_application(preview: PreviewPlan, application: Application) -> None:
@@ -274,9 +289,16 @@ def corrected_observations(
             if a.observation == item and a.status == "applied"
         )
         fields: dict[str, object] = {
-            _CONTENT[a.data.field]: a.data.corrected_value for a in applied
+            _CONTENT[a.data.field]: a.data.corrected_value
+            for a in applied
+            if a.data.field != "cost"
         }
         for application in applied:
+            if application.data.field == "cost":
+                fields["stats"] = (
+                    application.data.corrected_value,
+                    *item.content.stats[1:],
+                )
             if application.data.sections is not None:
                 fields["sections"] = application.data.sections.corrected_value
         result.append(

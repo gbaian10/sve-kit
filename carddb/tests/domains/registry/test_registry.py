@@ -605,6 +605,50 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
     assert correction.state == "needs_review"
 
 
+def test_cost_correction_allows_mapping_and_preserves_the_raw_observation(
+    inputs: Inputs,
+) -> None:
+    number = "BP02-070EN"
+    inputs.jp["BP02-071"].faces[0].cost = "-"
+    inputs.en[number].faces[0].stats["cost"] = "3"
+    inputs.mapping.reskins.clear()
+    raw = inputs.en[number].model_dump()
+    with pytest.raises(ValueError, match="cost mismatch: BP02-070EN -> BP02-071"):
+        build(inputs, {})
+
+    version = "src:v1:" + "a" * 64
+    inputs.decisions.corrections = [
+        Correction(
+            region="en",
+            card_no=number,
+            field="cost",
+            expected_raw_value="3",
+            corrected_value="-",
+            expected_source_version_id=version,
+            image_sha256="sha256:" + "b" * 64,
+            locator="The evolved card has no printed cost",
+            state="active",
+            reason="The printed card has no cost.",
+        )
+    ]
+    entries = build(inputs, {})
+    validate(entries)
+    record = next(entry for entry in entries if entry.kind == "source_correction")
+    assert record.data["expected_source_version_id"] == version
+    (result,) = project_corrections(inputs, entries)
+    assert result["status"] == "applied"
+    assert result["value"] is None
+    assert result["corrections"] == [
+        {
+            "field": "cost",
+            "corrected_from": 3,
+            "is_corrected": True,
+            "reason": "The printed card has no cost.",
+        }
+    ]
+    assert inputs.en[number].model_dump() == raw
+
+
 @pytest.mark.parametrize(
     ("scenario", "with_sections"),
     [("applied", False), ("applied", True), ("conflict", True)],

@@ -17,6 +17,7 @@ from sve_carddb.domains.text_observations import (
 from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from ..ingest.test_source_archive import _put, _resource, _store
+from .build_input_fixtures import frozen_provider
 from .text_observation_fixtures import make_case
 
 if TYPE_CHECKING:
@@ -53,11 +54,20 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
     original = (inputs.jp if region == "jp" else inputs.en)[number].faces[0]
     if region == "en" and field == "card_type":
         original.info["Card Type"] = raw_type
+    source_version = None
+    if region == "en" and field == "cost":
+        original.stats["cost"] = "3"
+        inputs.jp["BP02-071"].faces[0].cost = "-"
+        inputs.mapping.reskins.clear()
+        card_pages, _ = frozen_provider(inputs, root / "reviewed-card-pages")
+        source_version = card_pages.cards[region, number].source.id
     expected = (
         original.text
         if field == "effect"
         else original.name
         if field == "name"
+        else original.stats["cost"]
+        if field == "cost"
         else original.card_type
         if region == "jp"
         else original.info["Card Type"]
@@ -70,6 +80,8 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
         if field == "effect"
         else "Corrected name"
         if field == "name"
+        else "-"
+        if field == "cost"
         else "Follower"
     )
     inputs.decisions.corrections = [
@@ -79,6 +91,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
             field=field,
             expected_raw_value=expected,
             corrected_value=value,
+            expected_source_version_id=source_version,
             image_sha256=digest(RAW_IMAGE),
             locator="Synthetic field box",
             state=state,
