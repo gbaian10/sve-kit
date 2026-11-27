@@ -41,7 +41,8 @@ function loadCodes(error: unknown): Readonly<Record<Seat, LoadErrorCode>> {
   try {
     const codes: unknown = JSON.parse(message)
     if (Array.isArray(codes) && codes.length === 2) {
-      const [p1, p2]: unknown[] = codes
+      const p1: unknown = codes[0]
+      const p2: unknown = codes[1]
       if (isLoadCode(p1) && isLoadCode(p2)) return { p1, p2 }
     }
   } catch {
