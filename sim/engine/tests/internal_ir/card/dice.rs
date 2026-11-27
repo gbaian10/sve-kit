@@ -180,7 +180,7 @@ fn following_text_reads_the_replacement_value() {
 fn unadmitted_roller_is_rejected_before_any_random_draw() {
     let mut step = roll(1);
     if let Node::Instruction { instruction } = &mut step.node {
-        instruction.actor = PlayerRef::Active {};
+        instruction.actor = PlayerRef::Owner {};
     }
     let program = card(vec![ability(1, vec![step])]);
     let mut game = Game::new(
@@ -445,4 +445,95 @@ fn accepted_dice_from_the_same_players_previous_turn_do_not_count_during_an_extr
     activate_on(&mut game, "s", reader, 1);
     assert_eq!(hand_size(&game, "P1"), before + 1);
     assert_eq!(game.observe(Viewer::P1).unwrap().history.dice.len(), 1);
+}
+
+#[test]
+fn comparing_two_rolls_rewards_the_highest_players_with_the_turn_player_rolling_first() {
+    let document = equipment_played::tree(
+        &json!({"auto":{"on":{"phase":{"which":"main","whose":"turn"}},"do":[
+            {"dice":{"who":"turn","bind":"turn_roll"}},
+            {"dice":{"who":"non_turn","bind":"other_roll"}},
+            {"if":{"cond":{"cmp":{"left":{"dice":"turn_roll"},"op":"ge","right":{"dice":"other_roll"}}},
+                   "then":[{"life":{"who":"turn","delta":3}},{"draw":{"who":"turn","n":1}}]}},
+            {"if":{"cond":{"cmp":{"left":{"dice":"other_roll"},"op":"ge","right":{"dice":"turn_roll"}}},
+                   "then":[{"life":{"who":"non_turn","delta":3}},{"draw":{"who":"non_turn","n":1}}]}}
+        ]}}),
+        "unit-amulet",
+    );
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    for (next, other, seat) in [("P1", "P2", 1_u32), ("P2", "P1", 2_u32)] {
+        let mut outcomes = [false; 3];
+        for index in 0_u8..24 {
+            let mut initial = setup(1, json!([]));
+            initial["turn"]["active"] = json!(other);
+            initial["players"]["P1"]["zones"]["field"] =
+                json!([{"id":"watch","card":"unit-amulet"}]);
+            initial["players"]["P2"]["zones"]["field"] = json!([]);
+            for player in [next, other] {
+                initial["players"][player]["zones"]["hand"] = json!([]);
+                initial["players"][player]["zones"]["deck"] = json!([
+                    {"id":format!("{player}-top"),"card":"unit-spell"},
+                    {"id":format!("{player}-draw"),"card":"unit-spell"}
+                ]);
+            }
+            let mut game = Game::new(
+                catalog(),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                &format!("highest-roll-{index}"),
+            )
+            .unwrap();
+            game.load_internal_card("unit-amulet", &program).unwrap();
+            for number in ["unit-follower", "unit-spell"] {
+                game.load_internal_card(number, &card(vec![])).unwrap();
+            }
+            boxed::end_turn(&mut game);
+            let pending = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &pending.domain else {
+                panic!("start of main phase ability");
+            };
+            assert_eq!(pending.actor, PlayerId { seat: 1 });
+            let before = [hand_size(&game, next), hand_size(&game, other)];
+            resolved(
+                game.answer_internal_card(
+                    pending.actor,
+                    pending.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap(),
+            );
+            let dice = game.observe(Viewer::P1).unwrap().history.dice;
+            let [turn_roll, other_roll] = dice.as_slice() else {
+                panic!("one accepted roll per player");
+            };
+            let turn_player = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+            let other_player = if seat == 1 { Viewer::P2 } else { Viewer::P1 };
+            assert_eq!(
+                (turn_roll.player, other_roll.player),
+                (turn_player, other_player)
+            );
+            let (current, idle) = (turn_roll.value, other_roll.value);
+            outcomes[usize::from(current >= idle) + usize::from(current > idle)] = true;
+            let state = game.projection(View::Referee).unwrap();
+            for (index, (player, won)) in [(next, current >= idle), (other, idle >= current)]
+                .into_iter()
+                .enumerate()
+            {
+                assert_eq!(state[player]["leader"]["life"], if won { 23 } else { 20 });
+                assert_eq!(hand_size(&game, player), before[index] + usize::from(won));
+            }
+            if outcomes == [true; 3] {
+                break;
+            }
+        }
+        assert_eq!(
+            outcomes, [true; 3],
+            "both kinds of win and ties were exercised"
+        );
+    }
 }

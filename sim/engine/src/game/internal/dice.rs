@@ -5,7 +5,7 @@ use crate::ir::PlayerId;
 use crate::ir::dice as ir_dice;
 use crate::ir::{
     Action, Comparison, Control, DecisionId, DiceEvent, DiceOperation, DieFace, Expr, Instruction,
-    Nat, Node, PlayerRef, RollId, Termination,
+    Nat, Node, PlayerRef, PlayerRelation, RollId, Termination,
 };
 use serde_json::json;
 
@@ -18,17 +18,26 @@ pub(super) struct RollWait {
 
 pub(super) fn check_instruction(instruction: &Instruction) -> Result<()> {
     check_action(&instruction.action)?;
-    if matches!(instruction.action, Action::Dice { .. })
-        && !matches!(
-            instruction.actor,
-            PlayerRef::Controller {} | PlayerRef::Bound { .. }
-        )
-    {
+    if matches!(instruction.action, Action::Dice { .. }) && !valid_roller(&instruction.actor) {
         return Err(unsupported(
-            "dice requires the controller or a procedure player as roller",
+            "dice requires the controller, a procedure player, the turn player or one opponent",
         ));
     }
     Ok(())
+}
+
+fn valid_roller(player: &PlayerRef) -> bool {
+    match player {
+        PlayerRef::Controller {} | PlayerRef::Active {} | PlayerRef::Bound { .. } => true,
+        PlayerRef::RequireOne { players } => {
+            players.relation == PlayerRelation::Opponents
+                && matches!(
+                    players.relative_to,
+                    PlayerRef::Controller {} | PlayerRef::Active {}
+                )
+        }
+        _ => false,
+    }
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {

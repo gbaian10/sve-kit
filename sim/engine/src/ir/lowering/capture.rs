@@ -122,6 +122,18 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn named_effect_player(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        match name {
+            "opp" => Ok(timing::opponent()),
+            "non_turn" => Ok(timing::opponent_of(PlayerRef::Active {})),
+            _ => self.named_player(name, path),
+        }
+    }
+
     /// A query's players: relative to the controller, or exactly an enclosing procedure's player.
     pub(super) fn side_set(
         &self,
