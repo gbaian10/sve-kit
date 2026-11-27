@@ -128,7 +128,6 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<PlayerRef, LoweringError> {
         match name {
-            "opp" => Ok(timing::opponent()),
             "non_turn" => Ok(timing::opponent_of(PlayerRef::Active {})),
             _ => self.named_player(name, path),
         }

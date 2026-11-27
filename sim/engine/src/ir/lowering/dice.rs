@@ -28,8 +28,7 @@ impl BodyContext<'_> {
         match &value.who {
             None | Some(ast::Side::Controller) => Ok(PlayerRef::Controller {}),
             Some(ast::Side::Bound(name)) => self.named_effect_player(name, path),
-            Some(ast::Side::Opponent) => self.named_effect_player("opp", path),
-            Some(ast::Side::All) => Err(unsupported(path)),
+            Some(ast::Side::Opponent | ast::Side::All) => Err(unsupported(path)),
         }
     }
 
