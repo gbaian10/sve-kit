@@ -34,6 +34,10 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 
 執行期的私有 Look 選卡可用 `choose.from: {in: seen, except: {in: seen, name: 指定名字}}` 排除一個字面名字，並與既有種類／特徵條件交集。此准入要求相同 observation 與非空名字，不接受公開目標、搜尋、聯集、分組或和 `not_same_name_as_this` 合用；這不改變下方一般 schema 的其他尚未准入形狀。
 
+`move: {ref: {any_of: [{who: opp, zone: field, kind: follower}, {who: opp, zone: ex}]}, to: hand}`
+在結算時對場上和 EX 各查一次公開集合，再於同一指示將聯集移回各卡持有者的手牌。
+兩支查詢沿用各區的公開篩選。此形狀限定同一玩家範圍的一支場上和一支 EX，目的地為手牌。
+
 ## 動作逐 variant
 
 | 動作 | 必填／變體 | 可選與互斥（長形另有 M） | 真例／合成 |
