@@ -403,6 +403,26 @@ impl Game {
         }
     }
 
+    pub(in crate::game) fn player_reveal_link_only(&mut self, step: &str, controller: &str) {
+        if let Some(entry) = self
+            .player_events
+            .pending
+            .last_mut()
+            .filter(|entry| entry.step.as_deref() == Some(step))
+        {
+            for (perspective, view) in [Viewer::P1, Viewer::P2].into_iter().zip(&mut entry.views) {
+                if seat(perspective) != controller
+                    && let Ok(Some(EventKind::Action(action))) = view
+                    && let [Some(EventSubject::Card(card))] = action.subjects.as_mut_slice()
+                {
+                    // A different viewer's prior knowledge cannot identify the private choice.
+                    card.handle = None;
+                    card.properties.state = None;
+                }
+            }
+        }
+    }
+
     pub(in crate::game) fn player_source_before(
         &self,
         id: &str,

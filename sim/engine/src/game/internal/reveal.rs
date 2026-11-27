@@ -2,14 +2,15 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
+use crate::game::effects::RevealAccess;
 use crate::game::player::Viewer;
 use crate::game::player::observation::face_up;
 use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::perspective;
 use crate::ir::{
     Action, Bool, Expr, Instruction, MemberProjection, Nat, Node, NumericProperty, ObjectReceipt,
-    ObjectRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, SnapshotId,
-    ZoneKind,
+    ObjectRef, PlayerRelation, Position as DeckPosition, ReceiptId, ReceiptLocation, SelectionView,
+    Selector, SnapshotId, ZoneKind,
 };
 use core::mem::take;
 
@@ -57,7 +58,9 @@ pub(super) struct PublicReveal {
     id: String,
     controller: String,
     zone: String,
+    links_location: bool,
     newly_located: Vec<String>,
+    top_placement: Option<ReceiptId>,
 }
 
 pub(super) fn check_objects(objects: &Selector) -> Result<()> {
@@ -127,7 +130,8 @@ impl Game {
         let mut current = self.typed.as_ref();
         while let Some(execution) = current {
             if execution.reveals.iter().any(|reveal| {
-                reveal.id == id
+                reveal.links_location
+                    && reveal.id == id
                     && reveal.object.generation.0 == object.generation
                     && reveal.controller == object.controller
                     && reveal.zone == object.zone
@@ -249,11 +253,21 @@ impl Game {
         }
         // Revealing a private choice does not identify its original deck slot.
         let located = direct_look || zone == Some("hand");
+        let top_placement = if !located && current_members.len() == 1 {
+            execution.revealed_top_order(selected)
+        } else {
+            None
+        };
         for (member, id) in current_members.iter().zip(&ids) {
-            self.internal_record_reveal(execution, *member, id, located)?;
+            self.internal_record_reveal(execution, *member, id, located, top_placement)?;
         }
         let before = SnapshotId(self.state.ir_epoch);
-        self.reveal(&ids, "all", &execution.frame(), located)?;
+        let access = if located {
+            RevealAccess::GrantLocation
+        } else {
+            RevealAccess::PrivateLookChoice
+        };
+        self.reveal(&ids, "all", &execution.frame(), access)?;
         self.internal_hand_reveal_events(&hand_reveals, execution, before)?;
         execution.record_notice(
             self,
@@ -284,6 +298,7 @@ impl Game {
         reference: ObjectRef,
         id: &str,
         located: bool,
+        top_placement: Option<ReceiptId>,
     ) -> Result<()> {
         let object = self.object(id)?;
         if object.generation != reference.generation.0
@@ -308,7 +323,9 @@ impl Game {
             id: id.to_owned(),
             controller: object.controller.clone(),
             zone: object.zone.clone(),
+            links_location: located,
             newly_located,
+            top_placement,
         });
         Ok(())
     }
@@ -373,6 +390,34 @@ pub(super) fn look_sum(objects: &Selector, property: NumericProperty) -> Option<
 }
 
 impl Execution {
+    fn revealed_top_order(&self, selection: Option<&Selector>) -> Option<ReceiptId> {
+        let Node::Instruction { instruction } = self.todo.front()?.node()? else {
+            return None;
+        };
+        let Action::Order {
+            cards,
+            destinations,
+            ..
+        } = &instruction.action
+        else {
+            return None;
+        };
+        let [placement] = destinations.as_slice() else {
+            return None;
+        };
+        // The public result follows only when the next instruction places this exact choice.
+        (instruction.precondition.is_none()
+            && Some(cards) == selection
+            && placement.position == DeckPosition::Top {})
+        .then_some(instruction.receipt)
+    }
+
+    pub(super) fn reveals_top_placement(&self, receipt: ReceiptId, member: ObjectRef) -> bool {
+        self.reveals
+            .iter()
+            .any(|grant| grant.object == member && grant.top_placement == Some(receipt))
+    }
+
     pub(super) fn public_look_objects(
         &self,
         game: &Game,
