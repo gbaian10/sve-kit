@@ -204,6 +204,7 @@ fn assert_public_attachments(game: &Game) {
 fn limit_break_wire_marks_face_up_material_public_for_both_viewers() {
     let fixture = board_fixture::fixture().unwrap();
     let mut initial = setup_board(0);
+    // The initial position identifies both materials so facing is the only visibility difference.
     initial["players"]["P1"]["zones"]["limit_break"] = json!([
         {"id":"up","card":"unit-spell","face_up":true,"state":{"limit_break_of":"s"}},
         {"id":"down","card":"unit-amulet","face_up":false,"state":{"limit_break_of":"s"}},
