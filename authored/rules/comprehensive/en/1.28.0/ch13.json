@@ -1,7 +1,7 @@
 {
   "format": 1,
   "kind": "comprehensive-rules",
-  "version": "1.26.1",
+  "version": "1.28.0",
   "nodes": [
     {
       "key": "13",
@@ -165,7 +165,8 @@
       "number": "13.3.2.4",
       "kind": "rule",
       "depth": 4,
-      "text": "Card text written in the form \"add X to a Stack on your field\" means \"put X Stack counters on a card with Stack on your field.\""
+      "text": "Card text written in the form \"add X to a Stack on your field\" means \"if there is a card with Stack on your field, put X Stack counters on a card with Stack on your field; if there are no cards with Stack on your field, create a Magic Sediment token and, instead of putting it onto your field with 1 Stack counter as per its Stack ability, put it onto your field with X Stack counters.\"",
+      "changed": true
     },
     {
       "key": "13.3.3",

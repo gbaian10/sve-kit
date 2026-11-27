@@ -1,7 +1,7 @@
 {
   "format": 1,
   "kind": "comprehensive-rules",
-  "version": "1.26.1",
+  "version": "1.28.0",
   "nodes": [
     {
       "key": "12",
@@ -119,8 +119,7 @@
       "number": "12.2.5",
       "kind": "rule",
       "depth": 3,
-      "text": "Evolve abilities of cards with the special type \"evolved\" cannot be played.",
-      "changed": true
+      "text": "Evolve abilities of cards with the special type \"evolved\" cannot be played."
     },
     {
       "key": "12.3",
@@ -309,8 +308,7 @@
       "number": "12.7.2",
       "kind": "rule",
       "depth": 3,
-      "text": "\"Strike - [text]\" means \"When this attacks, [text].\" \"Strike - [cost]: [text]\" means \"When this attacks, [cost]: [text].\"",
-      "changed": true
+      "text": "\"Strike - [text]\" means \"When this attacks, [text].\" \"Strike - [cost]: [text]\" means \"When this attacks, [cost]: [text].\""
     },
     {
       "key": "12.7.2.1",
@@ -318,8 +316,7 @@
       "number": "12.7.2.1",
       "kind": "rule",
       "depth": 4,
-      "text": "\"Follower Strike - [text]\" means \"Strike - If the attack target is a follower, [text].\" \"Follower Strike - [cost]: [text]\" means \"Strike - If the attack target is a follower, [cost]: [text].\"",
-      "changed": true
+      "text": "\"Follower Strike - [text]\" means \"Strike - If the attack target is a follower, [text].\" \"Follower Strike - [cost]: [text]\" means \"Strike - If the attack target is a follower, [cost]: [text].\""
     },
     {
       "key": "12.7.2.2",
@@ -327,8 +324,7 @@
       "number": "12.7.2.2",
       "kind": "rule",
       "depth": 4,
-      "text": "\"Leader Strike - [text]\" means \"Strike - If the attack target is a leader, [text].\" \"Leader Strike - [cost]: [text]\" means \"Strike - If the attack target is a leader, [cost]: [text].\"",
-      "changed": true
+      "text": "\"Leader Strike - [text]\" means \"Strike - If the attack target is a leader, [text].\" \"Leader Strike - [cost]: [text]\" means \"Strike - If the attack target is a leader, [cost]: [text].\""
     },
     {
       "key": "12.8",
@@ -643,8 +639,7 @@
       "kind": "section",
       "depth": 2,
       "title": "Fuse",
-      "text": "",
-      "changed": true
+      "text": ""
     },
     {
       "key": "12.18.1",
@@ -652,8 +647,7 @@
       "number": "12.18.1",
       "kind": "rule",
       "depth": 3,
-      "text": "An activated ability with the Fuse keyword allows the player to put the card from their hand into their EX area in a strengthened state by discarding or burying from their EX area the specified card(s).",
-      "changed": true
+      "text": "An activated ability with the Fuse keyword allows the player to put the card from their hand into their EX area in a strengthened state by discarding or burying from their EX area the specified card(s)."
     },
     {
       "key": "12.18.2",
@@ -661,8 +655,7 @@
       "number": "12.18.2",
       "kind": "rule",
       "depth": 3,
-      "text": "\"() Fuse [specified cards]: [text]\" means \"() Discard or bury from your EX area [specified cards] other than this, put this from your hand into your EX area: [text].\"",
-      "changed": true
+      "text": "\"() Fuse [specified cards]: [text]\" means \"() Discard or bury from your EX area [specified cards] other than this, put this from your hand into your EX area: [text].\""
     },
     {
       "key": "12.18.2.1",
@@ -670,8 +663,7 @@
       "number": "12.18.2.1",
       "kind": "rule",
       "depth": 4,
-      "text": "If there are multiple [specified cards], they do not have to either all be discarded or all be buried from the EX area.",
-      "changed": true
+      "text": "If there are multiple [specified cards], they do not have to either all be discarded or all be buried from the EX area."
     },
     {
       "key": "12.18.2.2",
@@ -679,8 +671,7 @@
       "number": "12.18.2.2",
       "kind": "rule",
       "depth": 4,
-      "text": "If the player can select the number of [specified cards], they must select a number greater than zero if possible.",
-      "changed": true
+      "text": "If the player can select the number of [specified cards], they must select a number greater than zero if possible."
     },
     {
       "key": "12.18.2.2.1",
@@ -688,8 +679,7 @@
       "number": "12.18.2.2.1",
       "kind": "rule",
       "depth": 5,
-      "text": "If the number of cards is to be determined by an X value selected by the player (10.6.2.2.4) etc., the player must select the value of X so that the specified number of cards becomes 1 or more if possible.",
-      "changed": true
+      "text": "If the number of cards is to be determined by an X value selected by the player (10.6.2.2.4) etc., the player must select the value of X so that the specified number of cards becomes 1 or more if possible."
     },
     {
       "key": "12.18.3",
@@ -697,8 +687,7 @@
       "number": "12.18.3",
       "kind": "rule",
       "depth": 3,
-      "text": "If, for any reason, there are no cards to be discarded or buried from the EX area as part of the ability's cost, [text] does not happen.",
-      "changed": true
+      "text": "If, for any reason, there are no cards to be discarded or buried from the EX area as part of the ability's cost, [text] does not happen."
     },
     {
       "key": "12.18.4",
@@ -706,8 +695,7 @@
       "number": "12.18.4",
       "kind": "rule",
       "depth": 3,
-      "text": "If a card is put into the EX area as a result of its own Fuse ability, it is considered to have undergone \"fusion.\"",
-      "changed": true
+      "text": "If a card is put into the EX area as a result of its own Fuse ability, it is considered to have undergone \"fusion.\""
     },
     {
       "key": "12.18.4.1",
@@ -715,8 +703,7 @@
       "number": "12.18.4.1",
       "kind": "rule",
       "depth": 4,
-      "text": "When a card undergoes fusion, the cards discarded or buried in the process are considered to have been \"fused.\"",
-      "changed": true
+      "text": "When a card undergoes fusion, the cards discarded or buried in the process are considered to have been \"fused.\""
     }
   ]
 }

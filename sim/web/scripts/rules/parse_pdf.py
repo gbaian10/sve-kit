@@ -105,11 +105,17 @@ ICONS = {
         "6917788d0566": "icon_adv|[adv]",
         "962255fe3122": "icon_carrot|[feed]",
         "d7d1c8011181": "icon_carrot|[feed]",
+        "8bb11e479eed": "icon_carrot|[feed]",
         "405431c6ab53": "Critical Trigger",
+        "ba68d11fee89": "Critical Trigger",
         "a23228089960": "Draw Trigger",
+        "593de02de14e": "Draw Trigger",
         "4d93df514262": "Stand Trigger",
+        "23e6bcfbce93": "Stand Trigger",
         "1d14a3a0d449": "Heal Trigger",
+        "18285eff9b70": "Heal Trigger",
         "4cdf762b46b7": "icon_ride|[ride]",
+        "25ee1b74a22f": "icon_ride|[ride]",
         "3e5d500fcba5": "icon_UB|[UB]",
     },
 }
@@ -622,6 +628,9 @@ TOKEN_PARAGRAPHS = {
         "Curse of the Black Dragon": ("At the start",),
         "Princess Sword": ("If the equipped follower would take damage",),
         "Glorious Feather": ("If the equipped follower would deal damage",),
+        "Lyelth's Marionette": ("While this is on the field",),
+        "Lilium’s Dragon": ("Follower Strike",),
+        "Holy Cavalier": ("Whenever this gains",),
     },
 }
 

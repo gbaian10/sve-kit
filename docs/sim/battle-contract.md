@@ -295,7 +295,7 @@ Attack 的 target 是該 intent 題內選項，不能借另一攻擊者的候選
 ### 4.2 選取與複合限制
 
 `hand_limit_discard` 的棄牌都進 actor 自己墓場時，`selected` 同時指定完整棄牌集合及玩家選定的墓場放入順序，解碼不得依候選順序重排。
-依[日文綜合規則 1.29.0](../../authored/rules/comprehensive/jp/1.29.0/ch04.json)與[英文綜合規則 1.26.1](../../authored/rules/comprehensive/en/1.26.1/ch04.json) §4.1.5，同時放入同一區域的順序由該區域所屬玩家決定；§4.9.2 則明定墓場不管理卡片順序。
+依[日文綜合規則 1.29.0](../../authored/rules/comprehensive/jp/1.29.0/ch04.json)與[英文綜合規則 1.28.0](../../authored/rules/comprehensive/en/1.28.0/ch04.json) §4.1.5，同時放入同一區域的順序由該區域所屬玩家決定；§4.9.2 則明定墓場不管理卡片順序。
 若有跨擁有者的手牌進其他玩家墓場，不能由 actor 代替其他區域所屬玩家指定順序；該 producer 需另行處理各區域玩家的選擇，不能直接套用本題的單一 actor 順序。
 因此這裡指定的是這次放入的順序，不是持續追蹤的墓場遊戲順序；盤面的陣列位置也不代表墓場有頂／底或不能重排。這些牌仍然同時棄置，不因 `selected` 的先後而拆成逐張結算。
 此順序語義只適用本 use，不將所有 `select` 或 `roles` 解讀為排序題。

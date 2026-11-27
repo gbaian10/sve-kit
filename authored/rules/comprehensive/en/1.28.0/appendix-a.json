@@ -1,7 +1,7 @@
 {
   "format": 1,
   "kind": "comprehensive-rules",
-  "version": "1.26.1",
+  "version": "1.28.0",
   "nodes": [
     {
       "key": "A",
@@ -308,7 +308,45 @@
             "2",
             "2",
             "{icon_fanfare|[fanfare]} If there are at least 5 Condemned followers in your cemetery, give this {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and Rush. If there are at least 10, give it Assail and Bane.\n{icon_lastword|[lastwords]} Draw a card."
-          ]
+          ],
+          [
+            "Lyelth's Marionette",
+            "Forestcraft",
+            "Puppetry / Academic",
+            "0",
+            "1",
+            "1",
+            "Storm. Bane. Ward.\nWhile this is on the field, its name is also Puppet."
+          ],
+          [
+            "Lilium's Hatchling",
+            "Dragoncraft",
+            "Wyrmkin / Academic",
+            "1",
+            "1",
+            "1",
+            "Ward.\n{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Lilium’s Dragon",
+            "Dragoncraft",
+            "Wyrmkin / Academic",
+            "2",
+            "5",
+            "5",
+            "Rush. Assail.\nFollower Strike - Change the attack target’s attack and defense to 1."
+          ],
+          [
+            "Holy Cavalier",
+            "Havencraft",
+            "Luminary",
+            "1",
+            "1",
+            "2",
+            "Ward.\nWhenever this gains {icon_power|[attack]}, give it Rush."
+          ],
+          ["Shadow General", "Neutral", "Supreme", "5", "2", "8", "Bane. Ward."],
+          ["Radiant Artifact", "Neutral", "Supreme", "5", "4", "3", "Storm."]
         ]
       },
       "changed": true
@@ -476,6 +514,24 @@
             "",
             "",
             "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a White Psalm, New Revelation token. Deal 1 damage to each enemy leader."
+          ],
+          [
+            "Emergency Summoning",
+            "Runecraft",
+            "Alchemist / Earth Sigil",
+            "0",
+            "",
+            "",
+            "Stack.\n{icon_fanfare|[fanfare]} Summon a Guardform Golem token. If there’s an Alchemist follower on your field that costs 3 or more, put a Guardian Golem token into your EX area."
+          ],
+          [
+            "Reactive Barrier",
+            "Runecraft",
+            "Alchemist / Earth Sigil",
+            "0",
+            "",
+            "",
+            "Stack.\n{icon_fanfare|[fanfare]} Draw a card. If there’s an Alchemist follower on your field that costs 3 or more, draw 2 instead."
           ]
         ]
       },
@@ -812,6 +868,34 @@
             "Condemned / Thief / Loot",
             "1",
             "Select a Thief follower on your field. Give it {icon_power|[attack]}+1 and, if's a Condemned–Thief follower, deal 1 damage to each enemy leader."
+          ],
+          [
+            "Verdant Prayer",
+            "Forestcraft",
+            "Elf / Academic / Supreme",
+            "5",
+            "Look at the top 7 cards of your deck. You may summon up to 3 Academic and/or Beast followers that cost a total of 5 or less from among them. Put the rest on the bottom of your deck in any order. Give each follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+          ],
+          [
+            "Curse of Suffering",
+            "Runecraft",
+            "Mage / Academic / Princess",
+            "1",
+            "Deal 2 damage to each enemy leader, enemy follower on the field, and Amaryllis, the Princess on your field."
+          ],
+          [
+            "Cyclical Guidance",
+            "Havencraft",
+            "Luminary / Academic",
+            "2",
+            "Select up to X enemy followers on the field and deal them 5 damage. Give each Academic follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1. X equals the number of times your leader has gained {icon_hp|[defense]} this turn."
+          ],
+          [
+            "Her Holiness's Decree",
+            "Havencraft",
+            "Luminary",
+            "1",
+            "Select up to 2 followers on your field with Ward and give them Storm."
           ]
         ]
       },
@@ -898,8 +982,7 @@
             "The equipped follower has \"At the start of your end phase, give your leader {icon_hp|[defense]}+3.\"\nIf the equipped follower would deal damage, it deals that much +1 instead."
           ]
         ]
-      },
-      "changed": true
+      }
     },
     {
       "key": "A:5",
@@ -964,6 +1047,12 @@
             "Neutral",
             "Omen",
             "At the start of your end phase, if there’s 1 card or less in your hand, draw a card."
+          ],
+          [
+            "Crest: Wilbert, Desolate Paladin",
+            "Havencraft",
+            "Arena / Luminary",
+            "{icon_act|[act]} {icon_cost00|[cost00]}: Select a follower on your field with Ward and, if there are at least 3 followers on your field with Ward, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1. If there are 5, give {icon_power|[attack]}+2/{icon_hp|[defense]}+2 instead. Activate only once per turn."
           ]
         ]
       },

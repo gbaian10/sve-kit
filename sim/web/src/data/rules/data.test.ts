@@ -59,8 +59,17 @@ const compare = (a: readonly number[], b: readonly number[]) => {
   return 0
 }
 
-it("has at least the Japanese 1.29.0 and English 1.26.1 rules", () => {
-  expect([...VERSIONS.keys()]).toEqual(expect.arrayContaining(["jp/1.29.0", "en/1.26.1"]))
+it("has at least the Japanese 1.29.0 and English 1.28.0 rules", () => {
+  expect([...VERSIONS.keys()]).toEqual(expect.arrayContaining(["jp/1.29.0", "en/1.28.0"]))
+})
+
+it("preserves separate ability paragraphs for English 1.28.0 tokens", () => {
+  const followers = VERSIONS.get("en/1.28.0")?.nodes.find((node) => node.key === "A:1")
+  const rows = followers?.table?.rows ?? []
+  for (const name of ["Lyelth's Marionette", "Lilium’s Dragon", "Holy Cavalier"]) {
+    const row = rows.find(([cardName]) => cardName === name)
+    expect(row?.at(-1)?.split("\n"), name).toHaveLength(2)
+  }
 })
 
 describe.each([...VERSIONS])("comprehensive rules %s", (id, { index, files, nodes }) => {
