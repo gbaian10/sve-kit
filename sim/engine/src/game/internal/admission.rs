@@ -110,16 +110,17 @@ pub(super) fn check_play(program: &Program, source: &SourceSpan, source_bound: b
         node: program.clone(),
         source: source.clone(),
     };
+    let requirements = Requirements::derive_program(&located);
     // Native card costs precede source binding; ability declarations already bind their source.
     if !source_bound
-        && Requirements::derive_program(&located)
+        && requirements
             .required
             .iter()
             .any(|requirement| requirement.capability.code == "reference.source-information")
     {
         return Err(unsupported("play-time source information"));
     }
-    check_requirements(program, source, true, &BTreeSet::new(), None)
+    check_requirements_derived(program, true, &BTreeSet::new(), None, requirements)
 }
 
 fn check_body(
@@ -348,8 +349,7 @@ fn source_paths(
     }
 }
 
-fn parent_requirements(program: &Located<Program>, card: bool) -> Requirements {
-    let mut requirements = Requirements::derive_program(program);
+fn parent_requirements(mut requirements: Requirements, card: bool) -> Requirements {
     let definitions = granted_definition_roots(&requirements, card);
     if definitions.is_empty() {
         return requirements;
@@ -388,10 +388,6 @@ fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(Str
         .collect()
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "Every path-scoped capability exemption is listed in one auditable filter."
-)]
 fn check_requirements(
     program: &Program,
     source: &SourceSpan,
@@ -403,7 +399,27 @@ fn check_requirements(
         node: program.clone(),
         source: source.clone(),
     };
-    let mut requirements = parent_requirements(&located, card);
+    check_requirements_derived(
+        program,
+        card,
+        origins,
+        x,
+        Requirements::derive_program(&located),
+    )
+}
+
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every path-scoped capability exemption is listed in one auditable filter."
+)]
+fn check_requirements_derived(
+    program: &Program,
+    card: bool,
+    origins: &BTreeSet<String>,
+    x: Option<PaidX>,
+    requirements: Requirements,
+) -> Result<()> {
+    let mut requirements = parent_requirements(requirements, card);
     super::movement::mask_entry_effects(&mut requirements);
     let token_paths = super::tokens::paths(program, x);
     let kind_paths = super::by_kind::paths(program);
