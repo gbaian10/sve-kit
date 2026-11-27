@@ -10,7 +10,7 @@ use sha2::{Digest as _, Sha256};
 use sve_engine::battle::{BattleReferences, ReferenceInput};
 use sve_engine::catalog::{Catalog, EngineIdentityInput, ProgramPrinting, SnapshotPrograms};
 use sve_engine::game::Game;
-use sve_engine::game::player::{DeckConstruction, PlayerDeck};
+use sve_engine::game::player::{DeckConstruction, PlayerDeck, StrictStartError};
 use sve_engine::host::HostLimits;
 
 /// The trusted host's match parameters. The seed and first chooser stay inside the Worker.
@@ -271,8 +271,14 @@ impl PreparedBattle {
         if !admission.is_admitted() {
             return Err(LoadError::DeckAdmission);
         }
-        Game::start_player_game(selected, decks, viewer_of(first_chooser), seed)
-            .map_err(|_error| LoadError::DeckAdmission)
+        let too_small = decks.iter().any(|deck| deck.main.len() < 4);
+        Game::start_player_game(selected, decks, viewer_of(first_chooser), seed).map_err(|error| {
+            match error {
+                StrictStartError::Admission(_) => LoadError::DeckAdmission,
+                StrictStartError::Initialization(_) if too_small => LoadError::DeckAdmission,
+                StrictStartError::Initialization(_) => LoadError::Match,
+            }
+        })
     }
 }
 

@@ -1,0 +1,133 @@
+[
+  {
+    "engine_identity": {
+      "Resolved": {
+        "faces": [
+          {
+            "card_no": "t-anchor",
+            "face_id": "f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "face_ordinal": 0,
+            "rules_name_id": "synthetic-name",
+            "title_code": "synthetic_empty"
+          }
+        ],
+        "region": "jp",
+        "snapshot_sha256": "60f1849de7273101813df5fd6c3bea064feba0b562bf55f51e8154973d8d876a"
+      }
+    },
+    "identity": {
+      "engine": {
+        "id": "engine-test",
+        "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "programs": {
+        "id": "programs-test",
+        "sha256": "5b948db71e774653ab8281b6318c8d1ef445756d00a9b88a57e8cdd18f3640a7"
+      },
+      "region": "jp",
+      "rules": {
+        "id": "rules-test",
+        "sha256": "40255b35ceb19cf6c64a5216f3e6fa423f0cd635e8544bce3673614499b597c4"
+      },
+      "snapshot": {
+        "id": "snapshot-test",
+        "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    },
+    "keywords": "{\"format\":1,\"kind\":\"keyword_registry\",\"rule_names\":{}}",
+    "printings": [
+      {
+        "card_id": "c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "card_no": "t-anchor",
+        "faces": [
+          {
+            "cost": 1,
+            "face_id": "f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "revision_id": "revision",
+            "rules_name": "t-anchor"
+          }
+        ],
+        "printing_id": "test-t-anchor"
+      },
+      {
+        "card_id": "c:cccccccccccccccccccccccccccccccc",
+        "card_no": "t-unused",
+        "faces": [
+          {
+            "cost": 1,
+            "face_id": "f:cccccccccccccccccccccccccccccccc",
+            "revision_id": "unused",
+            "rules_name": "t-unused"
+          }
+        ],
+        "printing_id": "test-t-unused"
+      }
+    ],
+    "references": {
+      "faces": [
+        {
+          "card": {
+            "face": 0,
+            "printing_id": "test-t-anchor"
+          },
+          "card_no": "t-anchor",
+          "native_face": 0
+        },
+        {
+          "card": {
+            "face": 0,
+            "printing_id": "test-t-unused"
+          },
+          "card_no": "t-unused",
+          "native_face": 0
+        }
+      ],
+      "region": "jp",
+      "rules": {
+        "entries": [
+          {
+            "id": "1.2.3",
+            "kind": "cr",
+            "revision": "synthetic"
+          }
+        ],
+        "manifest_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "snapshot_sha256": "60f1849de7273101813df5fd6c3bea064feba0b562bf55f51e8154973d8d876a",
+      "wording": {
+        "faces": [
+          {
+            "card_no": "t-anchor",
+            "face_id": "f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "native_face": 0,
+            "revisions": [
+              {
+                "fields": [
+                  {
+                    "kind": "effect"
+                  }
+                ],
+                "revision_id": "revision"
+              }
+            ]
+          },
+          {
+            "card_no": "t-unused",
+            "face_id": "f:cccccccccccccccccccccccccccccccc",
+            "native_face": 0,
+            "revisions": [
+              {
+                "fields": [],
+                "revision_id": "unused"
+              }
+            ]
+          }
+        ],
+        "manifest_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    },
+    "rules": "{\"evidence\":[{\"checked_on\":\"2026-10-03\",\"id\":\"synthetic\",\"rule_refs\":[\"1.2.3\"],\"source_version_id\":\"src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}],\"format\":1,\"input\":{\"kind\":\"resolved\",\"snapshot_sha256\":\"60f1849de7273101813df5fd6c3bea064feba0b562bf55f51e8154973d8d876a\"},\"kind\":\"engine_rules\",\"resources\":[],\"scope\":{\"region\":\"jp\",\"rules_source_version_id\":\"src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"rules_version\":\"synthetic-1\"},\"titles\":[{\"anchor\":{\"face_id\":\"f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"kind\":\"face-id\",\"region\":\"jp\"},\"capabilities\":[],\"evidence\":[\"synthetic\"],\"title_code\":\"synthetic_empty\"}]}",
+    "snapshot": "{\"faces\":[{\"card_class\":\"ニュートラル\",\"card_type\":\"フォロワー\",\"cost\":\"1\",\"hp\":\"1\",\"name\":\"t-anchor\",\"power\":\"1\",\"sections\":[],\"text\":\"Draw a card twice.\",\"title\":\"synthetic\",\"traits\":[]}],\"number\":\"t-anchor\"}\n{\"faces\":[{\"card_class\":\"ニュートラル\",\"card_type\":\"フォロワー\",\"cost\":\"1\",\"hp\":\"1\",\"name\":\"t-unused\",\"power\":\"1\",\"sections\":[],\"text\":null,\"title\":\"synthetic\",\"traits\":[]}],\"number\":\"t-unused\"}"
+  },
+  "{\"entries\":[{\"ast\":{\"card_id\":\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"faces\":{\"f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\":{\"abilities\":[{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}},{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}}]}},\"scope\":\"shared\"},\"dsl_version\":\"1.0\",\"id\":\"synthetic\"}],\"format_version\":\"4.2.0\",\"printings\":{\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\":{\"representative\":\"test-t-anchor\",\"tokens\":[]}}}"
+]

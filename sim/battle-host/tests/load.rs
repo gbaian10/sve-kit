@@ -16,20 +16,6 @@ use sve_battle_host::load::{LoadError, PreparedBattle};
 use sve_battle_host::wire::{BattleInput, BattleUpdate, RequestId, Submit};
 use sve_battle_host::{Delivery, LocalSession};
 
-const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","rule_names":{}}"#;
-
-/// The anchor of the rule evidence and a printing no deck uses.
-fn snapshot() -> String {
-    ["t-anchor", "t-unused"]
-        .map(|number| {
-            json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル",
-                "card_type":"フォロワー","cost":"1","power":"1","hp":"1","traits":[],"text":(number == "t-anchor").then_some("Draw a card twice."),
-                "sections":[],"title":"synthetic"}]})
-            .to_string()
-        })
-        .join("\n")
-}
-
 fn setup(card: &str) -> String {
     let deck = json!({"construction":{"kind":"class","value":"ニュートラル"},
         "main":vec![card; 8],"evolve":[]});
@@ -39,51 +25,7 @@ fn setup(card: &str) -> String {
 }
 
 fn published() -> (Value, String) {
-    let native = snapshot();
-    let card = format!("c:{}", "a".repeat(32));
-    let face = format!("f:{}", "b".repeat(32));
-    let unused = format!("f:{}", "c".repeat(32));
-    let mut rules: Value = serde_json::from_str(&fixture::rules(&native, "t-anchor")).unwrap();
-    *rules.pointer_mut("/input/kind").unwrap() = json!("resolved");
-    *rules.pointer_mut("/titles/0/anchor").unwrap() =
-        json!({"kind":"face-id","region":"jp","face_id":face});
-    let rules = rules.to_string();
-    let mut refs = fixture::references(&native);
-    refs.wording = Some(
-        serde_json::from_value(json!({
-            "manifest_sha256": format!("sha256:{}", fixture::MANIFEST),
-            "faces": [
-                {"card_no":"t-anchor","native_face":0_u8,"face_id":face,
-                    "revisions":[{"revision_id":"revision","fields":[{"kind":"effect"}]}]},
-                {"card_no":"t-unused","native_face":0_u8,"face_id":unused,
-                    "revisions":[{"revision_id":"unused","fields":[]}]}
-            ]
-        }))
-        .unwrap(),
-    );
-    let draw = json!({"line":1_u8,"fanfare":{"do":[{"draw":{"n":1_u8}}]},
-        "ports":{"exports":{},"imports":{}}});
-    let programs = json!({
-        "format_version":"4.2.0",
-        "entries": [{"id":"synthetic","dsl_version":"1.0",
-            "ast":{"card_id":card,"scope":"shared","faces":{(face.clone()):{"abilities":[draw,draw]}}}}],
-        "printings": {(card.clone()):{"representative":"test-t-anchor","tokens":[]}}
-    })
-    .to_string();
-    let identity = fixture::identity(&programs, &rules);
-    let document = json!({
-        "snapshot":native,"keywords":KEYWORDS,"references":refs,"rules":rules,"identity":identity,
-        "engine_identity":{"Resolved":{"region":"jp","snapshot_sha256":refs.snapshot_sha256,
-            "faces":[{"card_no":"t-anchor","face_ordinal":0_u8,"face_id":face,
-                "rules_name_id":"synthetic-name","title_code":"synthetic_empty"}]}},
-        "printings":[
-            {"printing_id":"test-t-anchor","card_no":"t-anchor","card_id":card,
-                "faces":[{"face_id":face,"revision_id":"revision","cost":1_u8,"rules_name":"t-anchor"}]},
-            {"printing_id":"test-t-unused","card_no":"t-unused","card_id":format!("c:{}", "c".repeat(32)),
-                "faces":[{"face_id":unused,"revision_id":"unused","cost":1_u8,"rules_name":"t-unused"}]}
-        ],
-    });
-    (document, programs)
+    serde_json::from_str(include_str!("fixtures/published-battle.json")).unwrap()
 }
 
 #[test]
