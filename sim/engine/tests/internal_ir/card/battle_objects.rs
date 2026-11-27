@@ -422,3 +422,37 @@ fn wire_object_table_retires_identity_after_the_source_returns_to_a_shuffled_dec
         assert_eq!(exact_authority(&game), before);
     }
 }
+
+#[test]
+fn battle_catalog_rejects_incomplete_and_ambiguous_counter_names() {
+    let (snapshot, _, document) = catalog_documents(&json!("1"));
+    let documents = [("synthetic".into(), document)];
+    for (mut registry, expected) in [
+        (
+            json!({"rule_names":{"nameless":{"role":"counter"}}}),
+            "missing or unsupported rule name for nameless",
+        ),
+        (
+            json!({"rule_names":{"word":{"role":"ability-label","en":"Ability"}}}),
+            "missing or unsupported rule name for word",
+        ),
+        (
+            json!({"records":[{"code":"storm","rule_name":{"ja":"疾走","en":"Storm"}}]}),
+            "missing or unsupported rule name for storm",
+        ),
+        (
+            json!({"rule_names":{
+                "english":{"role":"counter","en":"Armageddon counter"},
+                "japanese":{"role":"counter","ja":"別の名前","aliases":["Armageddon counter"]}
+            }}),
+            "ambiguous keyword name: Armageddon counter",
+        ),
+    ] {
+        registry["format"] = json!(1);
+        registry["kind"] = json!("keyword_registry");
+        let error = Catalog::from_fixture_documents(&snapshot, &registry.to_string(), &documents)
+            .err()
+            .unwrap();
+        assert!(error.to_string().contains(expected), "{error}");
+    }
+}
