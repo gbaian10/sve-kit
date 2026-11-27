@@ -1,5 +1,6 @@
 //! The tool's commands: compose inputs, run seeds, replay records.
 
+use crate::lineup::Lineup;
 use crate::play::{End, Limits, Record, StepCost, replay};
 use crate::published::{Published, compose};
 use crate::report::{Report, run_seeds};
@@ -13,7 +14,7 @@ use std::time::Instant;
 
 const USAGE: &str = "usage:
   sve-selfplay prepare <reader-dir> <export-root> <out-dir>
-  sve-selfplay run <inputs.json> <programs.json> <out-dir> <first-seed> <games> [jobs] [records]
+  sve-selfplay run [--decks <decks.json>] <inputs.json> <programs.json> <out-dir> <first-seed> <games> [jobs] [records]
   sve-selfplay replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>";
 
 fn failed<E>(error: E) -> String
@@ -33,9 +34,9 @@ fn load(inputs: &str, programs: &str, log: &mut dyn Write) -> Result<Published, 
         log,
         "prepared in {:.1}s: {} eligible printings, {} excluded, {} without a program",
         start.elapsed().as_secs_f64(),
-        published.arena.pools.eligible().len(),
-        published.excluded.len(),
-        published.unprogrammed,
+        published.arena().pools.eligible().len(),
+        published.excluded().len(),
+        published.unprogrammed(),
     )
     .map_err(failed)?;
     Ok(published)
@@ -54,6 +55,10 @@ fn number(text: Option<&String>, default: u64) -> Result<u64, String> {
 }
 
 fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
+    let (decks, arguments) = match arguments {
+        [flag, path, rest @ ..] if flag == "--decks" => (Some(path), rest),
+        _ => (None, arguments),
+    };
     let [inputs, programs, out, first, games, rest @ ..] = arguments else {
         return Err(USAGE.into());
     };
@@ -63,11 +68,27 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
     );
     let jobs = usize::try_from(number(rest.first(), 4)?).map_err(failed)?;
     let records = number(rest.get(1), 0)?;
-    let published = load(inputs, programs, log)?;
+    let mut published = load(inputs, programs, log)?;
     let out = Path::new(out);
     create_dir_all(out).map_err(failed)?;
+    if let Some(decks) = decks {
+        let refused = published.list(&read_to_string(decks).map_err(failed)?)?;
+        let lineup = published.arena().lineup.as_ref().map_or(0, Lineup::len);
+        writeln!(log, "{lineup} listed decks, {} refused", refused.len()).map_err(failed)?;
+        let refused: Vec<Value> = refused
+            .iter()
+            .map(|deck| json!({"label": deck.label, "reason": deck.reason}))
+            .collect();
+        write(out.join("refused-decks.json"), json!(refused).to_string()).map_err(failed)?;
+        if lineup == 0 {
+            return Err(format!(
+                "deck list: no deck can be played ({} refused)",
+                refused.len()
+            ));
+        }
+    }
     let excluded: Vec<Value> = published
-        .excluded
+        .excluded()
         .iter()
         .map(|card| json!({"number": card.number, "reason": card.reason}))
         .collect();
@@ -79,8 +100,8 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
     let mut problem = None;
     let start = Instant::now();
     let limits = Limits::default();
-    run_seeds(&published.arena, first, games, jobs, limits, |played| {
-        report.add(&published.arena, &played);
+    run_seeds(published.arena(), first, games, jobs, limits, |played| {
+        report.add(published.arena(), &played);
         done = done.saturating_add(1);
         let mut write_out = || -> Result<(), String> {
             if let End::Failed(failure) = &played.end {
@@ -107,7 +128,7 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
         }
     });
     kept.flush().map_err(failed)?;
-    let mut summary = report.summary(&published.arena);
+    let mut summary = report.summary(published.arena());
     if let Some(fields) = summary.as_object_mut() {
         fields.insert("first_seed".into(), json!(first));
         fields.insert("jobs".into(), json!(jobs));
@@ -118,6 +139,7 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
         serde_json::to_string_pretty(&summary).map_err(failed)?,
     )
     .map_err(failed)?;
+    write(out.join("cards.json"), report.cards().to_string()).map_err(failed)?;
     problem.map_or(Ok(()), Err)
 }
 
@@ -133,7 +155,7 @@ fn replay_records(arguments: &[String], log: &mut dyn Write) -> Result<(), Strin
         let mut entry: Value = serde_json::from_str(text).map_err(failed)?;
         let wrapped = entry.get_mut("record").map(Value::take);
         let record: Record = serde_json::from_value(wrapped.unwrap_or(entry)).map_err(failed)?;
-        let played = replay(&published.arena, &record, Limits::default());
+        let played = replay(published.arena(), &record, Limits::default());
         let (kind, end) = match &played.end {
             End::Finished { .. } => ("finished", "finished".to_owned()),
             End::Failed(failure) => (

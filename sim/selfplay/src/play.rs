@@ -4,7 +4,8 @@ use crate::answer::{NoAnswer, choose};
 use crate::arena::{Arena, Control, Setup};
 use crate::check::{Checker, printings};
 use crate::pool::{Basis, Deck};
-use alloc::collections::{BTreeSet, VecDeque};
+use crate::usage::{Tally, Uses};
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::any::Any;
 use core::cmp::Reverse;
 use core::panic::AssertUnwindSafe;
@@ -144,6 +145,10 @@ pub struct Match {
     pub slow: Vec<StepContext>,
     /// Card numbers that were publicly visible at some stop.
     pub seen: BTreeSet<String>,
+    /// What each card number did, from both seats' event feeds.
+    pub uses: BTreeMap<String, Uses>,
+    /// Positions of the seats' decks in the deck list, when the decks were listed.
+    pub listed: Option<[usize; 2]>,
     /// Turns begun by both seats.
     pub turns: u64,
 }
@@ -163,6 +168,7 @@ struct Progress {
     costs: Vec<StepCost>,
     slow: Vec<StepContext>,
     seen: BTreeSet<String>,
+    tally: Tally,
     context: VecDeque<String>,
     cards: Vec<String>,
     turns: u64,
@@ -409,6 +415,7 @@ impl Table<'_> {
                     .sum()
             });
         absorbed.events = absorbed.events.max(events);
+        progress.tally.update(update.viewer, &update.events);
         progress.seen.extend(
             update
                 .observation
@@ -638,7 +645,13 @@ fn panic_message(payload: &(dyn Any + Send)) -> String {
         .to_owned()
 }
 
-fn finish(seed: u64, setup: Setup, progress: Progress, end: End) -> Match {
+fn finish(arena: &Arena, seed: u64, setup: Setup, progress: Progress, end: End) -> Match {
+    let mut uses = BTreeMap::<String, Uses>::new();
+    for (printing, counted) in progress.tally.merged() {
+        uses.entry(arena.number(&printing).to_owned())
+            .or_default()
+            .add(&counted);
+    }
     Match {
         record: Record {
             seed,
@@ -649,6 +662,8 @@ fn finish(seed: u64, setup: Setup, progress: Progress, end: End) -> Match {
         costs: progress.costs,
         slow: progress.slow,
         seen: progress.seen,
+        uses,
+        listed: None,
         turns: progress.turns,
     }
 }
@@ -675,11 +690,11 @@ fn drive(arena: &Arena, seed: u64, setup: Setup, mut source: Source<'_>, limits:
         Ok(Ok(session)) => session,
         Ok(Err(stage)) => {
             let failure = progress.fail("load", stage);
-            return finish(seed, setup, progress, End::Failed(*failure));
+            return finish(arena, seed, setup, progress, End::Failed(*failure));
         }
         Err(payload) => {
             let failure = progress.fail("panic", panic_message(payload.as_ref()));
-            return finish(seed, setup, progress, End::Failed(*failure));
+            return finish(arena, seed, setup, progress, End::Failed(*failure));
         }
     };
     let mut table = Table {
@@ -702,7 +717,17 @@ fn drive(arena: &Arena, seed: u64, setup: Setup, mut source: Source<'_>, limits:
         Ok(Err(failure)) => failed(failure),
         Err(payload) => failed(progress.fail("panic", panic_message(payload.as_ref()))),
     };
-    finish(seed, setup, progress, end)
+    finish(arena, seed, setup, progress, end)
+}
+
+fn seated(seed: u64, decks: [Deck; 2], rng: &mut ChaCha8Rng) -> Setup {
+    Setup {
+        decks,
+        first_chooser: if rng.random() { Seat::P1 } else { Seat::P2 },
+        seed: seed.to_string(),
+        control: [Control::Player, Control::Player],
+        max_submissions: 0,
+    }
 }
 
 /// The setup a seed names: two random legal decks and the first chooser.
@@ -716,22 +741,34 @@ fn setup(arena: &Arena, seed: u64, rng: &mut ChaCha8Rng, singles: bool) -> Optio
     };
     let first = copies(rng);
     let second = copies(rng);
-    Some(Setup {
-        decks: [
-            arena.pools.deck(first, rng)?,
-            arena.pools.deck(second, rng)?,
-        ],
-        first_chooser: if rng.random() { Seat::P1 } else { Seat::P2 },
-        seed: seed.to_string(),
-        control: [Control::Player, Control::Player],
-        max_submissions: 0,
-    })
+    let decks = [
+        arena.pools.deck(first, rng)?,
+        arena.pools.deck(second, rng)?,
+    ];
+    Some(seated(seed, decks, rng))
 }
 
-/// Play the match a seed names. Decks with several copies that a printed construction
-/// restriction refuses are rebuilt with one copy per name.
+/// Play the match a seed names: listed decks drawn by weight when the arena has a list,
+/// otherwise random decks.
 #[must_use]
 pub fn play(arena: &Arena, seed: u64, limits: Limits) -> Match {
+    let Some(lineup) = &arena.lineup else {
+        return play_random(arena, seed, limits);
+    };
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    let drawn = lineup.draw(&mut rng).zip(lineup.draw(&mut rng));
+    let Some(((first, first_deck), (second, second_deck))) = drawn else {
+        return no_decks(arena, seed, "no admitted listed deck");
+    };
+    let setup = seated(seed, [first_deck, second_deck], &mut rng);
+    let mut played = drive(arena, seed, setup, Source::Random(Box::new(rng)), limits);
+    played.listed = Some([first, second]);
+    played
+}
+
+/// Random decks; ones with several copies that a printed construction restriction refuses
+/// are rebuilt with one copy per name.
+fn play_random(arena: &Arena, seed: u64, limits: Limits) -> Match {
     let mut last = None;
     for singles in [false, true] {
         let mut rng = ChaCha8Rng::seed_from_u64(seed);
@@ -745,23 +782,25 @@ pub fn play(arena: &Arena, seed: u64, limits: Limits) -> Match {
             break;
         }
     }
-    last.unwrap_or_else(|| {
-        let empty = Deck {
-            construction: Basis::Class(String::new()),
-            main: Vec::new(),
-            evolve: Vec::new(),
-        };
-        let setup = Setup {
-            decks: [empty.clone(), empty],
-            first_chooser: Seat::P1,
-            seed: seed.to_string(),
-            control: [Control::Player, Control::Player],
-            max_submissions: 0,
-        };
-        let progress = Progress::default();
-        let failure = progress.fail("load", "no construction pool".into());
-        finish(seed, setup, progress, End::Failed(*failure))
-    })
+    last.unwrap_or_else(|| no_decks(arena, seed, "no construction pool"))
+}
+
+fn no_decks(arena: &Arena, seed: u64, reason: &str) -> Match {
+    let empty = Deck {
+        construction: Basis::Class(String::new()),
+        main: Vec::new(),
+        evolve: Vec::new(),
+    };
+    let setup = Setup {
+        decks: [empty.clone(), empty],
+        first_chooser: Seat::P1,
+        seed: seed.to_string(),
+        control: [Control::Player, Control::Player],
+        max_submissions: 0,
+    };
+    let progress = Progress::default();
+    let failure = progress.fail("load", reason.into());
+    finish(arena, seed, setup, progress, End::Failed(*failure))
 }
 
 /// Submit a record's commands again; any receipt that differs is a `replay` failure.
