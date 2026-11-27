@@ -21,7 +21,7 @@ const CARDS: [(&str, &str, &str); 2] = [
 
 #[test]
 fn bp04_001_and_002_share_one_source_and_every_registered_printing() {
-    let selected = selection_with_rules();
+    let selected = selection();
     let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
     for (number, card_id, face) in CARDS {
         let author = inputs().2["authors"]
@@ -86,7 +86,7 @@ fn answer(game: &mut Game, answer: Answer) {
     reason = "Both printings of the one permanent source share one repository fixture and one printed scenario."
 )]
 fn bp04_001_and_002_current_sources_distribute_hand_plus_ex_with_overkill() {
-    let selected = selection_with_rules();
+    let selected = selection();
     for (number, _, _) in CARDS {
         let mut initial = draw_position();
         initial["players"]["P1"]["zones"]["hand"] = json!([

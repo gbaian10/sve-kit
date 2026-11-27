@@ -243,7 +243,7 @@ fn gordon_quick_reduction_survives_zero_attack_and_applies_to_one_positive_attac
     ]);
     initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"gordon","card":"CP03-040"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

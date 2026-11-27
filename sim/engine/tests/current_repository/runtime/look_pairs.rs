@@ -3,7 +3,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn game(initial: &Value, facts: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         facts,
         &Value::Null,
@@ -58,7 +58,7 @@ fn order(game: &mut Game, play: CardPlay, numbers: &[&str]) -> CardPlay {
 
 fn dark_cat(initial: &Value) -> (Game, DecisionView) {
     let mut game = game(initial, &Value::Null);
-    let ability = selection_with_rules().current["CP03-116"]
+    let ability = selection().current["CP03-116"]
         .program
         .card()
         .abilities

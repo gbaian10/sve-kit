@@ -11,14 +11,14 @@ fn cp03_101_filters_its_private_drive_payment_before_drawing() {
     initial["players"]["P1"]["zones"]["deck"] =
         json!([{"id":"first","card":"BP01-037"},{"id":"second","card":"BP01-037"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
         "drive-discard",
     )
     .unwrap();
-    let ability = selection_with_rules().current["CP03-101"]
+    let ability = selection().current["CP03-101"]
         .program
         .card()
         .abilities

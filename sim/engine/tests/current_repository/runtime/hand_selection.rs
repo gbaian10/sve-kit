@@ -130,7 +130,7 @@ fn bp11_047_evolution_moves_only_a_chosen_witch_spell_to_ex_and_discounts_its_pl
             );
         }
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

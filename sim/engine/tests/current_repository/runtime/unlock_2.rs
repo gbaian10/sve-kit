@@ -3,7 +3,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn game_with_rules(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -121,7 +121,7 @@ fn bp17_015_creates_a_tree_then_acts_and_banishes_a_field_tree_to_draw() {
     let token_id = created["P1"]["ex"][0].as_str().unwrap().to_owned();
     assert_eq!(created["objects"][&token_id]["name"], "ナテラの大樹");
     assert_eq!(created["P1"]["ex"].as_array().unwrap().len(), 1);
-    let ability = selection_with_rules().current["BP17-015"]
+    let ability = selection().current["BP17-015"]
         .program
         .card()
         .abilities

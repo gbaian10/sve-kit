@@ -39,7 +39,7 @@ fn kokkoro_all_printings_equip_and_keep_ameth_through_normal_evolution() {
         initial["players"]["P1"]["zones"]["deck"] =
             json!([{"id":"drawn","card":"BP01-037"},{"id":"spare","card":"BP01-037"}]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

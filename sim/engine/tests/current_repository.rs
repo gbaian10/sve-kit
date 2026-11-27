@@ -31,7 +31,7 @@ mod expanded;
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
-use repository::{inputs, lowerer, selection, selection_with_rules};
+use repository::{inputs, lowerer, selection};
 
 const BP01_P25_FACE: &str = "f:90c74424f2435907a035f70ce37463d4";
 
@@ -417,7 +417,7 @@ fn whole_repository_selection_lowers_and_admits_every_printing() {
         .map(|author| author["printings"].as_array().unwrap().len())
         .sum::<usize>();
     // The rule-bound selection is what a real match loads.
-    let selected = selection_with_rules();
+    let selected = selection();
     assert_eq!(selected.current.len(), accepted);
     // Construction returns no game unless every selected printing passes runtime admission.
     Game::from_selected_effects(

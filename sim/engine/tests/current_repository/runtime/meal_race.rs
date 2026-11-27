@@ -14,7 +14,7 @@ fn position(card: &str, carrots: u8) -> Value {
 
 fn from_position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -24,7 +24,7 @@ fn from_position(initial: &Value) -> Game {
 }
 
 fn definition(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
+    selection().current[card]
         .program
         .card()
         .abilities

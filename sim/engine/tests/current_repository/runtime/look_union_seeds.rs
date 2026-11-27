@@ -3,7 +3,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn game(state: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         state,
         &Value::Null,
         &Value::Null,

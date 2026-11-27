@@ -16,7 +16,7 @@ fn in_hand(card: &str, library: &[(&str, &str)]) -> Value {
 // Collaboration cards need the registered title rules.
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

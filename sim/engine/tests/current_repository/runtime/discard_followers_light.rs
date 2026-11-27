@@ -7,7 +7,7 @@ const HARU: [&str; 3] = ["BP22-116", "BP22-SSP01", "PR-606"];
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -320,7 +320,7 @@ fn mana_both_real_evolution_faces_require_five_cemetery_academy_cards() {
                 ).collect::<Vec<_>>());
                 let mut board = game(&initial);
                 let before = board.projection(View::Referee).unwrap();
-                let definition = selection_with_rules().current[number]
+                let definition = selection().current[number]
                     .program
                     .card()
                     .abilities[0]

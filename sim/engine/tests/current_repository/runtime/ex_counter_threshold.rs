@@ -5,7 +5,7 @@ const PASSION: &str = "情熱カウンター";
 
 fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -41,7 +41,7 @@ fn position(card: &str, own: &[u8], opponent: &[u8]) -> Value {
 }
 
 fn activate(game: &mut Game, card: &str, line: u32) {
-    let program = &selection_with_rules().current[card].program;
+    let program = &selection().current[card].program;
     let ability = program
         .card()
         .abilities

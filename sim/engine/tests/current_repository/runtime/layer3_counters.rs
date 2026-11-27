@@ -13,7 +13,7 @@ fn croche_caps_battery_at_seven_and_uses_one_x_for_pp_counters_and_search() {
         {"id":"partner","card":"CP04-112"},{"id":"same","card":"CP04-P87"},{"id":"other","card":"BP01-037"}
     ]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -91,7 +91,7 @@ fn beauty_and_beast_keeps_paid_counter_x_and_gets_storm_only_outside_hand() {
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"][from] = json!([{"id":"source","card":"BP03-001","state":if from=="ex" {json!({"counters":{"童話カウンター":2_u8}})} else {json!({})}}]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -163,7 +163,7 @@ fn a_full_battery_still_records_the_union_burst_when_no_counter_is_added() {
         {"id":"source","card":"CP04-115","state":{"counters":{"バッテリーカウンター":7_u8}}}
     ]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

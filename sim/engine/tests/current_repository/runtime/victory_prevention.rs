@@ -32,7 +32,7 @@ fn bp05_092_blocks_lethal_attack_and_active_players_victory_then_restores_one_li
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"guardian","card":"BP05-092"}]);
     initial["players"]["P2"]["leader"]["life"] = json!(2_u8);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

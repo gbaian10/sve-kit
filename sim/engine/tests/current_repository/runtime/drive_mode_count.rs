@@ -92,7 +92,7 @@ fn resolve_modes(board: &mut Game, q: &DecisionView, all: bool) {
 
 fn run_case(card: &str, used: u8, all: bool) {
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position(card, used),
         &Value::Null,
         &Value::Null,

@@ -15,7 +15,7 @@ fn assert_event_history_available(game: &Game) {
 
 fn board(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

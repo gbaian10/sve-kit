@@ -5,7 +5,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -70,7 +70,7 @@ fn drive(game: &mut Game, mut step: Option<CardPlay>, picks: &[&str]) {
 
 /// Activates the source's printed ability on `line`.
 fn activate(game: &mut Game, card: &str, line: u32, picks: &[&str]) {
-    let program = &selection_with_rules().current[card].program;
+    let program = &selection().current[card].program;
     let ability = program
         .card()
         .abilities

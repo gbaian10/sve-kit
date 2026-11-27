@@ -12,7 +12,7 @@ const FACE: &str = "f:fa7eb2837bea53088903efca57420635";
 
 #[test]
 fn bp18_104_current_covers_both_lines_and_exactly_the_registered_printings() {
-    let selected = selection_with_rules();
+    let selected = selection();
     let author = inputs().2["authors"]
         .as_array()
         .unwrap()
@@ -214,7 +214,7 @@ fn bp18_104_look_then_next_tokyo_discount_survives_departure_and_commits_once() 
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

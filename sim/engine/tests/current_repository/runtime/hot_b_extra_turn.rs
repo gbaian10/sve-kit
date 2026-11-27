@@ -25,7 +25,7 @@ fn position(number: &str, spells: u8) -> Value {
 
 fn actual(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

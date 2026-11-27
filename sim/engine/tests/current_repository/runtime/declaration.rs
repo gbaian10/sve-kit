@@ -18,7 +18,7 @@ fn initial() -> Value {
 }
 fn build(position: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         position,
         &Value::Null,
         &Value::Null,

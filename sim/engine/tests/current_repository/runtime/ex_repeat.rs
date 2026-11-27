@@ -19,7 +19,7 @@ fn position(number: &str, old: usize, deck: usize) -> Value {
 }
 fn build(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -192,7 +192,7 @@ fn an_illegal_field_entry_does_not_spend_the_shared_free_play() {
         game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
         3_u8
     );
-    let ability = selection_with_rules().current["BP01-109"]
+    let ability = selection().current["BP01-109"]
         .program
         .card()
         .abilities

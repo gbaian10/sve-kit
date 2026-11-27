@@ -312,7 +312,7 @@ fn run_real_evolution(seat: &str) {
     let opponent_view = if seat == "P1" { View::P2 } else { View::P1 };
     // The admitted base needs the registered title bindings for its intrinsic evolution proof.
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &evolve_position(seat),
         &Value::Null,
         &Value::Null,

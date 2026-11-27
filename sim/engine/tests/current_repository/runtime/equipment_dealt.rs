@@ -43,7 +43,7 @@ fn all_ilya_printings_pay_the_fanfare_and_evolve_without_losing_nachtfang() {
         initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP04-074"}]);
         initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"mill","card":printing}]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -96,7 +96,7 @@ fn all_ilya_printings_pay_the_fanfare_and_evolve_without_losing_nachtfang() {
 
 fn actual(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -225,7 +225,7 @@ fn all_ilya_printings_pay_five_cemetery_cards_for_their_printed_union_burst() {
         );
         initial["players"]["P2"]["zones"]["field"] =
             json!([{"id":"enemy","card":"BP01-037","state":{"hp":10_u8,"max_hp":10_u8}}]);
-        let definition = selection_with_rules().current[host]
+        let definition = selection().current[host]
             .program
             .card()
             .abilities
@@ -515,7 +515,7 @@ fn q2450_an_ilya_union_burst_without_a_target_neither_pays_nor_heals() {
             .collect::<Vec<_>>()
     );
     initial["players"]["P2"]["zones"]["field"] = json!([]);
-    let definition = selection_with_rules().current["CP04-073"]
+    let definition = selection().current["CP04-073"]
         .program
         .card()
         .abilities
