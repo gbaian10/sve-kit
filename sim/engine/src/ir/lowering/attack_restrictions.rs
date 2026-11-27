@@ -2,6 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     SourceSpan, ability_source, ast, numeric, source_span, unsupported,
 };
+use crate::ir::attack_restrictions::owner_field;
 use crate::ir::{
     AbilityKind, AbilityQualification, Action, ActionPattern, Binding, Bool, BoolRead, Duration,
     DurationEnd, Effect, EffectDefinitionId, Expr, Interval, ObjectOperand, PermissionSubject,
@@ -150,11 +151,30 @@ fn permission(
                 .on
                 .as_ref()
                 .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?;
-            let target = shape
-                .target
-                .as_ref()
-                .map(|target| context.recipients(target, path))
-                .transpose()?;
+            let target = match &shape.target {
+                Some(ast::AttackRecipients::OwnerField {
+                    who:
+                        ast::AttackOwner {
+                            owner_of: ast::This::This,
+                        },
+                    kind: ast::AttackableKind::Follower,
+                    zone: None | Some(ast::FieldZone::Field),
+                    ..
+                }) if attacker == numeric::holder()
+                    && shape.if_can_attack.is_none()
+                    && *condition == Expr::Literal(Bool(true)) =>
+                {
+                    Some(owner_field(Binding::new(
+                        context.allocator.id(path)?,
+                        context.scope,
+                    )))
+                }
+                Some(ast::AttackRecipients::OwnerField { .. }) => return Err(unsupported(path)),
+                Some(ast::AttackRecipients::Other(target)) => {
+                    Some(context.recipients(target, path)?)
+                }
+                None => None,
+            };
             if shape.if_can_attack.is_some() {
                 attacker = conditional_attacker(context, attacker, target.as_ref(), path)?;
             }
@@ -245,6 +265,11 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
+        let target = match &shape.target {
+            Some(ast::AttackRecipients::OwnerField { .. }) => return Err(unsupported(path)),
+            Some(ast::AttackRecipients::Other(target)) => Some(self.recipients(target, path)?),
+            None => None,
+        };
         let duration = match &installation.until {
             Some(ast::Until::DuringNextTurn { during_next_turn }) => {
                 let player = super::posture::player(during_next_turn.who);
@@ -268,11 +293,7 @@ impl BodyContext<'_> {
                 },
                 action: ActionPattern::Attack {
                     attacker: targets,
-                    target: shape
-                        .target
-                        .as_ref()
-                        .map(|target| self.recipients(target, path))
-                        .transpose()?,
+                    target,
                 },
                 polarity: Polarity::Forbid,
                 condition: Expr::Literal(Bool(true)),

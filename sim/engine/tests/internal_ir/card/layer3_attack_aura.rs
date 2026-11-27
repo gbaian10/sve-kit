@@ -217,3 +217,86 @@ fn source_attack_count_rejects_other_history_filters() {
         );
     }
 }
+
+fn owner_attack_target() -> Value {
+    json!({"who":{"owner_of":"this"},"kind":"follower","leader_or":true,"zone":"field"})
+}
+
+#[test]
+fn a_follower_cannot_attack_its_owners_leader_or_their_field_after_transfer() {
+    let input = evolution_linked_movement::tree(&[(
+        "static",
+        json!({"effects":[{"cannot":{"what":"attack","target":owner_attack_target()}}]}),
+    )]);
+    let program = boxed::program(&input);
+    for seat in [1, 2] {
+        let mut initial = setup(seat, json!([]));
+        let (active, enemy) = if seat == 1 {
+            ("P1", "P2")
+        } else {
+            ("P2", "P1")
+        };
+        initial["turn"]["active"] = json!(active);
+        initial["players"][active]["zones"]["field"] = json!([
+            {"id":"owner-test-source","card":"unit-follower","owner":"P1","state":{"entered_this_turn":false}},
+            {"id":"owner-test-control","card":"unit-follower","owner":active,"state":{"entered_this_turn":false}}
+        ]);
+        initial["players"][enemy]["zones"]["field"] = json!([
+            {"id":"owner-test-enemy","card":"unit-follower","owner":"P1","state":{"acted":true}}
+        ]);
+        let mut game = evolution_linked_movement::loaded(&initial, &program);
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let state = game.projection(View::Referee).unwrap();
+        let targets = state["legal"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|action| action["do"] == "attack" && action["attacker"] == "owner-test-source")
+            .map(|action| action["target"].as_str().unwrap())
+            .collect::<Vec<_>>();
+        let available = state["legal"].as_array().unwrap();
+        for target in [format!("{enemy}.leader"), "owner-test-enemy".to_owned()] {
+            assert!(
+                available.iter().any(|action| {
+                    action["do"] == "attack"
+                        && action["attacker"] == "owner-test-control"
+                        && action["target"] == target
+                }),
+                "the ordinary follower can still attack {target}"
+            );
+        }
+        if seat == 1 {
+            assert!(
+                targets.contains(&"P2.leader"),
+                "the source can normally attack the other leader"
+            );
+            assert!(
+                targets.contains(&"owner-test-enemy"),
+                "a follower on the enemy field remains attackable even if its owner is the source's owner"
+            );
+        } else {
+            assert!(
+                targets.is_empty(),
+                "the transferred source cannot attack its owner's leader or followers controlled by its owner"
+            );
+        }
+    }
+}
+
+#[test]
+fn the_owner_field_attack_restriction_only_applies_to_the_printed_source() {
+    for effect in [
+        json!({"cannot":{"what":"attack","on":{"who":"self","zone":"field","kind":"follower"},"target":owner_attack_target()}}),
+        json!({"cannot":{"what":"attack","target":owner_attack_target(),"if_can_attack":"follower"}}),
+    ] {
+        let input = evolution_linked_movement::tree(&[("static", json!({"effects":[effect]}))]);
+        lowerer().lower(&input).unwrap_err();
+    }
+    let input = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({"cost":{"pp":0},"do":[{"apply":{"on":"this","until":"turn","effect":
+            {"cannot":{"what":"attack","target":owner_attack_target()}}}}]}),
+    )]);
+    lowerer().lower(&input).unwrap_err();
+}

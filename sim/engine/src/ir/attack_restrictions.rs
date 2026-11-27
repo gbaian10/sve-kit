@@ -1,7 +1,8 @@
+use super::phase_restrictions::affected_player;
 use super::{
-    Ability, AbilityKind, AbilityOrigin, ActionPattern, Bool, BoolRead, Duration, DurationEnd,
-    Effect, EffectDefinitionId, Expr, ObjectOperand, PermissionSubject, Polarity, RecipientSet,
-    Selector, TimeAnchor,
+    Ability, AbilityKind, AbilityOrigin, ActionPattern, Binding, Bool, BoolRead, Duration,
+    DurationEnd, Effect, EffectDefinitionId, Expr, ObjectOperand, ObjectRef, PermissionSubject,
+    PlayerRef, Polarity, RecipientSet, SelectionView, Selector, TimeAnchor, ZoneKind,
 };
 
 pub(crate) struct AttackPermission<'effect> {
@@ -10,6 +11,43 @@ pub(crate) struct AttackPermission<'effect> {
     pub condition: &'effect Expr<Bool>,
     pub duration: &'effect Duration,
     pub query: Option<EffectDefinitionId>,
+}
+
+pub(crate) fn owner_field(binding: Binding<ObjectRef>) -> RecipientSet {
+    let players = affected_player(PlayerRef::Owner {});
+    RecipientSet::Union {
+        sets: vec![
+            RecipientSet::Leaders {
+                players: players.clone(),
+            },
+            RecipientSet::Objects {
+                objects: Selector::Zone {
+                    players,
+                    zone: ZoneKind::Field,
+                    view: SelectionView::Current {},
+                    binding,
+                    // The attack action has already confined its object targets to followers.
+                    predicate: Box::new(Expr::Literal(Bool(true))),
+                },
+            },
+        ],
+    }
+}
+
+pub(crate) fn is_owner_field(target: &RecipientSet) -> bool {
+    let RecipientSet::Union { sets } = target else {
+        return false;
+    };
+    let [
+        RecipientSet::Leaders { .. },
+        RecipientSet::Objects {
+            objects: Selector::Zone { binding, .. },
+        },
+    ] = sets.as_slice()
+    else {
+        return false;
+    };
+    *target == owner_field(*binding)
 }
 
 pub(crate) fn projection(effect: &Effect) -> Option<AttackPermission<'_>> {
