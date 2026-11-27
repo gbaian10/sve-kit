@@ -1,12 +1,16 @@
 //! An arena over a verified public export: the same inputs and loader as the browser Worker.
 
-use crate::arena::{Arena, Open, Setup};
-use crate::pool::{PoolCard, Pools};
+use crate::arena::{Arena, Control, Open, Setup};
+use crate::lineup::{DeckList, Lineup, ListedDeck, Refused, shape};
+use crate::pool::{Basis, Deck, PoolCard, Pools};
 use alloc::collections::{BTreeMap, BTreeSet};
+use core::fmt;
+use core::iter::repeat_n;
 use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 use std::fs::read_to_string;
 use std::path::Path;
+use sve_battle_contract::Seat;
 use sve_battle_host::load::PreparedBattle;
 use sve_engine::catalog::{EngineIdentityInput, ProgramPrinting, SnapshotPrograms};
 use sve_engine::game::Game;
@@ -86,7 +90,6 @@ pub struct Excluded {
 }
 
 /// A prepared export and the printings self-play had to leave out.
-#[derive(Debug)]
 pub struct Published {
     /// The arena.
     pub arena: Arena,
@@ -94,6 +97,20 @@ pub struct Published {
     pub excluded: Vec<Excluded>,
     /// Deck-type printings without any program.
     pub unprogrammed: usize,
+    /// The programs the host prepared, held natively to probe listed decks.
+    pub native: SnapshotPrograms,
+    /// Deck reference of every printing a pool holds, by card number.
+    pub references: BTreeMap<String, String>,
+}
+
+impl fmt::Debug for Published {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Published")
+            .field("arena", &self.arena)
+            .field("excluded", &self.excluded)
+            .field("unprogrammed", &self.unprogrammed)
+            .finish_non_exhaustive()
+    }
 }
 
 struct Facts {
@@ -301,6 +318,7 @@ impl Published {
             });
         }
         let pools = Pools::new(cards, &amulet_titles);
+        let references = pooled(&pools, &numbers);
         excluded.extend(pools.unpooled().into_iter().map(|number| Excluded {
             number: number.to_owned(),
             reason: "no construction pool".into(),
@@ -309,13 +327,121 @@ impl Published {
             arena: Arena {
                 open: opener(prepared),
                 pools,
+                lineup: None,
                 printings: arena_printings,
                 numbers,
             },
             excluded,
             unprogrammed,
+            native,
+            references,
         })
     }
+
+    /// Play the decks of a list file instead of random ones; returns the decks left out.
+    ///
+    /// A deck is played only when it keeps the construction sizes, names printings some pool
+    /// holds, lowers, is admitted whole, and opens against itself on the host.
+    ///
+    /// # Errors
+    /// The file is not a deck list, or no listed deck can be played.
+    pub fn list(&mut self, text: &str) -> Result<Vec<Refused>, String> {
+        let list: DeckList =
+            serde_json::from_str(text).map_err(|error| format!("deck list: {error}"))?;
+        let mut lineup = Lineup::default();
+        let mut refused = Vec::new();
+        for (position, listed) in list.decks.into_iter().enumerate() {
+            let label = listed.label.clone().unwrap_or_else(|| position.to_string());
+            let admitted = if listed.weight == 0 {
+                Err("weight is zero".to_owned())
+            } else {
+                self.admit(&listed)
+            };
+            match admitted {
+                Ok(deck) => lineup.push(label, listed.weight, deck),
+                Err(reason) => refused.push(Refused { label, reason }),
+            }
+        }
+        if lineup.is_empty() {
+            return Err(format!(
+                "deck list: no deck can be played ({} refused)",
+                refused.len()
+            ));
+        }
+        self.arena.lineup = Some(lineup);
+        Ok(refused)
+    }
+
+    fn admit(&self, listed: &ListedDeck) -> Result<Deck, String> {
+        shape(listed)?;
+        let expand = |cards: &BTreeMap<String, usize>| {
+            cards
+                .iter()
+                .flat_map(|(number, count)| repeat_n(number.clone(), *count))
+                .collect::<Vec<_>>()
+        };
+        let (main, evolve) = (expand(&listed.main), expand(&listed.evolve));
+        let basis = match &listed.construction {
+            Basis::Class(class) => DeckConstruction::Class(class.clone()),
+            Basis::Title(title) => DeckConstruction::Title(title.clone()),
+        };
+        let native = PlayerDeck {
+            construction: basis,
+            main: main.clone(),
+            evolve: evolve.clone(),
+        };
+        let decks = [native.clone(), native];
+        let selected = Game::select_snapshot_decks(&self.native, &decks)
+            .map_err(|error| format!("lowering: {error}"))?;
+        let report = Game::check_player_decks(&selected, &decks)
+            .map_err(|error| format!("admission: {error}"))?;
+        if !report.is_admitted() {
+            let reasons: BTreeSet<String> = report
+                .gaps(Viewer::P1)
+                .iter()
+                .map(|gap| format!("{:?}", gap.reason))
+                .collect();
+            return Err(format!(
+                "admission: {}",
+                reasons.into_iter().collect::<Vec<_>>().join("+")
+            ));
+        }
+        let wire = |numbers: Vec<String>| {
+            numbers
+                .into_iter()
+                .map(|number| {
+                    self.references
+                        .get(&number)
+                        .cloned()
+                        .ok_or_else(|| format!("{number} is in no construction pool"))
+                })
+                .collect::<Result<Vec<_>, _>>()
+        };
+        let deck = Deck {
+            construction: listed.construction.clone(),
+            main: wire(main)?,
+            evolve: wire(evolve)?,
+        };
+        let setup = Setup {
+            decks: [deck.clone(), deck.clone()],
+            first_chooser: Seat::P1,
+            seed: "0".into(),
+            control: [Control::Player, Control::Player],
+            max_submissions: 0,
+        };
+        (self.arena.open)(&setup).map_err(|stage| format!("load: {stage}"))?;
+        Ok(deck)
+    }
+}
+
+/// Deck reference of every printing a pool holds, by card number.
+fn pooled(pools: &Pools, numbers: &BTreeMap<String, String>) -> BTreeMap<String, String> {
+    let eligible = pools.eligible();
+    numbers
+        .iter()
+        .filter(|(_, number)| eligible.contains(number.as_str()))
+        .map(|(printing, number)| (number.clone(), printing.clone()))
+        .collect()
 }
 
 /// Title label to registered code, and the codes whose opening needs a Start Amulet.

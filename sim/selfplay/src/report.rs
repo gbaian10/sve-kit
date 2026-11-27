@@ -2,12 +2,14 @@
 
 use crate::arena::Arena;
 use crate::play::{End, Limits, Match, StepContext, play};
-use alloc::collections::BTreeMap;
+use crate::usage::Uses;
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::cmp::Reverse;
 use core::sync::atomic::{AtomicU64, Ordering};
 use serde_json::{Value, json};
 use std::sync::mpsc::channel;
 use std::thread;
+use sve_battle_contract::Seat;
 
 const SEEDS_KEPT: usize = 10;
 const SLOW_KEPT: usize = 20;
@@ -69,6 +71,24 @@ pub struct Report {
     slow: Vec<(u64, StepContext)>,
     built: BTreeMap<String, u64>,
     seen: BTreeMap<String, u64>,
+    uses: BTreeMap<String, Uses>,
+    failed: BTreeMap<String, u64>,
+    listed: BTreeMap<usize, Seated>,
+}
+
+/// Results of one listed deck, counted per seat it took.
+#[derive(Debug, Default)]
+struct Seated {
+    seats: u64,
+    wins: u64,
+    losses: u64,
+    draws: u64,
+    failures: u64,
+    mirrors: u64,
+}
+
+const fn bump(count: &mut u64) {
+    *count = count.saturating_add(1);
 }
 
 /// Digits stripped, so one diagnostic about different objects groups together.
@@ -177,8 +197,10 @@ impl Report {
         self.slow
             .sort_by_key(|(_, step)| Reverse(step.cost.engine_micros));
         self.slow.truncate(SLOW_KEPT);
+        let failed = matches!(played.end, End::Failed(_));
+        let mut either = BTreeSet::new();
         for deck in &played.record.setup.decks {
-            let mut numbers: Vec<&str> = deck
+            let numbers: BTreeSet<&str> = deck
                 .main
                 .iter()
                 .chain(&deck.evolve)
@@ -189,23 +211,88 @@ impl Report {
                         .map_or(reference.as_str(), |printing| arena.number(printing))
                 })
                 .collect();
-            numbers.sort_unstable();
-            numbers.dedup();
-            for number in numbers {
-                let uses = self.built.entry(number.to_owned()).or_default();
-                *uses = uses.saturating_add(1);
+            for number in &numbers {
+                bump(self.built.entry((*number).to_owned()).or_default());
+            }
+            either.extend(numbers);
+        }
+        if failed {
+            for number in either {
+                bump(self.failed.entry(number.to_owned()).or_default());
             }
         }
         for number in &played.seen {
-            let uses = self.seen.entry(number.clone()).or_default();
-            *uses = uses.saturating_add(1);
+            bump(self.seen.entry(number.clone()).or_default());
         }
+        for (number, uses) in &played.uses {
+            self.uses.entry(number.clone()).or_default().add(uses);
+        }
+        if let Some(positions) = played.listed {
+            self.seat(positions, &played.end);
+        }
+    }
+
+    fn seat(&mut self, positions: [usize; 2], end: &End) {
+        for (seat, position) in [Seat::P1, Seat::P2].into_iter().zip(positions) {
+            let entry = self.listed.entry(position).or_default();
+            bump(&mut entry.seats);
+            match end {
+                End::Finished { winner: None } => bump(&mut entry.draws),
+                End::Finished {
+                    winner: Some(winner),
+                } if *winner == seat => bump(&mut entry.wins),
+                End::Finished { .. } => bump(&mut entry.losses),
+                End::Failed(_) => bump(&mut entry.failures),
+            }
+        }
+        let [first, second] = positions;
+        if first == second {
+            bump(&mut self.listed.entry(first).or_default().mirrors);
+        }
+    }
+
+    /// Every card number that entered a deck or did something: decks that held it, matches
+    /// where it was public, its event counts and the failed matches whose decks held it.
+    #[must_use]
+    pub fn cards(&self) -> Value {
+        let numbers: BTreeSet<&String> = self.built.keys().chain(self.uses.keys()).collect();
+        let count =
+            |map: &BTreeMap<String, u64>, number: &String| map.get(number).copied().unwrap_or(0);
+        numbers
+            .into_iter()
+            .map(|number| {
+                let mut entry = json!(self.uses.get(number).copied().unwrap_or_default());
+                if let Some(fields) = entry.as_object_mut() {
+                    fields.insert("built".into(), json!(count(&self.built, number)));
+                    fields.insert("seen".into(), json!(count(&self.seen, number)));
+                    fields.insert("failed".into(), json!(count(&self.failed, number)));
+                }
+                (number.clone(), entry)
+            })
+            .collect::<serde_json::Map<_, _>>()
+            .into()
     }
 
     /// The whole run as one document.
     #[must_use]
     pub fn summary(&self, arena: &Arena) -> Value {
         let eligible = arena.pools.eligible();
+        let lineup: Vec<Value> = arena.lineup.as_ref().map_or_else(Vec::new, |lineup| {
+            self.listed
+                .iter()
+                .map(|(position, seated)| {
+                    json!({
+                        "label": lineup.label(*position),
+                        "seats": seated.seats,
+                        "wins": seated.wins,
+                        "losses": seated.losses,
+                        "draws": seated.draws,
+                        "failures": seated.failures,
+                        "mirrors": seated.mirrors,
+                    })
+                })
+                .collect()
+        });
         let failures: Vec<Value> = self
             .failures
             .iter()
@@ -234,6 +321,7 @@ impl Report {
             "match_decisions": spread(&self.match_decisions),
             "match_events": spread(&self.match_events),
             "match_turns": spread(&self.match_turns),
+            "lineup": lineup,
             "slowest_steps": self.slow.iter().map(|(seed, step)| json!({"seed": seed, "step": step})).collect::<Vec<_>>(),
             "cards": {
                 "eligible": eligible.len(),

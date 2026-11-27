@@ -1,5 +1,6 @@
 //! The tool's commands: compose inputs, run seeds, replay records.
 
+use crate::lineup::Lineup;
 use crate::play::{End, Limits, Record, StepCost, replay};
 use crate::published::{Published, compose};
 use crate::report::{Report, run_seeds};
@@ -13,7 +14,7 @@ use std::time::Instant;
 
 const USAGE: &str = "usage:
   sve-selfplay prepare <reader-dir> <export-root> <out-dir>
-  sve-selfplay run <inputs.json> <programs.json> <out-dir> <first-seed> <games> [jobs] [records]
+  sve-selfplay run [--decks <decks.json>] <inputs.json> <programs.json> <out-dir> <first-seed> <games> [jobs] [records]
   sve-selfplay replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>";
 
 fn failed<E>(error: E) -> String
@@ -54,6 +55,10 @@ fn number(text: Option<&String>, default: u64) -> Result<u64, String> {
 }
 
 fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
+    let (decks, arguments) = match arguments {
+        [flag, path, rest @ ..] if flag == "--decks" => (Some(path), rest),
+        _ => (None, arguments),
+    };
     let [inputs, programs, out, first, games, rest @ ..] = arguments else {
         return Err(USAGE.into());
     };
@@ -63,9 +68,19 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
     );
     let jobs = usize::try_from(number(rest.first(), 4)?).map_err(failed)?;
     let records = number(rest.get(1), 0)?;
-    let published = load(inputs, programs, log)?;
+    let mut published = load(inputs, programs, log)?;
     let out = Path::new(out);
     create_dir_all(out).map_err(failed)?;
+    if let Some(decks) = decks {
+        let refused = published.list(&read_to_string(decks).map_err(failed)?)?;
+        let lineup = published.arena.lineup.as_ref().map_or(0, Lineup::len);
+        writeln!(log, "{lineup} listed decks, {} refused", refused.len()).map_err(failed)?;
+        let refused: Vec<Value> = refused
+            .iter()
+            .map(|deck| json!({"label": deck.label, "reason": deck.reason}))
+            .collect();
+        write(out.join("refused-decks.json"), json!(refused).to_string()).map_err(failed)?;
+    }
     let excluded: Vec<Value> = published
         .excluded
         .iter()
@@ -118,6 +133,7 @@ fn run(arguments: &[String], log: &mut dyn Write) -> Result<(), String> {
         serde_json::to_string_pretty(&summary).map_err(failed)?,
     )
     .map_err(failed)?;
+    write(out.join("cards.json"), report.cards().to_string()).map_err(failed)?;
     problem.map_or(Ok(()), Err)
 }
 

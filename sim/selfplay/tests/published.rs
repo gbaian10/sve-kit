@@ -228,6 +228,153 @@ fn seeds_run_from_a_composed_export_and_their_records_replay() {
     );
 }
 
+/// A listed deck of `size` cards, one copy each from `first` on.
+fn listed(label: &str, weight: u64, first: usize, size: usize) -> Value {
+    let main: serde_json::Map<String, Value> = (first..first.saturating_add(size))
+        .map(|index| (number(index), json!(1)))
+        .collect();
+    json!({"label": label, "weight": weight,
+        "construction": {"kind": "title", "value": "synthetic_empty"}, "main": main})
+}
+
+#[test]
+fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
+    let folder = Folder::new("listed");
+    written(&folder);
+    run(&[
+        "prepare",
+        &folder.text("reader"),
+        &folder.text("export"),
+        &folder.text("inputs"),
+    ])
+    .unwrap();
+    let mut unknown = listed("unknown", 5, 0, 40);
+    unknown["main"]["t-999"] = json!(1);
+    unknown["main"].as_object_mut().unwrap().remove("t-000");
+    let list = json!({"decks": [
+        listed("low", 1, 0, 40),
+        listed("high", 3, 20, 40),
+        listed("short", 5, 0, 39),
+        unknown,
+        listed("idle", 0, 0, 40),
+    ]});
+    write(folder.0.join("decks.json"), list.to_string()).unwrap();
+    let log = run(&[
+        "run",
+        "--decks",
+        &folder.text("decks.json"),
+        &folder.text("inputs/inputs.json"),
+        &folder.text("inputs/programs.json"),
+        &folder.text("out"),
+        "0",
+        "8",
+        "2",
+    ])
+    .unwrap();
+    assert!(log.contains("2 listed decks, 3 refused"), "{log}");
+    let refused: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/refused-decks.json")).unwrap())
+            .unwrap();
+    assert_eq!(refused[0]["label"], "short");
+    assert_eq!(refused[0]["reason"], "main deck has 39 cards");
+    assert_eq!(
+        refused[1],
+        json!({"label": "unknown", "reason": "admission: MissingSnapshot"})
+    );
+    assert_eq!(
+        refused[2],
+        json!({"label": "idle", "reason": "weight is zero"})
+    );
+
+    let summary: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/summary.json")).unwrap()).unwrap();
+    assert_eq!(summary["failures"], json!([]), "{summary}");
+    let lineup = summary["lineup"].as_array().unwrap();
+    let seats = |label: &str| {
+        lineup
+            .iter()
+            .find(|deck| deck["label"] == label)
+            .map_or(0, |deck| deck["seats"].as_u64().unwrap())
+    };
+    // Sixteen seats over the two playable decks.
+    assert_eq!(seats("low").saturating_add(seats("high")), 16, "{summary}");
+    assert!(seats("high") > seats("low"), "{summary}");
+    let mirrors: u64 = lineup
+        .iter()
+        .map(|deck| deck["mirrors"].as_u64().unwrap())
+        .sum();
+    assert!(mirrors > 0, "{summary}");
+    for deck in lineup {
+        let results: u64 = ["wins", "losses", "draws", "failures"]
+            .iter()
+            .map(|field| deck[field].as_u64().unwrap())
+            .sum();
+        assert_eq!(results, deck["seats"].as_u64().unwrap(), "{deck}");
+    }
+
+    let cards: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/cards.json")).unwrap()).unwrap();
+    // The only cards in "low" alone, and in "high" alone.
+    assert_eq!(
+        cards["t-000"]["built"].as_u64().unwrap(),
+        seats("low"),
+        "{cards}"
+    );
+    assert_eq!(cards["t-059"]["built"].as_u64().unwrap(), seats("high"));
+    assert!(cards.get("t-060").is_none());
+    let total = |field: &str| -> u64 {
+        cards
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|card| card[field].as_u64().unwrap())
+            .sum()
+    };
+    // Vanilla followers are played onto the field; nothing evolves and no ability exists.
+    assert!(total("played") > 0, "{cards}");
+    assert_eq!(total("played"), total("entered"), "{cards}");
+    for field in ["abilities", "triggers", "evolved", "failed"] {
+        assert_eq!(total(field), 0, "{field}");
+    }
+}
+
+#[test]
+fn a_deck_list_that_plays_nothing_is_refused() {
+    let folder = Folder::new("unlisted");
+    written(&folder);
+    run(&[
+        "prepare",
+        &folder.text("reader"),
+        &folder.text("export"),
+        &folder.text("inputs"),
+    ])
+    .unwrap();
+    let inputs = [
+        folder.text("inputs/inputs.json"),
+        folder.text("inputs/programs.json"),
+    ];
+    let attempt = |list: &str| {
+        write(folder.0.join("decks.json"), list).unwrap();
+        run(&[
+            "run",
+            "--decks",
+            &folder.text("decks.json"),
+            &inputs[0],
+            &inputs[1],
+            &folder.text("out"),
+            "0",
+            "1",
+        ])
+        .unwrap_err()
+    };
+    let none = json!({"decks": [listed("short", 1, 0, 39)]}).to_string();
+    assert_eq!(
+        attempt(&none),
+        "deck list: no deck can be played (1 refused)"
+    );
+    assert!(attempt("{}").starts_with("deck list: missing field"));
+}
+
 #[test]
 fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
     let (reader, programs) = export();
