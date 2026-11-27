@@ -69,7 +69,7 @@ fn cp03_070_reveals_an_overlord_follower_to_draw_without_discarding_it() {
         initial["players"]["P1"]["construction"] = json!("title");
         initial["players"]["P1"]["title_code"] = json!("cardfight_vanguard");
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

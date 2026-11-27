@@ -52,7 +52,7 @@ fn bp03_011_whole_card_gives_combo_fairy_rush_and_granted_damage_before_combat()
         ]);
     }
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

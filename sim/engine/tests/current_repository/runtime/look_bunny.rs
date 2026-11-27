@@ -26,7 +26,7 @@ fn finish(game: &mut Game, mut play: CardPlay) -> (Activation, u8) {
 }
 
 fn ride(game: &mut Game) -> (Activation, u8) {
-    let ability = selection_with_rules().current["CP03-054"]
+    let ability = selection().current["CP03-054"]
         .program
         .card()
         .abilities
@@ -95,7 +95,7 @@ fn midnight_bunny_takes_one_privately_and_banishes_only_the_other_looked_card() 
             .collect::<Vec<_>>()
         );
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

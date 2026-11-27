@@ -12,7 +12,7 @@ fn position(card: &str, zone: &str, construction: &str, title: &str) -> Value {
 
 fn from_position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -114,7 +114,7 @@ fn aoi_printings_pay_posture_and_reduce_the_declared_enemy_stats() {
         let initial = position(card, "field", "title", "princess_connect_re_dive");
         let mut game = from_position(&initial);
         let before = game.projection(View::Referee).unwrap();
-        let definition = selection_with_rules().current[card]
+        let definition = selection().current[card]
             .program
             .card()
             .abilities[0]

@@ -42,14 +42,6 @@ pub(crate) fn selection() -> &'static SelectedEffects {
     })
 }
 
-pub(crate) fn selection_with_rules() -> &'static SelectedEffects {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    SELECTED.get_or_init(|| {
-        let (snapshot, keywords, input) = inputs();
-        selection_with_rules_from(snapshot, keywords, input)
-    })
-}
-
 /// Wire printing identities for the JP repository test snapshot.
 pub(crate) fn battle_references() -> &'static BattleReferences {
     static REFERENCES: OnceLock<BattleReferences> = OnceLock::new();
@@ -72,7 +64,7 @@ pub(crate) fn battle_references() -> &'static BattleReferences {
             }
         }
         BattleReferences::new(
-            &selection_with_rules().catalogue,
+            &selection().catalogue,
             ReferenceInput {
                 rules: None,
                 wording: None,

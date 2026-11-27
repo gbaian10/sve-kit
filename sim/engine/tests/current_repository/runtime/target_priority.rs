@@ -159,7 +159,7 @@ fn diamond_master_plays_chooses_each_keyword_and_normally_evolves_to_revive_a_wa
         initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP03-092"}]);
         initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"ward","card":"BP01-046"}]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -202,14 +202,14 @@ fn kuuka_keeps_its_full_union_burst_activation_with_required_targeting() {
     initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP04-087"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
         "kuuka",
     )
     .unwrap();
-    let id = selection_with_rules().current["CP04-087"]
+    let id = selection().current["CP04-087"]
         .program
         .card()
         .abilities

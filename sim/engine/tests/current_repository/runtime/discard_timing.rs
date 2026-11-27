@@ -21,7 +21,7 @@ fn cost_position(other: Option<&str>) -> Value {
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -31,7 +31,7 @@ fn game(initial: &Value) -> Game {
 }
 
 fn hand_activation() -> AbilityId {
-    selection_with_rules().current["BP15-074"]
+    selection().current["BP15-074"]
         .program
         .card()
         .abilities

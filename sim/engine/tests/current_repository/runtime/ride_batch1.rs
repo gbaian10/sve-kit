@@ -247,7 +247,7 @@ fn check_effect(view: &Value, case: Case) {
 
 fn run(card: &str, case: Case, cost: u8) {
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position(card, case),
         &Value::Null,
         &Value::Null,
@@ -257,7 +257,7 @@ fn run(card: &str, case: Case, cost: u8) {
     let before = board.projection(View::Referee).unwrap();
     let power = before["objects"]["source"]["power"].as_i64().unwrap();
     let hp = before["objects"]["source"]["hp"].as_i64().unwrap();
-    let definition = selection_with_rules().current[card]
+    let definition = selection().current[card]
         .program
         .card()
         .abilities

@@ -14,7 +14,7 @@ const LADY: [&str; 2] = ["BP21-084", "BP21-P45"];
 
 fn actual(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

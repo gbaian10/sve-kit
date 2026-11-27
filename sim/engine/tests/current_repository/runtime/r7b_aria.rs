@@ -79,7 +79,7 @@ fn entered(game: &mut Game, id: &str) {
 }
 
 fn run_case(base: &str, form: &str, evolve: bool) {
-    let mut game = Game::from_selected_effects(selection_with_rules().clone(), &position(base, form), &Value::Null, &Value::Null, "r7b-aria").unwrap();
+    let mut game = Game::from_selected_effects(selection().clone(), &position(base, form), &Value::Null, &Value::Null, "r7b-aria").unwrap();
     entered(&mut game, "source");
     assert_eq!(pending(&mut game, base, form), 1, "The base Fanfare creates one real Fairy in EX.");
     let before = game.projection(View::Referee).unwrap();
@@ -146,8 +146,8 @@ fn check_return(game: &mut Game, base: &str, evolved: bool, fairy: &str) {
 #[test]
 fn r7b_aria_all_base_and_evolved_printings_keep_rush_across_the_actual_lastword_return() {
     for (base, form) in [("BP13-003", "BP13-004"), ("BP13-SL03", "BP13-SL04"), ("EBD01-005", "EBD01-006")] {
-        assert!(selection_with_rules().current.contains_key(base));
-        assert!(selection_with_rules().current.contains_key(form));
+        assert!(selection().current.contains_key(base));
+        assert!(selection().current.contains_key(form));
         for evolve in [false, true] {
             run_case(base, form, evolve);
         }

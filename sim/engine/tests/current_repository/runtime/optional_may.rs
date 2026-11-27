@@ -17,7 +17,7 @@ fn begin(number: &str, seat: &str, empty: bool) -> (Game, DecisionView) {
         initial["players"][seat]["zones"]["evolve_deck"] = json!([{"id":"form","card":number}]);
     }
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

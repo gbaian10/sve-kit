@@ -9,7 +9,7 @@ fn colossus_shuffles_five_graveyard_cards_into_the_whole_deck_before_dealing_dam
     let shuffled = json!(["fee4", "fee3", "fee2", "old-top", "fee1", "fee0"]);
     let random = json!({"shuffles":[{"player":"P1","result":shuffled}]});
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &random,

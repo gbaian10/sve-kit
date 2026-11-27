@@ -203,7 +203,7 @@ fn every_yukishima_print_shares_one_next_discount_and_observes_each_dual_trait_s
         initial["players"]["P2"]["zones"]["field"] =
             json!([{"id":"enemy","card":"BP01-171","state":{"hp":10_u8}}]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

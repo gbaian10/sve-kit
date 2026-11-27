@@ -22,7 +22,7 @@ fn position(count: usize) -> Value {
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

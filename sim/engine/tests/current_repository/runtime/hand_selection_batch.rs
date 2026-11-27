@@ -1,7 +1,7 @@
 use super::*;
 
 fn aliases(number: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let id = &selected.current[number].card_id;
     selected
         .current
@@ -12,7 +12,7 @@ fn aliases(number: &str) -> Vec<String> {
 }
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -122,7 +122,7 @@ fn play(game: &mut Game, mode: u64) {
     settle(game, mode);
 }
 fn activate(game: &mut Game, number: &str, line: u32) {
-    let definition = selection_with_rules().current[number]
+    let definition = selection().current[number]
         .program
         .card()
         .abilities
@@ -300,7 +300,7 @@ fn bp14_006_can_select_the_card_just_returned_from_ex_as_its_payment() {
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P1"]["ex"], json!(["returned"]));
         assert_eq!(state["P1"]["hand"], json!([]));
-        let definition = selection_with_rules().current[&number]
+        let definition = selection().current[&number]
             .program
             .card()
             .abilities

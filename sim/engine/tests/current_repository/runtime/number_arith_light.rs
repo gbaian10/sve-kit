@@ -78,7 +78,7 @@ fn damage_hits(activation: &Activation) -> Vec<u64> {
 /// Collaboration titles (ウマ娘, ヴァンガード) need the repository's rule bindings.
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

@@ -144,7 +144,7 @@ fn bp08_078_same_line_fanfare_and_lastword_each_damage_and_heal() {
 #[test]
 fn bp12_083_alias_pays_self_to_cemetery_mills_two_then_lastword_destroys() {
     let initial = position("PR-335", "field", "BP04-117");
-    let selected = selection_with_rules();
+    let selected = selection();
     let ability = selected.current["PR-335"]
         .program
         .card()

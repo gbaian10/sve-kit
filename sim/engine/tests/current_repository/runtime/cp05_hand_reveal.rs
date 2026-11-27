@@ -234,7 +234,7 @@ fn cp05_068_keeps_its_pending_ability_when_random_hand_revelation_moves_it() {
         {"id":"revealed","card":"CP05-P52"}, {"id":"other","card":DARK}
     ]);
     let mut game = reveal_game(&initial);
-    let printed = selection_with_rules().current["BP11-112"]
+    let printed = selection().current["BP11-112"]
         .program
         .card()
         .abilities

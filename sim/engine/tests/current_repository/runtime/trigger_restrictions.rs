@@ -18,7 +18,7 @@ const FORM: [&str; 6] = [
 
 fn position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

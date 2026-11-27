@@ -260,7 +260,7 @@ fn cp02_107_all_printings_choose_between_bane_and_drain_for_another_idol() {
             initial["players"]["P1"]["zones"]["field"] =
                 json!([{"id":"ally","card":"CP02-014"},{"id":"other","card":"BP01-037"}]);
             let mut game = Game::from_selected_effects(
-                selection_with_rules().clone(),
+                selection().clone(),
                 &initial,
                 &Value::Null,
                 &Value::Null,

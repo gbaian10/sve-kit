@@ -27,7 +27,7 @@ fn position(number: &str) -> Value {
 }
 fn game(number: &str) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position(number),
         &Value::Null,
         &Value::Null,
@@ -249,7 +249,7 @@ fn a_real_super_evolution_is_one_first_evolution_for_both_kyou_prints() {
         initial["players"]["P1"]["sep"] = json!(1_u8);
         initial["turn"]["elapsed_turns"]["P1"] = json!(7_u8);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

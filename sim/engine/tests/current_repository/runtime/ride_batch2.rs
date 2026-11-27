@@ -74,7 +74,7 @@ fn settle(game: &mut Game) {
 }
 
 fn ride(game: &mut Game, card: &str) {
-    let id = selection_with_rules().current[card]
+    let id = selection().current[card]
         .program
         .card()
         .abilities
@@ -120,7 +120,7 @@ fn ride(game: &mut Game, card: &str) {
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -211,7 +211,7 @@ fn cp03_073_all_printings_reveal_one_or_two_kagero_followers_and_bottom_the_rema
                 {"id":"first","card":"CP03-063"},{"id":"second","card":"CP03-068"},{"id":"tail","card":"BP01-009"}
             ]);
             let mut board = game(&initial);
-            let id = selection_with_rules().current[card]
+            let id = selection().current[card]
                 .program
                 .card()
                 .abilities[0]

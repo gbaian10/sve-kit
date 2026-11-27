@@ -3,7 +3,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -12,7 +12,7 @@ fn position(initial: &Value) -> Game {
     .unwrap()
 }
 fn ability(number: &str, line: u32) -> AbilityId {
-    selection_with_rules().current[number]
+    selection().current[number]
         .program
         .card()
         .abilities

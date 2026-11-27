@@ -19,14 +19,14 @@ fn bp05_086_whole_card_can_evolve_by_skipping_its_next_turn_instead_of_four_pp()
         );
     }
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
         "native-skip-turn-evolution",
     )
     .unwrap();
-    let definitions = selection_with_rules().current["BP05-086"]
+    let definitions = selection().current["BP05-086"]
         .program
         .card()
         .abilities

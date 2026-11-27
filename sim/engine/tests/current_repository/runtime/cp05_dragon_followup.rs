@@ -15,7 +15,7 @@ fn release_position() -> Value {
 }
 
 fn activate(game: &mut Game, object: &str, printing: &str) -> sve_engine::Result<CardPlay> {
-    let ability = selection_with_rules().current[printing]
+    let ability = selection().current[printing]
         .program
         .card()
         .abilities

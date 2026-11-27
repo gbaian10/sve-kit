@@ -380,7 +380,7 @@ fn evolved_lady_grey_gains_attack_when_the_dark_amulet_discards_a_card() {
     ]);
     initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-171"}]);
     let mut game = game(&initial);
-    let ability = selection_with_rules().current["CP05-079"]
+    let ability = selection().current["CP05-079"]
         .program
         .card()
         .abilities

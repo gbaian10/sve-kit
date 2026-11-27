@@ -42,7 +42,7 @@ fn target(board: &mut Game, play: CardPlay) -> Activation {
 #[test]
 fn r7b_chloe_all_prints_resolve_ub_and_observe_a_princess_spell_after_its_body() {
     for number in ["CP04-048", "CP04-P36", "PR-496"] {
-        assert!(selection_with_rules().current.contains_key(number));
+        assert!(selection().current.contains_key(number));
         let mut initial = draw_position();
         initial["players"]["P1"]["construction"] = json!("title");
         initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
@@ -53,7 +53,7 @@ fn r7b_chloe_all_prints_resolve_ub_and_observe_a_princess_spell_after_its_body()
         initial["players"]["P2"]["zones"]["field"] =
             json!([{"id":"enemy","card":"BP01-171","state":{"hp":20_u8,"max_hp":20_u8}}]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -106,7 +106,7 @@ fn r7b_chloe_without_an_enemy_cannot_activate_ub() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"chloe","card":"CP04-048"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
