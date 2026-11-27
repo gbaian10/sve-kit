@@ -1000,6 +1000,7 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。`unclassified_keyword_use` 不能用例外放行：查卡的關鍵字關係由程式推導並宣告整卡已檢查，未分類的寫法須先補上對照規則，見[關鍵字機制契約](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)。
 
 `check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keyword-registry.yaml` 以 `role: counter` 登錄規則名稱。
+規則名稱可登錄日文 `ja` 或英文 `en`，至少要有一種。作者檔可使用登錄代碼或名稱。對局優先顯示日文；英版獨有的指示物顯示其英文名稱。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 

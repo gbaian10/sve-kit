@@ -4,6 +4,7 @@ mod ex_stats;
 use super::battle_pending::{board, board_with_program, catalog_for, fixture};
 use super::*;
 use crate::battle_costs::object;
+use alloc::collections::BTreeMap;
 use std::sync::OnceLock;
 use sve_battle_contract::{MAX_SAFE_INTEGER, ObjectHandle, Seat, observation as wire};
 use sve_engine::battle::ProjectionError;
@@ -47,7 +48,8 @@ fn counter_catalog() -> Arc<Catalog> {
     Arc::clone(CATALOG.get_or_init(|| {
         let (_, _, document) = catalog_documents(&json!("1"));
         let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{
-            "known_counter":{"ja":"Known counter","role":"counter"}
+            "known_counter":{"ja":"Known counter","en":"Known English counter","role":"counter"},
+            "armageddon_counter":{"en":"Armageddon counter","role":"counter"}
         }});
         let rules = rule_fixtures::rules(
             &fixture().snapshot,
@@ -254,6 +256,47 @@ fn wire_object_table_checks_numbers_and_requires_known_counter_names() {
             Err(ProjectionError::Range)
         );
     }
+}
+
+#[test]
+fn an_english_counter_uses_its_registered_label_in_battle() {
+    let tree = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[
+            {"counter":{"on":"this","name":"armageddon_counter","delta":1}}
+        ]}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let state = initial(&json!({"counters":{"Armageddon counter":2,"known_counter":1}}));
+    let mut game = position(counter_catalog(), &state, Some(&program));
+    resolved(
+        game.activate_internal_card(
+            "raw-source-first",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let table = game
+        .battle_objects(Viewer::P1, &fixture().references)
+        .unwrap();
+    let counters = &table[&handle(&game, Viewer::P1, Viewer::P1, native::ObservedZone::Field)]
+        .state
+        .as_ref()
+        .unwrap()
+        .counters;
+    let amounts = counters
+        .iter()
+        .map(|counter| (counter.name.as_str(), counter.amount.get()))
+        .collect::<BTreeMap<_, _>>();
+    assert_eq!(
+        amounts,
+        BTreeMap::from([("Armageddon counter", 3), ("Known counter", 1)])
+    );
 }
 
 #[test]

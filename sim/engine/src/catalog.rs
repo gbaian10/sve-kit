@@ -59,13 +59,30 @@ struct RegisteredKeyword {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RuleName {
-    ja: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ja: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    en: Option<String>,
     #[serde(rename = "rule", skip_serializing_if = "Option::is_none")]
     _rule: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     role: Option<RuleNameRole>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     aliases: Vec<String>,
+}
+
+impl RuleName {
+    fn display_name(&self) -> Option<&str> {
+        self.ja.as_deref().or(self.en.as_deref())
+    }
+
+    fn spellings(&self) -> impl Iterator<Item = &str> {
+        self.ja
+            .as_deref()
+            .into_iter()
+            .chain(self.en.as_deref())
+            .chain(self.aliases.iter().map(String::as_str))
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -343,13 +360,21 @@ impl Catalog {
     }
 
     pub(crate) fn keyword_name(&self, id: &str) -> &str {
-        self.keywords.get(id).map_or("", |entry| entry.ja.as_str())
+        self.keywords
+            .get(id)
+            .and_then(RuleName::display_name)
+            .unwrap_or_default()
     }
 
     pub(crate) fn registered_counter_name(&self, name: &str) -> Option<&str> {
         self.keywords.iter().find_map(|(code, entry)| {
-            (entry.role == Some(RuleNameRole::Counter) && (code == name || entry.ja == name))
-                .then_some(entry.ja.as_str())
+            if entry.role == Some(RuleNameRole::Counter)
+                && (code == name || entry.spellings().any(|spelling| spelling == name))
+            {
+                entry.display_name()
+            } else {
+                None
+            }
         })
     }
 
@@ -414,10 +439,17 @@ impl Catalog {
     fn validate_keyword_names(&self) -> Result<()> {
         let mut owners = BTreeMap::new();
         for (id, entry) in &self.keywords {
-            for name in once(id.as_str())
-                .chain(once(entry.ja.as_str()))
-                .chain(entry.aliases.iter().map(String::as_str))
-            {
+            let valid_languages = if entry.role == Some(RuleNameRole::Counter) {
+                entry.display_name().is_some()
+            } else {
+                entry.ja.is_some() && entry.en.is_none()
+            };
+            if !valid_languages {
+                return Err(invalid(format!(
+                    "missing or unsupported rule name for {id}"
+                )));
+            }
+            for name in once(id.as_str()).chain(entry.spellings()) {
                 if name.is_empty() {
                     return Err(invalid("empty keyword name"));
                 }
@@ -476,7 +508,7 @@ impl Catalog {
     pub(crate) fn keyword_id(&self, name: &str) -> String {
         self.keywords
             .iter()
-            .find(|(_, value)| value.ja == name || value.aliases.iter().any(|alias| alias == name))
+            .find(|(_, value)| value.spellings().any(|spelling| spelling == name))
             .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
     }
 }
