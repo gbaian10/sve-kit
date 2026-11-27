@@ -274,31 +274,17 @@ impl Game {
     }
 
     fn damage_replacement_options(
-        &self,
         replacements: &[DamageReplacement],
     ) -> Result<Vec<ReplacementOption>> {
         replacements
             .iter()
             .zip(0_u64..)
             .map(|(replacement, handle)| {
-                let provider = string(&replacement.reference["source"]);
-                let (card, name) = if let (Some(card), Some(name)) = (
-                    replacement.reference["card"].as_str(),
-                    replacement.reference["name"].as_str(),
-                ) {
-                    (card.to_owned(), name.to_owned())
-                } else {
-                    // Older prototype candidates obtain their label from the public provider.
-                    (
-                        self.object(provider)?.card.clone(),
-                        self.card_name(provider)?,
-                    )
-                };
                 Ok(ReplacementOption {
                     handle,
-                    card,
-                    name,
-                    line: replacement.reference["line"].as_u64(),
+                    card: replacement.label.card.clone(),
+                    name: replacement.label.name.clone(),
+                    line: replacement.label.line,
                 })
             })
             .collect::<Result<Vec<_>>>()
@@ -332,7 +318,7 @@ impl Game {
                         player_id(&self.object(execution.object_id(object)?)?.controller)?
                     }
                 };
-                let options = self.damage_replacement_options(&replacements)?;
+                let options = Self::damage_replacement_options(&replacements)?;
                 run.remaining.push((recipient, hit));
                 run.choice_origins = replacements
                     .iter()

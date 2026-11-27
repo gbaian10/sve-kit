@@ -2,6 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing and constructed write maps."
 )]
+use super::internal::Label;
 use super::internal::{DamageOccurrence, SourceSnapshot};
 use super::player::events::ActionDetails;
 use super::{BTreeMap, Frame, Game, int, string};
@@ -12,6 +13,7 @@ use serde_json::{Value, json};
 #[derive(Clone, Debug)]
 pub(super) struct DamageReplacement {
     pub(super) reference: Value,
+    pub(super) label: Label,
     pub(super) delta: i64,
     pub(super) multiply: Option<i64>,
     pub(super) cap: Option<(i64, i64)>,
@@ -143,19 +145,6 @@ impl Game {
         Ok(self
             .internal_prevention_references(hit, source_snapshot)?
             .into_iter()
-            .map(|reference| DamageReplacement {
-                reference: reference["reference"].clone(),
-                delta: int(&reference["delta"]),
-                multiply: reference["multiply"].as_i64(),
-                cap: reference["cap"]
-                    .as_array()
-                    .map(|_| (int(&reference["cap"][0]), int(&reference["cap"][1]))),
-                prevent: reference["prevent"] == true,
-                consumption: reference["remaining"]
-                    .as_u64()
-                    .filter(|remaining| *remaining > 0)
-                    .and_then(|_| reference["reference"]["effect"].as_u64()),
-            })
             .filter(|replacement| {
                 replacement.consumption.is_none_or(|effect| {
                     self.internal_prevention_remaining(effect)
