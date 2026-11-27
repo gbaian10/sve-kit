@@ -11,6 +11,7 @@ mod closing;
 mod construction;
 mod decision;
 mod evolution;
+mod hosted;
 mod main_actions;
 mod occurrences;
 mod opening;
@@ -29,6 +30,8 @@ pub use decision::{
 pub use evolution::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
 };
+pub use hosted::HostedGame;
+pub(super) use hosted::InputCache;
 pub(in crate::game) use main_actions::ActivationOption;
 pub use main_actions::{
     AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,

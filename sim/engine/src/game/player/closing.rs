@@ -146,11 +146,12 @@ impl Game {
         actor: Viewer,
         token: QuestionToken,
         answer: ClosingAnswer,
+        inputs: &super::InputCache,
     ) -> SubmissionKind {
         if self.player_fault.is_some() {
             return SubmissionKind::EngineFault;
         }
-        let input = self.input(actor);
+        let input = inputs.read(self, actor);
         let Input::Question(question) = input else {
             return if matches!(input, Input::EngineFault) {
                 SubmissionKind::EngineFault
@@ -194,7 +195,7 @@ impl Game {
             return SubmissionKind::EngineFault;
         }
         self.player_epoch = next;
-        self.advance_player_input();
+        self.advance_player_input_cached(inputs.enabled());
         if self.player_fault.is_some() {
             SubmissionKind::EngineFault
         } else {

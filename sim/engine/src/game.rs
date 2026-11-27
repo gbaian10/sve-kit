@@ -322,6 +322,8 @@ pub struct Game {
     #[serde(skip)]
     player_epoch: u64,
     #[serde(skip)]
+    player_inputs: player::InputCache,
+    #[serde(skip)]
     player_evolution: Option<Box<internal::EvolutionDeclaration>>,
     #[serde(skip)]
     player_events: player::events::Journal,
@@ -656,6 +658,7 @@ impl Game {
             player_fault: None,
             replay: replay::Coordinates::default(),
             player_epoch: 0,
+            player_inputs: player::InputCache::default(),
             player_evolution: None,
             player_events: player::events::Journal::default(),
             player_notices: player::notices::Notices::default(),

@@ -2,7 +2,7 @@ use super::super::super::*;
 use super::super::select::project_game;
 use crate::battle::tests::{board_fixture, board_fixtures, history_fixture, payment_fixtures};
 use crate::game::player::observation::DiceHistory;
-use crate::game::player::{Input, Question, QuestionShape, SubmissionKind, Viewer};
+use crate::game::player::{HostedGame, Input, Question, QuestionShape, SubmissionKind, Viewer};
 use crate::game::{Game, View};
 use crate::ir::lowering::ExpandedLowerer;
 use crate::ir::{
@@ -185,14 +185,18 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
             Viewer::P1
         };
         for choice in [wire::DiceChoice::Keep, wire::DiceChoice::Reroll] {
-            let mut game = board(actor, &program);
-            let native = question(&game, actor).unwrap();
+            let mut game = HostedGame::new(board(actor, &program));
+            let authority = game.game();
+            let native = question(authority, actor).unwrap();
             let (value, remaining) = dice(&native).unwrap();
             assert_eq!(remaining, Nat(1));
             assert_eq!(native.purpose, player::QuestionPurpose::ResolutionChoice);
-            let before = board_fixtures::exact_authority(&game);
+            let before = board_fixtures::exact_authority(authority);
+            let uncached = authority.clone();
+            let inputs = [actor, other].map(|viewer| uncached.input(viewer));
+            assert_eq!([actor, other].map(|viewer| authority.input(viewer)), inputs);
             let (usage, shape, binding) =
-                project_game(&game, actor, &QuestionId::new("number".into())).unwrap();
+                project_game(authority, actor, &QuestionId::new("number".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::DiceReroll);
             assert_eq!(
                 binding.question().processing.procedure,
@@ -215,17 +219,18 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
                 }
             );
             assert_eq!(
-                game.observe(actor).unwrap().history.dice,
+                authority.observe(actor).unwrap().history.dice,
                 Vec::<DiceHistory>::new()
             );
             assert_eq!(
-                game.observe(other).unwrap().history.dice,
+                authority.observe(other).unwrap().history.dice,
                 Vec::<DiceHistory>::new()
             );
-            assert!(matches!(game.input(other), Input::Waiting(waiting)
+            assert!(matches!(authority.input(other), Input::Waiting(waiting)
                 if waiting.actor == actor && waiting.dice == Some((value, remaining))));
             assert!(
-                game.battle_question(other, &QuestionId::new("dice".into()), references)
+                authority
+                    .battle_question(other, &QuestionId::new("dice".into()), references)
                     .unwrap()
                     .is_none()
             );
@@ -247,21 +252,21 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
                 )
                 .unwrap();
             assert_eq!(
-                game.submit_player(other, command.clone()).kind,
+                game.submit(other, command.clone()).kind,
                 SubmissionKind::Rejected
             );
-            assert_unchanged(&game, &before);
+            assert_unchanged(game.game(), &before);
             assert_eq!(
-                game.submit_player(actor, command.clone()).kind,
-                SubmissionKind::Applied
+                [actor, other].map(|viewer| game.game().input(viewer)),
+                inputs
             );
-            assert_final_die(&game, actor, choice, value);
-            let after = board_fixtures::exact_authority(&game);
-            assert_eq!(
-                game.submit_player(actor, command).kind,
-                SubmissionKind::Rejected
-            );
-            assert_unchanged(&game, &after);
+            let applied = game.submit(actor, command.clone());
+            assert_eq!(applied.kind, SubmissionKind::Applied);
+            assert_eq!(applied.input, game.game().clone().input(actor));
+            assert_final_die(game.game(), actor, choice, value);
+            let after = board_fixtures::exact_authority(game.game());
+            assert_eq!(game.submit(actor, command).kind, SubmissionKind::Rejected);
+            assert_unchanged(game.game(), &after);
         }
     }
 }

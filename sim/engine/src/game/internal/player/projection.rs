@@ -268,13 +268,6 @@ impl Game {
             _ => Err(invalid("inconsistent evolution selection question")),
         }
     }
-
-    pub(in crate::game) fn validate_player_decision_projection(&self) -> Result<()> {
-        if self.state.game["ended"] != true && self.player_decision().is_some() {
-            self.player_decision_shape()?;
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
