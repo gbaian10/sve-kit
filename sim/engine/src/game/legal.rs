@@ -55,33 +55,6 @@ pub(super) fn permutations(items: &[Value]) -> Vec<Vec<Value>> {
     out
 }
 
-pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
-    if candidate["choice"] == "decline"
-        && (decision.get("select").is_some() || decision.get("order").is_some())
-    {
-        return false;
-    }
-    if candidate["do"] == "resolve-choice"
-        && candidate["select"].as_array().is_some_and(Vec::is_empty)
-        && decision["choice"] == "decline"
-        && decision.get("select").is_none()
-        && decision.get("order").is_none()
-    {
-        let mut normalized = decision.clone();
-        normalized["select"] = json!([]);
-        return decision_matches(candidate, &normalized);
-    }
-    candidate.as_object().is_some_and(|map| {
-        map.iter().all(|(key, value)| {
-            if key == "select" && candidate["do"] == "resolve-choice" {
-                unordered_selection_matches(candidate, decision)
-            } else {
-                decision.get(key) == Some(value)
-            }
-        })
-    })
-}
-
 pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -> bool {
     let Some(selected) = decision["select"].as_array() else {
         return false;

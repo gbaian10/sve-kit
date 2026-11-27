@@ -11,6 +11,13 @@ use super::placement::Placement;
 use super::{Frame, Game, Object, int, list, string};
 use crate::{EngineFailure, Result, invalid};
 
+#[derive(Clone, Copy)]
+pub(super) enum RevealAccess {
+    ExistingLocation,
+    GrantLocation,
+    PrivateLookChoice,
+}
+
 pub(super) fn token_erasure_zone(kind: &str, destination: &str) -> bool {
     match kind {
         "イクイップメント・トークン" => destination != "equipment",
@@ -430,21 +437,24 @@ impl Game {
         ids: &[String],
         to: &str,
         frame: &Frame,
-        located: bool,
+        access: RevealAccess,
     ) -> Result<()> {
         let player_batch = self.player_event_mark();
         let group = self.group();
         for seat in ["P1", "P2"] {
             if to == "all" || seat == to {
-                self.learn_members(seat, ids, located)?;
+                self.learn_members(seat, ids, matches!(access, RevealAccess::GrantLocation))?;
             }
         }
         for id in ids {
-            self.emit(
+            let step = self.emit(
                 json!({"kind":"公開","object":id,"to":to,"source":frame.source}),
                 &frame.cause,
                 group,
             );
+            if matches!(access, RevealAccess::PrivateLookChoice) {
+                self.player_reveal_link_only(&step, &frame.controller);
+            }
         }
         self.seal_player_event_batch(player_batch);
         Ok(())

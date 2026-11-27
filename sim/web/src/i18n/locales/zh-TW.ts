@@ -1054,6 +1054,7 @@ const zhTW = {
       title: "卡片通知（{{count}}）",
       look: "你查看的卡片",
       temporary_reveal: "公開的卡片",
+      deck_top: "放到牌庫頂的卡片",
       empty: "這次沒有看到卡片。",
       dismiss: "關閉通知",
     },

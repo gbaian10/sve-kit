@@ -2,7 +2,7 @@
 //! retain physical references; only their viewer projections contain handle strings.
 
 use super::Game;
-use super::player::observation::{seat, viewer};
+use super::player::observation::{seat, viewer, zone_positions_visible};
 use super::player::{ObjectHandle, Viewer};
 use crate::random::Random;
 use crate::{Result, invalid};
@@ -166,7 +166,9 @@ impl Game {
             .iter()
             .filter(|id| self.state.objects.contains_key(id.as_str()))
             .map(|id| {
-                self.location_key(perspective, id)
+                located
+                    .then(|| self.location_key(perspective, id))
+                    .transpose()
                     .map(|key| (key, id.clone()))
             })
             .collect::<Result<Vec<_>>>()?;
@@ -238,7 +240,7 @@ impl Game {
     fn location_key(&self, perspective: Viewer, id: &str) -> Result<(String, Option<u64>, String)> {
         let object = self.object(id)?;
         let mut position = None;
-        if object.zone != "hand" || object.controller == seat(perspective) {
+        if zone_positions_visible(&object.zone, object.controller == seat(perspective)) {
             let mut offset = 0_u64;
             for item in self
                 .player(&object.controller)?
