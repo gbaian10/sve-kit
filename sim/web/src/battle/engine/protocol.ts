@@ -46,7 +46,18 @@ export interface BattleBuild {
   readonly options: MatchOptions
 }
 
-export type LoadErrorCode = "format" | "selection" | "identity" | "references" | "match" | "engine"
+export const LOAD_ERROR_CODES = [
+  "format",
+  "selection",
+  "identity",
+  "references",
+  "match",
+  "deck_format",
+  "deck_printing",
+  "deck_admission",
+  "engine",
+] as const
+export type LoadErrorCode = (typeof LOAD_ERROR_CODES)[number]
 
 /** Main thread → Worker, once; one transferred port per player seat. */
 export interface InitMessage {

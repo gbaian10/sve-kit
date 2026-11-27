@@ -291,6 +291,27 @@ describe("BattleHost", () => {
     }
   })
 
+  it("sends each deck failure stage only to its submitting seat", async () => {
+    for (const detail of [
+      "deck_format",
+      "deck_printing",
+      "selection",
+      "references",
+      "deck_admission",
+    ]) {
+      for (const submitter of ["p1", "p2"] as const) {
+        const ports = { p1: new FakePort(), p2: new FakePort() }
+        const other = submitter === "p1" ? "p2" : "p1"
+        const codes = submitter === "p1" ? [detail, "match"] : ["match", detail]
+        setUp(() => Promise.reject(new Error(JSON.stringify(codes))), ports)
+        ports[other].send({ kind: "baseline", request_id: "after-failed-open" })
+        await settle()
+        expect(ports[submitter].received).toEqual([{ kind: "load_error", code: detail }])
+        expect(ports[other].received).toEqual([{ kind: "load_error", code: "match" }])
+      }
+    }
+  })
+
   it("stops after an engine trap and tells every seat once", async () => {
     const p1 = new FakePort()
     const p2 = new FakePort()
