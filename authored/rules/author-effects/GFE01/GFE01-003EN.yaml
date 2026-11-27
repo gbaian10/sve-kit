@@ -1,0 +1,23 @@
+cards:
+  GFE01-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - fanfare:
+          define:
+            officers:
+              count:
+                kind: follower
+                other: true
+                trait: 兵士
+                who: self
+                zone: field
+          do:
+            - buff:
+                hp: officers
+                on: this
+                power: officers
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
