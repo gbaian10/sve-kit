@@ -1066,7 +1066,7 @@ impl Checker {
                 effect,
                 duration,
             } => {
-                if super::player_hand_limit::is_modifier(effect)
+                if super::player_rules::PlayerRule::from_effect(effect).is_some()
                     && *instruction_actor != (PlayerRef::Controller {})
                 {
                     return self.reject();

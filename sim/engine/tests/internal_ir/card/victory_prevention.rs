@@ -1,6 +1,10 @@
 use super::*;
+use crate::player_pipeline::{answer, question};
 use sve_engine::game::internal::InputDomain;
-use sve_engine::game::player::{Input, SubmissionKind, Viewer, events::EventKind};
+use sve_engine::game::player::{
+    AttackTarget, Command, DecisionShape, Input, MainActionAnswer, MainIntentKind, QuestionShape,
+    SubmissionKind, Viewer, events::EventKind,
+};
 
 fn tree() -> Value {
     let mut input = evolution_linked_movement::tree(&[
@@ -176,6 +180,56 @@ fn victory_prevention_rejects_conditional_nonfield_and_installed_player_permissi
         json!({"cost":{"pp":0},"do":[{"apply":{"on":"this","until":"turn","effect":{"cannot":{"what":"lose","who":"self"}}}}]}),
     )]);
     lowerer().lower(&input).unwrap_err();
+}
+
+#[test]
+fn direct_opponent_loss_can_resolve_from_printed_strike() {
+    let input = evolution_linked_movement::tree(&[(
+        "attack_time",
+        json!({"do":[{"lose":{"who":"opponents"}}]}),
+    )]);
+    let programs = lowerer().lower(&input).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"source","card":"unit-follower","state":{"entered_this_turn":false}}]);
+    let mut game = evolution_linked_movement::loaded(&initial, &programs["unit-follower"]);
+    game.advance_player_input();
+    let main = question(&game, Viewer::P1);
+    let QuestionShape::ActionWindow(actions) = main.shape else {
+        panic!("main action window");
+    };
+    let attack = actions
+        .intents
+        .iter()
+        .find(|intent| matches!(intent.kind, MainIntentKind::Attack { .. }))
+        .unwrap();
+    let command = Command::MainAction {
+        token: main.token,
+        intent: attack.id.clone(),
+        answer: MainActionAnswer::Attack(AttackTarget::Leader(Viewer::P2)),
+    };
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::Applied
+    );
+    if let Input::Question(current) = game.input(Viewer::P1)
+        && let QuestionShape::Decision(DecisionShape::Pending(choices)) = current.shape
+    {
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Pending(choices[0].handle)).kind,
+            SubmissionKind::Applied
+        );
+    }
+    assert!(matches!(
+        game.input(Viewer::P1),
+        Input::Finished {
+            winner: Some(Viewer::P1)
+        }
+    ));
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["game"]["by"], "1.2.4");
+    assert_eq!(state["P2"]["leader"]["life"], 20);
 }
 
 #[test]

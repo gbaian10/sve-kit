@@ -39,6 +39,7 @@ use crate::ir::events::{drive, equipment};
 use crate::ir::flip_cost;
 use crate::ir::hand_position;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice, revealed_choice};
+use crate::ir::player_rules::PlayerRule;
 use crate::ir::player_stages;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
@@ -47,7 +48,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
-use crate::ir::{NumericChange, play_restrictions, player_hand_limit};
+use crate::ir::{NumericChange, play_restrictions};
 use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
 use crate::ir::{
     advance_entry, effect_evolution, phase_restrictions, prevention, printed_keywords,
@@ -199,14 +200,21 @@ fn keyword_source_paths(
     }
     paths.insert(format!("{path}/instruction/source/origin"));
     paths.insert(format!("{path}/instruction/source/origin/keyword"));
-    if let Action::InstallEffect { effect, .. } = action
+    let nested = if let Action::InstallEffect { effect, .. } = action
         && (prevention::projection(effect).is_some_and(|shape| shape.source == origin)
-            || super::hand_limit::check(action, origin).is_ok())
+            || super::player_rules::check(action, origin).is_ok())
     {
-        let prefix = format!("{path}/instruction/action/effect/source/origin");
-        paths.insert(prefix.clone());
-        paths.insert(format!("{prefix}/keyword"));
-    }
+        "effect/source"
+    } else if let Action::GameResult { source, .. } = action
+        && source == origin
+    {
+        "source"
+    } else {
+        return;
+    };
+    let prefix = format!("{path}/instruction/action/{nested}/origin");
+    paths.insert(prefix.clone());
+    paths.insert(format!("{prefix}/keyword"));
 }
 
 #[expect(
@@ -617,9 +625,9 @@ fn check_action(
     super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
-    if matches!(action, Action::InstallEffect { effect, .. } if player_hand_limit::is_modifier(effect))
+    if matches!(action, Action::InstallEffect { effect, .. } if PlayerRule::from_effect(effect).is_some())
     {
-        return super::hand_limit::check(action, source);
+        return super::player_rules::check(action, source).map(|_| ());
     }
     if phase_restrictions::projection(action).is_some() {
         return Ok(());
@@ -1157,6 +1165,7 @@ fn supported(code: &str) -> bool {
             | "reference.object-generation"
             | "reference.selected"
             | "reference.snapshot"
+            | "rule.double-fanfare"
             | "rule.unlimited-hand"
             | "selector.difference"
             | "selector.extremum"
@@ -1382,6 +1391,7 @@ fn supported(code: &str) -> bool {
             | "shape.RemoveScope.AllAtTime"
             | "shape.RepeatBody.Program"
             | "shape.RideDriveOperation.GainDrive"
+            | "shape.RuleModifier.DoubleFanfare"
             | "shape.RuleModifier.UnlimitedHand"
             | "shape.ScheduleAnchor.NextTurn"
             | "shape.SelectionView.Current"

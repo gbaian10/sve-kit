@@ -323,24 +323,34 @@ impl Game {
             let position = self.entry_position(event.controller, &old.id)?;
             candidates.extend(self.delayed_entry_pending(&installed, &event, &header, position)?);
             for (holder, ability, controller) in matched {
-                let source = self.internal_card_source(holder, ability.node.id, controller)?;
-                let information = SourceInformation::current(self, source)?;
-                let mut pending = self.new_pending(
-                    holder,
-                    source,
-                    ability.clone(),
-                    information,
-                    header.clone(),
-                    None,
-                )?;
-                pending.source_position = position;
-                #[cfg(feature = "runner")]
-                retain_entry_cause(&mut pending, entered, &old.id);
-                pending.timing = Some(EventPayload::EnterField {
-                    event: event.clone(),
-                });
-                pending.capture_subject_information(self)?;
-                candidates.push(pending);
+                let doubled = matches!(
+                    ability.node.source.origin,
+                    AbilityOrigin::Keyword {
+                        keyword: KeywordId::Fanfare,
+                        ..
+                    }
+                ) && self.internal_fanfare_doubled(controller)?;
+                let occurrences: u8 = if doubled { 2 } else { 1 };
+                for _ in 0..occurrences {
+                    let source = self.internal_card_source(holder, ability.node.id, controller)?;
+                    let information = SourceInformation::current(self, source)?;
+                    let mut pending = self.new_pending(
+                        holder,
+                        source,
+                        ability.clone(),
+                        information,
+                        header.clone(),
+                        None,
+                    )?;
+                    pending.source_position = position;
+                    #[cfg(feature = "runner")]
+                    retain_entry_cause(&mut pending, entered, &old.id);
+                    pending.timing = Some(EventPayload::EnterField {
+                        event: event.clone(),
+                    });
+                    pending.capture_subject_information(self)?;
+                    candidates.push(pending);
+                }
             }
         }
         self.internal_admit_pending(candidates)

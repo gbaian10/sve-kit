@@ -106,6 +106,8 @@ struct Player {
     leader: Value,
     #[serde(default, skip_serializing_if = "core::ops::Not::not")]
     unlimited_hand: bool,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    double_fanfare: BTreeSet<i64>,
     pp: Value,
     ep: i64,
     ep_capacity: i64,
@@ -493,6 +495,7 @@ impl Game {
                 Player {
                     leader: entry["leader"].clone(),
                     unlimited_hand: false,
+                    double_fanfare: BTreeSet::new(),
                     pp: entry["pp"].clone(),
                     ep,
                     ep_capacity,
