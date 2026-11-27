@@ -867,6 +867,9 @@ impl Execution {
         objects: &Selector,
         property: NumericProperty,
     ) -> Result<i64> {
+        // Only a target picked from a cemetery lends its printed stats there (GFB01c-021EN).
+        let cemetery_pick = matches!(objects, Selector::Bound { reference }
+            if self.targets.get(&reference.key()).is_some_and(|wait| wait.chosen_from("cemetery")));
         super::aggregates::checked_sum(
             self.objects(game, objects)?.into_iter().map(|object| {
                 let id = self.object_id(object)?;
@@ -879,14 +882,18 @@ impl Execution {
                 if current.zone == "field" {
                     return super::aggregates::numeric_value(game, id, property);
                 }
-                if current.zone != "ex" {
-                    return Ok(0);
-                }
                 let field = if property == NumericProperty::Attack {
                     "power"
                 } else {
                     "hp"
                 };
+                // A cemetery follower carries no modifiers, so its printed stats are its stats.
+                if current.zone == "cemetery" && cemetery_pick {
+                    return super::cost::printed_cost(&game.face(id)?[field]);
+                }
+                if current.zone != "ex" {
+                    return Ok(0);
+                }
                 current.state[field]
                     .as_i64()
                     .ok_or_else(|| invalid("public follower stat"))

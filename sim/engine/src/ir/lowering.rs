@@ -1624,6 +1624,8 @@ struct BodyContext<'definitions> {
     ability_holders: BTreeSet<String>,
     /// Formal targets naming at most one field or EX object, whose stats a body may read.
     single_targets: BTreeSet<String>,
+    /// Single formal targets chosen from a cemetery, whose printed attack a later read may use.
+    cemetery_targets: BTreeSet<String>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
     resolution_scope: ScopeId,
@@ -1719,6 +1721,7 @@ impl<'definitions> BodyContext<'definitions> {
             target_roles: BTreeMap::new(),
             ability_holders: BTreeSet::new(),
             single_targets: BTreeSet::new(),
+            cemetery_targets: BTreeSet::new(),
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
             resolution_scope: scope,

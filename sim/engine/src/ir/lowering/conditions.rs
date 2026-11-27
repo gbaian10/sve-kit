@@ -1249,7 +1249,10 @@ impl BodyContext<'_> {
                     path,
                 ),
                 // 「前者の攻撃力」: the chosen object's attack when read, after earlier buffs.
-                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
+                ast::Observation::Binding(name)
+                    if self.single_targets.contains(name)
+                        || self.cemetery_targets.contains(name) =>
+                {
                     let reference = self
                         .targets
                         .get(name)

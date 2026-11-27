@@ -293,6 +293,13 @@ impl TargetWait {
         })
     }
 
+    /// Every candidate stood in this zone when the pick was made.
+    pub(in crate::game::internal) fn chosen_from(&self, zone: &str) -> bool {
+        self.characteristics
+            .iter()
+            .all(|(_, saved)| saved.zone == zone)
+    }
+
     /// Every candidate stood on a field or in an EX area when this public pick of one was made.
     pub(in crate::game::internal) fn public_board_single(&self) -> bool {
         self.decision.visibility == (Visibility::Public {})
