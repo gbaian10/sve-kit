@@ -1,5 +1,6 @@
 use super::*;
 
+use sve_battle_contract::observation::{Facing, Knowledge};
 use sve_engine::catalog::SelectedEffects;
 use sve_engine::game::internal::{InputDomain, InstructionOutcome};
 use sve_engine::game::player::Viewer;
@@ -195,6 +196,56 @@ fn assert_public_attachments(game: &Game) {
                 }),
                 "the material and its bearer must both be identifiable"
             );
+        }
+    }
+}
+
+#[test]
+fn limit_break_wire_marks_face_up_material_public_for_both_viewers() {
+    let fixture = board_fixture::fixture().unwrap();
+    let mut initial = setup_board(0);
+    // The initial position identifies both materials so facing is the only visibility difference.
+    initial["players"]["P1"]["zones"]["limit_break"] = json!([
+        {"id":"up","card":"unit-spell","face_up":true,"state":{"limit_break_of":"s"}},
+        {"id":"down","card":"unit-amulet","face_up":false,"state":{"limit_break_of":"s"}},
+    ]);
+    let game = Game::new(
+        Arc::clone(&fixture.catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "limit-break-wire",
+    )
+    .unwrap();
+
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let board = game
+            .battle_observation(viewer, &fixture.references)
+            .unwrap();
+        let members = &board.players[0].zones.limit_break.cards;
+        assert_eq!(
+            members.len(),
+            2,
+            "both materials have established identities"
+        );
+        for (printing, facing, knowledge) in [
+            ("printing-spell", Facing::Up, Knowledge::Public),
+            ("printing-amulet", Facing::Down, Knowledge::Private),
+        ] {
+            let member = members
+                .iter()
+                .find(|member| board.objects[&member.object].card.printing_id == printing)
+                .unwrap();
+            let material = &board.objects[&member.object];
+            assert_eq!(
+                material.facing, facing,
+                "the view shows the material's facing"
+            );
+            assert_eq!(
+                material.knowledge, knowledge,
+                "only face-up material is public"
+            );
+            assert_eq!(member.position, None, "the material area stays unordered");
         }
     }
 }
