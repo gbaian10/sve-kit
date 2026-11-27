@@ -421,43 +421,36 @@ it("refuses to run without its bindings", async () => {
   expect(upstream).not.toHaveBeenCalled()
 })
 
-it("leaves a row another lookup has just repaired", async () => {
+it("serves the row another lookup has just repaired instead of asking DeckLog", async () => {
   await db
     .prepare(
-      "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('jp', 'AB12C', 'N', NULL, '[]', 'x')",
+      "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('jp', 'AB12C', 'N', 'ナイトメア', '[]', 'x')",
     )
     .run()
-  // This lookup reads the unreadable row; before it removes it, another lookup puts a good one back.
-  const racing: Database = {
-    prepare: (query) => {
-      if (query.startsWith("DELETE"))
-        return {
-          bind: (...values) => ({
-            first: () => Promise.reject(new Error("unused")),
-            bind: () => {
-              throw new Error("unused")
-            },
-            run: async () => {
-              await db
-                .prepare(
-                  "UPDATE decklog_deck SET cards = ?1 WHERE region = 'jp' AND code = 'AB12C'",
-                )
-                .bind(storedCards)
-                .run()
-              return db
-                .prepare(query)
-                .bind(...values)
-                .run()
-            },
-          }),
-          first: () => Promise.reject(new Error("unused")),
-          run: () => Promise.reject(new Error("unused")),
-        }
-      return db.prepare(query)
+  // This lookup reads the unreadable row; right after, another lookup replaces it with a good one.
+  type Statement = ReturnType<Database["prepare"]>
+  let repaired = false
+  const repairAfterRead = (statement: Statement): Statement => ({
+    bind: (...values) => repairAfterRead(statement.bind(...values)),
+    first: async () => {
+      const row = await statement.first()
+      if (!repaired) {
+        repaired = true
+        await db
+          .prepare("UPDATE decklog_deck SET cards = ?1 WHERE region = 'jp' AND code = 'AB12C'")
+          .bind(storedCards)
+          .run()
+      }
+      return row
     },
-  }
-  upstream.mockResolvedValueOnce(Response.json(deckLogAnswer({ sub_list: [] })))
+    run: () => statement.run(),
+  })
+  const racing: Database = { prepare: (query) => repairAfterRead(db.prepare(query)) }
 
-  expect((await client(environment({ DECKLOG_DB: racing }))("jp/AB12C")).status).toBe(200)
+  const response = await client(environment({ DECKLOG_DB: racing }))("jp/AB12C")
+
+  expect(response.status).toBe(200)
+  expect(await response.json()).toEqual(deck)
+  expect(upstream).not.toHaveBeenCalled()
   expect(((await stored()) as Record<string, unknown>)["cards"]).toBe(storedCards)
 })

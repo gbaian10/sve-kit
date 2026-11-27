@@ -188,12 +188,14 @@ function readRow(
  * code is fetched once more and stored again; any D1 failure rejects.
  */
 async function readStored(db: Database, region: Region, code: string): Promise<DeckLogDeck | null> {
-  const row = await db
-    .prepare(
-      "SELECT format, class_name, cards FROM decklog_deck WHERE region = ?1 AND code = ?2 LIMIT 1",
-    )
-    .bind(region, code)
-    .first()
+  const select = () =>
+    db
+      .prepare(
+        "SELECT format, class_name, cards FROM decklog_deck WHERE region = ?1 AND code = ?2 LIMIT 1",
+      )
+      .bind(region, code)
+      .first()
+  const row = await select()
   if (row === null) return null
   // D1 rows are untyped; they are checked here and never leave this module unchecked.
   const record = row as Record<string, unknown>
@@ -201,12 +203,13 @@ async function readStored(db: Database, region: Region, code: string): Promise<D
   if (deck) return deck
   console.error("decklog: unreadable-row")
   // Only the row read here goes: another lookup may already have replaced it with a good one, which
-  // then stays (the insert after this lookup's fetch does nothing).
+  // is then read back and served.
   await db
     .prepare("DELETE FROM decklog_deck WHERE region = ?1 AND code = ?2 AND cards = ?3")
     .bind(region, code, typeof record["cards"] === "string" ? record["cards"] : null)
     .run()
-  return null
+  const again = await select()
+  return again === null ? null : (readRow(region, code, again as Record<string, unknown>) ?? null)
 }
 
 async function store(db: Database, deck: DeckLogDeck): Promise<void> {
