@@ -1,8 +1,9 @@
 use super::*;
 use std::sync::OnceLock;
 use sve_battle_contract::event::{EventBody, EventDelivery};
+use sve_battle_contract::observation::{Knowledge, RememberedCard};
 use sve_battle_contract::presentation::{Notice, NoticeKind};
-use sve_battle_contract::{CardRef, Nat as WireNat};
+use sve_battle_contract::{CardRef, Nat as WireNat, Seat};
 use sve_engine::{
     EngineFailure,
     battle::{BattleReferences, EventFeed, PrintingFaceIdentity, ReferenceInput},
@@ -346,7 +347,7 @@ fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
         let order = question(pick(&mut game, &choice, vec![chosen]));
         let revealed = deliver(&mut game, &mut feed);
 
-        assert_spine_look(&mut game, references, deck);
+        assert_spine_look(&mut game, references, deck, previously_revealed);
 
         let known = &revealed.0.players[0].zones.deck.cards;
         assert_eq!(known.len(), usize::from(previously_revealed));
@@ -355,6 +356,7 @@ fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
             assert_eq!(known_top.position, Some(WireNat::from(0_u32)));
         }
         assert_spine_notice(&revealed.2, NoticeKind::TemporaryReveal, None);
+        assert_spine_memory(&before.0.remembered, &revealed.0.remembered);
 
         let rest = ordered(&mut game, &order);
         assert!(matches!(rest, CardPlay::Awaiting(_)));
@@ -397,7 +399,12 @@ fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
     assert_eq!(check(&duplicate, 0, true), check(&duplicate, 1, true));
 }
 
-fn assert_spine_look(game: &mut Game, references: &BattleReferences, deck: &[&str]) {
+fn assert_spine_look(
+    game: &mut Game,
+    references: &BattleReferences,
+    deck: &[&str],
+    previously_revealed: bool,
+) {
     let notices = game.take_battle_notices(Viewer::P1, references).unwrap();
     let look = notices
         .iter()
@@ -421,7 +428,17 @@ fn assert_spine_look(game: &mut Game, references: &BattleReferences, deck: &[&st
             u64::try_from(offset).unwrap(),
             "the actor keeps the original offset"
         );
-        let card = &actor.objects[&member.object].card;
+        let object = &actor.objects[&member.object];
+        let knowledge = if offset == 0 && previously_revealed {
+            Knowledge::Public
+        } else {
+            Knowledge::Private
+        };
+        assert_eq!(
+            object.knowledge, knowledge,
+            "only the earlier top reveal marked a physical object public"
+        );
+        let card = &object.card;
         assert_eq!(
             card.printing_id, *number,
             "the actor keeps the original deck order"
@@ -431,6 +448,26 @@ fn assert_spine_look(game: &mut Game, references: &BattleReferences, deck: &[&st
             "the Look notice keeps that same order"
         );
     }
+}
+
+fn assert_spine_memory(before: &[RememberedCard], after: &[RememberedCard]) {
+    let shown = RememberedCard {
+        card: CardRef {
+            printing_id: "follower-a".into(),
+            face: WireNat::from(0_u32),
+        },
+        owner: Seat::P1,
+    };
+    let added = usize::from(!before.contains(&shown));
+    assert_eq!(
+        after.len(),
+        before.len() + added,
+        "only the revealed face enters memory"
+    );
+    assert!(
+        after.contains(&shown) && before.iter().all(|card| after.contains(card)),
+        "the reveal preserves all remembered faces"
+    );
 }
 
 fn assert_spine_disclosed(events: &EventDelivery, previously_revealed: bool) {
