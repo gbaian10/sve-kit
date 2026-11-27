@@ -86,13 +86,11 @@ pub(in crate::game::internal) fn entry_additional_payment(
                 .iter()
                 .zip(&step.characters)
                 .filter_map(|(subject, characters)| {
+                    // CR 10.6.2.5.2 counts the original action when a cost is replaced.
                     let from = execution.facts.iter().find_map(|fact| {
                         if let super::Fact::Movement(fact) = fact
                             && fact.movement.before == *subject
-                            && fact
-                                .movement
-                                .actual_to
-                                .is_some_and(|zone| zone.kind == ZoneKind::Cemetery)
+                            && fact.movement.requested_to.kind == ZoneKind::Cemetery
                         {
                             return Some(fact.from.kind);
                         }

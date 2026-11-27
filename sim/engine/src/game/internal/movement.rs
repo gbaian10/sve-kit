@@ -483,9 +483,16 @@ impl Game {
         &self,
         execution: &Execution,
         previous: &Object,
-        zone: &str,
+        requested_zone: &str,
+        method: MoveMethod,
         has_evolution: bool,
+        banish_replaced: bool,
     ) -> Result<Option<&'static str>> {
+        let zone = if banish_replaced {
+            "banish"
+        } else {
+            requested_zone
+        };
         let card_type = self.object_type(&previous.id)?;
         let resource_links = previous.state["links"].as_object().is_some_and(|links| {
             links.len() == 1 && (links.contains_key("出走") || links.contains_key("憑依"))
@@ -498,7 +505,12 @@ impl Game {
             || resource_links;
         if special {
             if execution.ability.is_none()
-                && !self.internal_additional_field_put_authorized(execution, previous, zone)?
+                && !(method == MoveMethod::Put
+                    && self.internal_additional_field_put_authorized(
+                        execution,
+                        previous,
+                        requested_zone,
+                    )?)
                 && !self.internal_exchange_field_put_authorized(
                     execution,
                     &previous.id,
@@ -1258,10 +1270,15 @@ impl Game {
             let stack_replaced = self.stack_replaces_departure(&id, zone)?;
             let banish_replaced =
                 !stack_replaced && self.internal_banish_replaces_move(&id, zone)?;
-            let actual_zone = if banish_replaced { "banish" } else { zone };
             let evolution = self.departing_evolution(&previous)?;
-            let followup =
-                self.departure_followup(execution, &previous, actual_zone, evolution.is_some())?;
+            let followup = self.departure_followup(
+                execution,
+                &previous,
+                zone,
+                method,
+                evolution.is_some(),
+                banish_replaced,
+            )?;
 
             plans.push(PlannedMove {
                 result_index: moves.len().saturating_sub(1),
