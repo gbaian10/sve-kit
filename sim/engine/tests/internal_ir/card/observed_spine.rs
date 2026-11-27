@@ -461,7 +461,7 @@ fn assert_spine_memory(before: &[RememberedCard], after: &[RememberedCard]) {
     let added = usize::from(!before.contains(&shown));
     assert_eq!(
         after.len(),
-        before.len() + added,
+        before.len().checked_add(added).unwrap(),
         "only the revealed face enters memory"
     );
     assert!(
