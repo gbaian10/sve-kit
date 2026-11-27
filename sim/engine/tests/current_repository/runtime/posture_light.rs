@@ -2,7 +2,7 @@ use super::*;
 
 fn board(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -125,7 +125,7 @@ fn lala_all_prints_super_evolve_with_zero_or_two_targets_then_pay_stack_for_assa
                 view["objects"][soil]["counters"]["スタックカウンター"],
                 2_u8
             );
-            let ability = selection_with_rules().current[form]
+            let ability = selection().current[form]
                 .program
                 .card()
                 .abilities[2]

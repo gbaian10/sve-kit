@@ -5,7 +5,7 @@ use super::*;
 fn r7b_lunaar_all_prints_evolve_place_a_low_cost_ward_follower_and_heal() {
     for number in ["BP13-092", "BP22-R15", "PR-416"] {
         assert!(
-            selection_with_rules().current.contains_key(number),
+            selection().current.contains_key(number),
             "Every JP printing must be admitted."
         );
         let mut initial = draw_position();
@@ -20,7 +20,7 @@ fn r7b_lunaar_all_prints_evolve_place_a_low_cost_ward_follower_and_heal() {
             {"id":"tail","card":"BP13-091"}
         ]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

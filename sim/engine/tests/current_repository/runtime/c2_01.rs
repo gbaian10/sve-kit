@@ -2,7 +2,7 @@
 use super::*;
 
 fn trial_game(initial: &Value) -> Game {
-    let selected = selection_with_rules().clone();
+    let selected = selection().clone();
     for card in ["CP03-016", "BP01-131", "SD03-005", "BP20-P38"] {
         assert!(
             selected.current.contains_key(card),

@@ -61,7 +61,7 @@ fn play(game: &mut Game, picks: &[&str]) {
 }
 
 fn activation_id(printing: &str) -> AbilityId {
-    selection_with_rules().current[printing]
+    selection().current[printing]
         .program
         .card()
         .abilities
@@ -143,7 +143,7 @@ fn earth_game(initial: &Value) -> Game {
     let selection = FIXTURE.get_or_init(|| {
         let (snapshot, keywords, mut input) = inputs().clone();
         for printing in EARTH_FORMS {
-            if !selection_with_rules().current.contains_key(printing) {
+            if !selection().current.contains_key(printing) {
                 // The supporting forms stay in the evolve deck and only their printed traits are read.
                 input["documents"].as_array_mut().unwrap().push(json!([
                     format!("{printing}.yaml"),

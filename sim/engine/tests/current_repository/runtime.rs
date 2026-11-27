@@ -952,10 +952,7 @@ fn enter_with_fanfare(game: &mut Game, card: &str) -> CardPlay {
 
 // Helpers shared verbatim by several runtime scenario files.
 fn ability(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities[index]
+    selection().current[card].program.card().abilities[index]
         .node
         .id
 }
@@ -994,7 +991,7 @@ fn activated(number: &str) -> AbilityId {
 }
 
 fn activation(number: &str) -> AbilityId {
-    selection_with_rules().current[number]
+    selection().current[number]
         .program
         .card()
         .abilities
@@ -1043,7 +1040,7 @@ fn advance_entry() -> Action {
 }
 
 fn aliases(representative: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let identity = &selected.current[representative].card_id;
     selected
         .current
@@ -1191,7 +1188,7 @@ fn declare(game: &mut Game, line: u64) -> CardPlay {
 }
 
 fn definition(card: &str, kind: AbilityKind, nth: usize) -> AbilityId {
-    selection_with_rules().current[card]
+    selection().current[card]
         .program
         .card()
         .abilities
@@ -1654,7 +1651,7 @@ fn printed_id(card: &str) -> AbilityId {
 }
 
 fn printings(number: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let identity = &selected.current[number].card_id;
     selected
         .current
@@ -1697,7 +1694,7 @@ fn rejects(game: &mut Game, question: &DecisionView, handles: Vec<u64>) {
 
 fn rules_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -1741,7 +1738,7 @@ fn search(domain: &SearchDomain) -> SearchAnswer {
 
 fn seeded(initial: &Value, seed: &str) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

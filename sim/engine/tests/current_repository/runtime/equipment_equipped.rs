@@ -8,7 +8,7 @@ fn all_shefi_printings_equip_ice_dragon_sword_and_resolve_its_own_trigger() {
     for printing in ["CP04-055", "CP04-SL13", "PCS01-022", "PR-511"] {
         let initial = shefi_position(printing, 7, false);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -51,7 +51,7 @@ fn initial_equipment_associations_do_not_create_an_equipped_event_for_any_printi
             json!([{"id":"sword","card":printing,"state":{"equipped_to":"shefi"}}]);
         initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -150,7 +150,7 @@ fn q2539_a_sword_without_a_legal_enemy_target_cannot_buff_its_host() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"shefi","card":"CP04-055"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -272,7 +272,7 @@ fn shefi_position(printing: &str, maximum: u8, title: bool) -> Value {
 
 fn actual(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

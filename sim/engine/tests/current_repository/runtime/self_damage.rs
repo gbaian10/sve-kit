@@ -135,7 +135,7 @@ fn aston_machan_race_buffs_then_self_damages_even_without_an_enemy_target() {
             initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
         }
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -193,7 +193,7 @@ fn admitted_self_damage_card_unblocks_meal_material_and_ep_payment_exam_scenario
     )
     .unwrap();
     let reports = run(
-        &mut TypedAdapter::new(selection_with_rules().clone()),
+        &mut TypedAdapter::new(selection().clone()),
         &[question],
         None,
         RunOptions {

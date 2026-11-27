@@ -134,7 +134,7 @@ fn jungle_counts_only_own_uma_cards_and_checks_each_damage_clause_separately() {
         initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
         let mut board = game(&initial);
         let before = board.projection(View::Referee).unwrap();
-        let ability = selection_with_rules().current["BP22-R24"]
+        let ability = selection().current["BP22-R24"]
             .program
             .card()
             .abilities

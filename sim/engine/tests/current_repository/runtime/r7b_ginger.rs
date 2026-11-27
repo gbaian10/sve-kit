@@ -27,8 +27,8 @@ fn pending_ginger(board: &mut Game, number: &str) {
 #[test]
 fn r7b_ginger_all_prints_discount_from_own_banish_create_and_play_the_complete_token() {
     for number in ["BP18-042", "BP18-SL12", "PCS02-002"] {
-        assert!(selection_with_rules().current.contains_key(number));
-        assert!(selection_with_rules().current.contains_key("BP18-T04"));
+        assert!(selection().current.contains_key(number));
+        assert!(selection().current.contains_key("BP18-T04"));
         let mut initial = draw_position();
         initial["players"]["P1"]["leader"]["class"] = json!("ウィッチ");
         initial["players"]["P2"]["leader"]["class"] = json!("エルフ");
@@ -48,7 +48,7 @@ fn r7b_ginger_all_prints_discount_from_own_banish_create_and_play_the_complete_t
             {"id":"enemy","card":"BP01-002","state":{"power":9_u8,"hp":6_u8,"max_hp":9_u8,"damage":3_u8}}
         ]);
         let mut board = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

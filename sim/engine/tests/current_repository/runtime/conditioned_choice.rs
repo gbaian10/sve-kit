@@ -12,7 +12,7 @@ fn nerusha_whole_card_passes_the_combo_zero_two_and_three_shared_exam() {
     )
     .unwrap();
     let reports = run(
-        &mut TypedAdapter::new(selection_with_rules().clone()),
+        &mut TypedAdapter::new(selection().clone()),
         &[question],
         None,
         RunOptions {

@@ -39,7 +39,7 @@ fn every_shared_scenario_passes_on_the_typed_entry_or_is_listed() {
         "entries without a reason: {unpinned:?}"
     );
     let reports = run(
-        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
+        &mut TypedAdapter::new(repository::selection().clone()),
         &questions,
         None,
         RunOptions {
@@ -70,7 +70,7 @@ fn a_reverted_play_leaves_no_referee_events_behind() {
         .unwrap();
     let fixture = &expand(&question.id, &question.scenarios).unwrap()[name];
     let decisions = &question.scenarios[name].decisions;
-    let selected = repository::selection_with_rules();
+    let selected = repository::selection();
     let mut retried = TypedAdapter::new(selected.clone());
     retried.load(fixture).unwrap();
     let refused = retried.decide(&decisions[0]).unwrap();
@@ -107,7 +107,7 @@ fn a_named_pending_event_is_never_accepted_unchecked() {
         .find(|question| question.id == "card-BP19-080")
         .unwrap();
     let fixture = &expand(&question.id, &question.scenarios).unwrap()[0];
-    let mut adapter = TypedAdapter::new(repository::selection_with_rules().clone());
+    let mut adapter = TypedAdapter::new(repository::selection().clone());
     adapter.load(fixture).unwrap();
     // Only c1 enters, so a1 line 1 has a single pending occurrence: the one for c1.
     let mut enter = question.scenarios[0].decisions[0].clone();

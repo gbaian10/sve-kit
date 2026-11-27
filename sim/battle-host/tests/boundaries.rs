@@ -95,7 +95,7 @@ fn typed_start_game() -> (Game, BattleReferences) {
     };
     let setup = json!({"pregame":true,"players":{"P1":player("P1"),"P2":player("P2")}});
     let mut game = Game::from_selected_effects(
-        repository::selection_with_rules().clone(),
+        repository::selection().clone(),
         &setup,
         &Value::Null,
         &json!({"first_chooser":"P1"}),

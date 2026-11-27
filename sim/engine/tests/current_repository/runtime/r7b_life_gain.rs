@@ -55,9 +55,9 @@ fn play_guidance(board: &mut Game, token: &str, enemy_present: bool) {
 fn r7b_verdilia_all_prints_evolve_and_super_evolve_into_the_complete_guidance_sequence() {
     for (base, evolved) in [("BP21-091", "BP21-092"), ("BP21-SL21", "BP21-SL22")] {
         for (super_evolution, enemy_present) in [(false, true), (true, true), (true, false)] {
-            assert!(selection_with_rules().current.contains_key(evolved));
-            assert!(selection_with_rules().current.contains_key("BP21-T09"));
-            assert!(selection_with_rules().current.contains_key("BP21-P69"));
+            assert!(selection().current.contains_key(evolved));
+            assert!(selection().current.contains_key("BP21-T09"));
+            assert!(selection().current.contains_key("BP21-P69"));
             let mut initial = draw_position();
             initial["turn"]["elapsed_turns"]["P1"] = json!(7_u8);
             initial["players"]["P1"]["leader"]["class"] = json!("ビショップ");
@@ -77,7 +77,7 @@ fn r7b_verdilia_all_prints_evolve_and_super_evolve_into_the_complete_guidance_se
                 initial["players"]["P2"]["zones"]["field"] = json!([]);
             }
             let mut board = Game::from_selected_effects(
-                selection_with_rules().clone(),
+                selection().clone(),
                 &initial,
                 &Value::Null,
                 &Value::Null,

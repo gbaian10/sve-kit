@@ -6,7 +6,7 @@ const PLAYER: PlayerId = PlayerId { seat: 1 };
 
 fn loaded(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -150,7 +150,7 @@ fn bp22_002_draws_and_discards_nothing_for_zero_fairies() {
 }
 
 fn activation() -> AbilityId {
-    selection_with_rules().current["BP22-002"]
+    selection().current["BP22-002"]
         .program
         .card()
         .abilities

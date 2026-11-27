@@ -24,7 +24,7 @@ pub(super) fn position(base: &str, form: &str, stats: u8) -> Value {
 
 pub(super) fn drive_game(initial: &Value, facts: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         facts,
         &Value::Null,

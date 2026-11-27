@@ -83,7 +83,7 @@ fn evolve(game: &mut Game) -> CardPlay {
 fn summoner_evolves_and_chooses_different_classes_from_only_the_looked_low_cost_followers() {
     for count in [0_usize, 1, 2] {
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &position(),
             &Value::Null,
             &Value::Null,
@@ -182,7 +182,7 @@ fn summoner_handles_one_class_empty_deck_and_field_capacity_without_exposing_rem
                 .push(json!({"id":format!("old{n}"),"card":"BP01-042"}));
         }
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -249,7 +249,7 @@ fn summoner_exposes_four_class_groups_without_limiting_the_supported_class_count
         {"id":"royal2","card":"BP01-034"}
     ]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

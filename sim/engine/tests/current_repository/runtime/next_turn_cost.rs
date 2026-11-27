@@ -56,7 +56,7 @@ fn bp15_058_whole_card_installs_awakened_tax_for_the_next_opponent_turn() {
         ]);
     }
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

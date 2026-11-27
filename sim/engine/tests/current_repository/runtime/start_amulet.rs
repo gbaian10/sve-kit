@@ -39,7 +39,7 @@ fn vanguard_opening(amulet: &str, random: &Value) -> Game {
             "deck_list":filler("P2"),"evolve_deck_list":[]}
     }});
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &position,
         &Value::Null,
         random,
@@ -83,6 +83,44 @@ fn every_start_amulet_printing_is_offered_at_a_vanguard_opening() {
 }
 
 #[test]
+fn mulligan_matches_a_complete_order_with_input_metadata() {
+    let mut game = vanguard_opening(START_AMULETS[0], &Value::Null);
+    game.internal_rule_action(&json!({"do":"choose-start-amulet","object":"amulet"}))
+        .unwrap();
+    game.internal_rule_action(&json!({"do":"choose-first","first":"P1"}))
+        .unwrap();
+
+    let hand = game.projection(View::Referee).unwrap()["P1"]["hand"]
+        .as_array()
+        .unwrap()
+        .clone();
+    assert_eq!(hand.len(), 4);
+    let incomplete_order = hand.iter().take(3).cloned().collect::<Vec<_>>();
+
+    let invalid = game
+        .internal_rule_action(&json!({
+            "do":"mulligan",
+            "redo":true,
+            "order":incomplete_order,
+            "by":"P1",
+            "at":"pregame"
+        }))
+        .unwrap();
+    assert_ne!(invalid.outcome, "resolved");
+
+    let accepted = game
+        .internal_rule_action(&json!({
+            "do":"mulligan",
+            "redo":true,
+            "order":hand.into_iter().rev().collect::<Vec<_>>(),
+            "by":"P1",
+            "at":"pregame"
+        }))
+        .unwrap();
+    assert_eq!(accepted.outcome, "resolved");
+}
+
+#[test]
 fn start_amulet_shuffle_fault_rolls_back_placement_and_closes_input() {
     let mut game = vanguard_opening(
         "CP03-021",
@@ -123,14 +161,14 @@ fn csd03_start_amulets_sacrifice_themselves_to_buff_only_a_vanguard_follower() {
             {"id":"plain","card":"BP01-037"}
         ]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
             "start-amulet-act",
         )
         .unwrap();
-        let ability = selection_with_rules().current[card]
+        let ability = selection().current[card]
             .program
             .card()
             .abilities

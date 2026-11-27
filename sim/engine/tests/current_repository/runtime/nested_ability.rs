@@ -5,7 +5,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn real_game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -34,7 +34,7 @@ fn settle(game: &mut Game) {
     }
 }
 fn activate(game: &mut Game, holder: &str, number: &str) -> CardPlay {
-    let definition = selection_with_rules().current[number]
+    let definition = selection().current[number]
         .program
         .card()
         .abilities
@@ -123,7 +123,7 @@ fn jiemon_all_printings_pay_the_inner_gold_coins_and_keep_its_choice_order_disco
                 {"id":"rest3","card":"BP01-171"},{"id":"tail","card":"BP01-171"}
             ]);
             let mut game = Game::from_selected_effects(
-                selection_with_rules().clone(),
+                selection().clone(),
                 &initial,
                 &Value::Null,
                 &Value::Null,
@@ -354,7 +354,7 @@ fn ameth_all_printings_replay_akari_after_her_normal_limit_and_share_the_inferre
             settle(&mut game);
             assert!(game.internal_pending_choice().unwrap().is_none());
             let ready = game.projection(View::Referee).unwrap();
-            let definition = selection_with_rules().current["CP04-083"]
+            let definition = selection().current["CP04-083"]
                 .program
                 .card()
                 .abilities

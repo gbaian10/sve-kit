@@ -21,7 +21,7 @@ fn initial() -> Value {
     }})
 }
 fn guide_ability(number: &str) -> AbilityId {
-    selection_with_rules().current[number]
+    selection().current[number]
         .program
         .card()
         .abilities
@@ -34,7 +34,7 @@ fn guide_ability(number: &str) -> AbilityId {
 
 fn board(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

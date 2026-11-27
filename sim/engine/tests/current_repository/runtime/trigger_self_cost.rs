@@ -164,7 +164,7 @@ fn bp01_162_checks_life_before_optional_act_sacrifice_and_keeps_fanfare() {
         initial["players"]["P2"]["zones"]["field"] =
             json!([{"id":"enemy","card":"BP01-037","state":{"hp":10_i64,"max_hp":10_i64}}]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,

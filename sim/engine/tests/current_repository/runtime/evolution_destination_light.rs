@@ -3,7 +3,7 @@ use sve_engine::game::internal::SearchAnswer;
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -123,7 +123,7 @@ fn triggers(game: &mut Game) {
 }
 
 fn evolve(game: &mut Game, base: &str, definition: usize, face: u8, pp: u8) -> String {
-    let entry = &selection_with_rules().current[base]
+    let entry = &selection().current[base]
         .program
         .card()
         .abilities[definition];

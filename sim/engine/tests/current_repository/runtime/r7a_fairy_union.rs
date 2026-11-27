@@ -16,7 +16,7 @@ fn evolve(base: &str, form: &str, super_evolution: bool) -> (Game, Value) {
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"opponent","card":"BP01-T03"}]);
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

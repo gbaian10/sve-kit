@@ -20,7 +20,7 @@ fn position(base: &str, form: &str) -> Value {
 
 fn evolve(initial: &Value, super_evolve: bool) -> Game {
     let mut board = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,

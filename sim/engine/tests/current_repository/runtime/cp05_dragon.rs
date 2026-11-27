@@ -5,7 +5,7 @@ const ACTOR: PlayerId = PlayerId { seat: 1 };
 
 fn game_for(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -252,7 +252,7 @@ fn cp05_055_observes_both_release_stages_at_their_own_check_timing() {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     let mut game = game_for(&initial);
-    let id = selection_with_rules().current["CP05-T15"]
+    let id = selection().current["CP05-T15"]
         .program
         .card()
         .abilities

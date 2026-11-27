@@ -19,7 +19,7 @@ fn daiwa_searches_discounts_the_first_uma_spell_and_grants_storm_on_the_third_sp
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-037","state":{"hp":20_u8}}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

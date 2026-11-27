@@ -3,7 +3,7 @@ use sve_engine::game::internal::DecisionView;
 
 fn position(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -127,7 +127,7 @@ fn evolved_devouring_serpent_all_printings_stand_then_act_and_reveal_for_damage(
                 .unwrap()
                 .contains(&json!("疾走"))
         );
-        let definition = selection_with_rules().current[number]
+        let definition = selection().current[number]
             .program
             .card()
             .abilities

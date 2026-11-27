@@ -32,7 +32,7 @@ mod rule_fixtures;
 fn architecture_replay_checks_use_the_typed_entry() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let fixtures = load_fixtures(&root.join("tests/architecture-fixtures")).unwrap();
-    let selected = repository::selection_with_rules();
+    let selected = repository::selection();
     let mut factory =
         || -> Box<dyn ReplayEngine> { Box::new(TypedReplayAdapter::new(selected.clone())) };
     let reports = check_replay(&mut factory, &fixtures, &ArchOptions::default());
@@ -47,7 +47,7 @@ fn architecture_replay_checks_use_the_typed_entry() {
 fn architecture_assist_checks_use_the_typed_entry() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let fixtures = load_fixtures(&root.join("tests/architecture-fixtures")).unwrap();
-    let selected = repository::selection_with_rules();
+    let selected = repository::selection();
     let mut assist =
         || -> Box<dyn AssistEngine> { Box::new(TypedAssistAdapter::new(selected.clone())) };
     let mut replay =
@@ -63,7 +63,7 @@ fn architecture_assist_checks_use_the_typed_entry() {
 #[test]
 fn manual_operations_cannot_attach_private_object_identities_to_a_divergence() {
     let fixture = position(&json!({}), Value::Null);
-    let mut assist = TypedAssistAdapter::new(repository::selection_with_rules().clone());
+    let mut assist = TypedAssistAdapter::new(repository::selection().clone());
     assist.start(&fixture, "assist-privacy", "privacy").unwrap();
     assist
         .act(&json!({
@@ -134,7 +134,7 @@ fn strict_replay_keeps_the_start_amulet_private_and_continues_the_pending_mullig
         }
     });
     let mut replay = Replay::start(
-        repository::selection_with_rules().clone(),
+        repository::selection().clone(),
         decks,
         Viewer::P2,
         "replay-opening".into(),
@@ -227,7 +227,7 @@ fn position(zones: &Value, random: Value) -> Fixture {
 }
 
 fn adapter() -> TypedReplayAdapter {
-    TypedReplayAdapter::new(repository::selection_with_rules().clone())
+    TypedReplayAdapter::new(repository::selection().clone())
 }
 
 #[test]

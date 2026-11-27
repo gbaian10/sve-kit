@@ -113,11 +113,13 @@ impl Game {
     }
 
     pub(super) fn opening_decision(&mut self, decision: &Value) -> Result<bool> {
-        if !self
-            .opening_choices()?
-            .iter()
-            .any(|choice| super::legal::decision_matches(choice, decision))
-        {
+        if !self.opening_choices()?.iter().any(|choice| {
+            choice.as_object().is_some_and(|fields| {
+                fields
+                    .iter()
+                    .all(|(key, value)| decision.get(key) == Some(value))
+            })
+        }) {
             return Ok(false);
         }
         self.apply_opening_decision(decision)?;

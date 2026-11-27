@@ -13,7 +13,7 @@ fn initial() -> Value {
 
 fn loaded(value: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         value,
         &Value::Null,
         &Value::Null,

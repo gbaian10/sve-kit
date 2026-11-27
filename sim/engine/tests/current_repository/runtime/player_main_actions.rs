@@ -15,7 +15,7 @@ fn question(game: &Game, actor: Viewer) -> Question {
 
 fn main_intents(initial: &Value) -> Vec<MainIntentKind> {
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -146,7 +146,7 @@ fn bp13_002_plays_from_ex_for_three_pp_and_resolves_its_fanfare() {
     initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"secca","card":"BP13-002"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"resolve","card":"BP13-008"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -225,7 +225,7 @@ fn player_main_actions_require_a_standing_source_for_death_declaration() {
         initial["players"]["P1"]["zones"]["field"] =
             json!([{"id":"amulet","card":"BP01-150","state":{"acted":acted}}]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -256,7 +256,7 @@ fn player_main_actions_require_enough_spell_targets() {
                 json!([{"id":"enemy","card":"BP01-037"}]);
         }
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -288,7 +288,7 @@ fn player_main_actions_require_a_mode_with_legal_targets() {
             initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
         }
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -323,7 +323,7 @@ fn player_main_actions_require_payable_activation_materials() {
         }
         initial["players"]["P1"]["zones"]["field"] = json!(field);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -354,7 +354,7 @@ fn player_main_actions_require_enough_stack_for_great_magician() {
             {"id":"soil","card":"BP01-075","state":{"counters":{"stack_counter":stack}}}
         ]);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -388,7 +388,7 @@ fn player_main_actions_require_a_target_within_affordable_x() {
     for (pp, can_pay) in [(1_u8, false), (2, true)] {
         initial["players"]["P1"]["pp"]["current"] = json!(pp);
         let mut game = Game::from_selected_effects(
-            selection_with_rules().clone(),
+            selection().clone(),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -452,7 +452,7 @@ fn player_main_actions_real_card_attack_and_turn_end_need_only_question_capabili
         json!([{"id":"private-authority-attacker","card":"BP01-037"}]);
     initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"next-draw","card":"BP01-037"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -541,7 +541,7 @@ fn basic_policy_real_attack_uses_observation_and_question_without_authority_read
     initial["players"]["P1"]["zones"]["field"] =
         json!([{"id":"authority-attacker","card":"BP01-037"}]);
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

@@ -13,7 +13,7 @@ fn bp05_061_removes_ward_and_blocks_attacks_through_the_next_opposing_turn() {
         ]);
     }
     let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

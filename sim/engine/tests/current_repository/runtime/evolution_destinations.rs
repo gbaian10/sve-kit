@@ -9,7 +9,7 @@ fn position(base: &str, form: &str) -> Value {
 }
 
 fn evolve(game: &mut Game, definition: usize, face: u8, pp: u8, base: &str) -> Step {
-    let entry = &selection_with_rules().current[base]
+    let entry = &selection().current[base]
         .program
         .card()
         .abilities[definition];

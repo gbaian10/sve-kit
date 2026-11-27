@@ -3,7 +3,7 @@ use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
 fn aliases(number: &str) -> Vec<String> {
-    let selected = selection_with_rules();
+    let selected = selection();
     let identity = &selected.current[number].card_id;
     selected
         .current
@@ -25,7 +25,7 @@ fn position(card: &str) -> Value {
 }
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
-        selection_with_rules().clone(),
+        selection().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -106,7 +106,7 @@ fn trigger(game: &mut Game, card: &str, mode: u64) -> Activation {
 fn evolve(game: &mut Game, pp: u8) {
     let state = game.projection(View::Referee).unwrap();
     let base = state["objects"]["source"]["card"].as_str().unwrap();
-    let definition = selection_with_rules().current[base]
+    let definition = selection().current[base]
         .program
         .card()
         .abilities
