@@ -297,6 +297,7 @@ impl Checker {
             Expr::Live(read) => match read.as_ref() {
                 BoolRead::Awakening { player }
                 | BoolRead::Crimson { player }
+                | BoolRead::LeaderClass { player, .. }
                 | BoolRead::OwnTurn { player } => self.player(player),
                 BoolRead::CardPlayOrigin {
                     execution: ExecutionRef::Current {},

@@ -569,6 +569,7 @@ variants!(BoolRead {
     CardPlayTarget { execution: ExecutionRef, decision: DecisionId, selection: Binding<Selector>, predicate: PlayTargetMatch } => ["read.card-play-target"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],
+    LeaderClass { player: PlayerRef, class: ClassId } => ["read.leader-class"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
     LimitBreak { object: ObjectOperand, state: LimitBreakState } => ["read.limit-break"],
     HistoryExists { query: HistoryQuery } => ["read.history.exists"],

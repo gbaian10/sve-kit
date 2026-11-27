@@ -185,6 +185,7 @@ BP17-008 的矢所定義的 X 均讀離場前數量。Q1990 確認離場會移�
 | A.cond.my-turn | `{my_turn:true}` | 嚴格 true | CP03-003 |
 | A.cond.opp-turn | `{opp_turn:true}` | 嚴格 true | 合成：已登錄條件 |
 | A.cond.construction | `{construction:Title}` | Title 是非空作品標題；主詞為自己，不收 who／param | CP02-T01、CSD03a-016 |
+| A.cond.leader-class | `{leader_class:Class}` | Class 是非空職業名；讀能力控制者自己的主戰者，不收 who | GFB01a-005EN、GFB01b-023EN |
 | A.cond.from-payload | `{ref:Ref,from:Zone}` | 單一區域；不收 of／zone 別名 | 下兩列共用 |
 | A.cond.entered-from | `{entered_from:A.cond.from-payload}` | 入場來源 | BP03-090、BP07-038；非手牌以 not 包裹，BP03-028；監看其他入場用 it，進化 usable_if 的 this 讀目前場上世代，BP19-082 |
 | A.cond.played-from | `{played_from:A.cond.from-payload}` | 打出來源 | BP10-062 |
