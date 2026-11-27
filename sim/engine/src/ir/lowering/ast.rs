@@ -2369,7 +2369,7 @@ pub(super) enum Number {
         history_sum: HistorySum,
     },
     LeaderLife {
-        leader_life: LeaderSide,
+        leader_life: Side,
     },
     Plus {
         plus: Box<[Self; 2]>,
