@@ -22,7 +22,14 @@ function deckOf(body: unknown, region: Region, code: string): DeckLogDeck | unde
   const main = readDeckLogCards(record["main"])
   const evolve = readDeckLogCards(record["evolve"])
   const text = (value: unknown) => (typeof value === "string" ? value : null)
-  if (record["region"] !== region || record["code"] !== code || !leader || !main || !evolve)
+  if (
+    record["region"] !== region ||
+    record["code"] !== code ||
+    !leader ||
+    !main ||
+    main.length === 0 ||
+    !evolve
+  )
     return undefined
   return {
     region,

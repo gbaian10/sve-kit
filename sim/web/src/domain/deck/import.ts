@@ -107,37 +107,45 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
 
 // DeckLog's class and title choices (`deck_param2`) as listed by both editions on 2026-11-27; the
 // English "Class" (no class picked) and anything new are left to inference from the cards.
-const DECKLOG_BASES: Readonly<Record<string, DeckBasis>> = {
-  エルフ: { kind: "class", classCode: "elf" },
-  ロイヤル: { kind: "class", classCode: "royal" },
-  ウィッチ: { kind: "class", classCode: "witch" },
-  ドラゴン: { kind: "class", classCode: "dragon" },
-  ナイトメア: { kind: "class", classCode: "nightmare" },
-  ビショップ: { kind: "class", classCode: "bishop" },
-  Forestcraft: { kind: "class", classCode: "elf" },
-  Swordcraft: { kind: "class", classCode: "royal" },
-  Runecraft: { kind: "class", classCode: "witch" },
-  Dragoncraft: { kind: "class", classCode: "dragon" },
-  Abysscraft: { kind: "class", classCode: "nightmare" },
-  Havencraft: { kind: "class", classCode: "bishop" },
-  "ウマ娘 プリティーダービー": { kind: "title", titleCode: "umamusume_pretty_derby" },
-  "Umamusume: Pretty Derby": { kind: "title", titleCode: "umamusume_pretty_derby" },
-  "アイドルマスター シンデレラガールズ": {
-    kind: "title",
-    titleCode: "idolmaster_cinderella_girls",
-  },
-  "THE IDOLM@STER CINDERELLA GIRLS": { kind: "title", titleCode: "idolmaster_cinderella_girls" },
-  "カードファイト!! ヴァンガード": { kind: "title", titleCode: "cardfight_vanguard" },
-  "Cardfight!! Vanguard": { kind: "title", titleCode: "cardfight_vanguard" },
-  "プリンセスコネクト！Re:Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
-  "Princess Connect! Re: Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
-  グランブルーファンタジー: { kind: "title", titleCode: "granblue_fantasy" },
-}
+const DECKLOG_BASES: ReadonlyMap<string, DeckBasis> = new Map(
+  Object.entries({
+    エルフ: { kind: "class", classCode: "elf" },
+    ロイヤル: { kind: "class", classCode: "royal" },
+    ウィッチ: { kind: "class", classCode: "witch" },
+    ドラゴン: { kind: "class", classCode: "dragon" },
+    ナイトメア: { kind: "class", classCode: "nightmare" },
+    ビショップ: { kind: "class", classCode: "bishop" },
+    Forestcraft: { kind: "class", classCode: "elf" },
+    Swordcraft: { kind: "class", classCode: "royal" },
+    Runecraft: { kind: "class", classCode: "witch" },
+    Dragoncraft: { kind: "class", classCode: "dragon" },
+    Abysscraft: { kind: "class", classCode: "nightmare" },
+    Havencraft: { kind: "class", classCode: "bishop" },
+    "ウマ娘 プリティーダービー": { kind: "title", titleCode: "umamusume_pretty_derby" },
+    "Umamusume: Pretty Derby": { kind: "title", titleCode: "umamusume_pretty_derby" },
+    "アイドルマスター シンデレラガールズ": {
+      kind: "title",
+      titleCode: "idolmaster_cinderella_girls",
+    },
+    "THE IDOLM@STER CINDERELLA GIRLS": { kind: "title", titleCode: "idolmaster_cinderella_girls" },
+    "カードファイト!! ヴァンガード": { kind: "title", titleCode: "cardfight_vanguard" },
+    "Cardfight!! Vanguard": { kind: "title", titleCode: "cardfight_vanguard" },
+    "プリンセスコネクト！Re:Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
+    "Princess Connect! Re: Dive": { kind: "title", titleCode: "princess_connect_re_dive" },
+    グランブルーファンタジー: { kind: "title", titleCode: "granblue_fantasy" },
+  } satisfies Record<string, DeckBasis>),
+)
 
 // DeckLog's construction codes (docs/sim/deck-construction.md §6); anything else is left Standard.
-const DECKLOG_FORMATS: Readonly<Record<Region, Readonly<Record<string, DeckFormat>>>> = {
-  jp: { N: "standard", X: "crossover" },
-  en: { N: "standard", G: "gloryfinder" },
+const DECKLOG_FORMATS: Readonly<Record<Region, ReadonlyMap<string, DeckFormat>>> = {
+  jp: new Map([
+    ["N", "standard"],
+    ["X", "crossover"],
+  ]),
+  en: new Map([
+    ["N", "standard"],
+    ["G", "gloryfinder"],
+  ]),
 }
 
 /**
@@ -162,8 +170,8 @@ export function readDeckLogImport(deck: DeckLogDeck, lookup: ImportLookup): Impo
   return assemble(references, lookup, {
     name: undefined,
     edition: deck.region,
-    format: deck.format === null ? undefined : DECKLOG_FORMATS[deck.region][deck.format],
-    basis: deck.className === null ? undefined : DECKLOG_BASES[deck.className],
+    format: deck.format === null ? undefined : DECKLOG_FORMATS[deck.region].get(deck.format),
+    basis: deck.className === null ? undefined : DECKLOG_BASES.get(deck.className),
     unrecognized: [],
   })
 }

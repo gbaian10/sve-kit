@@ -123,6 +123,9 @@ function reduce(region: Region, code: string, value: unknown): Lookup {
 
 async function fetchDeckLog(region: Region, code: string): Promise<Lookup | "unavailable"> {
   const origin = DECKLOG_ORIGINS[region]
+  // Every request DeckLog gets from us is logged before it is sent, so a deployment can show that
+  // stored codes are not asked again (docs/deployment/cloudflare-development.md §12).
+  console.warn(`decklog: upstream ${region}`)
   let response: Response
   try {
     // eslint-disable-next-line no-restricted-globals -- DeckLog allows no cross-origin reads; the Worker asks for the browser.
@@ -147,9 +150,6 @@ async function fetchDeckLog(region: Region, code: string): Promise<Lookup | "una
     await response.body?.cancel().catch(() => undefined)
     return "unavailable"
   }
-  // Every request DeckLog gets from us is logged, so a deployment can show stored codes are not
-  // asked again (docs/deployment/cloudflare-development.md §12).
-  console.warn(`decklog: upstream ${region}`)
   try {
     return reduce(region, code, await readJsonBody(response.body, MAX_UPSTREAM_BYTES))
   } catch (error) {
@@ -196,12 +196,15 @@ async function readStored(db: Database, region: Region, code: string): Promise<D
     .first()
   if (row === null) return null
   // D1 rows are untyped; they are checked here and never leave this module unchecked.
-  const deck = readRow(region, code, row as Record<string, unknown>)
+  const record = row as Record<string, unknown>
+  const deck = readRow(region, code, record)
   if (deck) return deck
   console.error("decklog: unreadable-row")
+  // Only the row read here goes: another lookup may already have replaced it with a good one, which
+  // then stays (the insert after this lookup's fetch does nothing).
   await db
-    .prepare("DELETE FROM decklog_deck WHERE region = ?1 AND code = ?2")
-    .bind(region, code)
+    .prepare("DELETE FROM decklog_deck WHERE region = ?1 AND code = ?2 AND cards = ?3")
+    .bind(region, code, typeof record["cards"] === "string" ? record["cards"] : null)
     .run()
   return null
 }

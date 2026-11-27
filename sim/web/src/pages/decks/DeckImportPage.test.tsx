@@ -362,6 +362,15 @@ describe("DeckImportPage", () => {
       )
       const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
       expect(within(preview).getByText("來源：DeckLog BBBB2")).toBeInTheDocument()
+
+      // A lookup left before it settles is dropped; coming back to its code allows asking again.
+      fireEvent.change(box, { target: { value: "https://decklog.bushiroad.com/view/CCCC3" } })
+      await user.click(screen.getByRole("button", { name: "從 DeckLog 讀取" }))
+      expect(screen.getByRole("status")).toHaveTextContent("正在查詢 DeckLog…")
+      fireEvent.change(box, { target: { value: "https://decklog.bushiroad.com/view/DDDD4" } })
+      fireEvent.change(box, { target: { value: "https://decklog.bushiroad.com/view/CCCC3" } })
+      expect(screen.getByRole("button", { name: "從 DeckLog 讀取" })).toBeEnabled()
+      expect(screen.getByRole("status")).toHaveTextContent("")
     } finally {
       routeFixtureFetch(undefined)
     }

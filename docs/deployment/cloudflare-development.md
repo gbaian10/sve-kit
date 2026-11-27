@@ -442,7 +442,8 @@ API 與前端、R2 讀取共用 Worker、網域與第 4 節的 Access，不另�
   讀得到但內容讀不回來的列（理論上不會發生）會刪掉並重查一次。
   同一個代碼同時有兩個未命中時，兩者都會問 DeckLog，先寫入的那一列保留（`ON CONFLICT DO NOTHING`）。
   寫入失敗時照常回傳牌組，但帶 `no-store`，下次匯入會再查一次並寫入。
-- Workers Logs 以 `decklog:` 開頭：每次真的向 DeckLog 發出請求記一筆 `decklog: upstream jp`／`en`（`console.log`），
+- Workers Logs 以 `decklog:` 開頭：每次向 DeckLog 發出請求之前記一筆 `decklog: upstream jp`／`en`（`console.warn`，
+  不論之後成功或失敗），
   錯誤記 `decklog: <錯誤碼>`、`decklog: store-write`、`decklog: unreadable-row`（`console.error`）。
 
 ### 維護者建立與綁定
@@ -463,11 +464,11 @@ Agent 不建立遠端資源；以下由維護者在 `sim/web` 執行。
    bun x wrangler d1 migrations apply DECKLOG_DB --remote --config wrangler.dev.jsonc
    ```
 
-4. 照第 5 節部署後，登入開發站，在 `/decks/import` 貼一個主戰者、主牌組、進化牌組都有的 DeckLog 網址，
+4. 照第 5 節部署後，登入開發站，在 `/decks/import` 貼一個 D1 還沒存過、主戰者、主牌組、進化牌組都有的 DeckLog 網址，
    按「從 DeckLog 讀取」，確認預覽與對不到的卡號。Workers Logs 應有一筆 `decklog: upstream`。
    用 `bun x wrangler d1 execute DECKLOG_DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
-   確認已存。再查同一個代碼前，先在瀏覽器開發者工具勾選停用快取（或用無痕視窗），否則瀏覽器會直接用一年快取、
-   不會進 Worker；這次 Workers Logs 應有該路徑的請求，但不會多出 `decklog: upstream`。
+   確認已存。接著在瀏覽器開發者工具勾選停用快取（或改用無痕視窗，否則瀏覽器會直接用一年快取、不會進 Worker），
+   重新載入匯入頁，貼同一個網址再讀一次：Workers Logs 應有這次請求的路徑，但不會多出 `decklog: upstream`。
    正式環境另建資料庫與 Rate Limiting namespace，不共用開發的。
 
 ### 本機試用

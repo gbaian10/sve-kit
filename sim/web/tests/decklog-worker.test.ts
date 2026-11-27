@@ -359,7 +359,11 @@ it("keeps the first stored row when two lookups of a code miss at once", async (
         answers.push(resolve)
       }),
   )
+  // The second lookup starts once the first is waiting on DeckLog, so both have missed D1.
   const first = client()("jp/AB12C")
+  await vi.waitFor(() => {
+    expect(answers).toHaveLength(1)
+  })
   const second = client()("jp/AB12C")
   await vi.waitFor(() => {
     expect(answers).toHaveLength(2)
@@ -387,16 +391,13 @@ it("never asks DeckLog while D1 cannot be read, and does not let the browser kee
   expect(upstream).not.toHaveBeenCalled()
 
   // Reads work, writes fail: the deck is answered but not cached, so a later import stores it.
-  const readOnly: Database = {
-    prepare: (query) =>
-      query.startsWith("INSERT")
-        ? {
-            bind: () => readOnly.prepare(query),
-            first: () => Promise.reject(new Error("D1 down")),
-            run: () => Promise.reject(new Error("D1 down")),
-          }
-        : db.prepare(query),
-  }
+  type Statement = ReturnType<Database["prepare"]>
+  const failingWrites = (statement: Statement): Statement => ({
+    bind: (...values) => failingWrites(statement.bind(...values)),
+    first: () => statement.first(),
+    run: () => Promise.reject(new Error("D1 down")),
+  })
+  const readOnly: Database = { prepare: (query) => failingWrites(db.prepare(query)) }
   upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
   const unsaved = await client(environment({ DECKLOG_DB: readOnly }))("jp/AB12C")
   expect(unsaved.status).toBe(200)
@@ -418,4 +419,45 @@ it("refuses to run without its bindings", async () => {
   expect(failing.status).toBe(500)
   expect(await failing.json()).toEqual({ error: "server-error" })
   expect(upstream).not.toHaveBeenCalled()
+})
+
+it("leaves a row another lookup has just repaired", async () => {
+  await db
+    .prepare(
+      "INSERT INTO decklog_deck (region, code, format, class_name, cards, fetched_at) VALUES ('jp', 'AB12C', 'N', NULL, '[]', 'x')",
+    )
+    .run()
+  // This lookup reads the unreadable row; before it removes it, another lookup puts a good one back.
+  const racing: Database = {
+    prepare: (query) => {
+      if (query.startsWith("DELETE"))
+        return {
+          bind: (...values) => ({
+            first: () => Promise.reject(new Error("unused")),
+            bind: () => {
+              throw new Error("unused")
+            },
+            run: async () => {
+              await db
+                .prepare(
+                  "UPDATE decklog_deck SET cards = ?1 WHERE region = 'jp' AND code = 'AB12C'",
+                )
+                .bind(storedCards)
+                .run()
+              return db
+                .prepare(query)
+                .bind(...values)
+                .run()
+            },
+          }),
+          first: () => Promise.reject(new Error("unused")),
+          run: () => Promise.reject(new Error("unused")),
+        }
+      return db.prepare(query)
+    },
+  }
+  upstream.mockResolvedValueOnce(Response.json(deckLogAnswer({ sub_list: [] })))
+
+  expect((await client(environment({ DECKLOG_DB: racing }))("jp/AB12C")).status).toBe(200)
+  expect(((await stored()) as Record<string, unknown>)["cards"]).toBe(storedCards)
 })

@@ -88,6 +88,8 @@ export function DeckImportPage() {
     () => () => {
       pending.current?.abort()
       pending.current = null
+      // The aborted lookup never settles, so coming back to its code must not find it still loading.
+      setLookup((previous) => (previous?.result === "loading" ? null : previous))
     },
     [deckLogKey],
   )
