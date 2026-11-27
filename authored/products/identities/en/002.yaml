@@ -1,0 +1,31 @@
+format: 1
+kind: product_identity_shard
+records:
+  - kind: product_identity
+    filing_key: en
+    data:
+      product_id: en-bp21-bp22
+      region: en
+      match:
+        kind: product_link
+        product_url: https://en.shadowverse-evolve.com/products/bp2122/
+        expansion_code: BP21-BP22
+    evidence:
+      - batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:d65c29d0c98d023af895eaa21766d25b306d2ec0c4c9100dac184d41b5cfd019
+        locator: '{"product_block_ordinal":0}'
+        role: product_identity_match
+  - kind: product_identity
+    filing_key: en
+    data:
+      product_id: en-gfe02
+      region: en
+      match:
+        kind: expansion_link
+        search_url: https://en.shadowverse-evolve.com/cards/searchresults?expansion=GFE02
+        expansion_code: GFE02
+    evidence:
+      - batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:e0f39574048dc18dad4e2bb52dd6b2f113aa6aa5a558bd76f53b60b0a9fda0cc
+        locator: '{"product_block_ordinal":0}'
+        role: product_identity_match
