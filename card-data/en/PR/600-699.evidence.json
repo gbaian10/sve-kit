@@ -1,0 +1,145 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "PR",
+  "range": "600-699",
+  "shared": {
+    "recipes": {
+      "recipes-d84f931f5b7e8a50": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "cd5cf30b4ba38720a709dfe02791f58a0f82abeb"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-5bc33160d094c1f2": [
+        {
+          "ordinal": 0,
+          "name": "Promo Cards",
+          "date_raw": null,
+          "href_raw": [
+            "/cards/searchresults?expansion=PR"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=PR"
+          ],
+          "matches": [
+            {
+              "kind": "expansion_link",
+              "search_url": "https://en.shadowverse-evolve.com/cards/searchresults?expansion=PR",
+              "expansion_code": "PR"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-acd8bd9545d2adfc": [
+        {
+          "stable_source_key": "Q2536",
+          "official_number": "Q2536",
+          "locator": "qa-block:0",
+          "published_on": "2026-11-06",
+          "date_raw": "Nov. 6, 2026"
+        }
+      ]
+    },
+    "related": {
+      "related-398c3a8b047d7552": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=PR-599EN"
+        }
+      ],
+      "related-52e8e1ab8dacf744": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CP01-085EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:5acca740baeb9f6510ba4da893fee5162b826a0f633575146490682e068f9e8e": {
+      "recipe": "recipes-d84f931f5b7e8a50",
+      "raw": {
+        "raw_sha256": "sha256:a4123bf13a0b9147dcac7322af1b51e0eadf4de2c9fcc77963ca0ba3705b9eb7",
+        "raw_bytes": 38455,
+        "first_receipt_id": "sha256:c011c6b26ff2473a6e50f1c5bf6db7bbc1b358749f24c43264c3648c62bae411",
+        "descriptor_sha256": "sha256:dd427e28b8e8fb7e962b07cb2541a8a77ad08259ebbbcad8a3f7d68ae1070227",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:98d4d9176fe538fe7f482a2416e131c4fec81558fda6d8d1d1e6890924efb79a"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5bc33160d094c1f2",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-52e8e1ab8dacf744",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:5365bcc4464bf435d64a636aa52de6a5a6c222fc6a0d39b2f0a109afa5af6e6a"
+    },
+    "src:v1:8271cd28ce14354b6daf6ea0726838888cf5869294aad07f6eb8afb71518dedb": {
+      "recipe": "recipes-d84f931f5b7e8a50",
+      "raw": {
+        "raw_sha256": "sha256:e4228e86fd0124d632d7926a82634ac8c3665fe1308c8aae73eef7d71da3eec8",
+        "raw_bytes": 38461,
+        "first_receipt_id": "sha256:8f5f6a61962790aca9467ae75ef998eaea84072860d9e1e1bc42e3532f73a3e6",
+        "descriptor_sha256": "sha256:e2c86d34aa4b7208e35bee5392276902d32b88850a161f88715c61a6c450954e",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:14319e1f29b8ba73fb74cd156c289f098f9ccd0c1984d31a388efe61749ca727"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-5bc33160d094c1f2",
+        "qa": "qa-acd8bd9545d2adfc",
+        "related": "related-398c3a8b047d7552",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:ed92f8e90ce82a7746e02844c2a945bd55ccbc033ec8f8eb58db32f0d7626a10"
+    }
+  }
+}

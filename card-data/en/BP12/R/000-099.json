@@ -1,0 +1,231 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP12",
+  "range": "R/000-099",
+  "products": {
+    "products-7baa80be21635bcb": [
+      {
+        "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+        "date": "Nov. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP21-BP22",
+          "https://en.shadowverse-evolve.com/products/bp2122/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP12-R071EN",
+      "documents": {
+        "documents-8eef78e3e5cf64aa": {
+          "region": "en",
+          "record": {
+            "number": "BP12-R071EN",
+            "faces": [
+              {
+                "name": "Gremory, Death Teller",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Demon"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "Ward.\n{icon_fanfare|[fanfare]} Bury the top 2 cards of your deck.\n{icon_act|[act]} {icon_cost01|[cost01]}: Summon this from your cemetery. Give it \"{icon_lastword|[lastwords]} Banish this.\" Activate only if there are at least 10 cards in your cemetery and no cards on your field named Gremory, Death Teller.",
+                "sections": [],
+                "raw_text": "Ward.\n{icon_fanfare|[fanfare]} Bury the top 2 cards of your deck.\n{icon_act|[act]} {icon_cost01|[cost01]}: Summon this from your cemetery. Give it \"{icon_lastword|[lastwords]} Banish this.\" Activate only if there are at least 10 cards in your cemetery and no cards on your field named Gremory, Death Teller.",
+                "speech": null,
+                "illustrator": "Nijihara",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP12-R071EN.png",
+                "trait_raw": "Demon",
+                "traits": [
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1637 (Nov. 14, 2025)",
+                "question": "If I have exactly 10 cards in my cemetery including this follower, can I play its activated ability?",
+                "answer": "Yes, you can. The 10-card requirement is met at the time you play the ability."
+              },
+              {
+                "title": "Q1636 (Nov. 14, 2025)",
+                "question": "Can I only play this follower's activated ability while it's in my cemetery?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5c5d5c5aa9cb948f4630923fd384ddae91c0837b9eb88792c5d9342629fc3e38",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP12-R071EN",
+            "fetched_at": "2026-11-27T13:32:49.758641Z"
+          },
+          "document_ref": "documents-8eef78e3e5cf64aa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-R086EN",
+      "documents": {
+        "documents-97e542cbb45aefb6": {
+          "region": "en",
+          "record": {
+            "number": "BP12-R086EN",
+            "faces": [
+              {
+                "name": "Rola, Inferno Dragoon",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Machina / Faith / Eidolon"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Put a Repair Mode token into your EX area. If this was put onto the field by an ability, evolve it.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost02|[cost02]}: Evolve this.\n{icon_fanfare|[fanfare]} Put a Repair Mode token into your EX area. If this was put onto the field by an ability, evolve it.",
+                "speech": "{icon_neutral|[neutral]}{icon_cost01|[cost01]} Repair Mode (Spell - Machina) | {icon_quick|[quick]} Give your leader {icon_hp|[defense]}+1.",
+                "illustrator": "Nadare",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP12-R086EN.png",
+                "trait_raw": "Machina / Faith / Eidolon",
+                "traits": [
+                  "Machina",
+                  "Faith",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1650 (Nov. 14, 2025)",
+                "question": "Do I evolve this follower with its Fanfare ability if it is put onto the field by an ability during an opponent's turn?",
+                "answer": "Yes, you do."
+              },
+              {
+                "title": "Q1649 (Nov. 14, 2025)",
+                "question": "If I evolve this follower with its Fanfare ability, can I evolve another follower using its evolve ability in the same turn?",
+                "answer": "Yes. Although you can only activate one evolve ability per turn, other abilities that evolve followers do not count towards this limit."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP12-R087EN|Rola, Inferno Dragoon}",
+                "href": "/cards/?cardno=BP12-R087EN"
+              },
+              {
+                "label": "{BP17-T18EN|Repair Mode}",
+                "href": "/cards/?cardno=BP17-T18EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:efae3a93d5b4b5dcb4c50c5e8c204b459cbea1174aec3a8bc6a72959ba183801",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP12-R086EN",
+            "fetched_at": "2026-11-27T13:32:58.297121Z"
+          },
+          "document_ref": "documents-97e542cbb45aefb6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP12-R087EN",
+      "documents": {
+        "documents-d1d0838edba1dfa4": {
+          "region": "en",
+          "record": {
+            "number": "BP12-R087EN",
+            "faces": [
+              {
+                "name": "Rola, Inferno Dragoon",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Machina / Faith / Eidolon"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "On Evolve - Choose 1. (1) Select an enemy follower on the field and deal it damage equal to the number of Machina followers on your field. (2) Give this Storm.",
+                "sections": [],
+                "raw_text": "On Evolve - Choose 1. (1) Select an enemy follower on the field and deal it damage equal to the number of Machina followers on your field. (2) Give this Storm.",
+                "speech": null,
+                "illustrator": "Nadare",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP12-R087EN.png",
+                "trait_raw": "Machina / Faith / Eidolon",
+                "traits": [
+                  "Machina",
+                  "Faith",
+                  "Eidolon"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1651 (Nov. 14, 2025)",
+                "question": "If I can't select an enemy follower on the field, can I still choose option 1 of this follower's On Evolve ability and have nothing happen?",
+                "answer": "No. If you can't select an enemy follower, you would be required to choose option 2."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP12-R086EN|Rola, Inferno Dragoon}",
+                "href": "/cards/?cardno=BP12-R086EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dc9a6d73e11b25267ac2f523eaffe400e91942c65cff311c4ecbb15a981089c3",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP12-R087EN",
+            "fetched_at": "2026-11-27T13:33:00.921521Z"
+          },
+          "document_ref": "documents-d1d0838edba1dfa4"
+        }
+      ]
+    }
+  ]
+}

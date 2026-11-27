@@ -1,0 +1,611 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP13",
+  "range": "R/000-099",
+  "products": {
+    "products-7baa80be21635bcb": [
+      {
+        "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+        "date": "Nov. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP21-BP22",
+          "https://en.shadowverse-evolve.com/products/bp2122/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP13-R001EN",
+      "documents": {
+        "documents-37717248f2475aa0": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R001EN",
+            "faces": [
+              {
+                "name": "Sekka, Fatebound Fox",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Hunter / Beast"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_fanfare|[fanfare]} Look at the top 3 cards of your deck. You may reveal a {icon_elf|[forestcraft]} card that costs 2 or less from among them and add it to your hand. Put the rest on the bottom of your deck in any order. If you revealed a card, discard a card.\n{icon_act|[act]} {icon_cost03|[cost03]}, banish this and 2 other cards from your cemetery: You may summon a Sekka, Ninefold Blaze from your evolve deck.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Look at the top 3 cards of your deck. You may reveal a {icon_elf|[forestcraft]} card that costs 2 or less from among them and add it to your hand. Put the rest on the bottom of your deck in any order. If you revealed a card, discard a card.\n{icon_act|[act]} {icon_cost03|[cost03]}, banish this and 2 other cards from your cemetery: You may summon a Sekka, Ninefold Blaze from your evolve deck.",
+                "speech": null,
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R001EN.png",
+                "trait_raw": "Wasteland / Hunter / Beast",
+                "traits": [
+                  "Wasteland",
+                  "Hunter",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1670 (Nov. 14, 2025)",
+                "question": "Can I only play this follower's activated ability when it's in my cemetery?",
+                "answer": "Yes, that's correct."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R002EN|Sekka, Ninefold Blaze}",
+                "href": "/cards/?cardno=BP13-R002EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:25a4d278152aa3af5a9afa564b5e95a815042e3bb82916ba90ac56af16ec969f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R001EN",
+            "fetched_at": "2026-11-27T13:32:15.839007Z"
+          },
+          "document_ref": "documents-37717248f2475aa0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R002EN",
+      "documents": {
+        "documents-9084e76c633a56f4": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R002EN",
+            "faces": [
+              {
+                "name": "Sekka, Ninefold Blaze",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Advanced",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Hunter / Beast"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "3",
+                  "power": "3"
+                },
+                "text": "{icon_fanfare|[fanfare]} Choose 1. (1) Search your deck for a Resolve of the Nine-Tailed Fox, reveal it, add it to your hand, then shuffle. (2) Select a Resolve of the Nine-Tailed Fox in your cemetery and add it to your hand.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Choose 1. (1) Search your deck for a Resolve of the Nine-Tailed Fox, reveal it, add it to your hand, then shuffle. (2) Select a Resolve of the Nine-Tailed Fox in your cemetery and add it to your hand.",
+                "speech": null,
+                "illustrator": "Onineko",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R002EN.png",
+                "trait_raw": "Wasteland / Hunter / Beast",
+                "traits": [
+                  "Wasteland",
+                  "Hunter",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1673 (Nov. 14, 2025)",
+                "question": "When playing Biofabrication, can I select a faceup advanced follower in my evolve deck?",
+                "answer": "No, you can't. Advanced followers are not evolved followers."
+              },
+              {
+                "title": "Q1672 (Nov. 14, 2025)",
+                "question": "When playing Rimewind, can I select an enemy advanced follower?",
+                "answer": "Yes, you can. Advanced followers are also considered \"unevolved\" followers."
+              },
+              {
+                "title": "Q1671 (Nov. 14, 2025)",
+                "question": "If I can't select a Resolve of the Nine-Tailed Fox in my cemetery, can I still pick option 2 and have nothing happen?",
+                "answer": "No. If you can't select a Resolve of the Nine-Tailed Fox in your cemetery, you would be required to choose option 1."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-008EN|Resolve of the Nine-Tailed Fox}",
+                "href": "/cards/?cardno=BP13-008EN"
+              },
+              {
+                "label": "{BP13-R001EN|Sekka, Fatebound Fox}",
+                "href": "/cards/?cardno=BP13-R001EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d1f4619c38b25fef8571e784aab81d5853ed098906b924854bd940ed0b6492ef",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R002EN",
+            "fetched_at": "2026-11-27T13:32:18.589817Z"
+          },
+          "document_ref": "documents-9084e76c633a56f4"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R036EN",
+      "documents": {
+        "documents-5f4a064176365fb0": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R036EN",
+            "faces": [
+              {
+                "name": "Anne, Mysterian Imperatrix",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Runecraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Mage / Academic / Princess / Cutthroat"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "{icon_fanfare|[fanfare]} Discard an Academic card: Draw a card. If there are at least 5 Academic cards in your cemetery, put an Anne's Summoning token into your EX area.\n{icon_act|[act]} {icon_stand|[engage]}: You may play a Rending Blast from your evolve deck. Activate only if there are at least 15 Academic cards in your cemetery.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Discard an Academic card: Draw a card. If there are at least 5 Academic cards in your cemetery, put an Anne's Summoning token into your EX area.\n{icon_act|[act]} {icon_stand|[engage]}: You may play a Rending Blast from your evolve deck. Activate only if there are at least 15 Academic cards in your cemetery.",
+                "speech": null,
+                "illustrator": "Ponzu",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R036EN.png",
+                "trait_raw": "Mage / Academic / Princess / Cutthroat",
+                "traits": [
+                  "Mage",
+                  "Academic",
+                  "Princess",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1693 (Nov. 14, 2025)",
+                "question": "If I have 2 remaining play points or fewer when I play Anne, Mysterian Imperatrix's activated ability, can I still play a Rending Blast from my evolve deck?",
+                "answer": "No. You must still pay the Rending Blast's cost to play it."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-039EN|Rending Blast}",
+                "href": "/cards/?cardno=BP13-039EN"
+              },
+              {
+                "label": "{BP21-T11EN|Anne's Summoning}",
+                "href": "/cards/?cardno=BP21-T11EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c1fba774c86a64f88e906517ceb02dc90aff22ce0c3bfd8d37a2e8ba110b34fe",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R036EN",
+            "fetched_at": "2026-11-27T13:32:32.558363Z"
+          },
+          "document_ref": "documents-5f4a064176365fb0"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R054EN",
+      "documents": {
+        "documents-c64156c8427781f1": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R054EN",
+            "faces": [
+              {
+                "name": "Drache, Fiery Dragonlord",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Dragonewt / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "3",
+                  "power": "4"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this.\nRush.\n{icon_fanfare|[fanfare]} The next Draconic Duelist card you play this turn costs 3 less.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost04|[cost04]}: Evolve this.\nRush.\n{icon_fanfare|[fanfare]} The next Draconic Duelist card you play this turn costs 3 less.",
+                "speech": null,
+                "illustrator": "Manabi Okada",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R054EN.png",
+                "trait_raw": "Wasteland / Dragonewt / Draconic Duelist",
+                "traits": [
+                  "Wasteland",
+                  "Dragonewt",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R055EN|Drache, Fiery Dragonlord}",
+                "href": "/cards/?cardno=BP13-R055EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f91d070abcb35fdbe1d53c8459a5a3e59af457bdbce2b21341ee2ef8829eebc",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R054EN",
+            "fetched_at": "2026-11-27T13:32:35.524476Z"
+          },
+          "document_ref": "documents-c64156c8427781f1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R055EN",
+      "documents": {
+        "documents-79504f6eacbd13e6": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R055EN",
+            "faces": [
+              {
+                "name": "Drache, Fiery Dragonlord",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Wasteland / Dragonewt / Draconic Duelist"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "6"
+                },
+                "text": "Assail.\nOn Evolve - Select a Draconic Duelist follower in your cemetery that costs X or less and summon it. X equals this follower's attack.",
+                "sections": [],
+                "raw_text": "Assail.\nOn Evolve - Select a Draconic Duelist follower in your cemetery that costs X or less and summon it. X equals this follower's attack.",
+                "speech": null,
+                "illustrator": "Manabi Okada",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R055EN.png",
+                "trait_raw": "Wasteland / Dragonewt / Draconic Duelist",
+                "traits": [
+                  "Wasteland",
+                  "Dragonewt",
+                  "Draconic Duelist"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R054EN|Drache, Fiery Dragonlord}",
+                "href": "/cards/?cardno=BP13-R054EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2f6453a0872f2db370be8996327128ccd55b675ea7070dff513c438cdf2ac72f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R055EN",
+            "fetched_at": "2026-11-27T13:32:38.318206Z"
+          },
+          "document_ref": "documents-79504f6eacbd13e6"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R088EN",
+      "documents": {
+        "documents-8499d50177a3e91f": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R088EN",
+            "faces": [
+              {
+                "name": "Jeanne, Despair's Maiden",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Zealot / Cutthroat"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost05|[cost05]}: Evolve this.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}-2: Select an enemy follower on the field that costs 2 or less and destroy it.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost05|[cost05]}: Evolve this.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}-2: Select an enemy follower on the field that costs 2 or less and destroy it.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R088EN.png",
+                "trait_raw": "Zealot / Cutthroat",
+                "traits": [
+                  "Zealot",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R089EN|Jeanne, Despair's Maiden}",
+                "href": "/cards/?cardno=BP13-R089EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cef2aaf8080a8f4e8d2a2b0d33f39abd567dd06fe839c8f321678fbfa84ed7d4",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R088EN",
+            "fetched_at": "2026-11-27T13:33:03.451922Z"
+          },
+          "document_ref": "documents-8499d50177a3e91f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R089EN",
+      "documents": {
+        "documents-bd6b6e71c49b0271": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R089EN",
+            "faces": [
+              {
+                "name": "Jeanne, Despair's Maiden",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Zealot / Cutthroat"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "6"
+                },
+                "text": "On Evolve - Deal 3 damage to each enemy leader and enemy follower on the field. Give your leader {icon_hp|[defense]}+3.",
+                "sections": [],
+                "raw_text": "On Evolve - Deal 3 damage to each enemy leader and enemy follower on the field. Give your leader {icon_hp|[defense]}+3.",
+                "speech": null,
+                "illustrator": "Soji Hisakata",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R089EN.png",
+                "trait_raw": "Zealot / Cutthroat",
+                "traits": [
+                  "Zealot",
+                  "Cutthroat"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R088EN|Jeanne, Despair's Maiden}",
+                "href": "/cards/?cardno=BP13-R088EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6a0ab5020b5a4797bd51e896d9b74d08ec74bf7c8ff57da7585a8da9f17bc917",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R089EN",
+            "fetched_at": "2026-11-27T13:33:05.971250Z"
+          },
+          "document_ref": "documents-bd6b6e71c49b0271"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R091EN",
+      "documents": {
+        "documents-1d565dc10c39d174": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R091EN",
+            "faces": [
+              {
+                "name": "Lunerian Paladin",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWard.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWard.",
+                "speech": null,
+                "illustrator": "NASARU",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R091EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R092EN|Lunerian Paladin}",
+                "href": "/cards/?cardno=BP13-R092EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bda9e3921e5b8b0273efa202e832360127d4b240b05fd5c7d7ad44198930d6a9",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R091EN",
+            "fetched_at": "2026-11-27T13:33:09.012262Z"
+          },
+          "document_ref": "documents-1d565dc10c39d174"
+        }
+      ]
+    },
+    {
+      "card_no": "BP13-R092EN",
+      "documents": {
+        "documents-62835dc96ed1c0a8": {
+          "region": "en",
+          "record": {
+            "number": "BP13-R092EN",
+            "faces": [
+              {
+                "name": "Lunerian Paladin",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Gold",
+                  "Trait": "Faith / Beast"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "Ward.\nOn Evolve - Look at the top 4 cards of your deck. You may summon a follower that costs 2 or less from among them. Put the rest on the bottom of your deck in any order. If you summoned a follower with Ward, give your leader {icon_hp|[defense]}+2.",
+                "sections": [],
+                "raw_text": "Ward.\nOn Evolve - Look at the top 4 cards of your deck. You may summon a follower that costs 2 or less from among them. Put the rest on the bottom of your deck in any order. If you summoned a follower with Ward, give your leader {icon_hp|[defense]}+2.",
+                "speech": null,
+                "illustrator": "NASARU",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP13-R092EN.png",
+                "trait_raw": "Faith / Beast",
+                "traits": [
+                  "Faith",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP13-R091EN|Lunerian Paladin}",
+                "href": "/cards/?cardno=BP13-R091EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3b2894f505368ac5543b2bf1c1ac47f063f51f7e32edb923e7075f9eb9e5fba6",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP13-R092EN",
+            "fetched_at": "2026-11-27T13:33:11.897553Z"
+          },
+          "document_ref": "documents-62835dc96ed1c0a8"
+        }
+      ]
+    }
+  ]
+}
