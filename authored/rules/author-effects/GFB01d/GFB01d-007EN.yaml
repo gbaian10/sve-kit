@@ -1,0 +1,51 @@
+cards:
+  GFB01d-007EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - dice:
+                bind: active_roll
+                who: turn
+            - dice:
+                bind: other_roll
+                who: non_turn
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: active_roll
+                    op: ge
+                    right:
+                      dice: other_roll
+                then:
+                  - life:
+                      delta: 3
+                      who: turn
+                  - draw:
+                      n: 1
+                      who: turn
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: other_roll
+                    op: ge
+                    right:
+                      dice: active_roll
+                then:
+                  - life:
+                      delta: 3
+                      who: non_turn
+                  - draw:
+                      n: 1
+                      who: non_turn
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

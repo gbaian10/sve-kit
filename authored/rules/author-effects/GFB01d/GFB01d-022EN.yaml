@@ -1,0 +1,21 @@
+cards:
+  GFB01d-022EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - pp:
+                delta:
+                  times:
+                    - 2
+                    - count:
+                        kind: amulet
+                        who: self
+                        zone: field
+                who: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

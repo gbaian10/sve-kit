@@ -1,0 +1,28 @@
+cards:
+  GFB01d-004EN:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n:
+                  count:
+                    kind: amulet
+                    who: self
+                    zone: field
+                to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

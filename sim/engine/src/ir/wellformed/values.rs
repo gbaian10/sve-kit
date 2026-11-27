@@ -302,7 +302,8 @@ impl Checker {
                 BoolRead::CardPlayOrigin {
                     execution: ExecutionRef::Current {},
                     ..
-                } => Ok(()),
+                }
+                | BoolRead::PhysicalSourceInZone { .. } => Ok(()),
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::FieldEntryOrigin { object, .. }
                 | BoolRead::FieldEntryMethod { object, .. }

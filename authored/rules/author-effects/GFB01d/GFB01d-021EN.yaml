@@ -1,0 +1,19 @@
+cards:
+  GFB01d-021EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: ex
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

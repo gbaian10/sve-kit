@@ -3508,6 +3508,7 @@ pub(super) struct ByKind {
 pub(super) enum Condition {
     MyTurn(bool),
     InZone(ObjectLocation),
+    PhysicalSourceInZone(String),
     Is(AttackTargetCondition),
     History(HistoryCondition),
     EnteredFrom(EntryOriginCondition),
