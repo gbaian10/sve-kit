@@ -17,6 +17,8 @@ pub(super) struct Knowledge {
     pub(super) seen: BTreeMap<String, Value>,
     pub(super) faces: BTreeSet<KnownFace>,
     located: BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    public_locations: BTreeMap<String, u64>,
     pub(super) carried: Vec<Value>,
     handles: BTreeMap<String, HandleEntry>,
     issued: u64,
@@ -74,6 +76,16 @@ impl Knowledge {
         self.located.contains(id)
     }
 
+    pub(super) fn knows_public_location(&self, id: &str, generation: u64) -> bool {
+        self.public_locations.get(id) == Some(&generation)
+    }
+
+    pub(super) fn record_public_location(&mut self, id: &str, generation: u64) {
+        if self.knows_location(id) {
+            self.public_locations.insert(id.into(), generation);
+        }
+    }
+
     pub(super) fn identity_period(&self, id: &str) -> Option<u64> {
         self.handles.get(id).map(|entry| entry.index)
     }
@@ -108,6 +120,11 @@ impl Knowledge {
     }
 
     pub(super) fn forget_location(&mut self, id: &str) {
+        self.public_locations.remove(id);
+        self.remove_located_handle(id);
+    }
+
+    fn remove_located_handle(&mut self, id: &str) {
         self.located.remove(id);
         self.handles.remove(id);
     }
@@ -343,7 +360,8 @@ impl Game {
                     .cloned()
                     .collect::<Vec<_>>();
                 for id in &interrupted {
-                    knowledge.forget_location(id);
+                    // Reissuing a handle does not change what the restored position discloses.
+                    knowledge.remove_located_handle(id);
                 }
                 target.learn_members(seat, &interrupted, true)?;
             }

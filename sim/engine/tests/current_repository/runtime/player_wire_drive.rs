@@ -4,7 +4,7 @@ use super::player_presentation::{SEATS, question};
 use super::player_presentation_drive_fault::reach_the_drive_question;
 use super::*;
 use sve_battle_contract::event::{self as wire, EventBody};
-use sve_battle_contract::observation::TurnView;
+use sve_battle_contract::observation::{Facing, Knowledge, TurnView};
 use sve_battle_contract::{
     CardRef, Nat as WireNat, ObjectHandle as WireHandle, Seat, SourceRef, Subject,
 };
@@ -123,6 +123,31 @@ pub(super) fn bodies(game: &Game, viewer: Viewer) -> Vec<EventBody> {
         })
         .map(|event| event.body)
         .collect()
+}
+
+#[test]
+fn the_cards_returned_by_twin_drive_are_public_face_down_at_the_bottom() {
+    let game = twin_drive_resolved(false);
+    for viewer in SEATS {
+        let board = game
+            .battle_observation(viewer, battle_references())
+            .unwrap();
+        let [first, _] = &board.players;
+        let deck = &first.zones.deck;
+        assert_eq!(deck.count.get(), 4);
+        assert_eq!(deck.cards.len(), 2, "the cards never checked remain hidden");
+        for (member, (position, printing)) in deck
+            .cards
+            .iter()
+            .zip([(2_u32, "BP01-037"), (3, "BP01-006")])
+        {
+            assert_eq!(member.position, Some(WireNat::from(position)));
+            let object = board.objects.get(&member.object).unwrap();
+            assert_eq!(object.card.printing_id, printing);
+            assert_eq!(object.facing, Facing::Down);
+            assert_eq!(object.knowledge, Knowledge::Public);
+        }
+    }
 }
 
 /// What each Drive result says: its kind, the checked printing, and whether it was accepted
