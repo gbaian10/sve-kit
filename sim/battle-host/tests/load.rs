@@ -11,7 +11,7 @@ mod fixture;
 
 use serde_json::{Value, json};
 use sve_battle_contract::question::{MainIntent, QuestionShape};
-use sve_battle_contract::{Answer, ClientMessage, Command, HostMessage};
+use sve_battle_contract::{Answer, ClientMessage, Command, HostMessage, Seat};
 use sve_battle_host::load::{LoadError, PreparedBattle};
 use sve_battle_host::wire::{BattleInput, BattleUpdate, RequestId, Submit};
 use sve_battle_host::{Delivery, LocalSession};
@@ -96,13 +96,84 @@ fn a_published_program_opens_a_deck_by_permanent_printing() {
             .iter()
             .any(|delivery| matches!(delivery.message, HostMessage::Ready(_)))
     );
-    assert_eq!(prepared.open("{}").err(), Some(LoadError::Format));
+    assert_eq!(prepared.open("{}").unwrap_err().code(), "format");
     for unavailable in ["test-t-unused", "t-anchor"] {
         assert_eq!(
-            prepared.open(&setup(unavailable)).err(),
-            Some(LoadError::Match)
+            prepared.open(&setup(unavailable)).unwrap_err().code(),
+            "match"
         );
     }
+}
+
+#[test]
+fn rejected_opponent_decks_share_one_status_with_the_other_seat() {
+    let (mut document, programs) = published();
+    let mut programs: Value = serde_json::from_str(&programs).unwrap();
+    let card = document
+        .pointer("/printings/1/card_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let face = document
+        .pointer("/printings/1/faces/0/face_id")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    programs
+        .pointer_mut("/entries")
+        .unwrap()
+        .as_array_mut()
+        .unwrap()
+        .push(json!({
+            "id":"rejected","dsl_version":"1.0",
+            "ast":{"card_id":card,"scope":"shared","faces":{(face):{"abilities":"invalid"}}}
+        }));
+    programs
+        .pointer_mut("/printings")
+        .unwrap()
+        .as_object_mut()
+        .unwrap()
+        .insert(
+            card.to_owned(),
+            json!({"representative":"test-t-unused","tokens":[]}),
+        );
+    let programs = programs.to_string();
+    *document.pointer_mut("/identity/programs/sha256").unwrap() =
+        json!(fixture::hex(programs.as_bytes()));
+    let prepared = PreparedBattle::new(&document.to_string(), &programs).unwrap();
+
+    let mut setup: Value = serde_json::from_str(&setup("test-t-anchor")).unwrap();
+    *setup.pointer_mut("/control").unwrap() = json!(["player", "player"]);
+    let legal = setup.pointer("/decks/0").unwrap().clone();
+    prepared.open(&setup.to_string()).unwrap();
+    let with_main = |main| {
+        let mut deck = legal.clone();
+        *deck.pointer_mut("/main").unwrap() = main;
+        deck
+    };
+    for (rejected, detail) in [
+        (Value::Null, "deck_format"),
+        (with_main(json!(["unavailable"])), "deck_printing"),
+        (with_main(json!(["test-t-unused"])), "selection"),
+        (with_main(json!([])), "deck_admission"),
+    ] {
+        for (submitter, other, decks) in [
+            (Seat::P1, Seat::P2, [&rejected, &legal]),
+            (Seat::P2, Seat::P1, [&legal, &rejected]),
+        ] {
+            *setup.pointer_mut("/decks").unwrap() = json!(decks);
+            let refusal = prepared.open(&setup.to_string()).unwrap_err();
+            assert_eq!(refusal.code_for(submitter), detail);
+            assert_eq!(refusal.code_for(other), "match");
+            assert_eq!(refusal.code(), "match");
+        }
+    }
+    let duplicate = legal.to_string().replacen('{', r#"{"main":[],"#, 1);
+    *setup.pointer_mut("/decks").unwrap() = json!([legal, "duplicate-deck"]);
+    let setup = setup.to_string().replace(r#""duplicate-deck""#, &duplicate);
+    let refusal = prepared.open(&setup).unwrap_err();
+    assert_eq!(refusal.code_for(Seat::P1), "match");
+    assert_eq!(refusal.code_for(Seat::P2), "deck_format");
 }
 
 fn update(deliveries: &[Delivery]) -> &BattleUpdate {
