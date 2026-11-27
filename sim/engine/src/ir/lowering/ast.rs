@@ -1657,6 +1657,7 @@ pub(super) struct PlayingQuery {
     pub name: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
     pub token: Option<bool>,
 }
 

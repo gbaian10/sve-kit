@@ -830,27 +830,31 @@ fn other_hand_cost_count_keeps_plain_private_zone_counts_closed() {
 }
 
 #[test]
-fn static_exact_original_cost_keeps_quote_zone_stacking_and_ability_loss_distinct() {
-    let tree = equipment_played::tree(
-        &json!({"static":{"effects":[{"cost_mod":{
-            "when_playing":{"who":"self","zone":"ex","kind":"follower","orig_cost_eq":1},
-            "delta":-1
-        }}]}}),
-        "unit-follower",
-    );
-    let program = lowerer()
-        .lower(&tree)
-        .unwrap()
-        .remove("unit-follower")
-        .unwrap();
-    for (original, quoted, zone, copies, silenced, expected) in [
-        (0_u8, 4_u8, "ex", 1_u8, false, 4_u8),
-        (1, 4, "ex", 1, false, 3),
-        (2, 1, "ex", 1, false, 1),
-        (1, 4, "hand", 1, false, 4),
-        (1, 4, "ex", 1, true, 4),
-        (1, 4, "ex", 2, false, 2),
+fn static_original_cost_filters_keep_printed_cost_and_payment_distinct() {
+    for (comparison, threshold, original, quoted, zone, copies, silenced, expected) in [
+        ("orig_cost_eq", 1_u8, 0_u8, 4_u8, "ex", 1_u8, false, 4_u8),
+        ("orig_cost_eq", 1, 1, 4, "ex", 1, false, 3),
+        ("orig_cost_eq", 1, 2, 1, "ex", 1, false, 1),
+        ("orig_cost_eq", 1, 1, 4, "hand", 1, false, 4),
+        ("orig_cost_eq", 1, 1, 4, "ex", 1, true, 4),
+        ("orig_cost_eq", 1, 1, 4, "ex", 2, false, 2),
+        ("orig_cost_ge", 7, 6, 8, "hand", 1, false, 8),
+        ("orig_cost_ge", 7, 7, 4, "hand", 1, false, 3),
+        ("orig_cost_ge", 7, 8, 5, "ex", 1, false, 4),
     ] {
+        let mut selector = json!({"who":"self","kind":"follower",(comparison):threshold});
+        if comparison == "orig_cost_eq" {
+            selector["zone"] = json!("ex");
+        }
+        let tree = equipment_played::tree(
+            &json!({"static":{"effects":[{"cost_mod":{"when_playing":selector,"delta":-1}}]}}),
+            "unit-follower",
+        );
+        let program = lowerer()
+            .lower(&tree)
+            .unwrap()
+            .remove("unit-follower")
+            .unwrap();
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
         initial["players"]["P1"]["zones"] = json!({});
