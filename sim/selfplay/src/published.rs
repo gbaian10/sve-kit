@@ -96,6 +96,7 @@ pub struct Published {
     /// The programs the host prepared, held natively to probe listed decks.
     native: SnapshotPrograms,
     deck_cards: BTreeMap<String, PoolCard>,
+    classes: BTreeSet<String>,
     amulet_titles: BTreeSet<String>,
 }
 
@@ -269,6 +270,7 @@ impl Published {
                 .unwrap_or_default()
         };
         let facts = snapshot_facts(text("snapshot"));
+        let classes = printed_classes(&facts);
         let rules = parse(text("rules"), "rules")?;
         let (codes, amulet_titles) = titles(&document, &rules, &facts);
         let programmed = package.get("printings").and_then(Value::as_object);
@@ -347,6 +349,7 @@ impl Published {
             unprogrammed,
             native,
             deck_cards,
+            classes,
             amulet_titles,
         })
     }
@@ -447,6 +450,11 @@ impl Published {
 
     fn construct(&self, listed: &ListedDeck) -> Result<Deck, String> {
         let basis = &listed.construction;
+        if let Basis::Class(class) = basis
+            && !self.classes.contains(class)
+        {
+            return Err(format!("{class} is not a snapshot class"));
+        }
         let mut amulet = None;
         let mut section = |entries: &BTreeMap<String, usize>, evolve: bool| {
             let mut cards = Vec::new();
@@ -513,6 +521,15 @@ impl Published {
         };
         (self.arena.open)(&setup).map(drop)
     }
+}
+
+fn printed_classes(facts: &BTreeMap<String, Facts>) -> BTreeSet<String> {
+    facts
+        .values()
+        .filter_map(|card| card.class.as_deref())
+        .filter(|class| !class.is_empty() && !matches!(*class, NEUTRAL | "-"))
+        .map(str::to_owned)
+        .collect()
 }
 
 /// Title label to registered code, and the codes whose opening needs a Start Amulet.

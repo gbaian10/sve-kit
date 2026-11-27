@@ -62,13 +62,16 @@ in a mirror. In a mixed list it also checks each class deck against an admitted 
 because control transfers can require additional Drive icon facts. It writes skipped decks
 and their reasons to `refused-decks.json` before returning an error for an all-refused list.
 The summary's `lineup` gives each admitted deck's seats, results and mirror matches.
+Its coverage baseline is the set of card numbers in the admitted list. Random runs
+use card numbers from the random construction pools.
 
 `cards.json` counts, per card number, the played cards, the ability plays and the ability
 resolutions from its text, the moves onto a field or into a cemetery, and the evolutions that
 placed it. Counts use identities the host disclosed in committed events. The tool takes the
 larger count from the two feeds for each printing, event kind and playing or destination seat
-where available. The host sends no pending-trigger events, so a triggered ability is counted
-only in `resolved`, once it resolves. `built` and `failed` count a card at most once per match.
+where available. Both triggered and activated abilities count in `abilities` when their
+play is established and in `resolved` when they finish. The host sends no pending-trigger
+events. `built` and `failed` count a card at most once per match.
 
 `replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>` submits each record's
 commands again and writes the cost of every submission. A record holds the host's setup and

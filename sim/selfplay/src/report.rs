@@ -91,6 +91,14 @@ const fn bump(count: &mut u64) {
     *count = count.saturating_add(1);
 }
 
+fn deck_card_number<'text>(arena: &'text Arena, reference: &'text str) -> &'text str {
+    let printing = arena
+        .printings
+        .get(reference)
+        .map_or(reference, String::as_str);
+    arena.number(printing)
+}
+
 /// Digits stripped, so one diagnostic about different objects groups together.
 fn signature(detail: &str) -> String {
     let mut text = String::new();
@@ -200,12 +208,11 @@ impl Report {
         let failed = matches!(played.end, End::Failed(_));
         let mut either = BTreeSet::new();
         for deck in &played.record.setup.decks {
-            let numbers = deck.main.iter().chain(&deck.evolve).map(|reference| {
-                arena
-                    .printings
-                    .get(reference)
-                    .map_or(reference.as_str(), |printing| arena.number(printing))
-            });
+            let numbers = deck
+                .main
+                .iter()
+                .chain(&deck.evolve)
+                .map(|reference| deck_card_number(arena, reference));
             either.extend(numbers);
         }
         for number in either {
@@ -274,7 +281,15 @@ impl Report {
     /// The whole run as one document.
     #[must_use]
     pub fn summary(&self, arena: &Arena) -> Value {
-        let eligible = arena.pools.eligible();
+        let eligible = arena.lineup.as_ref().map_or_else(
+            || arena.pools.eligible(),
+            |lineup| {
+                lineup
+                    .card_references()
+                    .map(|reference| deck_card_number(arena, reference))
+                    .collect()
+            },
+        );
         let lineup: Vec<Value> = arena.lineup.as_ref().map_or_else(Vec::new, |lineup| {
             (0..lineup.len())
                 .map(|position| {

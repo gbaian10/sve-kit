@@ -34,15 +34,21 @@ fn identifier(prefix: &str, index: usize) -> String {
 /// Sixty vanilla neutral followers, each with an empty program: enough names for any deck.
 /// One attack on a leader ends the match, which keeps these debug-build matches short.
 fn export() -> (Value, String) {
-    export_with(CARDS)
+    export_with(CARDS, &[])
 }
 
-fn export_with(size: usize) -> (Value, String) {
+fn export_with(size: usize, abilities: &[Value]) -> (Value, String) {
+    let text = (!abilities.is_empty()).then_some("Synthetic fanfare.");
+    let fields = if abilities.is_empty() {
+        json!([])
+    } else {
+        json!([{"kind": "effect"}])
+    };
     let snapshot = (0..size)
         .map(|index| {
             json!({"number":number(index),"faces":[{"name":number(index),
                 "card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"20",
-                "hp":"1","traits":[],"text":null,"sections":[],"title":"synthetic"}]})
+                "hp":"1","traits":[],"text":text,"sections":[],"title":"synthetic"}]})
             .to_string()
         })
         .collect::<Vec<_>>()
@@ -57,7 +63,7 @@ fn export_with(size: usize) -> (Value, String) {
             "manifest_sha256": format!("sha256:{}", fixture::MANIFEST),
             "faces": (0..size).map(|index| json!({"card_no":number(index),"native_face":0_u8,
                 "face_id":identifier("f", index),
-                "revisions":[{"revision_id":format!("revision-{index}"),"fields":[]}]}))
+                "revisions":[{"revision_id":format!("revision-{index}"),"fields":fields}]}))
                 .collect::<Vec<_>>(),
         }))
         .unwrap(),
@@ -66,7 +72,7 @@ fn export_with(size: usize) -> (Value, String) {
         "format_version":"4.2.0",
         "entries": (0..size).map(|index| json!({"id":number(index),"dsl_version":"1.0",
             "ast":{"card_id":identifier("c", index),"scope":"shared",
-                "faces":{(identifier("f", index)):{"abilities":[]}}}})).collect::<Vec<_>>(),
+                "faces":{(identifier("f", index)):{"abilities":abilities}}}})).collect::<Vec<_>>(),
         "printings": (0..size).map(|index| (identifier("c", index),
             json!({"representative":format!("test-{}", number(index)),"tokens":[]})))
             .collect::<serde_json::Map<_, _>>(),
@@ -264,6 +270,8 @@ fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
         .unwrap()
         .remove("t-040");
     wrong_section["evolve"] = json!({"t-040": 1});
+    let mut unknown_class = listed("unknown class", 5, 0, 40);
+    unknown_class["construction"] = json!({"kind": "class", "value": "invalid-class"});
     let list = json!({"decks": [
         listed("low", 1, 0, 40),
         listed("high", 3, 20, 40),
@@ -271,6 +279,7 @@ fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
         unknown,
         listed("idle", 0, 0, 40),
         wrong_section,
+        unknown_class,
     ]});
     write(folder.0.join("decks.json"), list.to_string()).unwrap();
     let log = run(&[
@@ -285,23 +294,19 @@ fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
         "2",
     ])
     .unwrap();
-    assert!(log.contains("2 listed decks, 4 refused"), "{log}");
+    assert!(log.contains("2 listed decks, 5 refused"), "{log}");
     let refused: Value =
         serde_json::from_str(&read_to_string(folder.0.join("out/refused-decks.json")).unwrap())
             .unwrap();
-    assert_eq!(refused[0]["label"], "short");
-    assert_eq!(refused[0]["reason"], "main deck has 39 cards");
     assert_eq!(
-        refused[1],
-        json!({"label": "unknown", "reason": "admission: MissingSnapshot"})
-    );
-    assert_eq!(
-        refused[2],
-        json!({"label": "idle", "reason": "weight is zero"})
-    );
-    assert_eq!(
-        refused[3],
-        json!({"label": "wrong section", "reason": "t-040 is in the wrong deck section"})
+        refused,
+        json!([
+            {"label": "short", "reason": "main deck has 39 cards"},
+            {"label": "unknown", "reason": "admission: MissingSnapshot"},
+            {"label": "idle", "reason": "weight is zero"},
+            {"label": "wrong section", "reason": "t-040 is in the wrong deck section"},
+            {"label": "unknown class", "reason": "invalid-class is not a snapshot class"}
+        ])
     );
 
     let summary: Value =
@@ -395,9 +400,16 @@ fn a_deck_list_that_plays_nothing_is_refused() {
 }
 
 #[test]
-fn a_legal_listed_deck_can_play_without_a_random_pool() {
+fn a_legal_listed_deck_can_play_and_count_fanfares_without_a_random_pool() {
     let folder = Folder::new("small-pool");
-    let (reader, programs) = export_with(40);
+    let (reader, programs) = export_with(
+        40,
+        &[json!({
+            "fanfare": {"do": [{"buff": {"on": "this", "power": 1}}]},
+            "line": 1,
+            "ports": {"exports": {}, "imports": {}}
+        })],
+    );
     write_export(&folder, &reader, &programs);
     run(&[
         "prepare",
@@ -418,11 +430,28 @@ fn a_legal_listed_deck_can_play_without_a_random_pool() {
         "0",
         "1",
     ])
-    .unwrap();
+    .unwrap_or_else(|error| {
+        let refused = read_to_string(folder.0.join("out/refused-decks.json"));
+        panic!("{error}: {refused:?}");
+    });
     let summary: Value =
         serde_json::from_str(&read_to_string(folder.0.join("out/summary.json")).unwrap()).unwrap();
     assert_eq!(summary["failures"], json!([]), "{summary}");
     assert_eq!(summary["lineup"][0]["mirrors"], 1);
+    assert_eq!(summary["cards"]["eligible"], 40);
+    assert_eq!(summary["cards"]["never_built"], json!([]));
+
+    let cards: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/cards.json")).unwrap()).unwrap();
+    let mut played_any = false;
+    for card in cards.as_object().unwrap().values() {
+        let plays = card["played"].as_u64().unwrap();
+        played_any |= plays > 0;
+        // Each follower has one mandatory, non-terminal fanfare and no activated ability.
+        assert_eq!(card["abilities"], plays, "{card}");
+        assert_eq!(card["resolved"], plays, "{card}");
+    }
+    assert!(played_any, "{cards}");
 }
 
 #[test]

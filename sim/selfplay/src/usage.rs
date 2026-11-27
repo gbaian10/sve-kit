@@ -92,7 +92,6 @@ fn counted(body: &EventBody) -> Option<(&str, Kind, Option<Seat>)> {
     {
         return Some((text_printing(source), Kind::Ability, Some(*player)));
     }
-    // The host sends no pending-trigger events; a triggered ability shows once it resolves.
     if let EventBody::AbilityResolved {
         source: Some(source),
         player,

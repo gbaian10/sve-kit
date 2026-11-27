@@ -83,6 +83,17 @@ impl Lineup {
         self.entries.len()
     }
 
+    pub(crate) fn card_references(&self) -> impl Iterator<Item = &str> {
+        self.entries.iter().flat_map(|entry| {
+            entry
+                .deck
+                .main
+                .iter()
+                .chain(&entry.deck.evolve)
+                .map(String::as_str)
+        })
+    }
+
     /// The label of a drawn deck.
     #[must_use]
     pub fn label(&self, index: usize) -> &str {
