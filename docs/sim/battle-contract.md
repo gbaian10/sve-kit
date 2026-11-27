@@ -435,7 +435,7 @@ Notice 保存獨立授權的 Look／短暫揭露，不能等最後盤面才回�
 ```typescript
 type Notice = {
   id: Opaque;
-  kind: "look" | "temporary_reveal";
+  kind: "look" | "temporary_reveal" | "deck_top";
   source: TextRef | null;
   cards: { card: CardRef; owner: Seat; position: Nat | null }[];
 };
