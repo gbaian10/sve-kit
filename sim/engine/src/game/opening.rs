@@ -4,6 +4,7 @@
 )]
 use super::legal::permutations;
 use super::{Frame, Game, int, list, other, string};
+use crate::ir::Position;
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
@@ -166,7 +167,7 @@ impl Game {
                         .iter()
                         .map(|id| string(id).into())
                         .collect::<Vec<_>>();
-                    self.move_objects(&order, "deck", None, Some(&json!("bottom")), &frame)?;
+                    self.move_objects(&order, "deck", None, Some(Position::Bottom {}), &frame)?;
                     self.deal_opening(seat, &frame)?;
                 }
                 if self.state.turn["first_player"] == seat {

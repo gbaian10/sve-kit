@@ -3,7 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 use super::{Frame, Game, Object, int, list, scalar, string};
-use crate::ir::SnapshotId;
+use crate::ir::{Position, SnapshotId};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::slice::from_ref;
@@ -50,7 +50,7 @@ impl Game {
         &mut self,
         previous: &Object,
         destination: &str,
-        position: Option<&Value>,
+        position: Option<Position>,
         frame: &Frame,
         group: u64,
     ) -> Result<()> {
@@ -67,10 +67,14 @@ impl Game {
             }
             event["source"] = json!(frame.source);
         }
-        if let Some(pos) = position
-            && destination == "deck"
+        if destination == "deck"
+            && let Some(position) = position
         {
-            event["position"] = json!(pos);
+            event["position"] = match position {
+                Position::Top {} => json!(1_u8),
+                Position::Bottom {} => json!("bottom"),
+                Position::Index { index } => json!(index.0.get()),
+            };
         }
         if let Some(rule) = frame.values.get("movement_rule") {
             event["by"] = rule.clone();
