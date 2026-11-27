@@ -1,0 +1,82 @@
+cards:
+  GFD01-024EN:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 1
+                to: enemy
+            - declare:
+                bind: defense
+                kind: number
+                max: 2
+                min: 1
+            - life:
+                delta: defense
+                who: self
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+        line: 1
+      - auto:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              minus:
+                                - leader_life: p
+                                - times:
+                                    - per:
+                                        of:
+                                          leader_life: p
+                                        unit: 2
+                                    - 2
+                            op: eq
+                            right: 1
+                        else:
+                          - life:
+                              delta: 1
+                              who: p
+                          - draw:
+                              n: 1
+                              who: p
+                        then:
+                          - if:
+                              cond:
+                                cmp:
+                                  left:
+                                    count:
+                                      kind: follower
+                                      who: p
+                                      zone: field
+                                  op: ge
+                                  right: 1
+                              then:
+                                - choose:
+                                    bind: buried
+                                    by: p
+                                    from:
+                                      kind: follower
+                                      who: p
+                                      zone: field
+                                    n: 1
+                                - move:
+                                    ref: buried
+                                    to: cemetery
+                          - life:
+                              delta: -1
+                              who: p
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

@@ -1,0 +1,42 @@
+cards:
+  GFD02-004EN:
+    abilities:
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on:
+                  kind: follower
+                  who: opp
+                  zone: field
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+        line: 1
+      - auto:
+          do:
+            - draw:
+                n:
+                  count:
+                    acted: true
+                    kind: follower
+                    who: opp
+                    zone: field
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

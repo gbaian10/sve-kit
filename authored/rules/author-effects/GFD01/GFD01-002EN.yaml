@@ -1,0 +1,29 @@
+cards:
+  GFD01-002EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - ward
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - cannot:
+                what: attack
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - life:
+                      delta: 4
+                      who: self
+                  - draw:
+                      n: 2
+                      who: self
+        line: 4
+    admission: light
+format: 2
+kind: author_effect_set

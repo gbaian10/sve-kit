@@ -1,0 +1,17 @@
+cards:
+  GFD01-007EN:
+    abilities:
+      - evolve_time:
+          do:
+            - set_life:
+                n:
+                  minus:
+                    - leader_life: opp
+                    - count:
+                        who: opp
+                        zone: hand
+                who: opponents
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

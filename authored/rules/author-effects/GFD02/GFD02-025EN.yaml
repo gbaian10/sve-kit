@@ -1,0 +1,11 @@
+cards:
+  GFD02-025EN:
+    abilities:
+      - fanfare:
+          do:
+            - evolve:
+                ref: this
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set
