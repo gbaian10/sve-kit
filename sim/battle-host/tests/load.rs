@@ -48,6 +48,30 @@ fn a_published_program_opens_a_deck_by_permanent_printing() {
 }
 
 #[test]
+fn jp_battle_binds_its_programs_in_a_two_region_package() {
+    let (mut document, programs) = published();
+    let mut programs: Value = serde_json::from_str(&programs).unwrap();
+    programs["entries"].as_array_mut().unwrap().push(json!({
+        "id":"english-program","dsl_version":"1.0",
+        "ast":{"card_id":"english-card","scope":"shared","abilities":[]}
+    }));
+    programs["printings"]["english-card"] =
+        json!({"representative":"english-printing","tokens":[]});
+    let programs = programs.to_string();
+    document["identity"]["programs"]["sha256"] = json!(fixture::hex(programs.as_bytes()));
+
+    let prepared = PreparedBattle::new(&document.to_string(), &programs).unwrap();
+    assert!(prepared.open(&setup("test-t-anchor")).is_ok());
+    assert_eq!(
+        prepared
+            .open(&setup("english-printing"))
+            .unwrap_err()
+            .code(),
+        "match"
+    );
+}
+
+#[test]
 fn rejected_opponent_decks_share_one_status_with_the_other_seat() {
     let (mut document, programs) = published();
     let mut programs: Value = serde_json::from_str(&programs).unwrap();
