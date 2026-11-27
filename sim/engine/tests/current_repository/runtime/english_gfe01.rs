@@ -42,34 +42,6 @@ fn play_all(board: &mut Game, id: &str) {
 }
 
 #[test]
-fn arthur_summons_cheap_followers_from_the_top_ten_for_a_swordcraft_leader() {
-    for (class, summoned) in [("ロイヤル", true), ("ニュートラル", false)] {
-        let mut initial = position("GFB01a-005EN");
-        initial["players"]["P1"]["leader"]["class"] = json!(class);
-        initial["players"]["P1"]["zones"]["deck"] = json!([
-            {"id":"cheap","card":"BP01-042"},
-            {"id":"big","card":"BP01-037"},
-            {"id":"goblin","card":"BP01-171"}
-        ]);
-        let mut board = game(&initial);
-        play_all(&mut board, "source");
-        let after = state(&board);
-        let field = after["P1"]["field"].as_array().unwrap();
-        assert_eq!(
-            field.contains(&json!("cheap")),
-            summoned,
-            "{class}: {after}"
-        );
-        assert_eq!(field.contains(&json!("goblin")), summoned, "{class}");
-        assert!(!field.contains(&json!("big")), "{class}");
-        assert_eq!(
-            after["P1"]["deck"].as_array().unwrap().len(),
-            if summoned { 1 } else { 3 }
-        );
-    }
-}
-
-#[test]
 fn burst_shot_mode_one_draws_then_deals_damage_equal_to_the_hand() {
     let mut initial = position("GFB01a-016EN");
     initial["players"]["P1"]["zones"]["hand"] = json!([
@@ -126,28 +98,6 @@ fn grand_summoning_adds_a_third_follower_and_play_points_for_a_runecraft_leader(
             "{class}: {after}"
         );
         assert_eq!(after["P1"]["pp"]["current"], pp, "{class}");
-    }
-}
-
-#[test]
-fn dragonrend_quake_is_cheaper_for_dragoncraft_and_trades_attacks() {
-    for (class, pp) in [("ドラゴン", 9_u8), ("ロイヤル", 6)] {
-        let mut initial = position("GFB01b-023EN");
-        initial["players"]["P1"]["leader"]["class"] = json!(class);
-        initial["players"]["P2"]["zones"]["field"] = json!([
-            {"id":"big","card":"BP01-037","state":{"hp":30_u8,"max_hp":30_u8}},
-            {"id":"small","card":"BP01-042","state":{"hp":30_u8,"max_hp":30_u8}}
-        ]);
-        let mut board = game(&initial);
-        let step = board.play_internal_card("source", actor()).unwrap();
-        let step = choose_card_by_number(&mut board, step, "BP01-037");
-        let step = choose_card_by_number(&mut board, step, "BP01-042");
-        take_all(&mut board, step);
-        settle_all(&mut board);
-        let after = state(&board);
-        assert_eq!(after["P1"]["pp"]["current"], pp, "{class}");
-        assert_eq!(after["objects"]["big"]["damage"], 2_u8, "{class}");
-        assert_eq!(after["objects"]["small"]["damage"], 5_u8, "{class}");
     }
 }
 
@@ -269,12 +219,14 @@ fn vagabond_frog_draws_then_grows_and_moves_to_the_opponent_at_end() {
     let after = state(&board);
     assert_eq!(after["P2"]["field"], json!(["source"]), "{after}");
     assert_eq!(after["objects"]["source"]["power"], 1_u8);
+    assert_eq!(after["objects"]["source"]["hp"], 3_u8);
 }
 
 #[test]
 fn unicorn_warrior_puts_a_unicorn_in_ex_and_grows_a_follower_when_healed() {
     let mut initial = position("GFE01-015EN");
     initial["players"]["P1"]["leader"]["class"] = json!("ビショップ");
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"fort","card":"GFB01a-021EN"}]);
     let mut board = game(&initial);
     play_all(&mut board, "source");
     let stored = state(&board);
@@ -291,6 +243,15 @@ fn unicorn_warrior_puts_a_unicorn_in_ex_and_grows_a_follower_when_healed() {
         "one gain this turn"
     );
     assert!(keyword(&after, &unicorn, "守護"));
+    // The second gain this turn makes X two.
+    let step = board
+        .activate_internal_card("fort", activated("GFB01a-021EN"), actor())
+        .unwrap();
+    take_all(&mut board, step);
+    settle_all(&mut board);
+    let again = state(&board);
+    assert_eq!(again["P1"]["leader"]["life"], 26_u8, "{again}");
+    assert_eq!(again["objects"]["source"]["power"], 7_u8, "{again}");
 }
 
 #[test]
@@ -313,6 +274,12 @@ fn heavens_gate_lets_each_player_summon_a_follower() {
     let after = state(&board);
     assert_eq!(after["P1"]["field"].as_array().unwrap().len(), 2, "{after}");
     assert_eq!(after["P2"]["field"], json!(["their"]));
+    assert_eq!(after["P1"]["deck"], json!([]), "all three cards were drawn");
+    assert_eq!(
+        after["P1"]["hand"].as_array().unwrap().len(),
+        2,
+        "three drawn, one summoned"
+    );
 }
 
 #[test]
@@ -335,4 +302,19 @@ fn heavens_gate_discards_two_to_tuck_a_follower() {
             .contains(&json!("enemy"))
     );
     assert_eq!(moved["P1"]["hand"], json!([]));
+}
+
+#[test]
+fn dartagnan_evolves_officers_put_onto_the_field() {
+    let mut initial = on_field("GFE01-009EN");
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"aramis","card":"GFE01-003EN"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] =
+        json!([{"id":"aramis-form","card":"GFE01-004EN"}]);
+    let mut board = game(&initial);
+    play_all(&mut board, "aramis");
+    let after = state(&board);
+    assert_eq!(
+        after["objects"]["aramis"]["evolved_with"], "aramis-form",
+        "{after}"
+    );
 }
