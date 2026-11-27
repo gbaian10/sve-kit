@@ -435,3 +435,67 @@ fn helblindi_gives_low_rolls_to_the_roller_and_high_rolls_to_its_controller() {
         "a high roll heals Helblindi's controller"
     );
 }
+
+#[test]
+fn sky_fortress_pays_full_cost_with_nine_cards_on_the_field() {
+    // Two-player fields hold five cards each (CR 4.4.4.1), so ten cards leave no room to play it.
+    let mut initial = position("GFB01a-006EN");
+    initial["players"]["P1"]["zones"]["field"] = json!(
+        (0_u8..4)
+            .map(|index| json!({"id":format!("mine-{index}"),"card":"BP01-171"}))
+            .collect::<Vec<_>>()
+    );
+    initial["players"]["P2"]["zones"]["field"] = json!(
+        (0_u8..5)
+            .map(|index| json!({"id":format!("theirs-{index}"),"card":"BP01-171"}))
+            .collect::<Vec<_>>()
+    );
+    let mut board = game(&initial);
+    play(&mut board, "source");
+    let after = state(&board);
+    assert_eq!(after["P1"]["pp"]["current"], 3_u8, "{after}");
+}
+
+#[test]
+fn tisiphone_evolves_at_end_only_after_three_enemy_followers_died() {
+    for (enemies, evolves) in [(2_u8, false), (3, true)] {
+        let mut initial = position("GFB01a-022EN");
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"tisiphone","card":"GFB01b-001EN"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] =
+            json!([{"id":"form","card":"GFB01b-002EN"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!(
+            (0..enemies)
+                .map(|index| json!({"id":format!("goblin-{index}"),"card":"BP01-171"}))
+                .collect::<Vec<_>>()
+        );
+        let mut board = game(&initial);
+        play(&mut board, "source");
+        assert_eq!(state(&board)["P2"]["field"], json!([]));
+        board
+            .internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        settle(&mut board);
+        let ended = state(&board);
+        assert_eq!(
+            ended["objects"]["tisiphone"]["evolved_with"] == "form",
+            evolves,
+            "{enemies} destroyed: {ended}"
+        );
+    }
+}
+
+#[test]
+fn malocchio_with_thirty_counters_makes_the_opponent_lose() {
+    let mut initial = position("GFB01b-006EN");
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{
+        "id":"source","card":"GFB01b-006EN",
+        "state":{"evolved":true,"evolved_with":"form","counters":{"armageddon_counter":30_u8}}
+    }]);
+    initial["players"]["P1"]["zones"]["evolution"] = json!([{"id":"form","card":"GFB01b-007EN"}]);
+    let mut board = game(&initial);
+    attack(&mut board, "source", "P2.leader");
+    let after = state(&board);
+    assert_eq!(after["game"]["ended"], true, "{after}");
+}
