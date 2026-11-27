@@ -167,7 +167,7 @@ fn missing_proposed_controller_is_rejected_only_by_filtered_ability_prevention()
             board
                 .static_prevention_references(&hit, None, &mut references)
                 .unwrap();
-            assert_eq!(references, Vec::<Value>::new());
+            assert!(references.is_empty());
         }
     }
 }
