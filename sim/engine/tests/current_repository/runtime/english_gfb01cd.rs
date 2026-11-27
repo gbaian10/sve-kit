@@ -397,3 +397,39 @@ fn elysian_saint_hares_can_summon_a_one_cost_follower_from_the_deck() {
     assert_eq!(after["P1"]["field"], json!(["source", "goblin"]));
     assert_eq!(after["P1"]["deck"], json!(["big"]));
 }
+
+#[test]
+fn demonic_storm_uses_a_cemetery_demons_attack_and_summons_it_at_twenty() {
+    for (fillers, summoned) in [(19_usize, true), (4, false)] {
+        let mut initial = position("GFB01c-021EN");
+        let mut grave = vec![json!({"id":"demon","card":"BP01-101"})];
+        grave.extend(
+            goblins("grave", fillers)
+                .as_array()
+                .unwrap()
+                .iter()
+                .cloned(),
+        );
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(grave);
+        initial["players"]["P2"]["zones"]["field"] = json!([
+            {"id":"tough","card":"BP01-037","state":{"hp":30_u8,"max_hp":30_u8}},
+            {"id":"goblin","card":"BP01-171"}
+        ]);
+        let mut board = game(&initial);
+        let step = board.play_internal_card("source", actor()).unwrap();
+        take_all(&mut board, step);
+        settle_all(&mut board);
+        let after = state(&board);
+        assert_eq!(after["objects"]["tough"]["damage"], 3_u8, "{after}");
+        assert_eq!(after["P2"]["cemetery"], json!(["goblin"]));
+        assert_eq!(
+            after["P1"]["field"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("demon")),
+            summoned,
+            "{} in cemetery",
+            fillers + 1
+        );
+    }
+}

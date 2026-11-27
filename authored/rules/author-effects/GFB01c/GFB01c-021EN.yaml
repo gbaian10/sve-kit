@@ -1,0 +1,32 @@
+cards:
+  GFB01c-021EN:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  power_of: demon
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - if:
+                cond:
+                  necro: 20
+                then:
+                  - move:
+                      ref: demon
+                      result: entered
+                      to: field
+          targets:
+            - bind: demon
+              from:
+                kind: follower
+                trait: 魔界
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+format: 2
+kind: author_effect_set

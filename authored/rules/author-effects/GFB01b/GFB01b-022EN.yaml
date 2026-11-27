@@ -1,0 +1,39 @@
+cards:
+  GFB01b-022EN:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  trait: 機械
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - grant:
+                keywords:
+                  - rush
+                on: ally
+            - pp:
+                delta:
+                  orig_cost_of: ally
+                who: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: 機械
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
