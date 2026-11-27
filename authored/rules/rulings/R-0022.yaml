@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0022
+revision: 1
+question: Bab’zz 的結束階段能力待機後，若同一張實體卡移到場上或 EX 區，還會產生 Hornet Warrior 嗎？
+decision: 本專案解讀為會。結算時讀取實體來源的位置，在能力控制者的場上或 EX 區就產生衍生物，其餘區域略過。
+evidence:
+  - ref: CR 4.1.4.1
+    kind: supporting
+    version: "1.28.0"
+    url: https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf
+    note: 效果明確指向剛換區的實體卡時，可以參照移動後的卡。
+  - ref: CR 10.7.7
+    kind: supporting
+    version: "1.28.0"
+    note: 已待機的自動能力即使來源換區仍須打出。
+  - ref: Q1344
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-001EN&faq=
+    note: EX 區滿時謝幕能力會讓來源留在墓場。此問答未說明待機的結束階段能力如何跨區參照來源。
+  - ref: project
+    kind: project
+    date: "2026-11-28"
+    reason: 原文在同一條條件中明列場上與 EX 區，因此依卡文保留只讀的實體來源位置判斷。
+strength: inferred
+decided_on: "2026-11-28"
+applies_to: [B.trigger, V.zone]
+hint:
+  zh-TW: 本專案解讀。已待機的能力在結算時查實體來源，仍在能力控制者的場上或 EX 區就產生 Hornet Warrior。
+  ja: 本プロジェクトの解釈。待機した能力の解決時、その実物のカードが能力のプレイヤーの場かEXエリアにあれば、Hornet Warriorを出します。
+  en: "Project interpretation: the pending ability creates a Hornet Warrior if its physical source is on its controller's field or in their EX area when it resolves."

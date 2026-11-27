@@ -1,4 +1,4 @@
-use super::ability_combinations::{activate_card, finish};
+use super::ability_combinations::{activate_card, decision_answer, finish};
 use super::*;
 
 #[test]
@@ -247,4 +247,62 @@ fn yggdrasils_printed_last_words_prevent_damage_from_the_next_attack() {
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["objects"]["raider"]["acted"], true, "the attack reached combat");
     assert_eq!(after["P1"]["leader"]["life"], 20_u8, "the departed Yggdrasil prevents its controller from losing defense");
+}
+
+#[test]
+fn babzz_creates_one_english_hornet_from_either_printed_zone() {
+    for zone in ["field", "ex"] {
+        let mut initial = draw_position();
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"babzz","card":"GFD01-001EN"}]);
+        initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"drawn","card":"BP01-037"}]);
+        let mut game = game(&initial);
+        if zone == "ex" {
+            game.play_internal_card("babzz", actor()).unwrap_err();
+        }
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        finish(&mut game, None, &[]);
+
+        let state = game.projection(View::Referee).unwrap();
+        let created = state["P1"]["ex"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|id| state["objects"][id.as_str().unwrap()]["card"] == "GFD01-T01EN")
+            .count();
+        assert_eq!(created, 1, "one Hornet Warrior from {zone}");
+    }
+}
+
+#[test]
+fn unicorn_resolves_the_active_players_entire_mode_before_the_other_player_chooses() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"unicorn","card":"GFD01-024EN"}]);
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"drawn","card":"BP01-037"}]);
+    initial["players"]["P2"]["leader"]["life"] = json!(19_u8);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"first","card":"BP01-037"}, {"id":"second","card":"BP01-037"}
+    ]);
+    initial["players"]["P2"]["zones"]["deck"] =
+        json!([{"id":"next-draw","card":"BP01-037"}]);
+    let mut game = game(&initial);
+    game.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let step = game.answer_internal_card(
+        pending.actor,
+        pending.token,
+        decision_answer(&pending.domain, &[]),
+    ).unwrap();
+    let CardPlay::Awaiting(burial) = &step else { panic!("expected a burial choice"); };
+    assert_eq!(burial.actor, PlayerId { seat: 2 }, "the odd mode asks its own player to choose");
+    let during_choice = game.projection(View::Referee).unwrap();
+    assert_eq!(during_choice["P1"]["leader"]["life"], 21_u8, "the active player has completed the heal");
+    assert_eq!(during_choice["P1"]["hand"], json!(["drawn"]), "the active player has completed the draw");
+    assert_eq!(during_choice["P2"]["leader"]["life"], 19_u8, "odd mode waits for its burial choice");
+    finish(&mut game, Some(step), &[]);
+    let completed = game.projection(View::Referee).unwrap();
+    assert_eq!(completed["P2"]["leader"]["life"], 18_u8, "the chosen odd mode then deducts defense");
+    assert_eq!(completed["P2"]["cemetery"], json!(["first"]), "the chosen follower was buried");
 }

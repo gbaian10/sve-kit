@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0023
+revision: 1
+question: Empyreal Unicorn 的結束階段能力依玩家防禦奇偶分流時，兩個模式如何排程？
+decision: 本專案把每位玩家的強制模式視為一個含選擇的處理。由回合玩家完整結算自己的模式，再由非回合玩家完成自己的模式。
+evidence:
+  - ref: CR 1.3.4.1
+    kind: supporting
+    version: "1.28.0"
+    url: https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf
+    note: 多位玩家所做的含選擇處理從回合玩家開始，條文未列強制模式互異時的範例。
+  - ref: Q1360
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-024EN&faq=
+    note: 奇數模式在沒有可送墓從者時仍扣防，未裁定與另一模式的先後。
+  - ref: Q1361
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-024EN&faq=
+    note: 送墓由該位玩家選擇自己的從者，未裁定與另一模式的先後。
+  - ref: project
+    kind: project
+    date: "2026-11-28"
+    reason: 依卡文的逐人選模式保留完整模式的結算。另一種讀法是將埋葬、增減防禦和抽牌拆成跨玩家的獨立處理，待官方裁定再複核。
+strength: inferred
+decided_on: "2026-11-28"
+applies_to: [K.each-player]
+hint:
+  zh-TW: 本專案解讀。回合玩家先完成自己的奇數或偶數模式，再由非回合玩家完整結算自己的模式。
+  ja: 本プロジェクトの解釈。ターンプレイヤーが自身の奇数または偶数のモードをすべて解決し、その後で非ターンプレイヤーが自身のモードを解決します。
+  en: "Project interpretation: the active player resolves their entire odd or even mode, then the non-active player resolves their mode."
