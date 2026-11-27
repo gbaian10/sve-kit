@@ -45,7 +45,7 @@ fn follower(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> bool {
     })
 }
 
-/// The affirmative orientation and card-kind conjuncts cannot be bypassed by an OR branch.
+/// The orientation conjunct cannot be bypassed by an OR branch.
 pub(crate) fn selector(selector: &Selector) -> Option<bool> {
     let Selector::Zone {
         zone: ZoneKind::Evolve,
@@ -59,11 +59,10 @@ pub(crate) fn selector(selector: &Selector) -> Option<bool> {
     };
     if players.relation != PlayerRelation::SelfPlayer
         || players.relative_to != (PlayerRef::Controller {})
-        || !follower(predicate, *binding)
     {
         return None;
     }
-    state(predicate, *binding)
+    state(predicate, *binding).filter(|before| !before || follower(predicate, *binding))
 }
 
 pub(crate) fn material(decision: &Decision) -> Option<(&Selector, bool)> {
@@ -122,7 +121,17 @@ pub(crate) fn private_resolution(decision: &Decision) -> bool {
     else {
         return false;
     };
-    if cardinality.minimum != super::Nat(0)
+    let Some((
+        Selector::Zone {
+            predicate, binding, ..
+        },
+        false,
+    )) = material(decision)
+    else {
+        return false;
+    };
+    if !follower(predicate, *binding)
+        || cardinality.minimum != super::Nat(0)
         || cardinality.maximum.is_none_or(|n| n.0 == 0)
         || !private_face_down(decision)
     {

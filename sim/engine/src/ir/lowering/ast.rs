@@ -4873,7 +4873,7 @@ pub(super) struct FlipFilter {
     pub _who: SelfPlayer,
     #[serde(rename = "zone")]
     pub _zone: FlipZone,
-    pub kind: SearchKind,
+    pub kind: Option<SearchKind>,
     pub face_up: Option<bool>,
     pub name: Option<String>,
     pub name_contains: Option<String>,

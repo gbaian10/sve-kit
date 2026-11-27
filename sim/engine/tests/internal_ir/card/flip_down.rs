@@ -49,30 +49,127 @@ fn board_with_resources(program: &WellFormedCardProgram, current: u64, maximum: 
 
 fn board_from_position(program: &WellFormedCardProgram, initial: &Value) -> Game {
     let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
-    for (number, attribute) in [("form", "土属性"), ("other-form", "闇属性")] {
+    let forms = [
+        ("form", "フォロワー・エボルヴ", "土属性"),
+        ("other-form", "フォロワー・エボルヴ", "闇属性"),
+        ("evolved-amulet", "アミュレット・エボルヴ", "土属性"),
+        ("advanced-follower", "フォロワー・アドバンス", "土属性"),
+    ];
+    let mut effects = json!({"format":1,"kind":"fixture_cards","cards":{}});
+    for (number, kind, attribute) in forms {
         snapshot.push('\n');
-        snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[attribute],"text":null,"sections":[]}]}).to_string());
+        snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"-","power":"4","hp":"5","traits":[attribute],"text":null,"sections":[]}]}).to_string());
+        effects["cards"][number] = json!({"status":"complete"});
     }
-    let forms = json!({"format":1,"kind":"fixture_cards","cards":{
-        "form":{"status":"complete"},
-        "other-form":{"status":"complete"}
-    }})
-    .to_string();
     let catalog = Arc::new(
         Catalog::from_fixture_documents(
             &snapshot,
             &registry,
-            &[("unit.yaml".into(), document), ("form.yaml".into(), forms)],
+            &[
+                ("unit.yaml".into(), document),
+                ("form.yaml".into(), effects.to_string()),
+            ],
         )
         .unwrap(),
     );
     let mut game = Game::new(catalog, initial, &Value::Null, &Value::Null, "evolve-flip").unwrap();
     game.load_internal_card("unit-follower", program).unwrap();
     let form_program = card(vec![]);
-    game.load_internal_card("form", &form_program).unwrap();
-    game.load_internal_card("other-form", &form_program)
-        .unwrap();
+    for (number, _, _) in forms {
+        game.load_internal_card(number, &form_program).unwrap();
+    }
     game
+}
+
+#[test]
+fn end_phase_flip_up_payment_accepts_any_owned_facedown_evolve_deck_card() {
+    let expanded = evolution_linked_movement::tree(&[(
+        "auto",
+        json!({
+            "on":{"phase":{"whose":"self","which":"end"}},
+            "cost":{"flip_up":{"sel":{"who":"self","zone":"evolve_deck"},"n":1_u8}},
+            "do":[{"life":{"who":"self","delta":1}}]
+        }),
+    )]);
+    let programs = lowerer().lower(&expanded).unwrap();
+    let program = &programs["unit-follower"];
+    for chosen in [Some("evolved-amulet"), Some("advanced-follower"), None] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
+            {"id":"evolved-amulet","card":"evolved-amulet"},
+            {"id":"advanced-follower","card":"advanced-follower"},
+            {"id":"open","card":"form","face_up":true}
+        ]);
+        initial["players"]["P2"]["zones"]["evolve_deck"] =
+            json!([{"id":"enemy-hidden","card":"evolved-amulet"}]);
+        let mut game = board_from_position(program, &initial);
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let CardPlay::Awaiting(declaration) = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+            .unwrap()
+        else {
+            panic!("flip payment declaration");
+        };
+        assert_eq!(declaration.domain, InputDomain::OptionalCost);
+        let result = game
+            .answer_internal_card(
+                declaration.actor,
+                declaration.token,
+                Answer::OptionalCost(chosen.is_some()),
+            )
+            .unwrap();
+        if let Some(printing) = chosen {
+            let CardPlay::Awaiting(materials) = result else {
+                panic!("flip payment materials");
+            };
+            let InputDomain::CostMaterials(domain) = &materials.domain else {
+                panic!("one private material");
+            };
+            assert_eq!(domain.members.len(), 2);
+            assert_eq!(domain.cardinality.minimum, Nat(1));
+            assert!(game.internal_decision(View::P2).is_none());
+            let member = domain
+                .members
+                .iter()
+                .find(|member| member.card.as_deref() == Some(printing))
+                .unwrap();
+            let before = exact_authority(&game);
+            game.answer_internal_card(
+                materials.actor,
+                materials.token,
+                Answer::CostMaterials(vec![]),
+            )
+            .unwrap_err();
+            assert_eq!(exact_authority(&game), before);
+            resolved(
+                game.answer_internal_card(
+                    materials.actor,
+                    materials.token,
+                    Answer::CostMaterials(vec![member.handle]),
+                )
+                .unwrap(),
+            );
+        } else {
+            assert!(matches!(result, CardPlay::Cancelled));
+        }
+        let authority = game.projection(View::Referee).unwrap();
+        let opponent = game.projection(View::P2).unwrap();
+        for material in ["evolved-amulet", "advanced-follower"] {
+            let paid = chosen == Some(material);
+            assert_eq!(authority["objects"][material]["face_up"], paid);
+            assert_eq!(authority["objects"][material]["generation"], 0_u8);
+            assert_eq!(opponent["objects"].get(material).is_some(), paid);
+        }
+        assert_eq!(authority["objects"]["enemy-hidden"]["face_up"], false);
+        assert_eq!(
+            authority["P1"]["leader"]["life"],
+            20_u8 + u8::from(chosen.is_some())
+        );
+    }
 }
 
 fn flip_up_tree(selection: &Value) -> Value {
@@ -203,8 +300,9 @@ fn body_flip_up_keeps_options_private_and_updates_the_later_public_count() {
 }
 
 #[test]
-fn body_flip_up_rejects_other_players_face_up_cards_and_zero_bounds() {
+fn body_flip_up_requires_own_facedown_followers_and_a_positive_bound() {
     for selection in [
+        json!({"sel":{"who":"self","zone":"evolve_deck"},"upto":1}),
         json!({"sel":{"who":"opp","zone":"evolve_deck","kind":"evolve_follower"},"upto":1}),
         json!({"sel":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true},"upto":1}),
         json!({"sel":{"who":"self","zone":"evolve_deck","kind":"evolve_follower"},"upto":0}),
