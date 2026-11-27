@@ -110,16 +110,17 @@ pub(super) fn check_play(program: &Program, source: &SourceSpan, source_bound: b
         node: program.clone(),
         source: source.clone(),
     };
+    let requirements = Requirements::derive_program(&located);
     // Native card costs precede source binding; ability declarations already bind their source.
     if !source_bound
-        && Requirements::derive_program(&located)
+        && requirements
             .required
             .iter()
             .any(|requirement| requirement.capability.code == "reference.source-information")
     {
         return Err(unsupported("play-time source information"));
     }
-    check_requirements(program, source, true, &BTreeSet::new(), None)
+    check_requirements(program, true, &BTreeSet::new(), None, requirements)
 }
 
 fn check_body(
@@ -157,7 +158,11 @@ fn check_body(
     if let Some(event) = entry {
         super::card::triggers::event_operand::mask_origin(&mut inspected, event);
     }
-    check_requirements(&inspected, source, origin.is_some(), &paths, x)?;
+    let requirements = Requirements::derive_program(&Located {
+        node: inspected.clone(),
+        source: source.clone(),
+    });
+    check_requirements(&inspected, origin.is_some(), &paths, x, requirements)?;
     super::numeric::check_program(program)?;
     check_program(
         program,
@@ -348,8 +353,7 @@ fn source_paths(
     }
 }
 
-fn parent_requirements(program: &Located<Program>, card: bool) -> Requirements {
-    let mut requirements = Requirements::derive_program(program);
+fn parent_requirements(mut requirements: Requirements, card: bool) -> Requirements {
     let definitions = granted_definition_roots(&requirements, card);
     if definitions.is_empty() {
         return requirements;
@@ -394,16 +398,12 @@ fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(Str
 )]
 fn check_requirements(
     program: &Program,
-    source: &SourceSpan,
     card: bool,
     origins: &BTreeSet<String>,
     x: Option<PaidX>,
+    requirements: Requirements,
 ) -> Result<()> {
-    let located = Located {
-        node: program.clone(),
-        source: source.clone(),
-    };
-    let mut requirements = parent_requirements(&located, card);
+    let mut requirements = parent_requirements(requirements, card);
     super::movement::mask_entry_effects(&mut requirements);
     let token_paths = super::tokens::paths(program, x);
     let kind_paths = super::by_kind::paths(program);
