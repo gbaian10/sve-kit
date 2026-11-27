@@ -120,7 +120,7 @@ pub(super) fn check_play(program: &Program, source: &SourceSpan, source_bound: b
     {
         return Err(unsupported("play-time source information"));
     }
-    check_requirements_derived(program, true, &BTreeSet::new(), None, requirements)
+    check_requirements(program, true, &BTreeSet::new(), None, requirements)
 }
 
 fn check_body(
@@ -158,7 +158,11 @@ fn check_body(
     if let Some(event) = entry {
         super::card::triggers::event_operand::mask_origin(&mut inspected, event);
     }
-    check_requirements(&inspected, source, origin.is_some(), &paths, x)?;
+    let requirements = Requirements::derive_program(&Located {
+        node: inspected.clone(),
+        source: source.clone(),
+    });
+    check_requirements(&inspected, origin.is_some(), &paths, x, requirements)?;
     super::numeric::check_program(program)?;
     check_program(
         program,
@@ -388,31 +392,11 @@ fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(Str
         .collect()
 }
 
-fn check_requirements(
-    program: &Program,
-    source: &SourceSpan,
-    card: bool,
-    origins: &BTreeSet<String>,
-    x: Option<PaidX>,
-) -> Result<()> {
-    let located = Located {
-        node: program.clone(),
-        source: source.clone(),
-    };
-    check_requirements_derived(
-        program,
-        card,
-        origins,
-        x,
-        Requirements::derive_program(&located),
-    )
-}
-
 #[expect(
     clippy::too_many_lines,
     reason = "Every path-scoped capability exemption is listed in one auditable filter."
 )]
-fn check_requirements_derived(
+fn check_requirements(
     program: &Program,
     card: bool,
     origins: &BTreeSet<String>,
