@@ -1,0 +1,40 @@
+cards:
+  GFD01-019EN:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  combo: 5
+                then:
+                  - look:
+                      bind: seen
+                      top:
+                        n: 10
+                        who: self
+                  - choose:
+                      bind: selected
+                      from:
+                        in: seen
+                        kind: follower
+                        orig_cost_le: 7
+                      may: true
+                      upto: 1
+                  - move:
+                      ref: selected
+                      result: entered
+                      to: field
+                  - move:
+                      order: shuffle
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: entered
+                            view: before
+                        in: seen
+                      to: deck
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

@@ -1,0 +1,20 @@
+cards:
+  GFD01-026EN:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_le: 7
+                  trait: 天使
+                  who: self
+                  zone: deck
+                to: field
+        line: 1
+      - line: 2
+        use: end_phase_angel_reward.v1
+    admission: light
+format: 2
+kind: author_effect_set

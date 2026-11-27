@@ -1,0 +1,25 @@
+cards:
+  GFD01-020EN:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  combo: 5
+                then:
+                  - grant:
+                      keywords:
+                        - intimidate
+                        - aura
+                      on:
+                        kind: follower
+                        who: self
+                        zone: field
+                      until:
+                        next_turn:
+                          edge: begin
+                          who: self
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

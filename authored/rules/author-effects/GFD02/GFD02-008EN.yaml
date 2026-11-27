@@ -1,0 +1,75 @@
+cards:
+  GFD02-008EN:
+    abilities:
+      - keywords:
+          - aura
+        line: 1
+      - auto:
+          cost:
+            flip_up:
+              n: 1
+              sel:
+                who: self
+                zone: evolve_deck
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 5
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 10
+                then:
+                  - damage:
+                      n: 10
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 20
+                then:
+                  - win:
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
