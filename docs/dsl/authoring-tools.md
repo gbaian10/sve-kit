@@ -240,6 +240,8 @@ do:
 
 擲骰使用 `dice: {bind: die}`（可明示 `who: self`），降低為既有 `Action::Dice`，共用洗牌與隨機選取的可重現亂數串流。後續本文用 `{dice: die}` 讀取該次最終接受點數；未定義、先讀後擲或重複命名均拒絕。骰值不由玩家宣告。
 
+`life.who`、`draw.who` 與 `dice.who` 可用 `turn` 指當回合玩家、`non_turn` 指兩人局的非回合玩家。每個擲骰指示保留該玩家最後接受的骰值，可用 `cmp` 比較兩個具名結果。需要逐一處理雙方重擲時，可先令 `turn` 擲骰，再令 `non_turn` 擲骰。兩邊分別使用大於等於條件可保留平手時雙方都執行的結果。
+
 在 `each_player` 的同一段 `stages` 中用 `dice: {bind: die, who: p}`，並在後續抽牌或隨機棄牌明寫 `who: p`。回合玩家先完成該段，骰值與重擲許可都屬於各自的擲骰者。
 
 場上的重擲許可寫成 `static: {effects: [{reroll: {who: self, times: 1}}]}`；只接受固定正整數、自身與無額外條件的場上宣告；只計入自己場上仍有效的印刷能力，失去能力或離場的來源不提供額度。每次擲骰後可逐次選擇重擲或接受，多個來源額度累加；重擲取代前一點數，下一次獨立擲骰重新取得額度（CR 5.20、Q2205–Q2209）。決策公開目前點數及剩餘額度；回答 1 重擲、0 接受，沿用既有整數回答邊界。
@@ -462,6 +464,8 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 所有觸發能力都可用 `targets` 宣告正式目標；費用時點依[作者語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)區分頭付款與本文付款。控制者在檢查時點打出待機能力時選擇目標，沒有足夠合法目標就不發動，不執行後續效果。謝幕在來源離場後選擇目標。目標宣告前不執行本體；同一印刷行的入場曲與謝幕仍以不同 `scope` 區分。模式目標、單一目標組的分配傷害，以及 `at: resolution` 公開計數讀值沿用共同打出規則。模式目標（`option: N`）的候選須是不依賴其他選擇的公開集合；「場の他のフォロワー」的 `other: true` 只排除能力持有者自身，可用於模式目標（BP15-114）。
 
+`fanfare: {no_effect: true}` 表示印刷的入場曲確實誘發、進待機並結算，本文無遊戲指示（如 New Year's Soul Devil）。此形狀只接受 `no_effect: true`，費用、目標與指示應使用普通入場曲本文。
+
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
 `enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。同一處也接受 `cost_le: N`，以進場當下的有效費用篩選主體（BP04-063）。
@@ -586,6 +590,8 @@ X 配模式仍維持拒絕。BP15-046 的必要公開兩張陰陽師手牌可與
 EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_cemetery: true`（「EXエリアのこれを墓場に置く」，BP12-054）與指定名稱的 `banish` 材料；`act_self` 仍只能由場上的來源支付。從者、法術、護符與各種 token 都可帶 EX 起動能力（BP11-004、BP12-095、BP17-099）。
 自身加另外兩張同名卡時，材料使用 `sel.other: true` 排除來源；正式目標與材料都在付款前固定。
 材料不足或 PP 不足時整份付款不成立，不先扣 PP 或移動任何卡片；場上來源不能冒用 EX 起動。
+
+數值 `{history_count: {event: attacked, window: this_turn, where: {ref: this}}}` 讀取場上來源同一世代本回合的攻擊宣告次數。直立後次數仍保留，換回合或重新入場時重新計算。把此讀值用於 `static.while` 與 `cannot: {what: attack, on: this}`，即可限制每張從者的攻擊上限。
 
 場上的印刷持續禁令可用 `cannot: {what: attack, on: {who: all, zone: field, kind: follower}, target: {leaders: all}, if_can_attack: follower}` 表示「能攻擊從者時不能攻擊領袖」。每個攻擊者各自用正式攻擊合法性查詢判定，求值時只排除該提供者的這條領袖禁令；其他禁攻、入場限制、守護、指定攻擊與威壓照常適用。對手有從者不代表能攻擊該從者，多個同類禁令也不會互相遞迴；來源離場或失能後停止套用。這不要求玩家一定攻擊，也不阻止結束主階段（BP06-113，Q871）。省略 `if_can_attack` 保持原有禁攻行為；目前此條件只接場上印刷能力、領袖目標，不接本文安裝型或一般 `A.cond` 合法攻擊 predicate。
 
@@ -998,6 +1004,7 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。`unclassified_keyword_use` 不能用例外放行：查卡的關鍵字關係由程式推導並宣告整卡已檢查，未分類的寫法須先補上對照規則，見[關鍵字機制契約](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)。
 
 `check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keyword-registry.yaml` 以 `role: counter` 登錄規則名稱。
+指示物名稱可登錄日文 `ja` 或英文 `en`，至少要有一種。其他規則名稱仍使用 `ja`。作者檔可使用登錄代碼或名稱。對局優先顯示日文；英版獨有的指示物顯示其英文名稱。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 
@@ -1537,6 +1544,10 @@ CR 1.3.5／5.18.2.2 推論，與作者語法規格相同；Q2704 確認新クレ
 程序外是能力控制者以外的玩家；`to` 也可寫 `self`、`opp` 或程序玩家名稱，`all` 不准入。
 接收方場上的空位在交付當下才讀：BP13-043 的程序先讓雙方依序指定，再從回合方起依序交付，
 後交付的一方看得到先交付造成的空位變化（Q1766）。`result` 與 `precondition` 仍不准入。
+
+`give: {ref: this, to: opp}` 或 `to: other_players` 可將場上的來源從者或護符交給接收者。
+直接引用能力來源的世代；來源已移區、接收方場上已滿，或來源已由接收方控制時，這個指示不移動卡片。
+因此 Loki 讓 Hulking Dragonewt 在兩人局結算兩次入場曲時，第二次結算後仍留在第一位接收者場上。[Q1378](https://en.shadowverse-evolve.com/cards/?cardno=GFD02-007EN)
 
 這不是離場再進場：所有者、物件世代、傷害、數值修正、計數器、進化與出走關聯都保留，
 裝備沿既有規則跟隨穿戴者的控制者，不產生入場或ファンファーレ。

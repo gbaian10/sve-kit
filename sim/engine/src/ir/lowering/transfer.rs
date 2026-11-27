@@ -42,13 +42,21 @@ impl BodyContext<'_> {
         })
     }
 
-    /// Gives the chosen objects to their recipient; `other_players` excludes the giving player,
+    /// Gives chosen objects or the source to their recipient; `other_players` excludes the giving player,
     /// which inside a player procedure is that procedure's player.
     pub(super) fn give(&self, value: &ast::Give, path: &str) -> Result<Action, LoweringError> {
-        let selection = *self
-            .targets
-            .get(&value.r#ref)
-            .ok_or_else(|| unsupported(path))?;
+        let objects = if value.r#ref == "this" {
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            }
+        } else {
+            Selector::Bound {
+                reference: *self
+                    .targets
+                    .get(&value.r#ref)
+                    .ok_or_else(|| unsupported(path))?,
+            }
+        };
         let one = Cardinality {
             minimum: Nat(1),
             maximum: Some(Nat(1)),
@@ -81,9 +89,7 @@ impl BodyContext<'_> {
         };
         // The whole chosen set: an empty choice gives nothing, and each member moves alone.
         Ok(Action::Transfer {
-            objects: Selector::Bound {
-                reference: selection,
-            },
+            objects,
             destination_controller,
         })
     }

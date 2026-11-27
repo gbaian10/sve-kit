@@ -95,6 +95,9 @@ records:
     term_category: ability
     term_id: term:ability.twin_drive
 rule_names:
+  armageddon_counter:
+    en: Armageddon counter
+    role: counter
   arrow_counter:
     ja: 矢カウンター
     role: counter
@@ -112,6 +115,9 @@ rule_names:
     role: counter
   dormancy_counter:
     ja: 休眠カウンター
+    role: counter
+  dream_counter:
+    en: dream counter
     role: counter
   drive:
     ja: ドライブ
@@ -153,6 +159,9 @@ rule_names:
     role: counter
   magic_counter:
     ja: 魔力カウンター
+    role: counter
+  myth_counter:
+    en: myth counter
     role: counter
   on_attack:
     ja: 攻撃時

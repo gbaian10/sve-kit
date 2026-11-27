@@ -267,6 +267,7 @@ impl Checker {
                 self.player(player)
             }
             NatRead::HistoryCount { query, count } => self.history_count_read(query, *count),
+            NatRead::SourceAttacksThisTurn {} => Ok(()),
             NatRead::Combo { player, execution } => {
                 if *execution != (ExecutionRef::Current {}) {
                     return self.reject();

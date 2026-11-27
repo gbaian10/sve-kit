@@ -239,3 +239,26 @@ fn doubled_chronos_fanfare_schedules_two_extra_turns() {
         "P2"
     );
 }
+
+#[test]
+fn a_doubled_source_transfer_leaves_the_follower_with_the_first_recipient() {
+    let mut game = board(
+        &[(
+            "fanfare",
+            json!({"do":[
+                {"give":{"ref":"this","to":"other_players"}},
+                {"life":{"who":"self","delta":1}}
+            ]}),
+        )],
+        true,
+    );
+    play(&mut game, Viewer::P1, "unit-amulet");
+    end_turn(&mut game, Viewer::P1, Viewer::P2);
+    play(&mut game, Viewer::P1, "unit-follower");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["leader"]["life"], 22);
+    assert_eq!(state["P2"]["leader"]["life"], 20);
+    assert_eq!(state["P1"]["field"], json!([]));
+    assert_eq!(state["P2"]["field"], json!(["fanfare-initial"]));
+    assert_eq!(state["objects"]["fanfare-initial"]["generation"], 2);
+}

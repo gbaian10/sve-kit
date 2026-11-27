@@ -3,6 +3,7 @@ use super::{Execution, Game, InputDomain, Result, Slot, Wait, invalid, seat_name
 use crate::game::player::observation::DiceHistory;
 use crate::ir::PlayerId;
 use crate::ir::dice as ir_dice;
+use crate::ir::events::timing::opponent_of;
 use crate::ir::{
     Action, Comparison, Control, DecisionId, DiceEvent, DiceOperation, DieFace, Expr, Instruction,
     Nat, Node, PlayerRef, RollId, Termination,
@@ -18,17 +19,19 @@ pub(super) struct RollWait {
 
 pub(super) fn check_instruction(instruction: &Instruction) -> Result<()> {
     check_action(&instruction.action)?;
-    if matches!(instruction.action, Action::Dice { .. })
-        && !matches!(
-            instruction.actor,
-            PlayerRef::Controller {} | PlayerRef::Bound { .. }
-        )
-    {
+    if matches!(instruction.action, Action::Dice { .. }) && !valid_roller(&instruction.actor) {
         return Err(unsupported(
-            "dice requires the controller or a procedure player as roller",
+            "dice requires the controller, a procedure player or a player relative to the turn",
         ));
     }
     Ok(())
+}
+
+fn valid_roller(player: &PlayerRef) -> bool {
+    matches!(
+        player,
+        PlayerRef::Controller {} | PlayerRef::Active {} | PlayerRef::Bound { .. }
+    ) || *player == opponent_of(PlayerRef::Active {})
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
