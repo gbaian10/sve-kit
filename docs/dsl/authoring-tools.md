@@ -80,6 +80,10 @@ records:
 
 `flip_down.ref` 可直接指定自己進化牌堆的正面集合，例如 `{who: self, zone: evolve_deck, kind: evolve_follower, face_up: true}`；沿用公開進化牌堆篩選，翻面後撤銷對手的公開位置知識。具名結果仍記錄實際成功翻面的成員。
 
+## 翻開進化牌組卡片作為費用
+
+`cost.flip_up: {sel: {who: self, zone: evolve_deck}, n: 1}` 讓能力控制者從自己的進化牌組選一張裏面卡支付費用。省略 `kind` 時包含進化護符、進階從者等所有符合區域與表裏方向的卡片。卡文明寫進化從者時加上 `kind: evolve_follower`。支付前只有控制者可看選項，翻面成功後才公開，卡片保留在原區域與世代。
+
 ## 本文翻開進化牌組卡片
 
 `flip_up: {sel: {who: self, zone: evolve_deck, kind: evolve_follower, trait: 土属性}, upto: 2}`

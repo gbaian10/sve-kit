@@ -520,6 +520,7 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
     };
     play.parameters.iter().any(|decision| {
         check_parameter(decision).is_ok()
+            && !flip_cost::private_material(decision)
             && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
             if binding == reference && constraint.groups.first().is_some_and(|group|
                 zones(&group.selector).is_ok_and(|zones|

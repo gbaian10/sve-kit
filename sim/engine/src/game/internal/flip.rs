@@ -70,11 +70,12 @@ impl Game {
             let owned = object.zone == "evolve_deck"
                 && object.controller == controller
                 && object.owner == controller;
+            // The payment selector already checked the card kind, if the cost names one.
             if strict
                 && (!current
                     || !owned
                     || object.state["face_up"] == up
-                    || self.object_type(id)? != "フォロワー・エボルヴ")
+                    || (!up && self.object_type(id)? != "フォロワー・エボルヴ"))
             {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "flip materials changed".into(),
@@ -87,7 +88,7 @@ impl Game {
                 return Err(unsupported("flip requires the controller's evolve deck"));
             }
             if object.state["face_up"] != up
-                && (!up || self.object_type(id)? == "フォロワー・エボルヴ")
+                && (!up || strict || self.object_type(id)? == "フォロワー・エボルヴ")
             {
                 planned.push((id.to_owned(), *member));
             }

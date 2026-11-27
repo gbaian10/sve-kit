@@ -70,9 +70,22 @@ impl FlipSelection<'_> {
             before,
             kind,
         } = self;
-        if !matches!(filter.kind, ast::SearchKind::EvolveFollower)
-            || filter.face_up.is_some_and(|face_up| face_up != before)
-        {
+        let card_kind = match filter.kind {
+            Some(ast::SearchKind::EvolveFollower) => Some(CardKind::EvolveFollower),
+            None if !before
+                && matches!(
+                    kind,
+                    DecisionKind::PlayParameter {
+                        slot: PlaySlot::CostMaterials,
+                        ..
+                    }
+                ) =>
+            {
+                None
+            }
+            _ => return Err(unsupported(path)),
+        };
+        if filter.face_up.is_some_and(|face_up| face_up != before) {
             return Err(unsupported(path));
         }
         let candidate = Binding::new(1, allocator.scope(path)?);
@@ -92,7 +105,7 @@ impl FlipSelection<'_> {
             binding: candidate,
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
-                    kind: Some(CardKind::EvolveFollower),
+                    kind: card_kind,
                     face_up: Some(before),
                     name: filter.name.as_deref(),
                     contains: filter.name_contains.as_deref(),
