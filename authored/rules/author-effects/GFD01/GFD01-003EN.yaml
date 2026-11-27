@@ -1,0 +1,26 @@
+cards:
+  GFD01-003EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+      - lastword:
+          do:
+            - player_effect:
+                effect:
+                  cannot:
+                    what: lose_defense
+                until:
+                  next_turn:
+                    edge: begin
+                    who: self
+                who: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

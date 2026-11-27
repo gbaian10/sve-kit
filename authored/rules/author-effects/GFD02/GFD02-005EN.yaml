@@ -1,0 +1,27 @@
+cards:
+  GFD02-005EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 7
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        kind: evolve_follower
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 7
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

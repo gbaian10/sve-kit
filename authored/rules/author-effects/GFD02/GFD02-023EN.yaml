@@ -1,0 +1,27 @@
+cards:
+  GFD02-023EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  leader_class: ナイトメア
+                then:
+                  - discard:
+                      n: 1
+                      random: true
+                      who: opp
+        line: 2
+      - attack_time:
+          do:
+            - discard:
+                n: 1
+                random: true
+                who: opp
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

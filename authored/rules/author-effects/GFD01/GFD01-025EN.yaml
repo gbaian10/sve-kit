@@ -1,0 +1,12 @@
+cards:
+  GFD01-025EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - line: 2
+        use: end_phase_angel_reward.v1
+    admission: light
+format: 2
+kind: author_effect_set

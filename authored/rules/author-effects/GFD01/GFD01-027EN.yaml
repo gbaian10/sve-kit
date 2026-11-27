@@ -1,0 +1,59 @@
+cards:
+  GFD01-027EN:
+    abilities:
+      - fanfare:
+          do:
+            - counter:
+                delta: 3
+                name: myth_counter
+                on: this
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: myth_counter
+                        on: this
+                    op: eq
+                    right: 0
+                then:
+                  - damage:
+                      n: 2
+                      to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - counter:
+                  n: 1
+                  name: myth_counter
+                  on: this
+          do:
+            - banish: enemy
+            - give:
+                ref: this
+                to: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

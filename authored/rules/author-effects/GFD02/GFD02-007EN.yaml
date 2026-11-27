@@ -1,0 +1,34 @@
+cards:
+  GFD02-007EN:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                target:
+                  kind: follower
+                  leader_or: true
+                  who:
+                    owner_of: this
+                  zone: field
+                what: attack
+      - fanfare:
+          do:
+            - give:
+                ref: this
+                to: other_players
+        line: 2
+      - auto:
+          do:
+            - damage:
+                n: 5
+                to:
+                  leader: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

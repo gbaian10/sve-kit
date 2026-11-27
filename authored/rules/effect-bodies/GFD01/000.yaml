@@ -1,0 +1,42 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      auto:
+        do:
+          - if:
+              cond:
+                any:
+                  - all:
+                      - my_turn: true
+                      - exists:
+                          kind: follower
+                          trait: 天使
+                          who: self
+                          zone: field
+                  - all:
+                      - not:
+                          my_turn: true
+                      - exists:
+                          kind: follower
+                          trait: 天使
+                          who: opp
+                          zone: field
+              then:
+                - life:
+                    delta: 3
+                    who: turn
+                - draw:
+                    n: 1
+                    who: turn
+        on:
+          phase:
+            which: end
+            whose: turn
+    id: end_phase_angel_reward.v1
+    written_by:
+      - actor:
+          model: gpt-6.2-sol
+          who: Codex
+        date: "2026-11-28"
