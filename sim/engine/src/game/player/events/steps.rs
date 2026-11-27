@@ -4,7 +4,7 @@ use super::{
     EventSubject, MovementBefore, MovementMethod, NumberFacet, Viewer,
 };
 use crate::game::Game;
-use crate::game::player::observation::{seat, viewer, zone};
+use crate::game::player::observation::{seat, viewer, zone, zone_positions_visible};
 use crate::ir::EvolutionState;
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::Value;
@@ -113,15 +113,13 @@ impl Game {
             Some(zone(&object.zone).map_err(|_authority_error| EventError::ProjectionGap)?)
         };
         let card = self.event_card(perspective, id, false)?;
-        let position = if card.is_some()
-            && object.zone != "limit_break"
-            && (object.zone != "hand" || perspective == player)
-        {
-            self.object_position(id)
-                .map_err(|_authority_error| EventError::ProjectionGap)?
-        } else {
-            None
-        };
+        let position =
+            if card.is_some() && zone_positions_visible(&object.zone, perspective == player) {
+                self.object_position(id)
+                    .map_err(|_authority_error| EventError::ProjectionGap)?
+            } else {
+                None
+            };
         Ok(EventLocation {
             player,
             zone: kind,

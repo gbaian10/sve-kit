@@ -1,8 +1,13 @@
 use super::*;
 use std::sync::OnceLock;
+use sve_battle_contract::event::{EventBody, EventDelivery};
+use sve_battle_contract::presentation::NoticeKind;
+use sve_battle_contract::{CardRef, Nat as WireNat};
 use sve_engine::{
     EngineFailure,
+    battle::{BattleReferences, EventFeed, PrintingFaceIdentity, ReferenceInput},
     game::internal::{DecisionView, InputDomain},
+    game::player::Viewer,
 };
 
 fn tree() -> &'static Value {
@@ -39,9 +44,14 @@ fn program(value: &Value) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn catalog_for_spine() -> Arc<Catalog> {
+fn spine_fixture() -> &'static (Arc<Catalog>, BattleReferences) {
+    static FIXTURE: OnceLock<(Arc<Catalog>, BattleReferences)> = OnceLock::new();
+    FIXTURE.get_or_init(build_spine_fixture)
+}
+
+fn build_spine_fixture() -> (Arc<Catalog>, BattleReferences) {
     let (snapshot, registry, legacy) = catalog_documents(&json!("1"));
-    let template: Value = serde_json::from_str(snapshot.lines().nth(1).unwrap()).unwrap();
+    let mut template: Value = serde_json::from_str(snapshot.lines().nth(1).unwrap()).unwrap();
     let mut faces = snapshot.lines().map(str::to_owned).collect::<Vec<_>>();
     let mut effects: Value = serde_json::from_str(&legacy).unwrap();
     for (number, name, kind, cost, traits) in [
@@ -73,14 +83,49 @@ fn catalog_for_spine() -> Arc<Catalog> {
         faces.push(face.to_string());
         effects["cards"][number] = json!({"status":"complete"});
     }
-    Arc::new(
-        Catalog::from_fixture_documents(
-            &faces.join("\n"),
-            &registry,
-            &[("spine".into(), effects.to_string())],
-        )
-        .unwrap(),
+    template["faces"][0]["title"] = json!("synthetic");
+    faces[1] = template.to_string();
+    let snapshot = faces.join("\n");
+    let rules = rule_fixtures::rules(
+        &snapshot,
+        json!([rule_fixtures::title(
+            "synthetic",
+            "unit-follower",
+            json!([])
+        )]),
+        json!([]),
+    );
+    let catalog = rule_fixtures::catalog(
+        &snapshot,
+        &registry,
+        &[("spine".into(), effects.to_string())],
+        &rules.to_string(),
     )
+    .unwrap();
+    let references = BattleReferences::new(
+        &catalog,
+        ReferenceInput {
+            region: "jp".into(),
+            snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+            faces: effects["cards"]
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(|number| PrintingFaceIdentity {
+                    card_no: number.clone(),
+                    native_face: 0,
+                    card: CardRef {
+                        printing_id: number.clone().into(),
+                        face: WireNat::from(0_u32),
+                    },
+                })
+                .collect(),
+            wording: None,
+            rules: None,
+        },
+    )
+    .unwrap();
+    (Arc::new(catalog), references)
 }
 
 fn board(program: &WellFormedCardProgram, deck: &[&str]) -> Game {
@@ -94,7 +139,7 @@ fn board(program: &WellFormedCardProgram, deck: &[&str]) -> Game {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        catalog_for_spine(),
+        spine_fixture().0.clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -266,6 +311,79 @@ fn bp14_selected_deck_reveal_hides_other_members_and_forgets_the_top_before_rema
 }
 
 #[test]
+fn bp14_waiting_seat_only_receives_the_revealed_face_before_top_placement() {
+    let program = program(&document(3));
+    let (_, references) = spine_fixture();
+    let check = |deck: &[&str]| {
+        let mut game = board(&program, deck);
+        game.advance_player_input();
+        let mut feed = EventFeed::new(Viewer::P2);
+        feed.baseline(&mut game);
+        let choice = start(&mut game, &program);
+        game.advance_player_input();
+        let before = (
+            game.battle_observation(Viewer::P2, references).unwrap(),
+            feed.deliver(&mut game, references),
+            game.take_battle_notices(Viewer::P2, references).unwrap(),
+        );
+        assert_eq!(target_cards(&choice), ["follower-a"]);
+        let order = question(pick(&mut game, &choice, vec![0]));
+        game.advance_player_input();
+
+        let look = game.take_battle_notices(Viewer::P1, references).unwrap();
+        assert_eq!(look[0].kind, NoticeKind::Look);
+        let actor = game.battle_observation(Viewer::P1, references).unwrap();
+        let members = &actor.players[0].zones.deck.cards;
+        for (offset, (member, number)) in members.iter().zip(deck).enumerate() {
+            assert_eq!(
+                member.position.unwrap().get(),
+                u64::try_from(offset).unwrap()
+            );
+            let card = &actor.objects.get(&member.object).unwrap().card;
+            assert_eq!(card.printing_id, *number);
+            assert_eq!(look[0].cards[offset].card, *card);
+        }
+        assert_eq!(members.len(), deck.len());
+
+        let waiting = game.battle_observation(Viewer::P2, references).unwrap();
+        assert!(waiting.players[0].zones.deck.cards.is_empty());
+        let notices = game.take_battle_notices(Viewer::P2, references).unwrap();
+        assert_eq!(notices.len(), 1);
+        assert_eq!(notices[0].kind, NoticeKind::TemporaryReveal);
+        assert_eq!(notices[0].cards[0].card.printing_id, "follower-a");
+        assert_eq!(notices[0].cards[0].position, None);
+        let events = feed.deliver(&mut game, references);
+
+        let rest = ordered(&mut game, &order);
+        finish_orders(&mut game, rest);
+        game.advance_player_input();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["deck"][0],
+            json!(format!(
+                "d{}",
+                deck.iter()
+                    .position(|&number| number == "follower-a")
+                    .unwrap()
+            ))
+        );
+        let committed = feed.deliver(&mut game, references);
+        let EventDelivery::Available { batches, .. } = &committed.events else {
+            panic!("the waiting seat receives committed events");
+        };
+        assert!(batches.iter().flat_map(|batch| &batch.events).any(|event| {
+            matches!(&event.body, EventBody::Revealed { cards }
+                if cards.len() == 1
+                    && cards[0].card.printing_id == "follower-a"
+                    && cards[0].object.is_none())
+        }));
+        (before, waiting, events, notices, committed)
+    };
+    let left = check(&["follower-a", "spell-a", "follower-b", "spell-b"]);
+    let right = check(&["spell-a", "follower-b", "follower-a", "spell-b"]);
+    assert_eq!(left, right);
+}
+
+#[test]
 fn bp14_empty_short_or_declined_choice_reveals_only_actual_selected_members() {
     let program = program(&document(3));
     for (deck, picked) in [
@@ -387,7 +505,7 @@ fn stale_private_hand_targets_still_skip_reveal_before_deck_hand_classification(
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"h","card":"spell-a"}]);
     let mut game = Game::new(
-        catalog_for_spine(),
+        spine_fixture().0.clone(),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -751,7 +869,7 @@ fn failed_ex_moves_are_not_removed_by_an_exclusion_union() {
             .collect::<Vec<_>>()
     );
     let mut game = Game::new(
-        catalog_for_spine(),
+        spine_fixture().0.clone(),
         &initial,
         &Value::Null,
         &Value::Null,

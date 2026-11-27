@@ -57,7 +57,7 @@ pub(super) struct PublicReveal {
     id: String,
     controller: String,
     zone: String,
-    viewers: Vec<String>,
+    newly_located: Vec<String>,
 }
 
 pub(super) fn check_objects(objects: &Selector) -> Result<()> {
@@ -247,11 +247,13 @@ impl Game {
             ids.push(id);
             current_members.push(current_reference);
         }
+        // Revealing a private choice does not identify its original deck slot.
+        let located = direct_look || zone == Some("hand");
         for (member, id) in current_members.iter().zip(&ids) {
-            self.internal_record_reveal(execution, *member, id)?;
+            self.internal_record_reveal(execution, *member, id, located)?;
         }
         let before = SnapshotId(self.state.ir_epoch);
-        self.reveal(&ids, "all", &execution.frame(), true)?;
+        self.reveal(&ids, "all", &execution.frame(), located)?;
         self.internal_hand_reveal_events(&hand_reveals, execution, before)?;
         execution.record_notice(
             self,
@@ -281,6 +283,7 @@ impl Game {
         execution: &mut Execution,
         reference: ObjectRef,
         id: &str,
+        located: bool,
     ) -> Result<()> {
         let object = self.object(id)?;
         if object.generation != reference.generation.0
@@ -288,13 +291,15 @@ impl Game {
         {
             return Err(invalid("current hidden reveal generation"));
         }
-        let viewers = ["P1", "P2"]
+        let newly_located = ["P1", "P2"]
             .into_iter()
             .filter(|viewer| {
-                self.state
-                    .knowledge
-                    .get(*viewer)
-                    .is_none_or(|known| !known.knows_location(id))
+                located
+                    && self
+                        .state
+                        .knowledge
+                        .get(*viewer)
+                        .is_none_or(|known| !known.knows_location(id))
             })
             .map(str::to_owned)
             .collect();
@@ -303,7 +308,7 @@ impl Game {
             id: id.to_owned(),
             controller: object.controller.clone(),
             zone: object.zone.clone(),
-            viewers,
+            newly_located,
         });
         Ok(())
     }
@@ -312,7 +317,7 @@ impl Game {
         let mut active = Vec::new();
         for grant in take(&mut execution.reveals) {
             let Some(current) = self.state.objects.get(&grant.id) else {
-                for viewer in grant.viewers {
+                for viewer in grant.newly_located {
                     if let Some(known) = self.state.knowledge.get_mut(&viewer) {
                         known.forget_location(&grant.id);
                     }
@@ -329,7 +334,7 @@ impl Game {
             if matches!(current.zone.as_str(), "hand" | "deck" | "evolve_deck") {
                 let owner = current.owner.clone();
                 let own_hand = current.zone == "hand";
-                for viewer in grant.viewers {
+                for viewer in grant.newly_located {
                     if !(own_hand && viewer == owner)
                         && let Some(known) = self.state.knowledge.get_mut(&viewer)
                     {
