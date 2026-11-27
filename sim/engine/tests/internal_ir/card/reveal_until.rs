@@ -399,8 +399,7 @@ fn reveal_receipts_do_not_grant_arbitrary_public_selection_or_move_variants() {
     }
 }
 
-#[test]
-fn original_cost_boundary_ignores_effective_cost_changes() {
+fn boundary_catalog() -> Arc<Catalog> {
     let snapshot = [
         ("unit-amulet", "アミュレット", "1"),
         ("cost-three", "フォロワー", "3"),
@@ -424,14 +423,19 @@ fn original_cost_boundary_ignores_effective_cost_changes() {
     }})
     .to_string();
     let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
-    let catalog = Arc::new(
+    Arc::new(
         Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("boundary.yaml".into(), document)],
         )
         .unwrap(),
-    );
+    )
+}
+
+#[test]
+fn original_cost_boundary_ignores_effective_cost_changes() {
+    let catalog = boundary_catalog();
     let program = lowerer()
         .lower(&tree())
         .unwrap()
@@ -510,4 +514,56 @@ fn a_raw_prefix_does_not_gain_a_dynamic_cost_condition() {
     };
     predicates[1] = condition_inputs::unprepared_cost(*candidate);
     WellFormedCardProgram::check(raw).unwrap_err();
+}
+
+#[test]
+fn a_prefix_without_a_cost_bound_matches_followers_of_any_cost() {
+    let mut input = tree();
+    input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"][0]["reveal_until"]["sel"]
+        .as_object_mut()
+        .unwrap()
+        .remove("orig_cost_le");
+    let program = lowerer()
+        .lower(&input)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let ability = program.card().abilities[0].node.id;
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"miss","card":"unit-amulet"},
+            {"id":"four","card":"cost-four"},
+            {"id":"three","card":"cost-three"},
+            {"id":"tail","card":"cost-four"}
+        ]),
+    );
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-amulet"}]);
+    let random = json!({"shuffles":[{"player":"P1","result":["miss"]}]});
+    let mut game = Game::new(
+        boundary_catalog(),
+        &initial,
+        &Value::Null,
+        &random,
+        "uncosted-prefix",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &program).unwrap();
+    for number in ["cost-three", "cost-four"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    resolved(
+        game.activate_internal_card("source", ability, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["field"], json!(["source", "four", "three"]));
+    assert_eq!(after["P1"]["deck"], json!(["tail", "miss"]));
+
+    let mut both = tree();
+    both["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"][0]["reveal_until"]["sel"]["orig_cost_gt"] =
+        json!(1_u8);
+    lowerer().lower(&both).unwrap_err();
 }

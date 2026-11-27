@@ -26,7 +26,9 @@ pub(super) fn lower(
             Comparison::Greater,
             context.number(minimum, path, &mut BTreeSet::new())?,
         ),
-        _ => return Err(unsupported(path)),
+        // Without a cost bound every follower matches; every original cost is at least zero.
+        (None, None) => (Comparison::GreaterEqual, Expr::Literal(Int(0))),
+        (Some(_), Some(_)) => return Err(unsupported(path)),
     };
     let candidate = Binding::new(context.allocator.id(path)?, context.scope);
     Ok(Action::RevealUntil {

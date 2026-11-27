@@ -63,6 +63,7 @@ pub(crate) fn cost_filter(action: &Action) -> Option<(Comparison, &Expr<Int>)> {
     };
     let allowed = match (comparison, right) {
         (Comparison::LessEqual | Comparison::Greater, Expr::Literal(bound)) => bound.0 >= 0,
+        (Comparison::GreaterEqual, Expr::Literal(bound)) => bound.0 == 0,
         (Comparison::Greater, Expr::Frozen(read)) => matches!(
             read.as_ref(),
             IntFrozen::PaidMaterialNumber {

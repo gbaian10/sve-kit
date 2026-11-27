@@ -175,6 +175,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 
 正式模式的 `pay.cost` 若含 `pp: x`，選定模式後宣告一次 X，並隨打出支付該模式的全部費用。模式本文的 `search.upto: x` 讀已支付的 X，零張上限不搜尋也不洗牌。搜尋入場的具名結果可用 `grant.on: {follow: entered}` 授予實際入場的從者關鍵字。
 
+`reveal_until.sel` 可省略原費條件，表示翻到指定張數的任何從者為止（GFB01c-004EN「Reveal cards from the top of your deck until you reveal 2 followers」）；`orig_cost_le` 與 `orig_cost_gt` 至多擇一。
+
 `reveal_until.sel.orig_cost_gt` 以嚴格大於比對牌庫從者的印刷原費。下限可讀公開的單一正式目標
 （`{orig_cost_of: target}`），或讀成功送墓的單一場上從者材料（`{orig_cost_of: {objects_of: material, view: before}}`）。
 
@@ -241,6 +243,8 @@ do:
 `upto` 可選零張，獨立的後續指示仍會執行（ECP02-029 的生命回復）。
 
 擲骰使用 `dice: {bind: die}`（可明示 `who: self`），降低為既有 `Action::Dice`，共用洗牌與隨機選取的可重現亂數串流。後續本文用 `{dice: die}` 讀取該次最終接受點數；未定義、先讀後擲或重複命名均拒絕。骰值不由玩家宣告。
+
+`leader_class: ロイヤル` 判斷能力控制者自己的主戰者是否為指定職業，對應英版卡文的「If your leader is 〔職業〕」。職業名與卡片篩選的 `class` 相同，使用日文職業名。依英文綜合規則 6.1.1.5.1，主戰者職業即主戰者卡的職業；引擎讀職業構築開局時記錄的主戰者職業，沒有記錄（例如作品構築）時不成立。讀值在指示結算或付款時取當下的能力控制者，控制權轉移後改讀新控制者的主戰者。可用於本文的 `if` 與 `play.cost_delta.if`（GFB01b-023EN）。Cross Craft 等多張主戰者的賽制尚未支援。
 
 `life.who`、`draw.who` 與 `dice.who` 可用 `turn` 指當回合玩家、`non_turn` 指兩人局的非回合玩家。每個擲骰指示保留該玩家最後接受的骰值，可用 `cmp` 比較兩個具名結果。需要逐一處理雙方重擲時，可先令 `turn` 擲骰，再令 `non_turn` 擲骰。兩邊分別使用大於等於條件可保留平手時雙方都執行的結果。
 

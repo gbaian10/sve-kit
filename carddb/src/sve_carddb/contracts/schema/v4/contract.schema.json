@@ -29924,6 +29924,9 @@
           "$ref": "#/$defs/DSLNodes.A.cond.crimson"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.cond.leader-class"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.cond.exists"
         },
         {
@@ -30372,6 +30375,18 @@
       "required": [
         "ref",
         "kind"
+      ],
+      "type": "object"
+    },
+    "DSLNodes.A.cond.leader-class": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_class": {
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
+        }
+      },
+      "required": [
+        "leader_class"
       ],
       "type": "object"
     },
@@ -43296,18 +43311,12 @@
         "zone",
         "kind"
       ],
-      "oneOf": [
-        {
-          "required": [
-            "orig_cost_le"
-          ]
-        },
-        {
-          "required": [
-            "orig_cost_gt"
-          ]
-        }
-      ]
+      "not": {
+        "required": [
+          "orig_cost_le",
+          "orig_cost_gt"
+        ]
+      }
     },
     "DSLNodes.A.sel.zone-objects": {
       "type": "object",
