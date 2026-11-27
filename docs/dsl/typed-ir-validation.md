@@ -767,9 +767,9 @@ Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序
 複合成本均不因此開放。正式目標在原子付款前完成；來源世代與目前區域沿用
 共用材料付款驗證，付款不能追到移區後的新物件。
 
-## 效果勝利與任意手牌捨棄的執行子集
+## 效果勝敗與任意手牌捨棄的執行子集
 
-作者 `win: {who: self}` 降到既有 `Action::GameResult` 的 `Outcome::Win`。合法子集限能力控制者的單一隱式 PlayerSet，動作來源須與指令來源相同；其他玩家集合、敗北或偽造來源仍拒絕。執行器沿共用規則勝利程序，勝利後立即清除 typed continuation、待機與問題。正式打牌回傳 `CardPlay::GameEnded(Terminal)`：保留已執行前綴，但 `Progress.complete` 為 false，沒有 CardResolved／AbilityResolved 事實，也不再搬動尚未完成處理的法術。
+作者 `win: {who: self}` 和 `lose: {who: opp | opponents}` 都降低為 `Action::GameResult`，分別指定 `Outcome::Win` 與 `Outcome::Lose`。勝利接受能力控制者，敗北接受對手的單一或全體 PlayerSet。動作與指令須使用同一來源。執行器逐一檢查目標玩家是否有對應的勝敗禁止。對局結束時立即清除 typed continuation、待機與問題。正式打牌回傳 `CardPlay::GameEnded(Terminal)`，保留已執行前綴，`Progress.complete` 為 false，沒有 CardResolved／AbilityResolved 事實，尚未完成處理的法術也保留在原區域。
 
 任意張數捨棄使用既有 Chosen／DiscardOutcome；只接受無篩選的自己當前手牌、單一 disjoint 群組、min=0/max=None。發問時上限夾到現有候選數，回答仍驗 actor、token、世代、owner、controller 與唯一 handle。成功回條的 Before 成員數供 `count_of` 讀取；既有精確一張材料的原費讀取限制不變。
 數值張數捨棄使用 `DiscardMode::ChosenCount {population, count}`：population 只接受無篩選的自己當前手牌，count 是有號整數，結算時求值；不大於零時寫入空的 DiscardOutcome 而不發問；否則上下限都是 count，再把下限降到現有候選數（上限保留 count，候選與唯一 handle 驗證使玩家最多選到現有張數），回答驗證與 Chosen 相同。它只在效果本文產生。`DiscardMode::Random` 的 count 也可是結算時求值的整數：常值須為正，動態值不大於零時不捨棄，大於手牌時捨棄全部。

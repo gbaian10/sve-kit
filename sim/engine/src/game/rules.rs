@@ -441,6 +441,35 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn lose_for_players(&mut self, players: Vec<String>, frame: &Frame) -> Result<()> {
+        let mut losers = Vec::new();
+        for seat in players {
+            if !self.restricted(&format!("{seat}.leader"), "lose")? {
+                losers.push(seat);
+            }
+        }
+        if losers.is_empty() {
+            return Ok(());
+        }
+        // In a two-seat game, a single loss immediately gives the other seat the win.
+        let winner = match losers.as_slice() {
+            [loser] => Some(other(loser)),
+            _ => None,
+        };
+        self.state.game = json!({"ended":true,"winner":winner,"by":"1.2.4"});
+        let group = self.group();
+        let player_batch = self.player_event_mark();
+        for loser in losers {
+            self.emit(
+                json!({"kind":"敗北","player":loser,"ability":frame.reference}),
+                &frame.cause,
+                group,
+            );
+        }
+        self.seal_player_event_batch(player_batch);
+        Ok(())
+    }
+
     pub(super) fn checks(&mut self) -> Result<()> {
         if self.state.game["ended"] == true {
             self.internal_terminal_cleanup();

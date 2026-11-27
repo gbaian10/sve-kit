@@ -73,6 +73,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | apply | on:O、effect:E | until:U、capture:play | BP12-109、CP04-060 |
 | player_effect | who:P、effect:E | until:U | BP14-046 |
 | win/skip_turn/extra_turn | who:P | 三個不同操作 | BP04-003、合成、EBD02-007；BP05-086 是費用，非 skip_turn 動作例 |
+| lose | who:opp 或 opponents | 指定對手直接敗北 | GFB01b-007EN，Q759、Q760 |
 | make_type | on:O、type:CardKind | until:U | BP05-001 |
 | evolve | ref:O | into:CardName／非空 CardName[]／ObjectSel；不收直接 param | A-060；BP09-004 的能力頭不算動作例 |
 | transform | ref:O、into:CardName或{allocate:{among:CardName[],each_exactly_once:true}} | entry_effects:E[]；into 不借 evolve 列表 | A-016j |

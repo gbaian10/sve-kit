@@ -28379,6 +28379,22 @@
         }
       ]
     },
+    "DSLNodes.A.act.lose": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "type": "string",
+          "enum": [
+            "opp",
+            "opponents"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
     "DSLNodes.A.act.lose-abilities": {
       "type": "object",
       "properties": {
@@ -43849,6 +43865,9 @@
         },
         "win": {
           "$ref": "#/$defs/DSLNodes.A.act.player-action"
+        },
+        "lose": {
+          "$ref": "#/$defs/DSLNodes.A.act.lose"
         },
         "skip_turn": {
           "$ref": "#/$defs/DSLNodes.A.act.player-action"

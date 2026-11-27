@@ -15388,6 +15388,22 @@
         }
       ]
     },
+    "A.act.lose": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "type": "string",
+          "enum": [
+            "opp",
+            "opponents"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
     "A.act.player-action": {
       "type": "object",
       "properties": {
@@ -16649,6 +16665,9 @@
         },
         "win": {
           "$ref": "#/$defs/A.act.player-action"
+        },
+        "lose": {
+          "$ref": "#/$defs/A.act.lose"
         },
         "skip_turn": {
           "$ref": "#/$defs/A.act.player-action"
