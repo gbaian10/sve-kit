@@ -5,8 +5,8 @@ use sve_battle_contract::event::EventBody;
 use sve_battle_contract::{Seat, Subject};
 use sve_engine::battle::project_batch;
 use sve_engine::game::internal::{DecisionView, InputDomain, InstructionOutcome};
-use sve_engine::game::player::Viewer;
 use sve_engine::game::player::events::{ActionDetails, ActionKind, EventKind, EventSubject};
+use sve_engine::game::player::{Viewer, observation::ObservedZone};
 
 fn tree() -> Value {
     let mut document = evolution_linked_movement::tree(&[
@@ -731,11 +731,11 @@ fn transferring_the_source_amulet_keeps_its_generation_and_state() {
         .unwrap()
         .remove("unit-amulet")
         .unwrap();
-    for full in [false, true] {
+    for (full, owner) in [(false, "P1"), (true, "P2")] {
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"]["field"] = json!([
-            {"id":"source","card":"unit-amulet","owner":"P2",
+            {"id":"source","card":"unit-amulet","owner":owner,
              "state":{"acted":true,"counters":{"test":3}}}
         ]);
         initial["players"]["P2"]["zones"]["field"] = if full {
@@ -780,6 +780,21 @@ fn transferring_the_source_amulet_keeps_its_generation_and_state() {
         );
         let after = game.projection(View::Referee).unwrap();
         let controller = if full { "P1" } else { "P2" };
+        let controlling_viewer = if full { Viewer::P1 } else { Viewer::P2 };
+        let owning_viewer = if full { Viewer::P2 } else { Viewer::P1 };
+        let observation = game.observe(Viewer::P1).unwrap();
+        let field = observation
+            .players
+            .iter()
+            .find(|player| player.player == controlling_viewer)
+            .unwrap()
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap();
+        let properties = &field.cards[0].card.properties;
+        assert_eq!(properties.owner, owning_viewer);
+        assert_eq!(properties.controller, controlling_viewer);
         assert!(
             after[controller]["field"]
                 .as_array()
@@ -793,4 +808,63 @@ fn transferring_the_source_amulet_keeps_its_generation_and_state() {
             );
         }
     }
+}
+
+#[test]
+fn a_chosen_amulet_stays_with_its_existing_controller() {
+    let document = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},
+            "targets":[{"bind":"chosen","from":{"who":"opp","zone":"field","kind":"amulet"},"n":1}],
+            "do":[{"give":{"ref":"chosen","to":"self"}}]
+        }}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"chosen","card":"unit-amulet"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "chosen-amulet",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let asked = question(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let InputDomain::Targets(choices) = &asked.domain else {
+        panic!("a formal target");
+    };
+    assert_eq!(choices.members.len(), 1);
+    let result = resolved(
+        game.answer_internal_card(
+            asked.actor,
+            asked.token,
+            Answer::Targets(vec![choices.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    assert!(result.progress.receipts.values().any(
+        |outcome| matches!(outcome, InstructionOutcome::Transferred(members) if members.is_empty())
+    ));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P2"]["field"],
+        json!(["chosen"])
+    );
 }
