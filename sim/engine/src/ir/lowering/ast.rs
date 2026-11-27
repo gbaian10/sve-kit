@@ -1139,6 +1139,7 @@ pub(super) enum MoveObjects {
     FilteredObserved(FilteredObserved),
     Field(Objects),
     Public(Box<PublicQuery>),
+    PublicUnion { any_of: Box<[PublicQuery; 2]> },
 }
 
 #[derive(Deserialize)]
@@ -2386,7 +2387,7 @@ pub(super) enum Number {
         history_sum: HistorySum,
     },
     LeaderLife {
-        leader_life: LeaderSide,
+        leader_life: Side,
     },
     Plus {
         plus: Box<[Self; 2]>,
