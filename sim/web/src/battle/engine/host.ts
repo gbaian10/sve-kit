@@ -8,7 +8,7 @@ import type {
   SeatMessage,
   SeatRequest,
 } from "./protocol"
-import { LOAD_ERROR_CODES, SEATS } from "./protocol"
+import { LOAD_ERROR_CODES, SEATS, SHARED_LOAD_ERROR_CODES } from "./protocol"
 
 /** The wasm-bindgen `Session`; every call is synchronous. */
 export interface EngineSession {
@@ -37,7 +37,8 @@ function isLoadCode(value: unknown): value is LoadErrorCode {
 
 function loadCodes(error: unknown): Readonly<Record<Seat, LoadErrorCode>> {
   const message = error instanceof Error ? error.message : ""
-  if (isLoadCode(message)) return { p1: message, p2: message }
+  const shared = SHARED_LOAD_ERROR_CODES.find((code) => code === message)
+  if (shared !== undefined) return { p1: shared, p2: shared }
   try {
     const codes: unknown = JSON.parse(message)
     if (Array.isArray(codes) && codes.length === 2) {

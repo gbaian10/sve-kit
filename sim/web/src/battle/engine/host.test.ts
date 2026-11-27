@@ -281,6 +281,7 @@ describe("BattleHost", () => {
       ["references", "references"],
       ["format", "format"],
       ["match", "match"],
+      ["deck_printing", "engine"],
       ["RuntimeError: unreachable at secret.rs:1", "engine"],
     ] as const) {
       const p1 = new FakePort()

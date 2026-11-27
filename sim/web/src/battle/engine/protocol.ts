@@ -46,16 +46,19 @@ export interface BattleBuild {
   readonly options: MatchOptions
 }
 
-export const LOAD_ERROR_CODES = [
+export const SHARED_LOAD_ERROR_CODES = [
   "format",
   "selection",
   "identity",
   "references",
   "match",
+  "engine",
+] as const
+export const LOAD_ERROR_CODES = [
+  ...SHARED_LOAD_ERROR_CODES,
   "deck_format",
   "deck_printing",
   "deck_admission",
-  "engine",
 ] as const
 export type LoadErrorCode = (typeof LOAD_ERROR_CODES)[number]
 
