@@ -1102,6 +1102,7 @@ export default {
       title: "カードの通知（{{count}}）",
       look: "確認したカード",
       temporary_reveal: "公開されたカード",
+      deck_top: "デッキの一番上に置かれたカード",
       empty: "確認したカードはありません。",
       dismiss: "閉じる",
     },
