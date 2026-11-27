@@ -81,26 +81,40 @@ fn board_from_position(program: &WellFormedCardProgram, initial: &Value) -> Game
     game
 }
 
-#[test]
-fn end_phase_flip_up_payment_accepts_any_owned_facedown_evolve_deck_card() {
-    let expanded = evolution_linked_movement::tree(&[(
+fn end_phase_flip_cost(direction: &str, kind: Option<&str>) -> Value {
+    let mut sel = json!({"who":"self","zone":"evolve_deck"});
+    if let Some(kind) = kind {
+        sel["kind"] = json!(kind);
+    }
+    evolution_linked_movement::tree(&[(
         "auto",
         json!({
             "on":{"phase":{"whose":"self","which":"end"}},
-            "cost":{"flip_up":{"sel":{"who":"self","zone":"evolve_deck"},"n":1_u8}},
+            "cost":{(direction):{"sel":sel,"n":1_u8}},
             "do":[{"life":{"who":"self","delta":1}}]
         }),
-    )]);
-    let programs = lowerer().lower(&expanded).unwrap();
-    let program = &programs["unit-follower"];
-    for chosen in [Some("evolved-amulet"), Some("advanced-follower"), None] {
+    )])
+}
+
+#[test]
+fn end_phase_flip_up_payment_filters_kind_only_when_required() {
+    for (kind, chosen, expected) in [
+        (None, Some("evolved-amulet"), 3),
+        (None, Some("advanced-follower"), 3),
+        (None, None, 3),
+        (Some("evolve_follower"), Some("form"), 1),
+    ] {
+        let expanded = end_phase_flip_cost("flip_up", kind);
+        let programs = lowerer().lower(&expanded).unwrap();
+        let program = &programs["unit-follower"];
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
         initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
             {"id":"evolved-amulet","card":"evolved-amulet"},
             {"id":"advanced-follower","card":"advanced-follower"},
-            {"id":"open","card":"form","face_up":true}
+            {"id":"form","card":"form"},
+            {"id":"open","card":"other-form","face_up":true}
         ]);
         initial["players"]["P2"]["zones"]["evolve_deck"] =
             json!([{"id":"enemy-hidden","card":"evolved-amulet"}]);
@@ -129,7 +143,7 @@ fn end_phase_flip_up_payment_accepts_any_owned_facedown_evolve_deck_card() {
             let InputDomain::CostMaterials(domain) = &materials.domain else {
                 panic!("one private material");
             };
-            assert_eq!(domain.members.len(), 2);
+            assert_eq!(domain.members.len(), expected);
             assert_eq!(domain.cardinality.minimum, Nat(1));
             assert!(game.internal_decision(View::P2).is_none());
             let member = domain
@@ -158,7 +172,11 @@ fn end_phase_flip_up_payment_accepts_any_owned_facedown_evolve_deck_card() {
         }
         let authority = game.projection(View::Referee).unwrap();
         let opponent = game.projection(View::P2).unwrap();
-        for material in ["evolved-amulet", "advanced-follower"] {
+        assert_eq!(
+            authority["P1"]["evolve_deck"],
+            json!(["evolved-amulet", "advanced-follower", "form", "open"])
+        );
+        for material in ["evolved-amulet", "advanced-follower", "form"] {
             let paid = chosen == Some(material);
             assert_eq!(authority["objects"][material]["face_up"], paid);
             assert_eq!(authority["objects"][material]["generation"], 0_u8);
@@ -170,6 +188,47 @@ fn end_phase_flip_up_payment_accepts_any_owned_facedown_evolve_deck_card() {
             20_u8 + u8::from(chosen.is_some())
         );
     }
+}
+
+#[test]
+fn flip_down_payment_still_requires_evolve_follower_kind() {
+    lowerer()
+        .lower(&end_phase_flip_cost("flip_down", None))
+        .unwrap_err();
+}
+
+#[test]
+fn private_flip_material_cannot_be_banished_by_a_payment() {
+    let expanded = end_phase_flip_cost("flip_up", None);
+    let programs = lowerer().lower(&expanded).unwrap();
+    let mut program = programs["unit-follower"].card().clone();
+    let body = program.abilities[0].node.body.as_mut().unwrap();
+    let Node::Control {
+        control: Control::Pay { costs, .. },
+    } = &mut body.steps[0].node
+    else {
+        panic!("trigger payment");
+    };
+    let CostSpec::Ordered { steps } = costs else {
+        panic!("flip cost");
+    };
+    let Action::FlipUp { objects, .. } = &steps[0].instruction.action else {
+        panic!("flip action");
+    };
+    steps[0].instruction.action = Action::Banish {
+        objects: objects.clone(),
+    };
+    let admitted = WellFormedCardProgram::check(program).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "flip-material-reuse",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &admitted)
+        .unwrap_err();
 }
 
 fn flip_up_tree(selection: &Value) -> Value {

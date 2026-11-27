@@ -70,7 +70,7 @@ impl Game {
             let owned = object.zone == "evolve_deck"
                 && object.controller == controller
                 && object.owner == controller;
-            // The payment selector already checked the printed kind, if the cost names one.
+            // The payment selector already checked the card kind, if the cost names one.
             if strict
                 && (!current
                     || !owned
