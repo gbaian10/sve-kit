@@ -36,7 +36,7 @@ use crate::ir::{
     FaceId, PaymentEvent, PaymentResult, QuickWindow, RaceEvent,
 };
 use crate::ir::{DiceEvent, EquipEvent};
-use crate::ir::{phase_restrictions as phase_rules, shuffle as shuffle_shape};
+use crate::ir::{phase_restrictions as phase_rules, player_hand_limit, shuffle as shuffle_shape};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -83,6 +83,7 @@ mod receipt_members;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod flip;
 mod grant;
+mod hand_limit;
 mod history_turn;
 mod limit_break;
 mod transfer;
@@ -1973,6 +1974,9 @@ impl Game {
             }
             action @ Action::InstallEffect { .. } if phase_rules::projection(action).is_some() => {
                 self.internal_install_phase_restriction(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. } if player_hand_limit::is_modifier(effect) => {
+                self.internal_install_unlimited_hand(execution, &instruction)?;
             }
             Action::InstallEffect { effect, .. }
                 if matches!(effect.as_ref(), Effect::Continuous { .. }) =>

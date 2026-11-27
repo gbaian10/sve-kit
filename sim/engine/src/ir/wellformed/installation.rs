@@ -6,7 +6,7 @@ use crate::ir::{
     InstallationSubjects, InstallationTime, Interval, KeywordId, PermissionSubject, Polarity,
     Selector, StandScope, TimeAnchor, TimestampBasis, UsageScope,
 };
-use crate::ir::{phase_restrictions, play_restrictions};
+use crate::ir::{phase_restrictions, play_restrictions, player_hand_limit};
 
 fn is_installed_activation_permission(
     effect: &Effect,
@@ -79,6 +79,15 @@ impl Checker {
         if let InstallationSubjects::Players { players, .. } = subjects {
             self.players(players)?;
             self.installed_duration(duration)?;
+            if player_hand_limit::is_modifier(effect) {
+                let Some(source) = player_hand_limit::source(players, effect, duration) else {
+                    return self.reject();
+                };
+                if self.ability_source.as_ref() != Some(source) {
+                    return self.reject();
+                }
+                return self.ability_source(source);
+            }
             if phase_restrictions::effect_window(players, effect, duration).is_some() {
                 return Ok(());
             }

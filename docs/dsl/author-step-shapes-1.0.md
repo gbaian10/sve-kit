@@ -71,7 +71,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | play_card | ref:O | cost?:0；其餘費用覆寫尚不接受 | BP13-036 |
 | play_ability | of:O；trigger 或 ability:{ub:true,n:正安全整數} | cost_policy:normal/waive_original；兩支互斥 | BP14-023、A-016e |
 | apply | on:O、effect:E | until:U、capture:play | BP12-109、CP04-060 |
-| player_effect | who:P、effect:E | until:U | BP14-046 |
+| player_effect | who:P、effect:E | until:U。手牌無上限固定 `who: self`、`effect: {hand_limit: unlimited}`、`until: game` | BP14-046、GFB01a-003EN |
 | win/skip_turn/extra_turn | who:P | 三個不同操作 | BP04-003、合成、EBD02-007；BP05-086 是費用，非 skip_turn 動作例 |
 | lose | who:opp 或 opponents | 指定對手直接敗北 | GFB01b-007EN，Q759、Q760 |
 | make_type | on:O、type:CardKind | until:U | BP05-001 |

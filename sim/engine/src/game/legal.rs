@@ -72,8 +72,7 @@ pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -
 impl Game {
     pub(super) fn end_choices(&self, seat: &str) -> Result<Vec<Value>> {
         if self.state.flow["stage"] == "discard" {
-            let excess = usize::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0))
-                .map_err(invalid)?;
+            let excess = usize::try_from(self.hand_excess(seat)?).map_err(invalid)?;
             return Ok(subsets(&self.zone_ids(seat, "hand"), excess, excess)
                 .into_iter()
                 .map(|select| json!({"do":"end-discard","select":select}))

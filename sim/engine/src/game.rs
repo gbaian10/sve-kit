@@ -104,6 +104,8 @@ struct Object {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Player {
     leader: Value,
+    #[serde(default, skip_serializing_if = "core::ops::Not::not")]
+    unlimited_hand: bool,
     pp: Value,
     ep: i64,
     ep_capacity: i64,
@@ -490,6 +492,7 @@ impl Game {
                 seat.into(),
                 Player {
                     leader: entry["leader"].clone(),
+                    unlimited_hand: false,
                     pp: entry["pp"].clone(),
                     ep,
                     ep_capacity,

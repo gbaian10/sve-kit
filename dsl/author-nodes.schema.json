@@ -15750,6 +15750,35 @@
         "effect"
       ]
     },
+    "A.act.player-effect.hand-limit": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "hand_limit": {
+              "const": "unlimited"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "hand_limit"
+          ]
+        },
+        "until": {
+          "const": "game"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
     "A.act.make-type": {
       "type": "object",
       "properties": {
@@ -16661,7 +16690,14 @@
           "$ref": "#/$defs/A.act.apply"
         },
         "player_effect": {
-          "$ref": "#/$defs/A.act.player-effect"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.act.player-effect"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.hand-limit"
+            }
+          ]
         },
         "win": {
           "$ref": "#/$defs/A.act.player-action"

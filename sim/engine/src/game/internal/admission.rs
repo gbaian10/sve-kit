@@ -47,7 +47,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
-use crate::ir::{NumericChange, play_restrictions};
+use crate::ir::{NumericChange, play_restrictions, player_hand_limit};
 use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
 use crate::ir::{
     advance_entry, effect_evolution, phase_restrictions, prevention, printed_keywords,
@@ -200,7 +200,8 @@ fn keyword_source_paths(
     paths.insert(format!("{path}/instruction/source/origin"));
     paths.insert(format!("{path}/instruction/source/origin/keyword"));
     if let Action::InstallEffect { effect, .. } = action
-        && prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+        && (prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+            || super::hand_limit::check(action, origin).is_ok())
     {
         let prefix = format!("{path}/instruction/action/effect/source/origin");
         paths.insert(prefix.clone());
@@ -616,6 +617,10 @@ fn check_action(
     super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
+    if matches!(action, Action::InstallEffect { effect, .. } if player_hand_limit::is_modifier(effect))
+    {
+        return super::hand_limit::check(action, source);
+    }
     if phase_restrictions::projection(action).is_some() {
         return Ok(());
     }
@@ -968,6 +973,7 @@ fn supported(code: &str) -> bool {
             | "duration.source-zone-exit"
             | "duration.turn"
             | "effect.continuous"
+            | "effect.rule-modifier"
             | "effect.cost-delta"
             | "effect.cost-modifier"
             | "effect.cost-set"
@@ -1151,6 +1157,7 @@ fn supported(code: &str) -> bool {
             | "reference.object-generation"
             | "reference.selected"
             | "reference.snapshot"
+            | "rule.unlimited-hand"
             | "selector.difference"
             | "selector.extremum"
             | "selector.filter"
@@ -1256,6 +1263,7 @@ fn supported(code: &str) -> bool {
             | "shape.Effect.Continuous"
             | "shape.Effect.CostModifier"
             | "shape.Effect.Permission"
+            | "shape.Effect.RuleModifier"
             | "shape.EffectReference.CurrentInstallation"
             | "shape.EffectSource.Any"
             | "shape.EffectTarget.Dynamic"
@@ -1374,6 +1382,7 @@ fn supported(code: &str) -> bool {
             | "shape.RemoveScope.AllAtTime"
             | "shape.RepeatBody.Program"
             | "shape.RideDriveOperation.GainDrive"
+            | "shape.RuleModifier.UnlimitedHand"
             | "shape.ScheduleAnchor.NextTurn"
             | "shape.SelectionView.Current"
             | "shape.Selector.Bound"
