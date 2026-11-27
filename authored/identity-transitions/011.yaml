@@ -1,0 +1,89 @@
+format: 1
+kind: identity_transition_shard
+records:
+  - kind: identity_transition
+    action: apply
+    reverts:
+    sequence: 11
+    previous:
+      record_key: '["identity_transition",10]'
+      record_hash: sha256:184c0e9b6e5f9c32de38d8ba034e8dfbd4e9782b1588bd7248c8cfc2fff9cfcf
+    registry_basis:
+      authored_revision: cd21637c04b8a8176dad8a8ad7851576a8412c53
+      index_path: ids/index.yaml
+      index_hash: sha256:4d34606d187d47d9ef57550c76f794592f78d2a79b2dc8c56e70ce32c713f1ce
+    review_context:
+      context:
+        program_revision: cd21637c04b8a8176dad8a8ad7851576a8412c53
+        configuration: '{"dependencies":[{"name":"uv.lock","sha256":"sha256:cc3e2b4db723b85ce6d3fb4c4eeb399c9fb9bab7c6251a2256893a4b11d9a19a"}],"profile":"registry-art-extension-v1","registry":{"authored_revision":"cd21637c04b8a8176dad8a8ad7851576a8412c53","index_hash":"sha256:4d34606d187d47d9ef57550c76f794592f78d2a79b2dc8c56e70ce32c713f1ce","index_path":"ids/index.yaml"},"review_input":null,"sources":[{"card_batch":"sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5","image_batch":"sha256:969e563798cca3dc7c14a38f48a80ffd2dfa0bfea6ddaa9e4cbc3e1b9fa692c3","parser_version":"official-en-exact-v1","region":"en"},{"card_batch":"sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa","image_batch":"sha256:f6ca43d9e965f9b53e0886ec76de903ea87dcea0f761011b2bd90f2153a9d305","parser_version":"official-jp-exact-v1","region":"jp"}]}'
+      source_batches:
+        - batch_id: sha256:969e563798cca3dc7c14a38f48a80ffd2dfa0bfea6ddaa9e4cbc3e1b9fa692c3
+        - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        - batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        - batch_id: sha256:f6ca43d9e965f9b53e0886ec76de903ea87dcea0f761011b2bd90f2153a9d305
+    updates:
+      - target_key: art:a:ff92c44ce9bf51e986c80c4bc8590880
+        before:
+          record_key: art:a:ff92c44ce9bf51e986c80c4bc8590880
+          record_hash: sha256:4fa489e355c6162bbbd7ff86cae5bcd566ee885b912e26e1d0616cd44ec87480
+          transition_key:
+        after:
+          kind: art
+          owner: BP22
+          data:
+            id: a:ff92c44ce9bf51e986c80c4bc8590880
+            card_id: c:a946c0047d3857f58da14720d7305054
+            face_id: f:fa336b6a525751bca411749be053fa09
+            classification: unclassified
+            uses:
+              - printing_id: p:3f2f5612bc405673baecccd0483ef1d4
+                face_id: f:fa336b6a525751bca411749be053fa09
+              - printing_id: p:ba68315c6fe951bd8f0719688357c40f
+                face_id: f:fa336b6a525751bca411749be053fa09
+              - printing_id: p:ae0fbbd6deb15038bb7c405d6831ac19
+                face_id: f:fa336b6a525751bca411749be053fa09
+              - printing_id: p:98e909162ae65599be457d32852c030d
+                face_id: f:fa336b6a525751bca411749be053fa09
+            observation:
+              region: jp
+              card_no: BP22-075
+              recipe: registry-observation-v2
+              observation_hash: sha256:d6b32801ebde3ab4b38112622c1e44f7547a8bb77549a27ec9c75f63552fbc3c
+              rules_hash: sha256:55580a43f58ade8a029df67600b8e658655c7eeab68b81624cb528ff23aaf502
+        allocation_anchor:
+    repairs: []
+    routes: []
+    evidence:
+      - batch_id: sha256:969e563798cca3dc7c14a38f48a80ffd2dfa0bfea6ddaa9e4cbc3e1b9fa692c3
+        source_version_id: src:v1:f37128bf4296e5a6f631c60d4a8fb0d58a879fba1597e70b692ab454efa8e4f2
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:98e909162ae65599be457d32852c030d"}'
+        role: art_image
+      - batch_id: sha256:969e563798cca3dc7c14a38f48a80ffd2dfa0bfea6ddaa9e4cbc3e1b9fa692c3
+        source_version_id: src:v1:9ac55668780885b064baa97c2323ad17b0e01f9735cadcd37901971ae74dd554
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:ae0fbbd6deb15038bb7c405d6831ac19"}'
+        role: art_image
+      - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:d840369b322f9579d8b1b13665b5cfe12b09bd3cacdb86b34933e737edbbb845
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:3f2f5612bc405673baecccd0483ef1d4"}'
+        role: art_observation
+      - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:43eba6c91c3cd41e800df0c3ab52c378b276ec5324fe77d7957b6639dbd6b3fa
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:ba68315c6fe951bd8f0719688357c40f"}'
+        role: art_observation
+      - batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:c019d8573441bfc965b446d87e74f2057b2f6c8a786a4cc9e6244121dadd00dc
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:98e909162ae65599be457d32852c030d"}'
+        role: art_observation
+      - batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:ae19fda21b8722a24e839a1397ee69f52903725d87492810d134e76b57db9204
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:ae0fbbd6deb15038bb7c405d6831ac19"}'
+        role: art_observation
+      - batch_id: sha256:f6ca43d9e965f9b53e0886ec76de903ea87dcea0f761011b2bd90f2153a9d305
+        source_version_id: src:v1:a1856a3cc38814458fd656364d5eb011573ca60743cc84450051eba91c3ddb86
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:3f2f5612bc405673baecccd0483ef1d4"}'
+        role: art_image
+      - batch_id: sha256:f6ca43d9e965f9b53e0886ec76de903ea87dcea0f761011b2bd90f2153a9d305
+        source_version_id: src:v1:f6d995b6a040780d8b339f91179871cf317f60888b46f48e33eb0bf307b8b165
+        locator: '{"art_id":"a:ff92c44ce9bf51e986c80c4bc8590880","face_id":"f:fa336b6a525751bca411749be053fa09","printing_id":"p:ba68315c6fe951bd8f0719688357c40f"}'
+        role: art_image
+    reason: 逐張核對封存英日卡圖及現行身分，確認新增版次共用同一插畫，保留既有版次與觀測。
