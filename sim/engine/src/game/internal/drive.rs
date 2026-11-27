@@ -367,6 +367,7 @@ impl Game {
             &execution.frame(),
         )?;
         let placed = self.object(&wait.physical)?;
+        let generation = placed.generation;
         let final_destination = RuntimeZoneRef {
             player: player_id(&placed.controller)?,
             kind: match placed.zone.as_str() {
@@ -376,6 +377,11 @@ impl Game {
                 _ => return Err(unsupported("Drive check final destination")),
             },
         };
+        if final_destination.kind == ZoneKind::Deck {
+            for known in self.state.knowledge.values_mut() {
+                known.record_public_location(&wait.physical, generation);
+            }
+        }
         let event = DriveCheckedEvent {
             check: wait.check,
             player: wait.run.player,

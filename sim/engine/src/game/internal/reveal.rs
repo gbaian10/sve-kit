@@ -113,6 +113,16 @@ impl Game {
         {
             return Ok(true);
         }
+        if object.zone == "deck"
+            && ["P1", "P2"].into_iter().all(|seat| {
+                self.state
+                    .knowledge
+                    .get(seat)
+                    .is_some_and(|known| known.knows_public_location(id, object.generation))
+            })
+        {
+            return Ok(true);
+        }
         // Other seats' private knowledge must not change this viewer's metadata.
         let mut current = self.typed.as_ref();
         while let Some(execution) = current {

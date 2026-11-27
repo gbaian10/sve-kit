@@ -34,6 +34,43 @@ fn game() -> Game {
     game_in("field")
 }
 
+#[test]
+fn restoring_a_public_deck_location_preserves_disclosure_with_new_handles() {
+    let mut game = game_in("deck");
+    let id = "s";
+    let generation = game.object(id).unwrap().generation;
+    let viewers = [Viewer::P1, Viewer::P2];
+    for seat in ["P1", "P2"] {
+        game.learn(seat, id, true).unwrap();
+        game.state
+            .knowledge
+            .get_mut(seat)
+            .unwrap()
+            .record_public_location(id, generation);
+    }
+    let checkpoint = game.clone();
+    let original = viewers.map(|viewer| game.observed_card(viewer, id).unwrap());
+    assert!(original.iter().all(|card| card.public));
+
+    game.shuffle("P1", &[id.into()]).unwrap();
+    for seat in ["P1", "P2"] {
+        game.learn(seat, id, true).unwrap();
+    }
+    assert!(
+        viewers
+            .iter()
+            .all(|&viewer| !game.observed_card(viewer, id).unwrap().public)
+    );
+
+    let published = game.published_knowledge();
+    game.restore_player_state(checkpoint, &published).unwrap();
+    for (viewer, previous) in viewers.into_iter().zip(original) {
+        let restored = game.observed_card(viewer, id).unwrap();
+        assert!(restored.public);
+        assert_ne!(restored.handle, previous.handle);
+    }
+}
+
 fn execution(game: &mut Game) -> Execution {
     let identities = game.internal_identities().unwrap();
     game.card_execution(
