@@ -1,0 +1,84 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: printing
+    owner: BP09
+    data:
+      id: p:a5e1db4ba64b5014a03803502054fa0f
+      card_id: c:c1a7e10c96e458638cb5262a958f21f2
+      region: en
+      card_no: BP09-R046EN
+      variant_key: standard
+      home_set_id: BP09
+      source_face_map:
+        - source_index: 0
+          face_id: f:8be4564d79125a60b2aa718b2d33df3b
+      observation:
+        region: en
+        card_no: BP09-R046EN
+        observation_hash: sha256:9ec13206414c75f5522bbedc40aa46ce74e08a1e2467c5543cb66ae7a4367e71
+        rules_hash: sha256:32a458044b0a869c3eed6f59c3da76f2cb5ca65664e94883d4a67aceffaf28c5
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: DSD01a-008
+        target_observation:
+          region: jp
+          card_no: DSD01a-008
+          observation_hash: sha256:88868c802af51d1aa34d0782568777e9150e54ce3ac1d8a42e67361e7df657fa
+          rules_hash: sha256:0a9c1255fe7d646ece8d4ae8f0ef7cf923c69a02ccddc473127db0cff2dc6473
+          recipe: registry-observation-v2
+  - kind: printing
+    owner: BP09
+    data:
+      id: p:c7c39464d443542f9bef5329a1a80ab0
+      card_id: c:22883926e93152aaa8867c1a8067b111
+      region: en
+      card_no: BP09-R047EN
+      variant_key: standard
+      home_set_id: BP09
+      source_face_map:
+        - source_index: 0
+          face_id: f:03455036da5d5afe9186e3301344f529
+      observation:
+        region: en
+        card_no: BP09-R047EN
+        observation_hash: sha256:31464e548e3c81ebd4f6270dcfe17b44a9e6700ace2ea4f33fae0478abad35fd
+        rules_hash: sha256:2cd3b50e5503144c3555a4ad4cff6c81dc26aa245c1b396c5af2531bb079dde1
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP21-PR10
+        target_observation:
+          region: jp
+          card_no: BP21-PR10
+          observation_hash: sha256:ea8b6c72f5b626757a63c268c4225ae9f79b32160125779de6abd75bf767edec
+          rules_hash: sha256:011db8aebfc4c8c42f5dcd0507214d9fbe8b70f235999a6145fce3808d864a33
+          recipe: registry-observation-v2
+  - kind: printing
+    owner: BP09
+    data:
+      id: p:e0a4ae97fbfb5d608f0e3ffd3648360a
+      card_id: c:a2c3c719a8195e32b3d3a2fd617d23d4
+      region: en
+      card_no: BP09-R091EN
+      variant_key: standard
+      home_set_id: BP09
+      source_face_map:
+        - source_index: 0
+          face_id: f:0ef7748edf2953b780677c8f9363cfbf
+      observation:
+        region: en
+        card_no: BP09-R091EN
+        observation_hash: sha256:30bac4c225213860e5dcf0dc6eb3e8ac38f108fb35e051fb7b44c054a4140f00
+        rules_hash: sha256:ece731fb65da14872e09db9f1deb5137798ea78aa1f96e3ea196528aa7736e9f
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP22-R10
+        target_observation:
+          region: jp
+          card_no: BP22-R10
+          observation_hash: sha256:88a2d869d49e3a534088fdcd94f2c0616ae53327748fa458880cfd022dffb7e9
+          rules_hash: sha256:e8401a51e1d12615d52c1547da5e90180d726148c20750ac2be0db0677390670
+          recipe: registry-observation-v2
