@@ -499,3 +499,34 @@ fn malocchio_with_thirty_counters_makes_the_opponent_lose() {
     let after = state(&board);
     assert_eq!(after["game"]["ended"], true, "{after}");
 }
+
+#[test]
+fn acceleratium_finds_a_machina_card_and_buries_itself_to_rush_and_refund() {
+    let mut initial = position("GFB01b-022EN");
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"goblin","card":"BP01-171"},{"id":"mech","card":"BP07-110"}]);
+    let mut board = game(&initial);
+    play(&mut board, "source");
+    assert_eq!(state(&board)["P1"]["hand"], json!(["mech"]));
+}
+
+#[test]
+fn acceleratium_refunds_play_points_equal_to_the_machinas_cost() {
+    let mut initial = position("GFB01b-022EN");
+    initial["players"]["P1"]["pp"] = json!({"current":0_u8,"max":10_u8});
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"GFB01b-022EN"},
+        {"id":"drone","card":"BP07-110","state":{"entered_this_turn":true}}
+    ]);
+    let mut board = game(&initial);
+    let step = board
+        .activate_internal_card("source", activated("GFB01b-022EN"), actor())
+        .unwrap();
+    take_all(&mut board, step);
+    settle_all(&mut board);
+    let after = state(&board);
+    assert_eq!(after["P1"]["cemetery"], json!(["source"]));
+    assert!(keyword(&after, "drone", "突進"));
+    assert_eq!(after["P1"]["pp"]["current"], 2_u8);
+}
