@@ -308,13 +308,7 @@ fn field_ex_return_tree() -> Value {
     )
 }
 
-#[test]
-fn field_and_ex_return_together_to_their_owners_hands() {
-    let program = lowerer()
-        .lower(&field_ex_return_tree())
-        .unwrap()
-        .remove("unit-amulet")
-        .unwrap();
+fn field_ex_return_game() -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([
@@ -323,9 +317,11 @@ fn field_and_ex_return_together_to_their_owners_hands() {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"borrowed","card":"unit-follower","owner":"P1"},
+        {"id":"enemy-follower","card":"unit-follower"},
         {"id":"enemy-amulet","card":"unit-amulet"}
     ]);
     initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"enemy-ex","card":"unit-spell"}]);
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"hidden","card":"unit-spell"}]);
     let mut game = Game::new(
         catalog(),
         &initial,
@@ -334,11 +330,27 @@ fn field_and_ex_return_together_to_their_owners_hands() {
         "field-ex-return",
     )
     .unwrap();
-    game.load_internal_card("unit-amulet", &program).unwrap();
     game.load_internal_card("unit-follower", &card(vec![]))
         .unwrap();
     game.load_internal_card("unit-spell", &card(vec![]))
         .unwrap();
+    game
+}
+
+#[test]
+fn field_and_ex_return_together_to_their_owners_hands() {
+    use sve_engine::game::player::Viewer;
+    use sve_engine::game::player::events::{EventKind, MovementMethod};
+    use sve_engine::game::player::observation::ObservedZone;
+
+    let program = lowerer()
+        .lower(&field_ex_return_tree())
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut game = field_ex_return_game();
+    game.load_internal_card("unit-amulet", &program).unwrap();
+    game.advance_player_input();
     let activated = resolved(
         game.activate_internal_card(
             "source",
@@ -360,14 +372,53 @@ fn field_and_ex_return_together_to_their_owners_hands() {
         })
         .collect::<Vec<_>>();
     assert_eq!(batches.len(), 1);
-    assert_eq!(batches[0].moved.len(), 2);
+    assert_eq!(batches[0].moved.len(), 3);
     assert!(batches[0].moved.iter().all(|member| member.after.is_some()));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["borrowed"]));
-    assert_eq!(state["P2"]["hand"], json!(["enemy-ex"]));
+    assert_eq!(state["P2"]["hand"].as_array().unwrap().len(), 3);
     assert_eq!(state["P1"]["field"], json!(["source", "ally"]));
     assert_eq!(state["P2"]["field"], json!(["enemy-amulet"]));
     assert_eq!(state["P2"]["ex"], json!([]));
+    for id in ["hidden", "enemy-follower", "enemy-ex"] {
+        assert!(state["P2"]["hand"].as_array().unwrap().contains(&json!(id)));
+    }
+    game.advance_player_input();
+    let mut movement_batches = game
+        .event_batches(Viewer::P2, None)
+        .unwrap()
+        .map(|batch| {
+            batch
+                .events
+                .iter()
+                .filter_map(|event| match &event.kind {
+                    EventKind::Movement {
+                        method: MovementMethod::Effect(MoveMethod::Put),
+                        before,
+                        ..
+                    } => before.zone,
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        })
+        .filter(|batch| !batch.is_empty());
+    let origins = movement_batches.next().unwrap();
+    assert_eq!(origins.len(), 3);
+    assert_eq!(
+        origins
+            .iter()
+            .filter(|&&zone| zone == ObservedZone::Field)
+            .count(),
+        2
+    );
+    assert_eq!(
+        origins
+            .iter()
+            .filter(|&&zone| zone == ObservedZone::Ex)
+            .count(),
+        1
+    );
+    assert_eq!(movement_batches.next(), None);
 }
 
 #[test]
@@ -384,5 +435,48 @@ fn field_ex_return_rejects_private_sources_unrelated_destinations_and_mixed_play
         movement["ref"]["any_of"][1] = json!({"who":who,"zone":zone});
         movement["to"] = json!(destination);
         lowerer().lower(&candidate).unwrap_err();
+    }
+}
+
+#[test]
+fn raw_ir_cannot_bypass_the_field_ex_return_boundary() {
+    let programs = lowerer().lower(&field_ex_return_tree()).unwrap();
+    for variant in ["ex-only", "different-players", "private-zone"] {
+        let mut raw = programs["unit-amulet"].card().clone();
+        let ability = &mut raw.abilities[0].node;
+        let id = ability.id;
+        let Node::Instruction { instruction } = &mut ability.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("movement instruction");
+        };
+        let Action::Move { objects, .. } = &mut instruction.action else {
+            panic!("move action");
+        };
+        let Selector::Union { sets } = objects else {
+            panic!("public union");
+        };
+        let Selector::Zone { players, zone, .. } = &mut sets[1] else {
+            panic!("EX selection");
+        };
+        match variant {
+            "ex-only" => *objects = sets.remove(1),
+            "different-players" => players.relation = PlayerRelation::SelfPlayer,
+            "private-zone" => *zone = ZoneKind::Hand,
+            _ => panic!("unknown raw IR variant: {variant}"),
+        }
+
+        let Ok(program) = WellFormedCardProgram::check(raw) else {
+            continue;
+        };
+        let mut game = field_ex_return_game();
+        if game.load_internal_card("unit-amulet", &program).is_ok() {
+            let before = exact_authority(&game);
+            assert!(
+                game.activate_internal_card("source", id, PlayerId { seat: 1 })
+                    .is_err(),
+                "{variant} cannot return EX or hidden cards"
+            );
+            assert_eq!(exact_authority(&game), before);
+        }
     }
 }
