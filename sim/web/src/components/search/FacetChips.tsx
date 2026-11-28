@@ -17,6 +17,7 @@ export interface FacetChipOption {
 }
 
 export interface FacetChip extends FacetChipOption {
+  readonly className?: string
   /** Sub-values behind a popover; the chip itself selects or clears all of them at once. */
   readonly children?: readonly FacetChipOption[]
 }
@@ -28,10 +29,11 @@ export function FacetChips({
   counts,
   selected,
   onChange,
-  locationGrid = false,
+  rows,
 }: {
   readonly title: string
-  readonly locationGrid?: boolean
+  /** Fixed rows of chip codes that never reflow with the width; absent chips leave no gap. */
+  readonly rows?: readonly (readonly string[])[]
   readonly items: readonly FacetChip[]
   /** Printings per value; undefined while the index is still loading (chips are disabled). */
   readonly counts: Readonly<Record<string, number>> | undefined
@@ -40,92 +42,93 @@ export function FacetChips({
 }) {
   const { t } = useTranslation()
   const idPrefix = useId()
-  const content = (
-    <div
-      className={
-        locationGrid
-          ? "grid w-full grid-cols-3 gap-1.5 md:flex md:flex-wrap"
-          : "flex flex-wrap gap-1.5"
-      }
-    >
-      {items.map((item) => {
-        const children = item.children ?? []
-        const all =
-          selected.includes(item.code) ||
-          (children.length > 0 && children.every((child) => selected.includes(child.code)))
-        const some = !all && children.some((child) => selected.includes(child.code))
-        const toggle = (code: string) => {
-          onChange(
-            toggleFacet(
-              selected,
-              code,
-              children.map((child) => child.code),
-              item.code,
-            ),
-          )
-        }
-        const hintId = item.hint === undefined ? undefined : `${idPrefix}-${item.code}-hint`
-        const chipTitle = t("filters.chipTitle", {
-          label: item.label,
-          count: counts?.[item.code] ?? 0,
-        })
-        const chip = (
-          <Toggle
-            pressed={all ? true : some ? "mixed" : false}
-            disabled={!counts}
-            label={item.label}
-            title={item.hint === undefined ? chipTitle : `${chipTitle}\n${item.hint}`}
-            describedBy={hintId}
-            className={cn(
-              children.length > 0 && "rounded-r-none",
-              locationGrid && "max-md:h-11 max-md:min-w-0 max-md:flex-1 max-md:px-1",
-            )}
-            onClick={() => {
-              toggle(item.code)
-            }}
-          >
-            {item.content ?? item.label}
-          </Toggle>
-        )
-        return (
-          <span
-            key={item.code}
-            data-filter-chip=""
-            className={cn(
-              "inline-flex min-w-0",
-              locationGrid && item.code === "main" && "col-span-3 justify-self-start",
-            )}
-          >
-            {chip}
-            {hintId !== undefined && (
-              <span id={hintId} className="sr-only">
-                {item.hint}
-              </span>
-            )}
-            {children.length > 0 && (
-              <FilterDropdown
-                label={t("filters.details", { label: item.label })}
-                compact
-                disabled={!counts}
-              >
-                {children.map((child) => (
-                  <FacetCheckbox
-                    key={child.code}
-                    label={child.label}
-                    content={child.content}
-                    count={counts?.[child.code] ?? 0}
-                    checked={all || selected.includes(child.code)}
-                    onChange={() => {
-                      toggle(child.code)
-                    }}
-                  />
-                ))}
-              </FilterDropdown>
-            )}
+  const chipOf = (item: FacetChip) => {
+    const children = item.children ?? []
+    const all =
+      selected.includes(item.code) ||
+      (children.length > 0 && children.every((child) => selected.includes(child.code)))
+    const some = !all && children.some((child) => selected.includes(child.code))
+    const toggle = (code: string) => {
+      onChange(
+        toggleFacet(
+          selected,
+          code,
+          children.map((child) => child.code),
+          item.code,
+        ),
+      )
+    }
+    const hintId = item.hint === undefined ? undefined : `${idPrefix}-${item.code}-hint`
+    const chipTitle = t("filters.chipTitle", {
+      label: item.label,
+      count: counts?.[item.code] ?? 0,
+    })
+    const chip = (
+      <Toggle
+        pressed={all ? true : some ? "mixed" : false}
+        disabled={!counts}
+        label={item.label}
+        title={item.hint === undefined ? chipTitle : `${chipTitle}\n${item.hint}`}
+        describedBy={hintId}
+        className={cn(
+          children.length > 0 && "rounded-r-none",
+          rows && "min-w-0 max-md:h-11 max-md:px-1 @max-[260px]/facet-rows:px-1",
+        )}
+        onClick={() => {
+          toggle(item.code)
+        }}
+      >
+        {item.content ?? item.label}
+      </Toggle>
+    )
+    return (
+      <span
+        key={item.code}
+        data-filter-chip=""
+        className={cn("inline-flex min-w-0", item.className)}
+      >
+        {chip}
+        {hintId !== undefined && (
+          <span id={hintId} className="sr-only">
+            {item.hint}
           </span>
-        )
+        )}
+        {children.length > 0 && (
+          <FilterDropdown
+            label={t("filters.details", { label: item.label })}
+            compact
+            disabled={!counts}
+          >
+            {children.map((child) => (
+              <FacetCheckbox
+                key={child.code}
+                label={child.label}
+                content={child.content}
+                count={counts?.[child.code] ?? 0}
+                checked={all || selected.includes(child.code)}
+                onChange={() => {
+                  toggle(child.code)
+                }}
+              />
+            ))}
+          </FilterDropdown>
+        )}
+      </span>
+    )
+  }
+  const content = rows ? (
+    <div className="@container/facet-rows flex w-full min-w-0 flex-col gap-1.5">
+      {rows.map((codes) => {
+        const row = codes.flatMap((code) => items.filter((item) => item.code === code))
+        return row.length > 0 ? (
+          <div key={codes[0]} className="flex min-w-0 gap-1.5 @max-[190px]/facet-rows:gap-1">
+            {row.map(chipOf)}
+          </div>
+        ) : null
       })}
     </div>
+  ) : (
+    <div className="flex flex-wrap gap-1.5">{items.map(chipOf)}</div>
   )
   const clear =
     selected.length > 0

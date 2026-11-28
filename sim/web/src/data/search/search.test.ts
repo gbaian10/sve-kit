@@ -1112,6 +1112,82 @@ it("gives GBF appearances their own PR group alongside other rarity filters", as
   }
 })
 
+it("files PR pack printings without a badge under PR without a badge", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  // Official PR without a printed badge belongs to the PR (No badge) facet in this pack.
+  const unrated = { rarity_code: null, rarity_raw: "-", rarity_badge: null, premium: null }
+  const source = (
+    bootstrap: typeof snapshot.bootstrap,
+    promo: JsonObject = { rarity_code: "pr", rarity_raw: "PR", rarity_badge: null },
+  ) => {
+    const overrides: Record<string, JsonObject> = {
+      "p:sd01-001": unrated,
+      "p:pr-001": promo,
+      "p:bp01-001": { rarity_code: "pr", rarity_badge: { style: "none" } },
+    }
+    const columns = new BootstrapColumns()
+    columns.ingest(
+      bootstrap.map((fragment) =>
+        fragment.table === "printing"
+          ? {
+              ...fragment,
+              rows: fragment.rows.map((row) =>
+                Object.hasOwn(row, "rarity_code")
+                  ? { ...row, ...overrides[stringValue(row["id"])] }
+                  : row,
+              ),
+            }
+          : fragment,
+      ),
+    )
+    columns.seal()
+    return columns
+  }
+  const columns = source(snapshot.bootstrap)
+  const created = new SearchIndex(columns, "jp")
+  const completed = new SearchIndex(source(initial.bootstrap), "jp")
+  completed.completePrintings(columns)
+  for (const index of [created, completed, new SearchIndex(completed.encode(), "jp")]) {
+    const ids = (rarities: readonly string[]) =>
+      index
+        .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, unit: "printing", rarities } })
+        .items.map((item) => item.printingId)
+    for (const rarities of [["pr"], ["pr:none"]]) {
+      expect(ids(rarities)).toContain("p:pr-001")
+      expect(ids(rarities)).toContain("p:bp01-001")
+    }
+    expect(ids(["unrated"])).not.toContain("p:pr-001")
+    expect(ids(["pr:unknown"])).not.toContain("p:pr-001")
+    // A printing outside the PR pack without a rarity stays unrated.
+    expect(ids(["unrated"])).toContain("p:sd01-001")
+    expect(ids(["pr"])).not.toContain("p:sd01-001")
+    expect(index.options.prBadgeStyles).toContain("none")
+    const counts = index.options.rarityCounts
+    expect(counts["pr:none"]).toBe(ids(["pr:none"]).length)
+    expect(counts["pr"]).toBe(ids(["pr"]).length)
+    expect(counts["pr"]).toBe(
+      index.options.prBadgeStyles.reduce((sum, style) => sum + (counts[`pr:${style}`] ?? 0), 0),
+    )
+    expect(counts["unrated"]).toBe(ids(["unrated"]).length)
+  }
+  const withBadge = new SearchIndex(
+    source(snapshot.bootstrap, { ...unrated, rarity_badge: { style: "br", text: "BR" } }),
+    "jp",
+  )
+  const badged = withBadge.search({
+    ...query,
+    state: { ...DEFAULT_QUERY, unit: "printing", rarities: ["pr:br"] },
+  })
+  expect(badged.items.map((item) => item.printingId)).toContain("p:pr-001")
+  expect(withBadge.options.rarityCounts["pr:br"]).toBe(badged.total)
+})
+
 it("filters leader frames per printing, intersects rarity and restores the index", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()

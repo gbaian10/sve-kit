@@ -5,7 +5,7 @@ import type { JsonObject } from "../../src/data/format-v3/json"
 
 type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop"
 type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
-type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp"
+type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp" | "pr"
 export type Region = "jp" | "en"
 type MappingState = "confirmed" | "unmapped" | "pending" | "confirmed_none"
 
@@ -40,6 +40,8 @@ export interface Printing {
   readonly intId: number
   readonly variant: "standard" | "alt" | "signed"
   readonly rarity: string | null
+  /** The badge printed at the lower right; PR pack printings are rated by it alone. */
+  readonly badge?: { readonly style: string; readonly text?: string }
   readonly premium?: boolean
   /** A registered reprint printing; unregistered printings carry null on the wire. */
   readonly reprint?: boolean
@@ -165,6 +167,7 @@ const RARITIES: Record<Rarity, Text> = {
   gold: { ja: "ゴールド", zhHant: "金", en: "Gold" },
   legend: { ja: "レジェンド", zhHant: "傳說", en: "Legendary" },
   sp: { ja: "スペシャル", zhHant: "特別", en: "Special" },
+  pr: { ja: "PR", zhHant: "PR", en: "Promo" },
 }
 
 const TRAITS: Record<string, Text> = {
@@ -975,7 +978,8 @@ export const CARDS: readonly Card[] = [
         cardNo: "PR-001",
         intId: 3001,
         variant: "standard",
-        rarity: "sp",
+        rarity: "pr",
+        badge: { style: "sp", text: "PR" },
         product: "prod:pr-jp",
       },
     ],

@@ -110,6 +110,8 @@ records:
 未知欄位、未知 style、YAML 重複鍵、重複 printing_id 與不存在的版次都使建置失敗；
 region／card_no 僅供審閱，不作識別鍵。沒有記錄表示待確認，不表示無標籤。
 外觀不綁圖片 hash，不改寫官方稀有度；雙面卡需一起看兩面後登錄一筆。
+PR 卡包（family code `pr`）的官網稀有度標法不一致，查卡只依這份外觀分級：有標籤歸入對應的 PR 外觀，
+none 或沒有記錄都視為沒有稀有度、卡片不顯示（[快照格式](../export/snapshot-format.md)）。收錄 PR 卡包時照常逐張登錄，含 none。
 
 ```yaml
 format: 1

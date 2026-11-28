@@ -156,21 +156,24 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
 編號類別僅決定版次列顯示順序，不推導稀有度或版次身分，也不改變卡頁預設版次選取。
 
-Web 的 `rarity` 篩選取聯集，使用官方 `rarity_code` 歸類；保留 token `unrated` 表示官方代碼為 null 或「-」，與 PR 外觀 `pr:none`（官方仍是 pr）不同。
+PR 卡包（family code `pr`）的官網稀有度標法不一致，快照照原值保存，但 Web 分類與顯示這個卡包的版次時不看
+`rarity_code`／`rarity_raw`，只看 `rarity_badge`：有標籤（style 不是 `none`）視為 PR 並按外觀分級；
+`none` 或 null 視為沒有稀有度，卡片不顯示稀有度。Web 由同一條規則取得顯示及篩選用的版次稀有度。
+
+Web 的 `rarity` 篩選依上述採用的稀有度代碼歸類。沒有稀有度的 PR 卡包版次歸入 `pr:none`，其他沒有可用代碼的版次歸入 `unrated`。
+碎閃版次計入 `premium`。選取「碎閃」時，可再按上述稀有度分類縮小結果。
 PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
-計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；官方 pr 的外觀子項目互斥且完整，加總等於父項目。
-例如 `rarity=sp,pr:br,unrated` 同時包含官方 SP、官方 PR 的 BR 標籤外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
+計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；PR 子項目互斥且完整，加總等於父項目。
+`rarity=sp,pr:br,unrated` 同時選取查卡分類為 SP、PR（BR）與無分類的版次。圖牌依卡面外觀顯示。
 
 `printing.rarity_badge` 是與 `rarity_code` 一同載入的可空物件：`null` 表示待確認；
 `{style: "none"}` 表示已確認無標籤；其他 style 為 `br / sr / gr / lg / sl / sp / gbf`，
 必須帶 `text` 原樣印字（例如 `PR` 或 `BR`）。每版次一筆，雙面標註時一起確認；
 不由同名卡、另一地區或卡號前綴推導。採物件讓「無資料」和「無標籤」各自有明確表示，且 style／text 同屬一筆外觀。
 
-稀有度篩選 `pr` 只依官方 `rarity_code=pr`，包含全部 PR 外觀與待確認版次；
-子選項 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:gbf / pr:sp / pr:none` 同時要求
-**同一版次**的官方 pr 與對應 style。早期印 BR 的 PR 仍屬 PR（BR）；七種外觀子項的三語標籤皆由 style 大寫產生。
-Web 將外觀為 null 的官方 PR 歸至 `pr:unknown`。該區沒有這類版次時隱藏子選項。
-多選稀有度時為聯集，其他版次條件仍需同一版次滿足；排序與預設版次照官方代碼，外觀全空時原有行為不變。
+稀有度代碼為 `pr` 的版次按卡面標籤外觀歸入 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:gbf / pr:sp / pr:none`，
+PR 卡包以外的外觀為 null 時歸入 `pr:unknown`。早期印 BR 的 PR 仍屬 PR（BR），七種有標籤的子項以 style 大寫顯示。
+多選稀有度時為聯集，其他版次條件仍需同一版次滿足。匯出的預設版次照官方代碼選取；Web 的版次排序依採用後的代碼，卡片依卡面標籤外觀顯示。
 
 ### 主戰者卡名框篩選
 
