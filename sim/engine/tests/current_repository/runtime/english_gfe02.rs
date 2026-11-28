@@ -76,13 +76,13 @@ fn slumbering_calamity_adds_the_third_counter_and_evolves_without_paying_pp() {
 
 #[test]
 fn unevolved_slumbering_calamity_returns_to_its_runecraft_owners_field() {
-    let mut initial = position(BRINGER);
+    let mut initial = position("GFE02-017EN");
     initial["players"]["P2"]["leader"]["class"] = json!("ウィッチ");
     initial["players"]["P2"]["zones"]["field"] = json!([{
         "id":"calamity","card":CALAMITY,"state":{"counters":{"catastrophe_counter":2_u8}}
     }]);
     let mut board = game(&initial);
-    play_with_modes(&mut board, "source", &[]);
+    play_with_modes(&mut board, "source", &[ModeId(1)]);
     let after = state(&board);
     assert_eq!(after["P2"]["field"], json!(["calamity"]));
     assert!(after["objects"]["calamity"]["counters"]["catastrophe counter"].is_null());
