@@ -661,7 +661,7 @@ exclude_used 只接受 play 入口的頂層 ChoiceKeyword、controller、Public�
 Mode.count 是上限的權威。常值 count 先依 CR5.18.2.3 clamp 到模式數，domain 基數須一致；
 可為 exact、1..上限；只有上限涵蓋全部模式時才接受 0..上限，承載「好きな数」，
 不能把一般「まで」降成可選零個（CR5.18.2.1）。條件 count 僅接受 Nat Conditional 的常值葉子，
-條件以常值與 AtPlay／Current 的 SC、NC 比較（含 And／Or／Not）；domain 固定 min=1、
+條件可使用常值、AtPlay／Current 的 SC、NC 比較，或能力控制者的主戰者職業（含 And／Or／Not）；domain 固定 min=1、
 max=None，動態上限只由 count 產生。IR 目前無法表達動態 exact count，
 lowering 必須拒絕此類原文，不能誤降成「まで」而期待 checker 辨認。SC／NC 的 AtPlay 讀值
 只能用於模式數，不能出現在一般本文或 capture。BP02-045／BP02-088 是種子；通用 instead
