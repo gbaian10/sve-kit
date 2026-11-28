@@ -1,0 +1,52 @@
+cards:
+  GFB01b-023EN:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          cost_delta:
+            delta: -3
+            if:
+              leader_class: ドラゴン
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  power_of:
+                    role:
+                      name: second
+                      of: pair
+                to:
+                  role:
+                    name: first
+                    of: pair
+            - damage:
+                n:
+                  power_of:
+                    role:
+                      name: first
+                      of: pair
+                to:
+                  role:
+                    name: second
+                    of: pair
+          targets:
+            - bind: pair
+              from:
+                kind: follower
+                who: all
+                zone: field
+              n: 2
+              roles:
+                first:
+                  if_nonempty: 1
+                second: remaining
+    admission: light
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

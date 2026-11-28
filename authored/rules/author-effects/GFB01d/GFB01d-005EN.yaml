@@ -1,0 +1,41 @@
+cards:
+  GFB01d-005EN:
+    abilities:
+      - fanfare:
+          do:
+            - each_player:
+                as: player
+                stages:
+                  - - choose:
+                        bind: recovered
+                        by: player
+                        from:
+                          kind: amulet
+                          who: player
+                          zone: cemetery
+                        upto: 1
+                    - move:
+                        ref: recovered
+                        to: hand
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 5
+              - act_self: true
+          do:
+            - choose:
+                bind: summoned
+                from:
+                  kind: amulet
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: summoned
+                result: entered
+                to: field
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

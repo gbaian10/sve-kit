@@ -1,0 +1,37 @@
+cards:
+  GFB01b-019EN:
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: first
+                from:
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                position: bottom
+                ref: first
+                result: placed_first
+                to: deck
+            - choose:
+                bind: second
+                from:
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                position: bottom
+                ref: second
+                result: placed_second
+                to: deck
+            - draw:
+                n:
+                  plus:
+                    - count_of: placed_first
+                    - count_of: placed_second
+                who: self
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set
