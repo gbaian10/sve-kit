@@ -1,4 +1,4 @@
-import { type KeyboardEvent, type ReactNode, useId } from "react"
+import { type KeyboardEvent, type ReactElement, useId } from "react"
 
 import { cn } from "./cn"
 import { rovingRadioKeyDown } from "./useRovingRadio"
@@ -7,7 +7,7 @@ interface SegmentedOption<T extends string> {
   readonly value: T
   readonly label: string
   /** Shown instead of the label, which then names the button and becomes its tooltip. */
-  readonly icon?: ReactNode
+  readonly icon?: ReactElement
 }
 
 export interface SegmentedProps<T extends string> {
