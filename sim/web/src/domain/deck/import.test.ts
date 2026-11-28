@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { card } from "../../test-utils/deck-cards"
 import { DeckCodeError, encodeDeckCode } from "./code"
-import { importEdition, type ImportLookup, readImport } from "./import"
+import { importEdition, type ImportLookup, readDeckLogImport, readImport } from "./import"
 
 // Two printings of c:1 (default p:1, alt p:1a); a leader, an evolve card and a royal card.
 const cards = {
@@ -119,5 +119,87 @@ describe("readImport", () => {
   it("refuses a malformed code instead of guessing", () => {
     expect(() => readImport("SVEK-AQ", lookup)).toThrow(DeckCodeError)
     expect(importEdition("3 BP01-001")).toBeUndefined()
+  })
+
+  it("keeps the printing with the most copies when a card is listed under several", () => {
+    expect(readImport("1 BP01-001\n2 BP01-001P", lookup).main).toEqual([
+      { cardId: "c:1", count: 3, printingId: "p:1a" },
+    ])
+    // A tie keeps the first printing listed; the default printing is not written on the entry.
+    expect(readImport("2 BP01-001\n2 BP01-001P", lookup).main).toEqual([
+      { cardId: "c:1", count: 4 },
+    ])
+  })
+})
+
+describe("readDeckLogImport", () => {
+  const deckLog = {
+    region: "jp",
+    code: "AB12C",
+    format: "N",
+    className: "エルフ",
+    leader: [{ cardNo: "BP01-LD01", count: 1 }],
+    main: [
+      { cardNo: "BP01-001", count: 1 },
+      { cardNo: "BP01-001P", count: 2 },
+      { cardNo: "BP99-001", count: 3 },
+    ],
+    evolve: [{ cardNo: "BP01-010", count: 2 }],
+  } as const
+
+  it("reads DeckLog's printings into the edition's cards and lists the ones it cannot match", () => {
+    expect(readDeckLogImport(deckLog, lookup)).toEqual({
+      name: undefined,
+      edition: "jp",
+      format: "standard",
+      // DeckLog's declared class, not one inferred from the cards.
+      basis: { kind: "class", classCode: "elf" },
+      leader: { cardId: "c:leader" },
+      main: [{ cardId: "c:1", count: 3, printingId: "p:1a" }],
+      evolve: [{ cardId: "c:evo", count: 2 }],
+      side: [],
+      unknown: [{ label: "BP99-001", count: 3 }],
+      extraLeaders: [],
+      unrecognized: [],
+    })
+  })
+
+  it("keeps a declared title, and infers the basis when DeckLog's choice is unknown", () => {
+    const basis = (className: string | null) =>
+      readDeckLogImport({ ...deckLog, className }, lookup).basis
+    expect(basis("Umamusume: Pretty Derby")).toEqual({
+      kind: "title",
+      titleCode: "umamusume_pretty_derby",
+    })
+    expect(basis("グランブルーファンタジー")).toEqual({
+      kind: "title",
+      titleCode: "granblue_fantasy",
+    })
+    expect(basis("Class")).toEqual({ kind: "class", classCode: "forest" })
+    expect(basis(null)).toEqual({ kind: "class", classCode: "forest" })
+  })
+
+  it("lists a second leader instead of dropping it silently", () => {
+    const imported = readDeckLogImport(
+      {
+        ...deckLog,
+        leader: [
+          { cardNo: "BP01-LD01", count: 1 },
+          { cardNo: "BP01-LD01", count: 1 },
+        ],
+      },
+      lookup,
+    )
+    expect(imported.leader).toEqual({ cardId: "c:leader" })
+    expect(imported.extraLeaders).toEqual([{ label: "BP01-LD01", count: 1 }])
+  })
+
+  it("maps DeckLog's construction codes per edition and leaves unknown ones Standard", () => {
+    const format = (region: "jp" | "en", code: string | null) =>
+      readDeckLogImport({ ...deckLog, region, format: code }, lookup).format
+    expect(format("jp", "X")).toBe("crossover")
+    expect(format("en", "G")).toBe("gloryfinder")
+    expect(format("en", "X")).toBeUndefined()
+    expect(format("jp", null)).toBeUndefined()
   })
 })

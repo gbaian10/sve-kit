@@ -142,6 +142,8 @@ export default defineConfig(
     "node_modules/",
     "tests/lint-fixtures/",
     ".playwright-mcp/",
+    // Local state and bundles of `wrangler dev`; never edited or committed.
+    ".wrangler/",
     // Generated from sim/battle-contract; never edited or committed.
     "src/battle/contract/generated/",
     // wasm-bindgen output from `build:engine`; never edited or committed.

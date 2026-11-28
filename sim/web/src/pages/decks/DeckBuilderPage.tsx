@@ -102,7 +102,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
   const data = useDeckData(deck.edition)
   const { facts, restrictions, restrictionStatus, construction } = data
   // The deck's own images come from the search worker: reprints have no image rows on the main thread.
-  const images = useDeckImages(deck, facts, data.images)
+  const { images } = useDeckImages(deck, facts, data.images)
   const [scope, setScope] = useState<PoolScope>("all")
   const [highlight, setHighlight] = useState<string | null>(null)
   // Below the three-column width the deck is a full-screen sheet over the pool; back closes it.

@@ -26,7 +26,7 @@ it("says the cards could not load, keeps the pasted list and loads them on retry
   })
   prefsStore.set({ uiLanguage: "zh-TW" })
   await renderRoutes(routes, { initialEntries: ["/decks/import"] })
-  fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
     target: { value: "3 BP01-001" },
   })
   const alert = await screen.findByRole("alert", {}, { timeout: 25_000 })
@@ -36,5 +36,7 @@ it("says the cards could not load, keeps the pasted list and loads them on retry
   expect(
     await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 }),
   ).toBeInTheDocument()
-  expect(screen.getByRole("textbox", { name: "牌組文字或分享碼" })).toHaveValue("3 BP01-001")
+  expect(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" })).toHaveValue(
+    "3 BP01-001",
+  )
 }, 60_000)

@@ -206,6 +206,8 @@ node_modules/
 /sim/web/src/battle/contract/generated/
 # Engine WebAssembly and glue from `bun run build:engine`.
 /sim/web/src/battle/engine/generated/
+# Local state and bundles of `wrangler dev` (local D1 included).
+/sim/web/.wrangler/
 
 ### mise ###
 # Machine-local env such as SVE_DATA_DIR and SVE_TEST_SNAPSHOT.
