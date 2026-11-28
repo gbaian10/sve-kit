@@ -11,3 +11,16 @@ default-groups = ["dev", "test"]
 
 # Use Ruff defaults outside directories with their own configuration, regardless of user settings.
 [tool.ruff]
+
+# SQL style for hand-written files (D1 migrations under sim/web/migrations). Not wired into hooks or
+# CI yet; run by hand: uvx sqlfluff lint sim/web/migrations
+[tool.sqlfluff.core]
+dialect = "sqlite"
+templater = "raw"
+exclude_rules = [
+    "LT05", # no line-length limit
+    "RF04", # allow keywords as column names (name, type, ...)
+]
+
+[tool.sqlfluff.indentation]
+tab_space_size = 2 # two-space indent like the rest of the repo
