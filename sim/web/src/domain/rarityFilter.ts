@@ -13,9 +13,7 @@ const PR_STYLE_ORDER: readonly string[] = [
   "unknown",
 ]
 
-// The PR pack's family code. Its leaders carry no rarity (the site lists them as "-", and the
-// six it lists as PR are corrected to match); the filter files them under PR without a badge
-// while the card itself keeps showing none.
+// PR pack leaders can be found with other promos even though their cards carry no rarity.
 export const PR_PACK = "pr"
 
 /** What the rarity filter reads from one printing. */

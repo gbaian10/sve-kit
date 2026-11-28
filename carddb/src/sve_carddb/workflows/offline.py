@@ -653,6 +653,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     )
     errata_translations = load_errata_translations(authored_root(inputs.repo))
     overrides = load_overrides(authored_root(inputs.repo))
+    rarity_corrections = load_rarity_corrections(authored_root(inputs.repo))
     configuration = adoptions.configuration() | {
         "reviewed_errata": dict(errata_configuration(inputs.repo / "card-data")),
         "errata_translations": errata_translations.configuration(),
@@ -664,6 +665,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         "registry_review_inputs": identity.review_input_pin,
         "identity_transitions": identity.renewal_configuration(),
         "manual_printings": manual.configuration(),
+        "rarity_corrections": digest(
+            canonical([record.model_dump(mode="json") for record in rarity_corrections])
+        ),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
@@ -731,7 +735,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     badges = load_badges(authored_root(inputs.repo))
-    rarity_corrections = load_rarity_corrections(authored_root(inputs.repo))
     leader_frames = load_leader_frames(authored_root(inputs.repo))
     reprints = load_reprints(authored_root(inputs.repo))
     marks = load_marks(authored_root(inputs.repo))

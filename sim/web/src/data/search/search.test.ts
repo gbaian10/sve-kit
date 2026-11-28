@@ -1115,6 +1115,8 @@ it("gives GBF appearances their own PR group alongside other rarity filters", as
 it("files PR pack leaders without an official rarity under PR without a badge", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
@@ -1125,34 +1127,44 @@ it("files PR pack leaders without an official rarity under PR without a badge", 
     "p:pr-001": unrated,
     "p:bp01-001": { rarity_code: "pr", rarity_badge: { style: "none" } },
   }
-  const fragments = snapshot.bootstrap.map((fragment) =>
-    fragment.table === "printing"
-      ? {
-          ...fragment,
-          rows: fragment.rows.map((row) => ({ ...row, ...overrides[stringValue(row["id"])] })),
-        }
-      : fragment,
-  )
-  // A printing's home set is its fragment's owner, so the SD01 leader moves into the PR fragment.
-  const owns = (id: string) => (fragment: (typeof fragments)[number]) =>
-    fragment.table === "printing" && fragment.rows.some((row) => row["id"] === id)
-  const leader = fragments.find(owns("p:sd01-001"))
-  const promo = fragments.find(owns("p:pr-001"))
-  if (!leader || !promo) throw new Error("missing printing fragments")
-  const moved = leader.rows.filter((row) => row["id"] === "p:sd01-001")
-  const columns = new BootstrapColumns()
-  columns.ingest(
-    fragments.map((fragment) =>
-      fragment === leader
-        ? { ...fragment, rows: fragment.rows.filter((row) => row["id"] !== "p:sd01-001") }
-        : fragment === promo
-          ? { ...fragment, rows: [...fragment.rows, ...moved] }
-          : fragment,
-    ),
-  )
-  columns.seal()
+  const source = (bootstrap: typeof snapshot.bootstrap) => {
+    const fragments = bootstrap.map((fragment) =>
+      fragment.table === "printing"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) =>
+              Object.hasOwn(row, "rarity_code")
+                ? { ...row, ...overrides[stringValue(row["id"])] }
+                : row,
+            ),
+          }
+        : fragment,
+    )
+    // A printing's home set is its fragment's owner, so move the leader into the PR fragment.
+    const owns = (id: string) => (fragment: (typeof fragments)[number]) =>
+      fragment.table === "printing" && fragment.rows.some((row) => row["id"] === id)
+    const leader = fragments.find(owns("p:sd01-001"))
+    const promo = fragments.find(owns("p:pr-001"))
+    if (!leader || !promo) throw new Error("missing printing fragments")
+    const moved = leader.rows.filter((row) => row["id"] === "p:sd01-001")
+    const columns = new BootstrapColumns()
+    columns.ingest(
+      fragments.map((fragment) =>
+        fragment === leader
+          ? { ...fragment, rows: fragment.rows.filter((row) => row["id"] !== "p:sd01-001") }
+          : fragment === promo
+            ? { ...fragment, rows: [...fragment.rows, ...moved] }
+            : fragment,
+      ),
+    )
+    columns.seal()
+    return columns
+  }
+  const columns = source(snapshot.bootstrap)
   const created = new SearchIndex(columns, "jp")
-  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+  const completed = new SearchIndex(source(initial.bootstrap), "jp")
+  completed.completePrintings(columns)
+  for (const index of [created, completed, new SearchIndex(completed.encode(), "jp")]) {
     const ids = (rarities: readonly string[]) =>
       index
         .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, unit: "printing", rarities } })
@@ -1169,6 +1181,9 @@ it("files PR pack leaders without an official rarity under PR without a badge", 
     const counts = index.options.rarityCounts
     expect(counts["pr:none"]).toBe(ids(["pr:none"]).length)
     expect(counts["pr"]).toBe(ids(["pr"]).length)
+    expect(counts["pr"]).toBe(
+      index.options.prBadgeStyles.reduce((sum, style) => sum + (counts[`pr:${style}`] ?? 0), 0),
+    )
     expect(counts["unrated"]).toBe(ids(["unrated"]).length)
   }
 })

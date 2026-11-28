@@ -650,6 +650,7 @@ comparison_hash、basis_printing_id、basis_released_on；依據版次引用 pri
 
 `catalog/rarity-corrections.yaml` 在稀有度正規化之前改寫暫存 printing 的 `rarity_raw`，不新增欄位，也不改建置 schema。
 更正後的值照一般規則決定 `rarity_code`／`premium`；官網原值留在 card-data、來源歸檔與更正記錄。
+建置輸入紀錄的 configuration 以 `rarity_corrections` 保存本次使用的更正記錄內容雜湊。
 官網已改成更正值時，建置報告的 `rarity_diagnostics` 列出 `correction_upstream_fixed`，不阻擋建置。契約見
 [authored 佈局「稀有度更正」](../domains/authored-layout.md#稀有度更正)。
 

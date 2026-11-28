@@ -66,11 +66,6 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
             "kind": "printing_rarity_badges",
             "records": [],
         },
-        "catalog/rarity-corrections.yaml": {
-            "format": 1,
-            "kind": "printing_rarity_corrections",
-            "records": [],
-        },
         "rules/keyword-registry.yaml": {
             "format": 1,
             "kind": "keyword_registry",
@@ -145,6 +140,37 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
         {},
     )
     write_files(plan_files(root / "authored", identities))
+    install(
+        case.root,
+        "catalog/rarity-corrections.yaml",
+        {
+            "format": 1,
+            "kind": "printing_rarity_corrections",
+            "records": [
+                {
+                    "printing_id": next(
+                        entry.data["id"]
+                        for entry in identities
+                        if entry.kind == "printing" and entry.data["region"] == "jp"
+                    ),
+                    "region": "jp",
+                    "card_no": "SYN-01",
+                    "expected_raw_value": "LG",
+                    "corrected_value": "-",
+                    "reason": "The synthetic printed card has no rarity mark.",
+                    "evidence": [
+                        {
+                            "kind": "card_image",
+                            "sha256": digest(b"synthetic card image"),
+                            "image_src": "/synthetic.png",
+                            "region": "jp",
+                            "locator": "Card number line",
+                        }
+                    ],
+                }
+            ],
+        },
+    )
     homes = {
         str(entry.data["home_set_id"]) for entry in identities if entry.kind == "card"
     }
@@ -195,6 +221,14 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
         "jp",
     }
     assert actual.projection.tables == expected.projection.tables
+    printing = next(
+        row for row in actual.projection.tables["printing"] if row["region"] == "jp"
+    )
+    assert (printing["rarity_raw"], printing["rarity_code"], printing["premium"]) == (
+        "-",
+        None,
+        None,
+    )
     assert (
         InputRecord.model_validate_json(actual.input_content).uses
         == InputRecord.model_validate_json(expected.input_content).uses
