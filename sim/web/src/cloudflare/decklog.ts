@@ -26,7 +26,7 @@ interface Database {
 }
 
 export interface DeckLogEnv {
-  readonly DECKLOG_DB?: Database
+  readonly DB?: Database
   /** Every lookup, keyed by the caller's address: a person importing never comes near it. */
   readonly DECKLOG_LIMITER?: Limiter
   /** Lookups that reach DeckLog, one key per edition, so the Worker cannot hammer DeckLog. */
@@ -242,7 +242,7 @@ export async function lookUpDeckLog(
   const code = match[2] === undefined ? undefined : normalizeDeckLogCode(match[2])
   if (code === undefined || code !== match[2]) return failure("invalid-code")
 
-  const db = env.DECKLOG_DB
+  const db = env.DB
   const limiter = env.DECKLOG_LIMITER
   const upstream = env.DECKLOG_UPSTREAM_LIMITER
   if (!db || !limiter || !upstream) return failure("not-configured")

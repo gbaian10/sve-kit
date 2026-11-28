@@ -128,9 +128,9 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "d1_databases": [
     {
-      "binding": "DECKLOG_DB",
-      "database_name": "svekit-dev-decklog",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "binding": "DB",
+      "database_name": "svekit-dev",
+      "database_id": "218943f8-b31d-4999-98cd-fd44f08bed4d",
       "migrations_dir": "migrations",
     },
   ],
@@ -448,25 +448,27 @@ API 與前端、R2 讀取共用 Worker、網域與第 4 節的 Access，不另�
 
 ### 維護者建立與綁定
 
-Agent 不建立遠端資源；以下由維護者在 `sim/web` 執行。
+Agent 不建立遠端資源；建立新環境或重建資料庫時，以下由維護者在 `sim/web` 執行。
+
+開發環境只有一個 D1 資料庫 `svekit-dev`，綁定名稱 `DB`，由所有需要資料庫的 Worker 功能共用、各自一張表
+（DeckLog 是 `decklog_deck`）；正式環境另建一個，不共用。結構只由 `migrations/` 依序套用，不在後台手動改。
 
 1. 建立資料庫，記下輸出的 `database_id`：
 
    ```bash
-   bun x wrangler d1 create svekit-dev-decklog
+   bun x wrangler d1 create svekit-dev
    ```
 
-2. 把 `wrangler.dev.jsonc` 的 `database_id` 佔位（全 0）換成上一步的 ID。佔位還在時 `deploy:dev` 會失敗，
-   所以合併後要先完成這一節才能再部署。
+2. 把 `database_id` 寫進 `wrangler.dev.jsonc` 的 `d1_databases`。
 3. 確認 `namespace_id` `19902`、`19903` 在帳號內未被占用，再套用遷移：
 
    ```bash
-   bun x wrangler d1 migrations apply DECKLOG_DB --remote --config wrangler.dev.jsonc
+   bun x wrangler d1 migrations apply DB --remote --config wrangler.dev.jsonc
    ```
 
 4. 照第 5 節部署後，登入開發站，在 `/decks/import` 貼一個 D1 還沒存過、主戰者、主牌組、進化牌組都有的 DeckLog 網址，
    按「從 DeckLog 讀取」，確認預覽與對不到的卡號。Workers Logs 應有一筆 `decklog: upstream`。
-   用 `bun x wrangler d1 execute DECKLOG_DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
+   用 `bun x wrangler d1 execute DB --remote --config wrangler.dev.jsonc --command "SELECT region, code, fetched_at FROM decklog_deck"`
    確認已存。接著在瀏覽器開發者工具勾選停用快取（或改用無痕視窗，否則瀏覽器會直接用一年快取、不會進 Worker），
    重新載入匯入頁，貼同一個網址再讀一次：Workers Logs 應有這次請求的路徑，但不會多出 `decklog: upstream`。
    正式環境另建資料庫與 Rate Limiting namespace，不共用開發的。
@@ -476,7 +478,7 @@ Agent 不建立遠端資源；以下由維護者在 `sim/web` 執行。
 本機用 Wrangler 的本機 D1，不碰遠端。先建置，再於 `sim/web` 起 Worker（`SITE_ORIGIN` 要等於 Vite 轉送時的來源）：
 
 ```bash
-bun x wrangler d1 migrations apply DECKLOG_DB --local --config wrangler.dev.jsonc
+bun x wrangler d1 migrations apply DB --local --config wrangler.dev.jsonc
 bun x wrangler dev --config wrangler.dev.jsonc --local --port 8787 --var SITE_ORIGIN:http://127.0.0.1:8787
 ```
 
