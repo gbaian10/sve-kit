@@ -130,7 +130,9 @@ def _changes(
 def _program_dependencies(source: dict[str, JsonValue], selected: Profile) -> None:
     envelope = object_value(source["envelope"])
     envelope["$id"] = f"urn:sve-kit:snapshot:{selected.version}"
-    envelope["$comment"] = "4.2 program dependencies with 4.1 data containers."
+    envelope["$comment"] = (
+        "4.2 program dependencies and Trigger icons with 4.1 data containers."
+    )
     definitions = object_value(source["definitions"])
     manifest = object_value(object_value(definitions["Manifest"])["properties"])
     programs = object_value(definitions["Programs"])
@@ -156,7 +158,19 @@ def _program_dependencies(source: dict[str, JsonValue], selected: Profile) -> No
             }
         ),
     }
-    programs["required"] = [*array(programs["required"]), "printings"]
+    properties["trigger_icons"] = {
+        "type": "object",
+        "propertyNames": {"pattern": "^p:[0-9a-f]{32}$"},
+        "additionalProperties": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {"pattern": "^f:[0-9a-f]{32}$"},
+            "additionalProperties": {
+                "enum": ["critical", "draw", "stand", "heal", "none"],
+            },
+        },
+    }
+    programs["required"] = [*array(programs["required"]), "printings", "trigger_icons"]
 
 
 def generate(format_version: str = MEDIA) -> bytes:

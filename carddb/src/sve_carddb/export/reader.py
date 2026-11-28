@@ -42,6 +42,7 @@ from sve_carddb.export.semantics import (
     validate_view,
 )
 from sve_carddb.export.text_owners import TextOwners
+from sve_carddb.export.trigger_icons import validate_trigger_icons
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -542,6 +543,7 @@ def _program_closure(
     if used != set(by_id):
         raise ValueError("Unreferenced program entry")
     _program_printings(view, programs, entries)
+    validate_trigger_icons(view, programs.get("trigger_icons", {}))
 
 
 def _closure(view: View, manifest: Row) -> None:

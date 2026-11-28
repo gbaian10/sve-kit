@@ -1,6 +1,6 @@
 """Produce a public logical view, independent of tuple partitioning or publication."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.snapshot import definition, tables
@@ -60,6 +60,7 @@ class Projection:
     metadata: Record
     programs: tuple[Record, ...] = ()
     program_printings: Record | None = None
+    trigger_icons: Record = field(default_factory=dict)
 
 
 def _sort(view: dict[str, list[Record]]) -> None:

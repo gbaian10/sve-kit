@@ -185,7 +185,8 @@ struct State {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_dice_history: Vec<internal::DiceHistoryFact>,
     knowledge: BTreeMap<String, Knowledge>,
-    facts: Value,
+    #[serde(rename = "facts")]
+    fixture_facts: Value,
     game: Value,
     random: Value,
     random_index: usize,
@@ -360,7 +361,8 @@ impl Game {
         random: &Value,
         seed: &str,
     ) -> Result<Self> {
-        let mut game = Self::unopened(catalog, setup, facts, random, seed)?;
+        let mut game = Self::unopened(catalog, setup, random, seed)?;
+        game.state.fixture_facts = facts.clone();
         if setup["pregame"] == true {
             game.initialize_opening()?;
         }
@@ -375,7 +377,6 @@ impl Game {
     pub(super) fn unopened(
         catalog: Arc<Catalog>,
         setup: &Value,
-        facts: &Value,
         random: &Value,
         seed: &str,
     ) -> Result<Self> {
@@ -529,7 +530,7 @@ impl Game {
             ir_quick_activation_history: Vec::new(),
             ir_dice_history: Vec::new(),
             knowledge: BTreeMap::new(),
-            facts: facts.clone(),
+            fixture_facts: Value::Null,
             game: json!({"ended":false}),
             random: random.clone(),
             random_index: 0,

@@ -25,6 +25,7 @@ from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_snapshot
 from sve_carddb.export.reader import _program_printings, read_snapshot
 from sve_carddb.export.transport import Ownership, export_snapshot
+from sve_carddb.export.trigger_icons import validate_trigger_icons
 
 from ..support.snapshot_contract_fixtures import _reseal, fixture
 from ..support.snapshot_project_fixtures import populate, schema
@@ -258,7 +259,10 @@ def test_program_printings_use_the_shared_profile_and_reuse_every_other_payload(
     } == {key: blob.raw for key, blob in packed.payloads.items() if key != "programs"}
 
 
-@pytest.mark.parametrize("change", ["owner", "representative", "token", "config"])
+@pytest.mark.parametrize(
+    "change",
+    ["owner", "representative", "token", "config", "missing-icons", "foreign-icon"],
+)
 def test_program_printings_reject_inexact_closure(
     package_with_printings: Snapshot, change: str
 ) -> None:
@@ -274,11 +278,52 @@ def test_program_printings_reject_inexact_closure(
         object_value(bindings["card"])["representative"] = "missing-printing"
     elif change == "token":
         object_value(bindings["card"])["tokens"] = ["printing"]
+    elif change == "missing-icons":
+        del programs["trigger_icons"]
+    elif change == "foreign-icon":
+        programs["trigger_icons"] = {"p:" + "1" * 32: {"f:" + "2" * 32: "none"}}
     else:
         object_value(payloads["config"])["format_version"] = "4.2.0"
     sealed = _reseal(manifest, payloads)
     with pytest.raises((ValueError, ValidationError)):
         read_snapshot(manifest, sealed)
+
+
+def test_trigger_icon_keys_use_the_printing_region_and_its_adopted_title() -> None:
+    view: View = {
+        "printing": [
+            {
+                "id": "jp",
+                "region": "jp",
+                "card_no": "PR-281",
+                "card_no_state": "official",
+                "faces": [{"face_id": "shared"}],
+            },
+            {
+                "id": "en",
+                "region": "en",
+                "card_no": "CP03-EXAMPLE",
+                "card_no_state": "official",
+                "faces": [{"face_id": "shared"}],
+            },
+        ],
+        "face": [
+            {
+                "id": "shared",
+                "current": [
+                    {"region": "jp", "revision_id": "vanguard"},
+                    {"region": "en", "revision_id": "other-title"},
+                ],
+            },
+        ],
+        "face_revision": [
+            {"id": "vanguard", "region": "jp", "titles": ["cardfight_vanguard"]},
+            {"id": "other-title", "region": "en", "titles": ["another_title"]},
+        ],
+    }
+    validate_trigger_icons(view, {"jp": {"shared": "none"}})
+    with pytest.raises(ValueError, match="outside its Vanguard printing face"):
+        validate_trigger_icons(view, {"en": {"shared": "none"}})
 
 
 def test_only_english_programs_can_depend_on_an_english_token_printing() -> None:
