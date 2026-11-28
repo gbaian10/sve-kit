@@ -311,7 +311,11 @@ export function DeckImportPage() {
           className="flex flex-col gap-2 rounded-button border border-border bg-surface-1 p-3 text-13"
         >
           {hasPicture && (
-            <DeckPicture input={picture} label={t("decks.imageAlt", { name: deckName })} />
+            <DeckPicture
+              input={picture}
+              label={t("decks.imageAlt", { name: deckName })}
+              cardLang={edition === "jp" ? "ja" : "en"}
+            />
           )}
           {deckLogDeck && (
             <p className="text-text-2">

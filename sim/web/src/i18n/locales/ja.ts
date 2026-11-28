@@ -855,6 +855,7 @@ export default {
     importName: "名前：{{name}}",
     importUnknown: "{{count}} 件のカード番号・番号がカードと一致しないため、追加されません：",
     importCopies: "{{card}} ×{{count}}",
+    importCount: "×{{count}}",
     importUnrecognized: "{{count}} 行を読み取れなかったため、無視しました：",
     importLine: "{{line}}：{{text}}",
     importDeckLogBareHint:

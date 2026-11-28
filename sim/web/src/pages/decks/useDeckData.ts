@@ -135,7 +135,8 @@ export interface DeckImages {
   readonly images: ImageIndex | undefined
   /**
    * Whether a face's image row may still arrive: its summary request is running, or it came back
-   * and the row is being fetched. A failed request, or a printing past the requests, is settled.
+   * and the row is being fetched. A failed request, a printing the worker's snapshot lacks, or one
+   * past the requests is settled.
    */
   readonly pending: (printingId: string, faceId: string) => boolean
 }
@@ -174,16 +175,20 @@ export function useDeckImages(
     () => mergeImageIndexes([first.images, second.images, third.images, fourth.images, fallback]),
     [first.images, second.images, third.images, fourth.images, fallback],
   )
-  const phases = [first.phase, second.phase, third.phase, fourth.phase]
-  const phaseKey = phases.join()
-  const pending = useCallback(
-    (printingId: string, faceId: string) => {
-      if (images.known?.(printingId, faceId) === true) return false
-      const at = ids.indexOf(printingId)
-      if (at < 0 || at >= CHUNK * CHUNKS) return false
-      return phaseKey.split(",")[Math.floor(at / CHUNK)] !== "error"
-    },
-    [images, ids, phaseKey],
-  )
+  const requests = [first, second, third, fourth]
+  // Each printing waits on its own request only: one request failing settles none of the others.
+  const pending = (printingId: string, faceId: string) => {
+    const at = ids.indexOf(printingId)
+    if (at < 0 || at >= CHUNK * CHUNKS) return false
+    // Rows any index already holds (the main thread's, or ones kept from earlier answers) are enough.
+    if (images.asset(printingId, faceId) !== undefined) return false
+    const request = requests[Math.floor(at / CHUNK)]
+    if (request === undefined || request.phase === "error") return false
+    if (request.phase !== "complete") return true
+    // A printing the worker's snapshot lacks has no summary, so no image request follows it.
+    const item = request.recent?.find((summary) => summary.printingId === printingId)
+    if (item?.summary === undefined) return false
+    return request.images?.known?.(printingId, faceId) !== true
+  }
   return { images, pending }
 }

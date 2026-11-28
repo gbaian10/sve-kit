@@ -873,6 +873,7 @@ export default {
     importName: "Name: {{name}}",
     importUnknown: "{{count}} card numbers or ids match no card and are left out:",
     importCopies: "{{card}} ×{{count}}",
+    importCount: "×{{count}}",
     importUnrecognized: "{{count}} lines could not be read and were skipped:",
     importLine: "{{line}}: {{text}}",
     importDeckLogBareHint:

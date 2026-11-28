@@ -818,6 +818,7 @@ const zhTW = {
     importName: "名稱：{{name}}",
     importUnknown: "有 {{count}} 個卡號或編號對不到卡片，不會加入：",
     importCopies: "{{card}} ×{{count}}",
+    importCount: "×{{count}}",
     importUnrecognized: "有 {{count}} 行看不懂，已略過：",
     importLine: "{{line}}：{{text}}",
     importDeckLogBareHint:

@@ -6,13 +6,18 @@ import type { DeckEntry } from "../../domain/deck/types"
 import type { DeckFacts } from "./deck-info"
 import { useDeckImages } from "./useDeckData"
 
-// Each request answers with the phase the test sets for it; none brings image rows.
-const phases = new Map<string, string>()
+// Each request answers as the test sets for its first printing; by default it is still running.
+interface Answer {
+  readonly phase: string
+  readonly recent?: readonly { printingId: string; summary?: object }[]
+  readonly images?: ImageIndex
+}
+const answers = new Map<string, Answer>()
 const requested: string[][] = []
 vi.mock("../../app/snapshot", () => ({
   useRecentSummaries: (ids: readonly string[]) => {
     requested.push([...ids])
-    return { phase: phases.get(ids[0] ?? "") ?? "pending", images: undefined }
+    return answers.get(ids[0] ?? "") ?? { phase: "pending", images: undefined }
   },
   useCardSnapshot: () => undefined,
   useImageIndex: () => undefined,
@@ -32,29 +37,56 @@ const deck = {
   evolve: entries(51, 10),
   side: [],
 }
+// The main-thread index holds the base printing p1 only.
 const fallback: ImageIndex = {
   cardImage: () => undefined,
-  asset: () => undefined,
-  known: (printingId) => printingId === "p1",
+  asset: (printingId) => (printingId === "p1" ? { availability: "ready" } : undefined),
 }
+const knowing = (printingIds: readonly string[]): ImageIndex => ({
+  cardImage: () => undefined,
+  asset: () => undefined,
+  known: (printingId) => printingIds.includes(printingId),
+})
 
 describe("useDeckImages", () => {
-  it("asks for all 61 printings of a full deck and settles a printing its failed request held", () => {
-    phases.clear()
+  it("asks for every printing of a full deck and waits only on the ones still coming", () => {
+    answers.clear()
     requested.length = 0
     const { result, rerender } = renderHook(() => useDeckImages(deck, facts, fallback))
-    expect(requested.slice(-4).map((ids) => ids.length)).toEqual([20, 20, 20, 1])
-    // The main-thread index already has a base printing; the last one waits for its request.
+    const all = Array.from({ length: 61 }, (_, i) => `p${String(i)}`)
+    expect(new Set(requested.slice(-4).flat())).toEqual(new Set(all))
     expect(result.current.pending("p1", "f")).toBe(false)
     expect(result.current.pending("p60", "f")).toBe(true)
-    phases.set("p60", "error")
+    // The last request comes back: p60's rows are fetched next, then it is settled.
+    answers.set("p60", { phase: "complete", recent: [{ printingId: "p60", summary: {} }] })
+    rerender()
+    expect(result.current.pending("p60", "f")).toBe(true)
+    answers.set("p60", {
+      phase: "complete",
+      recent: [{ printingId: "p60", summary: {} }],
+      images: knowing(["p60"]),
+    })
     rerender()
     expect(result.current.pending("p60", "f")).toBe(false)
-    expect(result.current.pending("p59", "f")).toBe(true)
+  })
+
+  it("settles a printing the worker lacks, and one whose own request failed, but no other", () => {
+    answers.clear()
+    answers.set("p0", {
+      phase: "complete",
+      recent: [{ printingId: "p2" }],
+      images: knowing([]),
+    })
+    answers.set("p20", { phase: "error" })
+    const { result } = renderHook(() => useDeckImages(deck, facts, fallback))
+    expect(result.current.pending("p2", "f")).toBe(false)
+    expect(result.current.pending("p25", "f")).toBe(false)
+    // The third request is still running.
+    expect(result.current.pending("p45", "f")).toBe(true)
   })
 
   it("does not wait for printings past the requests", () => {
-    phases.clear()
+    answers.clear()
     const big = { ...deck, main: entries(1, 90), evolve: [] }
     const { result } = renderHook(() => useDeckImages(big, facts, fallback))
     expect(result.current.pending("p79", "f")).toBe(true)

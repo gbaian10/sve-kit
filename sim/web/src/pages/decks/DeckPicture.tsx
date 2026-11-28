@@ -50,16 +50,22 @@ interface Target {
 export function DeckPicture({
   input,
   label,
+  cardLang,
 }: {
   readonly input: DeckImageInput | null
   readonly label: string
+  /** The language card names are in (the deck's edition). */
+  readonly cardLang: "ja" | "en"
 }) {
   const { t } = useTranslation()
   const host = useRef<HTMLDivElement>(null)
   // Inputs are rebuilt on unrelated renders; the picture follows what it shows, not the object.
   const key = input === null ? null : JSON.stringify(input)
   const [target, setTarget] = useState<Target | null>(null)
-  if (input !== null && key !== null && key !== target?.key) setTarget({ key, input })
+  // Waiting (`null`) lets go of the target, so coming back draws again: a failed drawing or a card
+  // image that failed to decode gets another try.
+  if (key !== (target?.key ?? null))
+    setTarget(input === null || key === null ? null : { key, input })
   const [drawn, setDrawn] = useState<{ readonly key: string; readonly failed: boolean } | null>(
     null,
   )
@@ -115,7 +121,8 @@ export function DeckPicture({
                 <ul>
                   {section.cards.map((card, i) => (
                     <li key={`${String(i)}-${card.label}`}>
-                      {t("decks.importCopies", { card: card.label, count: card.count })}
+                      <span lang={cardLang}>{card.label}</span>{" "}
+                      {t("decks.importCount", { count: card.count })}
                     </li>
                   ))}
                 </ul>
