@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-001EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 10 }
+      - line: 2
+        keywords: [aura]
+      - line: 3
+        auto:
+          on: { phase: { which: end, whose: self } }
+          do:
+            - counter: { on: this, name: catastrophe_counter, delta: 1 }
+            - if:
+                cond:
+                  cmp:
+                    left: { counter: { on: this, name: catastrophe_counter } }
+                    op: ge
+                    right: 3
+                then:
+                  - evolve: { ref: this }
+      - line: 4
+        lastword:
+          do:
+            - if:
+                cond: { leader_class: ウィッチ }
+                then:
+                  - move: { ref: this, to: field }

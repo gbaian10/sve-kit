@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-005EN:
+    admission: light
+    meta:
+      rulings: [R-0024]
+    abilities:
+      - line: 1
+        evolve_time:
+          do: &roll_round
+            - if:
+                cond: { my_turn: true }
+                then:
+                  - dice: { bind: self_roll, who: self }
+                  - damage: { to: { leader: self }, n: { dice: self_roll } }
+                  - dice: { bind: opp_roll, who: non_turn }
+                  - damage: { to: { leader: opp }, n: { dice: opp_roll } }
+                else:
+                  - dice: { bind: active_roll, who: turn }
+                  - damage: { to: { leader: opp }, n: { dice: active_roll } }
+                  - dice: { bind: inactive_roll, who: self }
+                  - damage: { to: { leader: self }, n: { dice: inactive_roll } }
+      - line: 2
+        super_evolve_time:
+          do:
+            - repeat:
+                n: 2
+                do: *roll_round

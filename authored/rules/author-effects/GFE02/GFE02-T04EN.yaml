@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-T04EN:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on: { phase: { whose: self, which: end } }
+          targets:
+            - bind: summoned
+              from: { who: self, zone: cemetery, kind: follower }
+              n: 1
+          do:
+            - if:
+                cond:
+                  any:
+                    - necro: 20
+                    - cmp: { left: { orig_cost_of: summoned }, op: le, right: 5 }
+                then:
+                  - move: { ref: summoned, to: field, result: entered }
+            - move: { ref: this, to: cemetery }

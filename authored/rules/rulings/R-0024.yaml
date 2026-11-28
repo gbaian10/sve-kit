@@ -1,0 +1,27 @@
+format: 2
+kind: ruling
+id: R-0024
+revision: 1
+question: Calamity Bringer 的進化與超進化能力何時分別結算各玩家的擲骰和傷害？
+decision: 每輪從回合玩家開始。該玩家完成擲骰、可能的重擲及對自己主戰者的傷害，之後由非回合玩家完成自己的處理。超進化時能力的第二輪重新由回合玩家開始。
+evidence:
+  - ref: CR 1.3.4.1
+    kind: supporting
+    version: "1.28.0"
+    url: https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf
+    note: 多位玩家的含選擇處理以回合玩家為先。擲骰可以伴隨選擇是否重擲。
+  - ref: CR 1.3.4.1
+    kind: counter
+    version: "1.28.0"
+    note: 無選擇的處理同時進行。也可以把每輪解讀成先處理各玩家擲骰，再以同一批處理兩位主戰者的傷害。
+  - ref: project
+    kind: project
+    date: "2026-11-28"
+    reason: 沿用 R-0023 對於單一含選擇處理的逐席結算。待官方個別裁定再複核。
+strength: inferred
+decided_on: "2026-11-28"
+applies_to: [K.each-player]
+hint:
+  zh-TW: 本專案採逐席處理。每輪回合玩家先完成擲骰、重擲與傷害。
+  ja: 本プロジェクトでは、各ラウンドにターンプレイヤーが先にダイス、振り直し、ダメージを処理します。
+  en: The active player completes the roll, any rerolls, and damage first in each round.

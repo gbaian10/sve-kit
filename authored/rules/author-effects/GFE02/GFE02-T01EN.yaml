@@ -1,0 +1,11 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-T01EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [storm, drain]
+      - line: 2
+        use: lastword.leader-life-add
+        params: { n: 1 }

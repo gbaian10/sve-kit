@@ -1,0 +1,16 @@
+format: 2
+kind: effect_body_shard
+records:
+  - id: opponent-main-vicious-scorpion
+    admission: light
+    params: {}
+    written_by:
+      - actor: { who: Codex, model: gpt-6.2-sol }
+        date: "2026-11-28"
+    body:
+      auto:
+        on: { phase: { which: main, whose: opp } }
+        do:
+          - optional:
+              do:
+                - create: { token: Vicious Scorpion, to: field }
