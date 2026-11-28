@@ -642,7 +642,7 @@ impl BodyContext<'_> {
         {
             self.single_targets.insert(target.bind.clone());
         }
-        // A single cemetery target lends only its printed attack (GFB01c-021EN); other reads stay closed.
+        // Cemetery targets lend printed attack and cost, without exposing effective board stats.
         if cardinality.maximum == Some(Nat(1))
             && target.any_of.is_none()
             && matches!(

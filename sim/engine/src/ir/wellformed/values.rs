@@ -135,7 +135,7 @@ impl Checker {
     fn sum(&mut self, objects: &Selector, property: NumericProperty) -> Checked {
         if let Selector::Bound { reference } = objects
             && property == NumericProperty::OriginalCost
-            && (!self.env.public_board_singles.contains(&reference.key())
+            && (!self.env.public_cost_singles.contains(&reference.key())
                 || self.env.access.get(&reference.key()) != Some(&Visibility::Public {}))
         {
             return self.reject();

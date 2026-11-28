@@ -122,12 +122,19 @@ impl Checker {
                         .cardinality
                         .maximum
                         .is_some_and(|maximum| maximum.0 <= 1)
-                    && constraint
-                        .groups
-                        .iter()
-                        .all(|group| board_selector(&group.selector))
                 {
-                    self.env.public_board_singles.insert(binding.key());
+                    let in_zones = |zones: &[ZoneKind]| {
+                        constraint
+                            .groups
+                            .iter()
+                            .all(|group| selector_in_zones(&group.selector, zones))
+                    };
+                    if in_zones(&[ZoneKind::Field, ZoneKind::Ex]) {
+                        self.env.public_board_singles.insert(binding.key());
+                        self.env.public_cost_singles.insert(binding.key());
+                    } else if in_zones(&[ZoneKind::Cemetery]) {
+                        self.env.public_cost_singles.insert(binding.key());
+                    }
                 }
                 if let Some(roles) = target_roles {
                     for role in &roles.roles {
@@ -367,17 +374,17 @@ pub(super) fn private_to(visibility: &Visibility, actor: &PlayerRef) -> bool {
         if players.relation == PlayerRelation::SelfPlayer && &players.relative_to == actor)
 }
 
-/// Every candidate stands on a field or in an EX area, both public to every player.
+/// Every selected candidate comes from one of the explicitly authorized zones.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Any other selector may reach a private zone and lends no public cost."
 )]
-fn board_selector(selector: &Selector) -> bool {
+fn selector_in_zones(selector: &Selector, zones: &[ZoneKind]) -> bool {
     match selector {
-        Selector::Zone { zone, .. } => matches!(zone, ZoneKind::Field | ZoneKind::Ex),
-        Selector::Union { sets } => sets.iter().all(board_selector),
+        Selector::Zone { zone, .. } => zones.contains(zone),
+        Selector::Union { sets } => sets.iter().all(|set| selector_in_zones(set, zones)),
         Selector::Filter { input, .. } | Selector::Difference { input, .. } => {
-            board_selector(input)
+            selector_in_zones(input, zones)
         }
         _ => false,
     }

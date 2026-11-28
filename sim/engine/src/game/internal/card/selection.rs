@@ -300,14 +300,22 @@ impl TargetWait {
             .all(|(_, saved)| saved.zone == zone)
     }
 
-    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
-    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+    fn public_single(&self) -> bool {
         self.decision.visibility == (Visibility::Public {})
             && self.bounds.maximum.is_some_and(|maximum| maximum.0 <= 1)
+    }
+
+    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
+    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+        self.public_single()
             && self
                 .characteristics
                 .iter()
                 .all(|(_, saved)| matches!(saved.zone.as_str(), "field" | "ex"))
+    }
+
+    pub(in crate::game::internal) fn public_original_cost_single(&self) -> bool {
+        self.public_board_single() || (self.public_single() && self.chosen_from("cemetery"))
     }
 
     fn is_private_look_member(&self, member: ObjectRef) -> bool {

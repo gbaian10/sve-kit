@@ -1316,7 +1316,10 @@ impl BodyContext<'_> {
                     self.source_stats,
                 )),
                 // 「選んだフォロワーの元のコスト」: printed, so it survives the target leaving.
-                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
+                ast::Observation::Binding(name)
+                    if self.single_targets.contains(name)
+                        || self.cemetery_targets.contains(name) =>
+                {
                     let reference = self
                         .targets
                         .get(name)
