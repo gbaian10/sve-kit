@@ -216,7 +216,11 @@ describe("CardsPage", () => {
     const { router } = await open("/cards?class=bishop")
     const entry = { pages: 3, anchor: "p:bp01-051" }
     await act(() => router.navigate("/cards?class=bishop", { replace: true, state: entry }))
-    await userEvent.click(await screen.findByRole("radio", { name: "表格" }))
+    const table = await screen.findByRole("radio", { name: "表格" })
+    // The switch shows icons; the name doubles as the hover tooltip.
+    expect(table).toHaveAttribute("title", "表格")
+    expect(table).not.toHaveTextContent("表格")
+    await userEvent.click(table)
     expect(router.state.location.search).toBe("?class=bishop&view=table")
     expect(router.state.location.state).toMatchObject(entry)
     await userEvent.click(screen.getByRole("radio", { name: "清單" }))

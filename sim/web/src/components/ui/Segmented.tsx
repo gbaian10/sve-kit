@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useId } from "react"
+import { type KeyboardEvent, type ReactNode, useId } from "react"
 
 import { cn } from "./cn"
 import { rovingRadioKeyDown } from "./useRovingRadio"
@@ -6,6 +6,8 @@ import { rovingRadioKeyDown } from "./useRovingRadio"
 interface SegmentedOption<T extends string> {
   readonly value: T
   readonly label: string
+  /** Shown instead of the label, which then names the button and becomes its tooltip. */
+  readonly icon?: ReactNode
 }
 
 export interface SegmentedProps<T extends string> {
@@ -60,6 +62,8 @@ export function Segmented<T extends string>({
             type="button"
             role="radio"
             aria-checked={checked}
+            aria-label={option.icon === undefined ? undefined : option.label}
+            title={option.icon === undefined ? undefined : option.label}
             disabled={disabled}
             tabIndex={checked || (value === null && option.value === values[0]) ? 0 : -1}
             onKeyDown={onKeyDown}
@@ -68,6 +72,7 @@ export function Segmented<T extends string>({
             }}
             className={cn(
               "relative min-w-11 rounded-sm px-3 text-13 font-semibold whitespace-nowrap",
+              option.icon !== undefined && "grid place-items-center",
               "before:absolute before:inset-x-0 before:content-['']",
               size === "sm" ? "before:-inset-y-[7px]" : "before:-inset-y-1.5",
               checked
@@ -78,7 +83,7 @@ export function Segmented<T extends string>({
               disabled && "cursor-not-allowed text-text-3 hover:text-text-3",
             )}
           >
-            {option.label}
+            {option.icon ?? option.label}
           </button>
         )
       })}

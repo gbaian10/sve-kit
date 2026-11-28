@@ -18,6 +18,7 @@ import { CardList, CardTable } from "../../components/results/CardRows"
 import { ListColumnPicker } from "../../components/results/ListColumnPicker"
 import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
+import { ViewIcon } from "../../components/results/viewIcons"
 import { AbilityTypeFilter } from "../../components/search/AbilityTypeFilter"
 import { ArtistFilter } from "../../components/search/ArtistFilter"
 import { ClassQuickBar, ClassQuickBarSkeleton } from "../../components/search/ClassQuickBar"
@@ -499,7 +500,11 @@ export function CardBrowser({
       size="sm"
       tone="accent"
       label={t("results.view")}
-      options={VIEW_MODES.map((value) => ({ value, label: t(`options.view.${value}`) }))}
+      options={VIEW_MODES.map((value) => ({
+        value,
+        label: t(`options.view.${value}`),
+        icon: <ViewIcon view={value} />,
+      }))}
       value={view}
       onChange={onViewChange}
     />
