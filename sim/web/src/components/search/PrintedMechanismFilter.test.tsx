@@ -15,6 +15,7 @@ it.each([
   await renderInRouter(
     <PrintedMechanismFilter
       group="classMechanisms"
+      groupName={(code) => `name:${code}`}
       options={{ coverage: "complete", unknownCards: 0, counts: {} }}
       selected={[]}
       matchMode="any"
@@ -33,6 +34,7 @@ it.each([
 it("keeps a crossover selection disabled while loading and explains unknown cards", async () => {
   const props = {
     group: "collabMechanisms" as const,
+    groupName: (code: string) => `name:${code}`,
     selected: [],
     matchMode: "any" as const,
     onChange: vi.fn(),
@@ -54,4 +56,36 @@ it("keeps a crossover selection disabled while loading and explains unknown card
   const group = screen.getByRole("group", { name: "Crossover mechanisms" })
   expect(within(group).getByRole("status")).toHaveTextContent("3 cards are not fully determined")
   expect(within(group).getByRole("button", { name: "Serve2" })).toBeEnabled()
+})
+
+it("lays the buttons out in one row per class and title, abbreviations on hover", async () => {
+  const props = {
+    options: { coverage: "complete" as const, unknownCards: 0, counts: {} },
+    selected: [],
+    matchMode: "any" as const,
+    onChange: vi.fn(),
+    onMatchChange: vi.fn(),
+    groupName: (code: string) => `name:${code}`,
+  }
+  const { rerender } = await renderInRouter(
+    <PrintedMechanismFilter {...props} group="classMechanisms" />,
+    { language: "zh-TW" },
+  )
+  await userEvent.click(screen.getByRole("button", { name: /^職業機制/u }))
+  const witch = screen.getByRole("group", { name: "name:witch" })
+  expect(
+    within(witch)
+      .getAllByRole("button")
+      .map((button) => button.textContent),
+  ).toEqual(["魔力連鎖", "蓄積", "土之秘術"])
+  expect(screen.getByRole("img", { name: "name:witch" })).toHaveAttribute("title", "name:witch")
+  expect(within(witch).getByRole("button", { name: "魔力連鎖" })).toHaveAttribute(
+    "title",
+    "縮寫 SC（Spell Chain）",
+  )
+  rerender(<PrintedMechanismFilter {...props} group="collabMechanisms" />)
+  await userEvent.click(screen.getByRole("button", { name: /^合作作品機制/u }))
+  const vanguard = screen.getByRole("group", { name: "name:cardfight_vanguard" })
+  expect(within(vanguard).getAllByRole("button")).toHaveLength(3)
+  expect(screen.getByTitle("name:cardfight_vanguard")).toHaveTextContent("先導者")
 })
