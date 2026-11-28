@@ -75,6 +75,8 @@ async function modelledIndex(): Promise<SearchIndex> {
                   card_no: "PR-021",
                   int_id: 3021,
                   rarity_code: "pr",
+                  // A PR pack printing is rated by its badge alone.
+                  rarity_badge: { style: "sr", text: "PR" },
                 }),
               ),
             ]

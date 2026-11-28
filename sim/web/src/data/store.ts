@@ -1,3 +1,4 @@
+import { adoptPrPackRarity } from "../domain/prPack"
 import type { LoadedSnapshot } from "./client"
 import { drain } from "./format-v3/cursor"
 import type { Row } from "./format-v3/decode"
@@ -69,10 +70,20 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
         printingOwners.set(stringValue(row["id"]), (fragment.value["owner"] as Row)["id"] ?? null)
         if ((++visited & 31) === 0) yield
       }
+  const families = yield* mergedRowsCursor(snapshot.bootstrap, "product_family")
+  const familyCodes = new Map(
+    families.map((row) => [stringValue(row["id"]), stringValue(row["code"])]),
+  )
   const printings: Row[] = [],
     printingIds = new Set<string>()
   for (const row of yield* mergedRowsCursor(snapshot.bootstrap, "printing")) {
-    printings.push({ ...row, home_set_id: printingOwners.get(stringValue(row["id"])) ?? null })
+    const owner = printingOwners.get(stringValue(row["id"])) ?? null
+    printings.push(
+      adoptPrPackRarity(
+        { ...row, home_set_id: owner },
+        typeof owner === "string" ? familyCodes.get(owner) : undefined,
+      ),
+    )
     printingIds.add(stringValue(row["id"]))
     if ((++visited & 31) === 0) yield
   }
@@ -83,7 +94,6 @@ export function* cardIndexCursor(snapshot: LoadedSnapshot): Generator<void, Card
         if ((++visited & 31) === 0) yield
       }
   const revisions = yield* mergedRowsCursor(snapshot.bootstrap, "face_revision")
-  const families = yield* mergedRowsCursor(snapshot.bootstrap, "product_family")
   const cardMap = yield* byId(cards)
   const faceMap = yield* byId(faces)
   const facesByCard = yield* group(faces, "card_id")

@@ -1,3 +1,4 @@
+import { PR_PACK } from "./prPack"
 import { BADGE_STYLES } from "./rarityBadges"
 import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 
@@ -12,9 +13,6 @@ const PR_STYLE_ORDER: readonly string[] = [
   "none",
   "unknown",
 ]
-
-// PR pack cards without a printed rarity can still be found with other promos.
-const PR_PACK = "pr"
 
 /** What the rarity filter reads from one printing. */
 interface RarityFilterInput {
@@ -33,6 +31,7 @@ export function filterRarity({
   owner,
 }: Omit<RarityFilterInput, "premium">): { readonly rarity: string; readonly style?: string } {
   const rarity = rarityCode ?? ""
+  // A PR pack printing without a badge still belongs with the other promos.
   if (rarity === "" || rarity === "-")
     return owner === PR_PACK ? { rarity: PROMO_RARITY, style: "none" } : { rarity: UNRATED_RARITY }
   return rarity === PROMO_RARITY ? { rarity, style: badgeStyle ?? "unknown" } : { rarity }

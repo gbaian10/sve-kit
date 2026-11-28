@@ -641,18 +641,10 @@ comparison_hash、basis_printing_id、basis_released_on；依據版次引用 pri
 
 ## 卡面標籤外觀
 
-建置 schema 11 新增 printing 的 `rarity_badge_style`／`rarity_badge_text`，由 `catalog/rarity-badges.yaml` 匯入卡面標籤外觀。兩者為 null 表示待確認；style=none 時 text 為 null。這兩欄不參與官方稀有度、排序或預設版次的計算。建置報告的 `missing_pr_badges` 列出官方 pr 但無外觀資料的版次，不阻擋建置。
+建置 schema 11 新增 printing 的 `rarity_badge_style`／`rarity_badge_text`，由 `catalog/rarity-badges.yaml` 匯入卡面標籤外觀。兩者為 null 表示待確認；style=none 時 text 為 null。這兩欄不參與官方稀有度、排序或預設版次的計算；PR 卡包在 Web 只依外觀分類與顯示，見[快照格式](../export/snapshot-format.md)。建置報告的 `missing_pr_badges` 列出官方 pr 但無外觀資料的版次，不阻擋建置。
 
 建置 schema 13 起 `rarity_badge_style` 值域為 `br / sr / gr / lg / sl / sp / none`，schema 21 加入 `gbf`。
 `rarity_badge_text` 保存卡面原樣字樣，不保留舊值或遷移。
-
-## 稀有度更正
-
-`catalog/rarity-corrections.yaml` 在稀有度正規化之前改寫暫存 printing 的 `rarity_raw`，不新增欄位，也不改建置 schema。
-更正後的值照一般規則決定 `rarity_code`／`premium`；官網原值留在 card-data、來源歸檔與更正記錄。
-建置輸入紀錄的 configuration 以 `rarity_corrections` 保存本次使用的更正記錄內容雜湊。
-官網已改成更正值時，建置報告的 `rarity_diagnostics` 列出 `correction_upstream_fixed`，不阻擋建置。契約見
-[authored 佈局「稀有度更正」](../domains/authored-layout.md#稀有度更正)。
 
 ## 主戰者卡名框
 

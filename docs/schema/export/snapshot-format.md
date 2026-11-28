@@ -129,8 +129,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 不拿 `card.home_set_id` 判斷再錄商品，也不推算新的商品收錄關係。
 首頁可沿 `family_ids` 與 `product_family.kind`，取得每區商品發售日；商品型別的原採納規則不變。
 
-官方版次的 `rarity_raw` 取官網原值；有[已登錄的稀有度更正](../domains/authored-layout.md#稀有度更正)時取更正值，
-官網原值保存於 card-data 與來源歸檔。`rarity_code` 依 `rarity_raw` 使用以下共用代碼，字典標籤為 JP 卡面標籤（代碼大寫）：
+官方版次的 `rarity_raw` 保持原值，`rarity_code` 使用以下共用代碼；字典標籤是 JP 卡面標籤（即代碼的大寫）：
 
 | JP 原值 | EN 原值 | 代碼 |
 | --- | --- | --- |
@@ -157,7 +156,11 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
 編號類別僅決定版次列顯示順序，不推導稀有度或版次身分，也不改變卡頁預設版次選取。
 
-Web 的 `rarity` 篩選依各版次的 `rarity_code` 歸類。沒有可用稀有度代碼的 PR 卡包版次歸入 `pr:none`，其他沒有可用代碼的版次歸入 `unrated`。
+PR 卡包（family code `pr`）的官網稀有度標法不一致，快照照原值保存，但 Web 分類與顯示這個卡包的版次時不看
+`rarity_code`／`rarity_raw`，只看 `rarity_badge`：有標籤（style 不是 `none`）視為 PR 並按外觀分級；
+`none` 或 null 視為沒有稀有度，卡片不顯示稀有度。這條規則只在 Web 讀入版次列時套用一次。
+
+Web 的 `rarity` 篩選依上述採用的稀有度代碼歸類。沒有稀有度的 PR 卡包版次歸入 `pr:none`，其他沒有可用代碼的版次歸入 `unrated`。
 碎閃版次計入 `premium`。選取「碎閃」時，可再按上述稀有度分類縮小結果。
 PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
 計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；PR 子項目互斥且完整，加總等於父項目。
@@ -169,8 +172,8 @@ PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none
 不由同名卡、另一地區或卡號前綴推導。採物件讓「無資料」和「無標籤」各自有明確表示，且 style／text 同屬一筆外觀。
 
 稀有度代碼為 `pr` 的版次按卡面標籤外觀歸入 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:gbf / pr:sp / pr:none`，
-外觀為 null 時歸入 `pr:unknown`。早期印 BR 的 PR 仍屬 PR（BR），七種有標籤的子項以 style 大寫顯示。
-多選稀有度時為聯集，其他版次條件仍需同一版次滿足。排序與預設版次依稀有度代碼，卡片依卡面標籤外觀顯示。
+PR 卡包以外的外觀為 null 時歸入 `pr:unknown`。早期印 BR 的 PR 仍屬 PR（BR），七種有標籤的子項以 style 大寫顯示。
+多選稀有度時為聯集，其他版次條件仍需同一版次滿足。匯出的預設版次照官方代碼選取；Web 的版次排序依採用後的代碼，卡片依卡面標籤外觀顯示。
 
 ### 主戰者卡名框篩選
 

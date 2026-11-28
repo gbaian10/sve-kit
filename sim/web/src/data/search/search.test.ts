@@ -1112,7 +1112,7 @@ it("gives GBF appearances their own PR group alongside other rarity filters", as
   }
 })
 
-it("files PR pack printings without an official rarity under PR without a badge", async () => {
+it("files PR pack printings without a badge under PR without a badge", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   const initial = client.snapshot()
@@ -1120,11 +1120,11 @@ it("files PR pack printings without an official rarity under PR without a badge"
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
-  // The official site lists PR pack leaders, EP and SEP (PR-017, PR-266 and others) with "-".
+  // PR pack printings are rated by their badge alone: a Token listed as PR without one is unrated.
   const unrated = { rarity_code: null, rarity_raw: "-", rarity_badge: null, premium: null }
   const overrides: Record<string, JsonObject> = {
     "p:sd01-001": unrated,
-    "p:pr-001": unrated,
+    "p:pr-001": { rarity_code: "pr", rarity_raw: "PR", rarity_badge: null },
     "p:bp01-001": { rarity_code: "pr", rarity_badge: { style: "none" } },
   }
   const source = (bootstrap: typeof snapshot.bootstrap) => {
@@ -1160,6 +1160,7 @@ it("files PR pack printings without an official rarity under PR without a badge"
       expect(ids(rarities)).toContain("p:bp01-001")
     }
     expect(ids(["unrated"])).not.toContain("p:pr-001")
+    expect(ids(["pr:unknown"])).not.toContain("p:pr-001")
     // A printing outside the PR pack without a rarity stays unrated.
     expect(ids(["unrated"])).toContain("p:sd01-001")
     expect(ids(["pr"])).not.toContain("p:sd01-001")

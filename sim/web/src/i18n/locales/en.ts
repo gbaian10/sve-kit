@@ -420,7 +420,7 @@ export default {
       "Premium variants exist only for BR, SR, GR, and Unrated; PR Premium is not included yet",
     unrated: "Unrated",
     unratedHint:
-      "Cards without a rarity, such as tokens and leaders. PR pack cards without a rarity, including leaders, EP, and SEP, appear under PR (No badge).",
+      "Cards without a rarity, such as tokens and leaders. PR pack cards are rated only by the badge at the lower right; those without one appear under PR (No badge).",
     selected: "{{count}} selected",
     none: "No badge",
     unknown: "Unconfirmed",

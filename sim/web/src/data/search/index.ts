@@ -12,6 +12,7 @@ import {
   COLLAB_MECHANISMS,
   type MechanismOptions,
 } from "../../domain/printedMechanisms"
+import { adoptPrPackRarity } from "../../domain/prPack"
 import {
   COST_CAP,
   DEFAULT_QUERY,
@@ -209,7 +210,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 42
+export const INDEX_IMAGE_FORMAT = 43
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -365,13 +366,15 @@ function optionsOf(
   )
   const rarityCounts: Record<string, number> = {}
   const prBadgeStyles = new Set<string>()
-  for (const row of printingRows) {
+  for (const staged of printingRows) {
     // Locator-only rows do not yet carry an official classification.
-    if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
+    if (staged["region"] !== edition || !Object.hasOwn(staged, "rarity_code")) continue
+    const owner = familyCodes.get(stringValue(staged["home_set_id"]))
+    const row = adoptPrPackRarity(staged, owner)
     const { rarity, style } = filterRarity({
       rarityCode: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,
       badgeStyle: prBadgeFilterStyle(row),
-      owner: familyCodes.get(stringValue(row["home_set_id"])),
+      owner,
     })
     const premium = row["premium"] === true
     const countToken = premium ? PREMIUM_RARITY : rarity

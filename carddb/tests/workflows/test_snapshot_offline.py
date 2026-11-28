@@ -90,9 +90,6 @@ def prepared(
     (repo / "authored/catalog/rarity-badges.yaml").write_text(
         "format: 1\nkind: printing_rarity_badges\nrecords: []\n"
     )
-    (repo / "authored/catalog/rarity-corrections.yaml").write_text(
-        "format: 1\nkind: printing_rarity_corrections\nrecords: []\n"
-    )
     for name in (
         "carddb/pyproject.toml",
         "carddb/src/sve_carddb/parse/pages/extract_jp.py",
