@@ -41,6 +41,21 @@ fn end_phase(board: &mut Game) {
     finish(board, None, &[]);
 }
 
+fn pending_line(board: &mut Game, line: u64) -> CardPlay {
+    let pending = board.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("printed ability must be pending");
+    };
+    let handle = options
+        .iter()
+        .find(|option| option.line == line)
+        .unwrap()
+        .handle;
+    board
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(handle))
+        .unwrap()
+}
+
 #[test]
 fn slumbering_calamity_adds_the_third_counter_and_evolves_without_paying_pp() {
     let mut initial = put_on_field(CALAMITY);
@@ -57,6 +72,20 @@ fn slumbering_calamity_adds_the_third_counter_and_evolves_without_paying_pp() {
     );
     assert_eq!(after["objects"]["source"]["evolved"], true);
     assert_eq!(after["P1"]["pp"]["current"], pp);
+}
+
+#[test]
+fn unevolved_slumbering_calamity_returns_to_its_runecraft_owners_field() {
+    let mut initial = position(BRINGER);
+    initial["players"]["P2"]["leader"]["class"] = json!("ウィッチ");
+    initial["players"]["P2"]["zones"]["field"] = json!([{
+        "id":"calamity","card":CALAMITY,"state":{"counters":{"catastrophe_counter":2_u8}}
+    }]);
+    let mut board = game(&initial);
+    play_with_modes(&mut board, "source", &[]);
+    let after = state(&board);
+    assert_eq!(after["P2"]["field"], json!(["calamity"]));
+    assert!(after["objects"]["calamity"]["counters"]["catastrophe counter"].is_null());
 }
 
 #[test]
@@ -85,12 +114,33 @@ fn evolved_slumbering_calamity_makes_the_opponent_bury_their_own_field_cards() {
     reserve_form(&mut initial, EVOLVED_CALAMITY);
     initial["players"]["P2"]["leader"]["life"] = json!(20_u8);
     initial["players"]["P2"]["zones"]["field"] = json!([
-        {"id":"amulet","card":"GFE02-T04EN"},{"id":"follower","card":GOBLIN}
+        {"id":"amulet","card":"GFE02-T04EN"},{"id":"follower","card":GOBLIN},
+        {"id":"left","card":NACHT}
     ]);
     let mut board = seeded(&initial, "dice-3");
-    evolve(&mut board, "form", 10_u8);
+    board
+        .internal_rule_action(
+            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":10_u8}}),
+        )
+        .unwrap();
+    let choice = question(pending_line(&mut board, 1));
+    let InputDomain::Targets(domain) = &choice.domain else {
+        panic!("the opponent must choose what to bury");
+    };
+    assert_eq!(choice.actor, PlayerId { seat: 2 });
+    assert_eq!(domain.members.len(), 3);
+    let selected = domain
+        .members
+        .iter()
+        .filter(|member| matches!(member.card.as_deref(), Some(GOBLIN | "GFE02-T04EN")))
+        .map(|member| member.handle)
+        .collect();
+    let step = board
+        .answer_internal_card(choice.actor, choice.token, Answer::Targets(selected))
+        .unwrap();
+    finish(&mut board, Some(step), &[]);
     let after = state(&board);
-    assert!(after["P2"]["field"].as_array().unwrap().is_empty());
+    assert_eq!(after["P2"]["field"], json!(["left"]));
     let cemetery = after["P2"]["cemetery"].as_array().unwrap();
     assert_eq!(cemetery, &[json!("follower")]);
     assert_eq!(after["P2"]["deck"], json!(["their-draw"]));
@@ -135,30 +185,63 @@ fn super_evolved_calamity_bringer_rolls_in_turn_order_twice_more() {
             "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8,"sep":1_u8}
         }))
         .unwrap();
-    let question = board.internal_pending_choice().unwrap().unwrap();
-    let InputDomain::Pending(options) = &question.domain else {
-        panic!("the super-evolve ability must be pending");
+    let pending = board.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("both evolve abilities must be pending");
     };
-    let handle = options
+    let lines = options
         .iter()
-        .find(|option| option.line == 2)
-        .unwrap()
-        .handle;
-    let done = resolved(
-        board
-            .answer_internal_card(question.actor, question.token, Answer::Pending(handle))
-            .unwrap(),
-    );
-    let rollers = done
-        .progress
-        .facts
-        .iter()
-        .filter_map(|fact| match fact {
-            Fact::Dice(event) => Some(event.roller.seat),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(rollers, [1, 2, 1, 2]);
+        .map(|option| option.line)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(lines, BTreeSet::from([1, 2]));
+    let mut rolls = Vec::new();
+    for (line, expected_rollers) in [(1_u64, &[1, 2][..]), (2, &[1, 2, 1, 2][..])] {
+        let done = resolved(pending_line(&mut board, line));
+        let batch = done
+            .progress
+            .facts
+            .iter()
+            .filter_map(|fact| match fact {
+                Fact::Dice(event) => Some((event.roller.seat, event.value)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            batch.iter().map(|&(seat, _)| seat).collect::<Vec<_>>(),
+            expected_rollers
+        );
+        rolls.extend(batch);
+        while board.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            board.resume_internal_card().unwrap();
+        }
+    }
+    assert!(board.internal_pending_choice().unwrap().is_none());
+    let faces = [
+        DieFace::One,
+        DieFace::Two,
+        DieFace::Three,
+        DieFace::Four,
+        DieFace::Five,
+        DieFace::Six,
+    ];
+    let after = state(&board);
+    for (seat, player) in [(1, "P1"), (2, "P2")] {
+        let damage = rolls
+            .iter()
+            .filter(|&&(roller, _)| roller == seat)
+            .map(|&(_, face)| {
+                faces
+                    .into_iter()
+                    .zip(1_u64..=6)
+                    .find_map(|(value, number)| (value == face).then_some(number))
+                    .unwrap()
+            })
+            .sum::<u64>();
+        assert_eq!(
+            after[player]["leader"]["life"].as_u64(),
+            20_u64.checked_sub(damage)
+        );
+    }
 }
 
 #[test]
@@ -420,25 +503,26 @@ fn each_insect_token_applies_its_own_last_words_on_destruction() {
 }
 
 #[test]
-fn infernal_crown_only_summons_a_cost_six_follower_at_necrocharge_twenty() {
-    for (spells, summoned) in [(18, false), (19, true)] {
+fn infernal_crown_only_buries_itself_and_summons_above_cost_five_at_necrocharge_twenty() {
+    for (number, spells, field) in [
+        (GOBLIN, 18, json!(["source", "target"])),
+        ("GFE02-010EN", 18, json!(["source"])),
+        ("GFE02-010EN", 19, json!(["target"])),
+        (GOBLIN, 19, json!(["target"])),
+    ] {
         let mut initial = put_on_field("GFE02-T04EN");
         let mut grave = card_list("filler", spells, "GFE02-016EN");
         grave
             .as_array_mut()
             .unwrap()
-            .insert(0, json!({"id":"target","card":"GFE02-010EN"}));
+            .insert(0, json!({"id":"target","card":number}));
         initial["players"]["P1"]["zones"]["cemetery"] = grave;
         let mut board = game(&initial);
         end_phase(&mut board);
-        let after = state(&board);
         assert_eq!(
-            after["P1"]["field"],
-            if summoned {
-                json!(["target"])
-            } else {
-                json!([])
-            }
+            state(&board)["P1"]["field"],
+            field,
+            "{number} with {spells} spells"
         );
     }
 }
