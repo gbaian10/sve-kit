@@ -123,8 +123,8 @@ uses only its own confirmed cards as the denominator. The web client's deck read
   rebuilt (usually without retraining; see README, "Common tasks"). Of the cards added in the last training stage
   (see README, "Recogniser"), the new Japanese cards were checked on synthetic queries and the maintainer's 22
   photos, and the new English cards on synthetic queries only. The Leader card CP05-LD09 (sparkle finish)
-  appears twice in those photos: named right but with a low score in one, named as another Leader in the
-  other (about 31% visible)
+  appears twice in those photos: the correct card ranked first in one crop but failed the offline acceptance
+  check, and another Leader ranked first in the other (about 31% visible)
 - **Held-out split**: about 8% of cards are held out of training, drawn from the gallery of each training run.
   The last stage ran on a larger gallery than the stages before it, so some of its held-out cards were trained
   on earlier and its synthetic held-out numbers are not a clean test. The real-photo sets never feed training
