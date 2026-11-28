@@ -9,6 +9,7 @@ import type { Region } from "../../domain/search"
 import { orderTypeTokens } from "../../domain/typeFilter"
 import { Chip } from "../ui/Chip"
 import { locationLabel } from "./facet-labels"
+import { mechanicConditionLabel } from "./mechanic-labels"
 import { prBadgeVisual, prStyleLabel, prStyleVisual, rarityBadgeVisual } from "./rarityVisuals"
 
 export interface ConditionChipsProps {
@@ -154,17 +155,10 @@ export function ConditionChips({
       label: artistLabel(id),
       without: { ...query, artists: query.artists.filter((other) => other !== id) },
     })),
-    ...Object.entries(query.mechanics).map(([id, state]) => ({
-      key: `mechanic:${id}`,
-      label: t(state === "has" ? "filters.keywordHas" : "filters.keywordNot", {
-        label: keywordLabel(id),
-      }),
-      without: {
-        ...query,
-        mechanics: Object.fromEntries(
-          Object.entries(query.mechanics).filter(([other]) => other !== id),
-        ),
-      },
+    ...query.mechanics.map((key) => ({
+      key: `mechanic:${key}`,
+      label: mechanicConditionLabel(t, key, keywordLabel),
+      without: { ...query, mechanics: query.mechanics.filter((other) => other !== key) },
     })),
     ...query.abilityTypes.map((code) => ({
       key: `ability:${code}`,

@@ -2,9 +2,15 @@ import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import {
+  MECHANIC_RELATIONS,
   type MechanicCoverage,
+  mechanicKey,
   type MechanicProjection,
+  type MechanicRelation,
   mechanicState,
+  PANEL_KEYWORDS,
+  parseMechanicKey,
+  perRelation,
 } from "../../domain/mechanics"
 import { compareCodePoints, normalizeText } from "../../domain/normalize"
 import {
@@ -68,6 +74,7 @@ interface ArtistOption {
   /** The credit as the official site prints it; never translated. */
   readonly name: string
 }
+type KeywordCoverage = "pending" | "unknown" | "partial" | "complete"
 export interface SearchOptions {
   readonly restrictions?: RestrictionStatus
   readonly restrictionDetails?: Readonly<Record<string, readonly CardRestriction[]>>
@@ -76,8 +83,10 @@ export interface SearchOptions {
   readonly collabMechanisms?: MechanismOptions | undefined
   readonly abilityCoverage?: "pending" | "unknown" | "partial" | "complete" | undefined
   readonly abilityUnknownCards?: number | undefined
-  readonly keywordUnknownCards?: number | undefined
-  readonly keywordCoverage: "pending" | "unknown" | "partial" | "complete"
+  /** Per relation, over the panel keywords; "unknown" means no card of this edition is tagged for it. */
+  readonly keywordCoverage: Readonly<Record<MechanicRelation, KeywordCoverage>>
+  /** Cards with an undetermined panel keyword, per relation. */
+  readonly keywordUnknownCards?: Readonly<Record<MechanicRelation, number>> | undefined
   readonly types: readonly SearchOption[]
   /** Printings per printed type code in this edition. */
   readonly typeCounts: Readonly<Record<string, number>>
@@ -169,7 +178,6 @@ const CARD_COLUMNS = [
   "traitStart",
   "kinds",
   "present",
-  "absent",
   "abilities",
   "printedMechanisms",
   "errata",
@@ -209,7 +217,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 40
+export const INDEX_IMAGE_FORMAT = 42
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -431,7 +439,7 @@ function optionsOf(
         "name_unit_id",
       ),
     ),
-    keywordCoverage: "unknown",
+    keywordCoverage: perRelation("unknown"),
     rarityCounts,
     typeCounts,
     types,
@@ -532,6 +540,7 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   const coverage = group("card_mechanic_coverage")
   const support = group("card_engine_support")
   const keywords = bootstrap.rows("keyword").map((row) => stringValue(row["id"]))
+  const panel: readonly string[] = PANEL_KEYWORDS.filter((id) => keywords.includes(id))
   const strings = (value: JsonValue | undefined) =>
     arrayValue(value ?? []).map((id) => stringValue(id))
   return (cardId: string) => {
@@ -553,26 +562,25 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
       ),
     )
     const present: string[] = []
-    const absent: string[] = []
-    for (const keyword of keywords) {
-      const state = mechanicState(keyword, edition, projected, covered, blocked)
-      if (state === "present") present.push(keyword)
-      if (state === "absent") absent.push(keyword)
+    const known = perRelation(false)
+    const unknown = perRelation(false)
+    for (const relation of MECHANIC_RELATIONS) {
+      // Relations other than "has" are only derived for the panel keywords.
+      for (const keyword of relation === "has" ? keywords : panel) {
+        const state = mechanicState(keyword, relation, edition, projected, covered, blocked)
+        if (state === "present") present.push(mechanicKey(relation, keyword))
+        if (!panel.includes(keyword)) continue
+        if (state === "unknown") unknown[relation] = true
+        else known[relation] = true
+      }
     }
-    const annotated =
-      projected.length + covered.length > 0 &&
-      (edition === "jp" ||
-        !blocked ||
-        projected.some((row) => row.scope === "en_override") ||
-        covered.some((row) => row.scope === "en_override"))
     const own = (coverage.get(cardId) ?? []).find(
       (row) => row["scope"] === (edition === "jp" ? "shared" : "en_override"),
     )
     return {
       present,
-      absent,
-      annotated,
-      unknown: present.length + absent.length < keywords.length,
+      known,
+      unknown,
       abilities: strings(own?.["ability_types"]),
       abilitiesComplete: own?.["ability_types_complete"] === true,
       printedMechanisms: arrayValue(own?.["printed_mechanisms"] ?? []).map((value) =>
@@ -655,7 +663,6 @@ function build(
     edition,
   )) {
     cards.present.push(pool.encode([]))
-    cards.absent.push(pool.encode([]))
     cards.abilities.push(pool.encode([]))
     cards.printedMechanisms.push(pool.encode([]))
     const card = cards.id.length
@@ -803,7 +810,7 @@ function build(
     options: {
       ...options,
       ...artistOptions(artistCounts, artistNames),
-      keywordCoverage: "pending",
+      keywordCoverage: perRelation("pending"),
       ...(restrictions
         ? {
             restrictions: restrictions.status,
@@ -1210,8 +1217,8 @@ export class SearchIndex {
     this.pool.reopen()
     try {
       const membership = mechanicMembership(bootstrap, this.edition)
-      let known = false
-      let unknown = 0
+      const known = perRelation(false)
+      const unknown = perRelation(0)
       let abilityUnknown = 0
       let abilityKnown = false
       const groups = [
@@ -1234,9 +1241,10 @@ export class SearchIndex {
         const id = this.pool.get(this.cards.id[card] ?? 0)
         const states = membership(id)
         this.cards.present[card] = this.pool.encode(states.present)
-        this.cards.absent[card] = this.pool.encode(states.absent)
-        known ||= states.annotated
-        unknown += Number(states.unknown)
+        for (const relation of MECHANIC_RELATIONS) {
+          known[relation] ||= states.known[relation]
+          unknown[relation] += Number(states.unknown[relation])
+        }
         this.cards.abilities[card] = this.pool.encode(states.abilities)
         this.cards.printedMechanisms[card] = this.pool.encode(states.printedMechanisms)
         for (const group of groups) {
@@ -1266,7 +1274,12 @@ export class SearchIndex {
             },
           ]),
         ),
-        keywordCoverage: known ? (unknown ? "partial" : "complete") : "unknown",
+        keywordCoverage: Object.fromEntries(
+          MECHANIC_RELATIONS.map((relation) => [
+            relation,
+            known[relation] ? (unknown[relation] ? "partial" : "complete") : "unknown",
+          ]),
+        ) as Record<MechanicRelation, KeywordCoverage>,
         keywordUnknownCards: unknown,
         abilityUnknownCards: abilityUnknown,
         abilityCoverage: abilityKnown ? (abilityUnknown ? "partial" : "complete") : "unknown",
@@ -1324,13 +1337,18 @@ export class SearchIndex {
       throw new SearchQueryError({ kind: "edition-not-ready", message: "edition is not ready" })
     const state = eligible ? { ...query.state, text: "" } : query.state
     const facets: UnsupportedFacet[] = []
+    // A relation no card is tagged for cannot answer either way, so it must not read as "no results".
     if (
-      Object.keys(state.mechanics).length > 0 &&
-      (this.options.keywordCoverage === "unknown" ||
-        this.options.keywordCoverage === "pending" ||
-        Object.keys(state.mechanics).some(
-          (id) => !this.options.keywords.some((keyword) => keyword.id === id),
-        ))
+      state.mechanics.some((key) => {
+        const condition = parseMechanicKey(key)
+        if (!condition) return true
+        const coverage = this.options.keywordCoverage[condition.relation]
+        return (
+          coverage === "unknown" ||
+          coverage === "pending" ||
+          !this.options.keywords.some((keyword) => keyword.id === condition.keywordId)
+        )
+      })
     )
       facets.push("mechanics")
 
@@ -1416,18 +1434,17 @@ export class SearchIndex {
         return 1
       return Math.min(nameRank, printed)
     }
-    const positive = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "has")
-    const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
+    const wanted = state.mechanics
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (state.errataOnly && this.cards.errata[card] !== 1) continue
       if (state.regionOnly && this.cards.regionOnly[card] !== 1) continue
       if (state.restrictionsOnly && this.cards.restricted[card] !== 1) continue
       const heldKeywords = arrayValue(this.pool.decode(this.cards.present[card] ?? 0))
       if (
-        positive.length &&
+        wanted.length &&
         !(state.mechanicsMatch === "all"
-          ? positive.every((id) => heldKeywords.includes(id))
-          : positive.some((id) => heldKeywords.includes(id)))
+          ? wanted.every((id) => heldKeywords.includes(id))
+          : wanted.some((id) => heldKeywords.includes(id)))
       )
         continue
       const heldAbilities = arrayValue(this.pool.decode(this.cards.abilities[card] ?? 0))
@@ -1436,13 +1453,6 @@ export class SearchIndex {
         !(state.abilityTypesMatch === "all"
           ? state.abilityTypes.every((id) => heldAbilities.includes(id))
           : state.abilityTypes.some((id) => heldAbilities.includes(id)))
-      )
-        continue
-      if (
-        negative.length &&
-        !negative.every((id) =>
-          arrayValue(this.pool.decode(this.cards.absent[card] ?? 0)).includes(id),
-        )
       )
         continue
       const printed = arrayValue(this.pool.decode(this.cards.printedMechanisms[card] ?? 0))

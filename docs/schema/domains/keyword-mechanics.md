@@ -1,6 +1,6 @@
 # 關鍵字登錄與機制投影
 
-查卡的關鍵字篩選分四種關係：卡片本身有（has）、給別的卡（grants）、效果提到（refers）、
+查卡的關鍵字分四種關係：自身持有（has）、賦予其他卡（grants）、效果提到（refers）、
 依數量計算（counts）。本入口依[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)與
 [快照三態](../export/snapshot-format.md)提供查卡正標籤與已檢查範圍，不變更引擎支援狀態。
 
@@ -132,7 +132,7 @@ reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 
 不新增邏輯分片。report.mechanics 保存 adapter／producer、證據／投影／coverage 列數及
 拒絕原因，不含官方句子。
 
-## 本身有的日英全卡表檢查
+## 自身關鍵字的日英全卡表檢查
 
 `printed-self-keywords-v1` 在四關係 reducer 之後檢查所有非 retired 卡的各地區
 current 主文，包含進化面與 token 卡自己的主文，不依賴 DSL。它涵蓋 EN 以及八個關鍵字以外的登錄概念；
@@ -155,7 +155,7 @@ Single Drive 或 Twin Drive 的獨立宣告時，該關鍵字保留未知。跨�
 
 結果合併到 `mechanic_projection`，完整性另放 `card_mechanic_coverage.has_complete_keyword_ids`。
 此集合每次建置從 current 重新計算，不重用另一地區、印刷版或歷史 revision。
-四關係 complete 與 manifest coverage 維持原義；「本身有」完整不能令它們變完整。
+四關係 complete 與 manifest coverage 維持原義；「自身」完整不能令它們變完整。
 前端按地區的非 retired card 去重計數；有未知卡時顯示確切張數，為零才移除不完整提示；
 unknown 不能命中否定搜尋。
 

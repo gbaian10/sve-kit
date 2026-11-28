@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ClassQuickBar } from "../components/search/ClassQuickBar"
 import type { SearchQuery } from "../data"
 import type { SearchEvent, SearchRequest } from "../data/search/messages"
+import { perRelation } from "../domain/mechanics"
 import { DEFAULT_QUERY } from "../domain/query/model"
 import { prefsStore } from "../settings"
 import {
@@ -131,7 +132,7 @@ function answerViews(
         },
         options: {
           keywords: [],
-          keywordCoverage: "unknown",
+          keywordCoverage: perRelation("unknown"),
           types: [],
           typeCounts: {},
           locationCounts: {},
@@ -604,7 +605,7 @@ it("keeps rarity and type lists pending independently of the basic set and class
         page: { total: 0, offset: 0, items: [] },
         options: {
           keywords,
-          keywordCoverage,
+          keywordCoverage: perRelation(keywordCoverage),
           types: [],
           typeCounts: { leader: 2 },
           locationCounts: { leader: 2, "leader:gold": 2 },
@@ -629,7 +630,10 @@ it("keeps rarity and type lists pending independently of the basic set and class
   expect(result.current.options).toBeUndefined()
   answer(rarity, ["br", "unknown"], "pending")
   expect(result.current.options?.rarity.styles).toEqual(["br", "unknown"])
-  expect(result.current.options?.keyword).toEqual({ keywords, coverage: "pending" })
+  expect(result.current.options?.keyword).toEqual({
+    keywords,
+    coverage: perRelation("pending"),
+  })
   answer(rarity, ["br", "unknown"])
   expect(result.current.options).toEqual({
     abilityTypes: { coverage: "pending" },
@@ -638,6 +642,6 @@ it("keeps rarity and type lists pending independently of the basic set and class
     location: { types: [], counts: { leader: 2, "leader:gold": 2 } },
     trait: { traits: [], counts: {} },
     artist: { artists: [], counts: {} },
-    keyword: { keywords, coverage: "unknown" },
+    keyword: { keywords, coverage: perRelation("unknown") },
   })
 })
