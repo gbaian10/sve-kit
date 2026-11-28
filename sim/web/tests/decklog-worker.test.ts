@@ -11,7 +11,7 @@ import worker from "../src/cloudflare/worker"
 // stubbed fetch answering synthetic decks.
 type Proxy = Awaited<ReturnType<typeof getPlatformProxy<Record<string, unknown>>>>
 type Env = Parameters<typeof worker.fetch>[1]
-type Database = NonNullable<Env["DECKLOG_DB"]>
+type Database = NonNullable<Env["DB"]>
 type Limiter = NonNullable<Env["DECKLOG_LIMITER"]>
 
 const root = path.resolve(import.meta.dirname, "..")
@@ -25,7 +25,7 @@ beforeAll(async () => {
     remoteBindings: false,
     envFiles: [],
   })
-  db = proxy.env["DECKLOG_DB"] as Database
+  db = proxy.env["DB"] as Database
   // Statements split as `wrangler d1 migrations apply` splits them.
   const migrations = path.join(root, "migrations")
   for (const file of readdirSync(migrations).sort())
@@ -102,7 +102,7 @@ function environment(overrides: { [K in keyof Env]?: Env[K] | undefined } = {}):
       head: () => Promise.reject(new Error("Unexpected bucket access")),
     },
     ASSETS: { fetch: () => Promise.reject(new Error("Unexpected asset request")) },
-    DECKLOG_DB: db,
+    DB: db,
     DECKLOG_LIMITER: proxy.env["DECKLOG_LIMITER"],
     DECKLOG_UPSTREAM_LIMITER: passing,
     ...overrides,
@@ -379,7 +379,7 @@ it("keeps the first stored row when two lookups of a code miss at once", async (
 it("never asks DeckLog while D1 cannot be read, and does not let the browser keep an unsaved deck", async () => {
   const unreadable = await client(
     environment({
-      DECKLOG_DB: {
+      DB: {
         prepare: () => {
           throw new Error("D1 down")
         },
@@ -399,7 +399,7 @@ it("never asks DeckLog while D1 cannot be read, and does not let the browser kee
   })
   const readOnly: Database = { prepare: (query) => failingWrites(db.prepare(query)) }
   upstream.mockResolvedValueOnce(Response.json(deckLogAnswer()))
-  const unsaved = await client(environment({ DECKLOG_DB: readOnly }))("jp/AB12C")
+  const unsaved = await client(environment({ DB: readOnly }))("jp/AB12C")
   expect(unsaved.status).toBe(200)
   expect(unsaved.headers.get("Cache-Control")).toBe("no-store")
   expect(await unsaved.json()).toEqual(deck)
@@ -407,7 +407,7 @@ it("never asks DeckLog while D1 cannot be read, and does not let the browser kee
 })
 
 it("refuses to run without its bindings", async () => {
-  for (const missing of ["DECKLOG_DB", "DECKLOG_LIMITER", "DECKLOG_UPSTREAM_LIMITER"] as const) {
+  for (const missing of ["DB", "DECKLOG_LIMITER", "DECKLOG_UPSTREAM_LIMITER"] as const) {
     const unconfigured = await client(environment({ [missing]: undefined }))("jp/AB12C")
     expect(unconfigured.status).toBe(503)
     expect(await unconfigured.json()).toEqual({ error: "not-configured" })
@@ -447,7 +447,7 @@ it("serves the row another lookup has just repaired instead of asking DeckLog", 
   })
   const racing: Database = { prepare: (query) => repairAfterRead(db.prepare(query)) }
 
-  const response = await client(environment({ DECKLOG_DB: racing }))("jp/AB12C")
+  const response = await client(environment({ DB: racing }))("jp/AB12C")
 
   expect(response.status).toBe(200)
   expect(await response.json()).toEqual(deck)

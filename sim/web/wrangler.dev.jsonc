@@ -12,13 +12,13 @@
     "REPORT_GITHUB_INSTALLATION_ID": "184135707",
   },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
-  // DeckLog lookups (docs/deployment/cloudflare-development.md §12). Placeholder id: the maintainer
-  // creates the database, puts its id here and applies migrations/ before the next deploy.
+  // The development D1 database, shared by every Worker feature (one table per feature); DeckLog
+  // lookups use it today (docs/deployment/cloudflare-development.md §12).
   "d1_databases": [
     {
-      "binding": "DECKLOG_DB",
-      "database_name": "svekit-dev-decklog",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "binding": "DB",
+      "database_name": "svekit-dev",
+      "database_id": "218943f8-b31d-4999-98cd-fd44f08bed4d",
       "migrations_dir": "migrations",
     },
   ],
