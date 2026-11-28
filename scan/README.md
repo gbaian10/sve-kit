@@ -49,8 +49,8 @@ python -m sve_scan release <out dir> 1 det-e 1 rec-ft2               # same vers
 
 ```bash
 python -m sve_scan eval-rec rec-ft2 <evaluation folder> ...          # recogniser, real photos
-python -m sve_scan deck-label rec-ft2 det-e labels.json deck-det-e   # deck photos of the held-out events
-python -m sve_scan eval-deck deck-det-e                             # deck recall from the step above
+python -m sve_scan deck-label rec-ft2 det-e labels.json deck-rec-ft2   # deck photos of the held-out events
+python -m sve_scan eval-deck deck-rec-ft2                             # deck recall from the step above
 ```
 
 Give every model its own deck-label output folder: deck-label skips photos already in the folder and
@@ -196,8 +196,10 @@ INIT=rec-base LR_SCALE=0.25 SIBLINGS=art FRAME_P=0.6 FRAME_SMIN=0.4 HOLO_P=0.2 D
   REAL_P=0.4 TEXBANK=texbank.npz REAL2_P=0.3 REALBANK=realbank.npz PROCBANK=procbank.npz WR_P=0.2 HS_P=0.2 MISC_P=0.1 \
   python -m sve_scan rec-train mobilenetv3_large_100.ra_in1k 12 rec-ft
 
-# stage 3: continue stage 2 the same way on a gallery with new sets or a new frame style
-INIT=rec-ft LR_SCALE=0.25 <stage 2 variables> python -m sve_scan rec-train mobilenetv3_large_100.ra_in1k 12 rec-ft2
+# stage 3: rerun `gallery` on the newer export, then continue stage 2 with the same settings
+INIT=rec-ft LR_SCALE=0.25 SIBLINGS=art FRAME_P=0.6 FRAME_SMIN=0.4 HOLO_P=0.2 DEFOCUS_P=0.3 FOIL_P=0.3 \
+  REAL_P=0.4 TEXBANK=texbank.npz REAL2_P=0.3 REALBANK=realbank.npz PROCBANK=procbank.npz WR_P=0.2 HS_P=0.2 MISC_P=0.1 \
+  python -m sve_scan rec-train mobilenetv3_large_100.ra_in1k 12 rec-ft2
 
 python -m sve_scan rec-export mobilenetv3_large_100.ra_in1k rec-ft2  # rec-ft2.w8.onnx (weights-only int8)
 python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft2     # hub correction values
@@ -213,8 +215,9 @@ python -m sve_scan index rec-ft2                                      # index/re
   of training to keep checking that)
 - Stage 3 added a set with a new frame style (GBF) and many English-only cards. Continuing stage 2 re-creates the
   class weights from the current gallery, so new cards need no special handling. Against stage 2 on the same
-  index, it raised top-1 on the maintainer's photos of the new set from .927 to .964 and kept the real-photo sets
-  within run-to-run noise (397 and 399 of 429)
+  gallery (each with its own index), top-1 on 165 new Japanese cards in the maintainer's photos, cut exactly at
+  their SIFT-located corners, rose from .927 to .964; the five single-card photo sets scored 397/429 and
+  399/429 (two runs of the same recipe: 392 and 399)
 
 ### 4. Corner finder
 
@@ -256,8 +259,8 @@ python -m sve_scan det export det-e det_det-e.w8.onnx
 
 ```bash
 python -m sve_scan eval-rec rec-ft2 <evaluation folder> ...          # single card: card-level top-1 / top-5
-python -m sve_scan deck-label rec-ft2 det-e labels.json deck-det-e   # then eval-deck for deck recall
-python -m sve_scan eval-deck deck-det-e
+python -m sve_scan deck-label rec-ft2 det-e labels.json deck-rec-ft2   # then eval-deck for deck recall
+python -m sve_scan eval-deck deck-rec-ft2
 python -m sve_scan eval-det rec-ft2 det.json det-e:global            # corner finder: useful boxes, corner error
 ```
 
