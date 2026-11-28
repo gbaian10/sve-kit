@@ -132,3 +132,29 @@ it("hides locations the edition has no printings for, but always offers the main
       .map((button) => button.getAttribute("aria-label")),
   ).toEqual(["主牌組", "主戰者", "主戰者的細項"])
 })
+
+it("lays the chips out in three fixed rows, leaving out absent ones", async () => {
+  const rowsOf = () => {
+    const main = screen.getByRole("button", { name: "主牌組" })
+    const rows = main.closest("[data-filter-chip]")?.parentElement?.parentElement
+    return [...(rows?.children ?? [])].map((row) =>
+      [...row.querySelectorAll(":scope > [data-filter-chip] > button:first-child")].map((button) =>
+        button.getAttribute("aria-label"),
+      ),
+    )
+  }
+  const { unmount } = await renderInRouter(
+    <Harness
+      initial=""
+      counts={{ main: 9, evolve: 4, advance: 1, token: 5, leader: 3, ep: 2, sep: 1 }}
+    />,
+  )
+  expect(rowsOf()).toEqual([
+    ["主牌組", "進化", "進階"],
+    ["Token", "主戰者"],
+    ["EP", "SEP"],
+  ])
+  unmount()
+  await renderInRouter(<Harness initial="" counts={{ main: 9, evolve: 4, leader: 3 }} />)
+  expect(rowsOf()).toEqual([["主牌組", "進化"], ["主戰者"]])
+})

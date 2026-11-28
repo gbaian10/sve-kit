@@ -24,6 +24,13 @@ const TOKEN_KIND_PLATES: Readonly<Record<string, string>> = {
   treasure,
 }
 
+// Fixed rows, whatever the width: the deck's own piles, the chips with sub-values, then the points.
+const LOCATION_ROWS = [
+  ["main", "evolve", "advance"],
+  ["token", "leader"],
+  ["ep", "sep"],
+] as const
+
 // Where a printing goes in a deck; a chip's sub-values (Token kinds, leader frames) sit behind its
 // popover like the former type filter's did, so their tokens and URLs are unchanged.
 export function LocationFilter({
@@ -53,8 +60,15 @@ export function LocationFilter({
     // the other positions show their card-face plates.
     const content =
       code === "main" ? (
-        <span className="inline-flex items-center gap-1.5">
-          <img src={mainDeck} alt="" aria-hidden className="h-6 w-auto shrink-0" />
+        // Narrow screens tighten it, and the narrowest drop the card back, so the first row still
+        // fits three chips.
+        <span className="inline-flex items-center gap-1.5 max-md:gap-1 max-md:text-12">
+          <img
+            src={mainDeck}
+            alt=""
+            aria-hidden
+            className="h-6 w-auto shrink-0 max-md:h-5 max-[360px]:hidden"
+          />
           <span>{label}</span>
         </span>
       ) : (
@@ -101,7 +115,7 @@ export function LocationFilter({
   return (
     <FacetChips
       title={t("locationFilter.label")}
-      locationGrid
+      rows={LOCATION_ROWS}
       items={items}
       counts={options?.counts}
       selected={selected}
