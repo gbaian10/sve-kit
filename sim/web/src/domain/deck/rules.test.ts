@@ -65,6 +65,42 @@ describe("deckProblems", () => {
     ])
   })
 
+  it("uses the selected printing in the builder's Vanguard class error", () => {
+    const title = "cardfight_vanguard"
+    const card = (id: string): IndexCard | undefined => {
+      const base = cards.get(id)
+      if (base === undefined) return undefined
+      if (id === "c:leader") return { ...base, titles: [title] }
+      return {
+        ...base,
+        titles: [title],
+        startAmulet: true,
+        classCode: "royal",
+        triggerIcons: {
+          defaultPrinting: false,
+          printings: new Map([["p:trigger", true]]),
+        },
+      }
+    }
+    const problems = deckProblems(
+      deck({
+        basis: { kind: "title", titleCode: title },
+        leader: { cardId: "c:leader" },
+        main: [{ cardId: "c:rose", count: 1, printingId: "p:trigger" }],
+      }),
+      { ...index, card, titleRules: new Map([[title, "vanguard"]]) },
+      "2026-10-26",
+      (cardId) => names[cardId],
+    )
+    expect(problems[1]).toMatchObject({
+      kind: "triggerClassMismatch",
+      severity: "error",
+      clause: "14.4.2.1.2",
+      cardIds: ["c:rose"],
+      values: { name: "ローズクイーン", cardClass: "royal", leaderClass: "elf" },
+    })
+  })
+
   it("reports checks it could not make as infos after the errors", () => {
     const problems = deckProblems(
       deck({ leader: { cardId: "c:leader" } }),

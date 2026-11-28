@@ -46,6 +46,38 @@ const dateOrNull = (value: JsonValue | undefined, path: string) =>
   value === null ? null : stringValue(value, [path])
 const intOrNull = (value: JsonValue | undefined, path: string) =>
   value === null ? null : integerValue(value, [path])
+const triggerFlag = (value: JsonValue | undefined) =>
+  typeof value === "boolean"
+    ? value
+    : fail("shape", "expected Trigger icon flag", ["trigger_icons"])
+
+function applyTriggerIcons(
+  value: JsonValue | undefined,
+  cardAt: (
+    position: JsonValue | undefined,
+    path: string,
+  ) => { triggerIcons?: IndexCard["triggerIcons"] },
+): void {
+  if (value === undefined) return
+  for (const row of arrayValue(value, ["trigger_icons"])) {
+    const [position, fallback, entries] = arrayValue(row, ["trigger_icons"])
+    const card = cardAt(position, "trigger_icons")
+    if (card.triggerIcons !== undefined)
+      fail("shape", "duplicate Trigger icon card", ["trigger_icons"])
+    const printings = new Map<string, boolean>()
+    for (const entry of arrayValue(entries, ["trigger_icons"])) {
+      const [id, flag] = arrayValue(entry, ["trigger_icons"])
+      const printingId = stringValue(id, ["trigger_icons"])
+      if (printings.has(printingId))
+        fail("shape", "duplicate Trigger icon printing", ["trigger_icons"])
+      printings.set(printingId, triggerFlag(flag))
+    }
+    card.triggerIcons = {
+      defaultPrinting: fallback === null ? null : triggerFlag(fallback),
+      printings,
+    }
+  }
+}
 
 /** Validates the wire shape (docs/schema/export/construction-index.md) and its snapshot binding. */
 function decodeConstructionIndex(
@@ -106,6 +138,7 @@ function decodeConstructionIndex(
   }
   for (const position of arrayValue(root["start_amulet"], ["start_amulet"]))
     at(position, "start_amulet").startAmulet = true
+  applyTriggerIcons(root["trigger_icons"], at)
 
   const byId = new Map(ids.map((id, i) => [id, cards[i] as IndexCard]))
   const titleRules = new Map(

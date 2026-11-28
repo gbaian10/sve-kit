@@ -794,8 +794,10 @@ export default {
       choiceRestricted:
         "この制限のカードは {{max}} 種類までです（{{from}} より適用、現在 {{count}} 種類）。",
       formatUnsupported: "このフォーマットはまだチェックできません。",
-      triggerClassUnchecked:
-        "トリガーを持つカードはリーダーと同じクラスである必要があります。アイコンのデータがないためチェックしていません。",
+      triggerClassMismatch:
+        "トリガーを持つ「{{name}}」のクラスは{{cardClass}}です。リーダーと同じクラス（{{leaderClass}}）のカードを入れてください。",
+      triggerIconUnknown:
+        "一部のカードにはトリガーアイコンのデータがないため、そのカードのクラス制限は未確認です。",
       restrictionsUnknown:
         "公式の禁止・制限一覧が今日の時点まで確認できていません。新しい制限があるかもしれません。",
     },

@@ -34,8 +34,8 @@ export function deckProblems(
           ? { kind: "class", classCode: deck.basis.classCode }
           : { kind: "title", titleCode: deck.basis.titleCode },
       leader: deck.leader?.cardId ?? null,
-      main: deck.main.map((entry) => [entry.cardId, entry.count] as const),
-      evolve: deck.evolve.map((entry) => [entry.cardId, entry.count] as const),
+      main: deck.main.map((entry) => [entry.cardId, entry.count, entry.printingId] as const),
+      evolve: deck.evolve.map((entry) => [entry.cardId, entry.count, entry.printingId] as const),
     },
     index,
     { format: deck.format, date },

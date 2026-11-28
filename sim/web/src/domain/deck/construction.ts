@@ -19,6 +19,10 @@ export interface IndexCard {
   /** In the main deck, every other name is limited to one copy except these (CR 6.1.2). */
   readonly singletonExcept?: ReadonlySet<number>
   readonly startAmulet: boolean
+  readonly triggerIcons?: {
+    readonly defaultPrinting: boolean | null
+    readonly printings: ReadonlyMap<string, boolean>
+  }
 }
 
 interface RestrictionMember {
@@ -57,9 +61,11 @@ type DeckBasis =
 export interface DeckInput {
   readonly basis: DeckBasis
   readonly leader: string | null
-  readonly main: readonly (readonly [string, number])[]
-  readonly evolve: readonly (readonly [string, number])[]
+  readonly main: readonly DeckRow[]
+  readonly evolve: readonly DeckRow[]
 }
+
+type DeckRow = readonly [cardId: string, count: number, printingId?: string | undefined]
 
 export interface CheckContext {
   readonly format: string
@@ -78,6 +84,7 @@ export type ViolationCode =
   | "sameNameOver"
   | "leaderClassMismatch"
   | "classMismatch"
+  | "triggerClassMismatch"
   | "leaderTitleMismatch"
   | "titleMismatch"
   | "startAmuletMissing"
@@ -88,7 +95,7 @@ export type ViolationCode =
   | "choiceRestricted"
   | "formatUnsupported"
 
-export type NoteCode = "triggerClassUnchecked" | "restrictionsUnknown"
+export type NoteCode = "triggerIconUnknown" | "restrictionsUnknown"
 
 interface Violation {
   readonly code: ViolationCode
@@ -154,10 +161,10 @@ export function checkConstruction(
 
   const sections = { main: known(deck.main), evolve: known(deck.evolve) }
   function known(entries: DeckInput["main"]) {
-    const out: { readonly id: string; readonly count: number; readonly card: IndexCard }[] = []
-    for (const [id, count] of entries) {
+    const out: Entry[] = []
+    for (const [id, count, printingId] of entries) {
       const card = index.card(id)
-      if (card) out.push({ id, count, card })
+      if (card) out.push({ id, count, card, printingId })
       else unknown.add(id)
     }
     return out
@@ -210,7 +217,26 @@ export function checkConstruction(
     if (index.titleRules.get(title) === "vanguard") {
       if (!sections.main.some((entry) => entry.card.startAmulet))
         add("startAmuletMissing", "14.4.2.1.1")
-      notes.push({ code: "triggerClassUnchecked", clause: "14.4.2.1.2" })
+      const triggerCards = new Map<string, IndexCard>()
+      let unknownIcon = false
+      for (const { id, card, printingId } of every) {
+        const hasTrigger =
+          printingId === undefined
+            ? card.triggerIcons?.defaultPrinting
+            : card.triggerIcons?.printings.get(printingId)
+        if (hasTrigger === true) triggerCards.set(id, card)
+        if ((hasTrigger === null || hasTrigger === undefined) && card.titles.includes(title))
+          unknownIcon = true
+      }
+      const leaderClass = leader?.classCode
+      if (leaderClass !== undefined && leaderClass !== null)
+        for (const [id, card] of triggerCards)
+          if (card.classCode !== null && card.classCode !== leaderClass)
+            add("triggerClassMismatch", "14.4.2.1.2", [id], {
+              cardClass: card.classCode,
+              leaderClass,
+            })
+      if (unknownIcon) notes.push({ code: "triggerIconUnknown", clause: "14.4.2.1.2" })
     }
   }
   const amulets = every.filter((entry) => entry.card.startAmulet)
@@ -253,7 +279,12 @@ export function checkConstruction(
   return { legal: violations.length === 0, violations, notes }
 }
 
-type Entry = { readonly id: string; readonly count: number; readonly card: IndexCard }
+type Entry = {
+  readonly id: string
+  readonly count: number
+  readonly card: IndexCard
+  readonly printingId: string | undefined
+}
 
 /** CR 6.1.1.4 per deck, with the text overrides of CR 6.1.2 (spec §3.1). */
 function checkSameName(

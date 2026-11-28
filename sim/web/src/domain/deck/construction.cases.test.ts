@@ -19,6 +19,10 @@ interface LogicalCard {
   readonly copies?: Readonly<Record<string, number>>
   readonly singleton_except?: readonly string[]
   readonly start_amulet?: boolean
+  readonly trigger_icons?: {
+    readonly default: boolean | null
+    readonly printings: Readonly<Record<string, boolean>>
+  }
 }
 interface LogicalRestriction {
   readonly id: string
@@ -62,6 +66,7 @@ for (const [set, spec] of Object.entries(cases.fillers)) {
       class: spec.class,
       titles: spec.titles,
       zone: "main",
+      trigger_icons: { default: false, printings: {} },
     })
     ids.push(id)
   }
@@ -81,6 +86,14 @@ const indexCards = new Map<string, IndexCard>(
         ? { singletonExcept: new Set(card.singleton_except.map(code)) }
         : {}),
       startAmulet: card.start_amulet ?? false,
+      ...(card.trigger_icons
+        ? {
+            triggerIcons: {
+              defaultPrinting: card.trigger_icons.default,
+              printings: new Map(Object.entries(card.trigger_icons.printings)),
+            },
+          }
+        : {}),
     },
   ]),
 )
@@ -114,7 +127,7 @@ const index: ConstructionIndex = {
 }
 const nameOf = new Map([...codes].map(([name, value]) => [value, name]))
 
-type Entries = readonly (readonly [string, number])[]
+type Entries = Parameters<typeof checkConstruction>[0]["main"]
 const entries = (value: unknown): Entries => value as Entries
 
 function deckOf(deck: (typeof cases.cases)[number]["deck"]) {

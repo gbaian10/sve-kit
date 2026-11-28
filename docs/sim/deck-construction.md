@@ -16,9 +16,9 @@
 | --- | --- |
 | `basis` | `{kind:"class", class?}` 或 `{kind:"title", title}`（6.1.1.5）。`class` 是建牌器記下的職業，可省略 |
 | `leader` | 主戰者的卡片 ID，或 `null` |
-| `main`、`evolve` | `[卡片 ID, 張數]` 的清單；同一 ID 不重複 |
+| `main`、`evolve` | `[卡片 ID, 張數, 版次 ID?]` 的清單；各區同一 ID 不重複 |
 
-牌組以永久卡片 ID 記卡，印刷別（printing）不影響檢查。候補區不送進驗證器。
+牌組以永久卡片 ID 記卡。Trigger 圖示檢查使用選定的版次，未指定時取構築索引該區的預設版次。候補區不送進驗證器。
 
 ### 1.2 構築索引（邏輯形）
 
@@ -34,6 +34,7 @@
 | `copies` | 選填。卡片本文另定的張數，例如 `{main:50}`、`{evolve:10}`（6.1.2） |
 | `singleton_except` | 選填。放進主牌組時，其他構築名稱各只能 1 張；清單內的構築名稱不受影響（6.1.2） |
 | `start_amulet` | 選填。有【スタートアミュレット】能力（14.4.4） |
+| `trigger_icons` | 選填。該區預設版次及各有圖示審查資料的版次是否有 Trigger 圖示 |
 
 | 索引層級的欄位 | 內容 |
 | --- | --- |
@@ -55,7 +56,14 @@
 ```json
 {
   "legal": false,
-  "violations": [{ "code": "sameNameOver", "clause": "6.1.1.4", "cards": ["…"], "values": {} }],
+  "violations": [
+    {
+      "code": "sameNameOver",
+      "clause": "6.1.1.4",
+      "cards": ["…"],
+      "values": {}
+    }
+  ],
   "notes": [{ "code": "restrictionsUnknown", "clause": "restriction" }]
 }
 ```
@@ -71,7 +79,7 @@
 | `leaderMissing`、`mainTooFew`、`mainTooMany`、`evolveTooMany`、`startAmuletMissing`、`formatUnsupported` | 整副牌一筆 | 空 |
 | `leaderNotLeader`、`leaderClassMismatch`、`leaderTitleMismatch` | 整副牌一筆 | 主戰者 ID |
 | `mainWrongCard`、`evolveWrongCard` | 該區每個卡片 ID 一筆 | 該 ID |
-| `classMismatch`、`titleMismatch` | 每個卡片 ID 一筆（同 ID 在兩區也只一筆） | 該 ID |
+| `classMismatch`、`titleMismatch`、`triggerClassMismatch` | 每個卡片 ID 一筆（同 ID 在兩區也只一筆） | 該 ID |
 | `unknownCard` | 每個卡片 ID 一筆（主戰者與兩區合併） | 該 ID |
 | `sameNameOver` | 每個（區、構築名稱）一筆 | 該區中屬於該構築名稱的 ID；另一區的同名卡不列 |
 | `startAmuletNames` | 整副牌一筆 | 兩區所有有【スタートアミュレット】的 ID |
@@ -94,6 +102,7 @@
 | `leaderTitleMismatch` | 6.1.1.5.2 | 作品名基準：主戰者沒有該作品名 | `title` |
 | `titleMismatch` | 6.1.1.5.2 | 作品名基準：卡沒有該作品名 | `title` |
 | `startAmuletMissing` | 14.4.2.1.1 | ヴァンガード作品名基準：主牌組沒有【スタートアミュレット】的卡 | |
+| `triggerClassMismatch` | 14.4.2.1.2 | ヴァンガード作品名基準：有 Trigger 圖示的卡與主戰者的職業不同 | `cardClass, leaderClass` |
 | `startAmuletNames` | 14.4.4.1.1 | 主牌組與進化牌組的【スタートアミュレット】卡不只一個構築名稱 | |
 | `unknownCard` | 6.1.1 | 卡片 ID 不在索引裡；這張卡不再做其他檢查 | |
 
@@ -138,15 +147,17 @@ Q2609～Q2612（カットスロート在主牌組時，其他卡各 1 張，連 
 
 - **ヴァンガード**（`title_rules` 為 `vanguard` 的作品名基準牌組）：
   - 14.4.2.1.1 至少 1 張【スタートアミュレット】→ `startAmuletMissing`
-  - 14.4.2.1.2 有トリガー圖示的卡，職業要和主戰者相同 → **目前不檢查**：卡片資料還沒有トリガー圖示欄位，
-    輸出 note `triggerClassUnchecked`（條號 14.4.2.1.2）
+  - 14.4.2.1.2 主牌組與進化牌組裡的 Trigger 卡，職業必須和有效主戰者相同。所選版次有 Critical、Draw、Stand、Heal 任一圖示時，
+    異職業以卡片 ID 各回報一筆 `triggerClassMismatch`，中立也依同一規則比較。
+  - 確認無圖示的版次免比對職業。未選版次用該區預設版次；所選版次或預設版次的圖示未知時，略過該版次的職業比對，
+    並發出一則不影響合法性的 `triggerIconUnknown` 提示。提示只針對屬於該作品名的卡。舊構築索引缺少本欄時，圖示視為未知。
 - **【スタートアミュレット】**（14.4.4.1.1）是卡本身的永續能力，與基準無關：牌組中有這類卡時，它們必須同名
 - 其他作品名（ウマ娘、アイドルマスター シンデレラガールズ等）目前沒有構築條件；14.3.1.2 等是遊戲準備程序，不屬於構築
 
 ## 4. 不在範圍
 
 - 6.2 之後的遊戲準備程序（引擎負責）
-- 卡片的印刷別、語言版本、是否實際持有
+- 卡片的語言版本、是否實際持有
 - 「同名同種、表記不同」的卡：屬於同一張卡，由卡片 ID 處理
 
 ## 5. 禁限（#1598）
@@ -204,13 +215,12 @@ Q2609～Q2612（カットスロート在主牌組時，其他卡各 1 張，連 
 
 ## 8. 待確認
 
-以下三項維護者 2026-11-03 決定照暫定處理；之後官方說明不同再改。
+殿堂入り與英版禁限的解讀依維護者 2026-11-03 的決定暫定處理；之後官方說明不同再改。
 
 | 項目 | 內容 | 暫定 |
 | --- | --- | --- |
 | 殿堂入り的計算範圍 | 日版頁面寫「デッキに1枚だけ」，沒說主牌組與進化牌組是否合計 | 依禁限資料每筆成員的 `scope`；目前資料全是 `main` |
 | 英版禁限「decks of the designated class」 | 英版頁面寫「when using decks of the designated class」，字面像是只限某職業的牌組；日版沒有此限定 | 不分職業，禁限一律套用 |
-| トリガー圖示 | 14.4.2.1.2 需要卡片的トリガー圖示，資料還沒有 | 不檢查，輸出 note |
 | Gloryfinder | 日英都有此玩法；完整構築規則與卡池未整理 | 未支援 |
 
 ## 9. 共用測試案例

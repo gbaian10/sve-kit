@@ -53,14 +53,19 @@ class ConstructionIndexError(ValueError):
 
 
 def build_construction_index(
-    manifest: Mapping[str, JsonValue], tables: View, region: str, manifest_sha256: str
+    manifest: Mapping[str, JsonValue],
+    tables: View,
+    region: str,
+    manifest_sha256: str,
+    *,
+    trigger_icons: Mapping[str, JsonValue] | None = None,
 ) -> dict[str, JsonValue]:
     """The region's construction index, bound to the snapshot it was read from."""
     if region not in PATTERNS:
         raise ConstructionIndexError(f"Unsupported region {region}")
     names = _Names(tables, region)
     titles = sorted(_vocabulary(tables, "title"))
-    cards = _Cards(tables, region, names, titles)
+    cards = _Cards(tables, region, names, titles, trigger_icons or {})
     copies, singletons = _text_rules(cards.rule_texts, region, names)
     return {
         "construction_index_format": FORMAT,
@@ -78,6 +83,7 @@ def build_construction_index(
         "copies": copies,
         "singleton_except": singletons,
         "start_amulet": list(cards.amulets),
+        **({"trigger_icons": cards.triggers} if cards.triggers else {}),
         "formats": _formats(manifest, tables, region, names),
     }
 
@@ -97,7 +103,11 @@ def write_construction_indexes(
     built = {
         region: canonical(
             build_construction_index(
-                snapshot.manifest, snapshot.tables, region, snapshot.manifest_sha256
+                snapshot.manifest,
+                snapshot.tables,
+                region,
+                snapshot.manifest_sha256,
+                trigger_icons=snapshot.trigger_icons,
             )
         )
         for region in map(string, array(snapshot.manifest["regions"]))
@@ -120,11 +130,29 @@ def write_construction_indexes(
     return report
 
 
+def _trigger_faces(
+    printings: list[Row], region: str, icons: Mapping[str, JsonValue]
+) -> dict[str, dict[str, Row]]:
+    by_card: dict[str, dict[str, Row]] = defaultdict(dict)
+    for row in printings:
+        printing_id = string(row["id"])
+        if row["region"] == region and printing_id in icons:
+            by_card[string(row["card_id"])][printing_id] = object_value(
+                icons[printing_id]
+            )
+    return by_card
+
+
 class _Cards:
     """Columns of the region's released cards, in card id order."""
 
     def __init__(
-        self, tables: View, region: str, names: _Names, titles: list[str]
+        self,
+        tables: View,
+        region: str,
+        names: _Names,
+        titles: list[str],
+        icons: Mapping[str, JsonValue],
     ) -> None:
         faces = {string(row["id"]): row for row in tables["face"]}
         revisions = {string(row["id"]): row for row in tables["face_revision"]}
@@ -137,6 +165,7 @@ class _Cards:
         self.title_bits: list[JsonValue] = []
         self.zones: list[JsonValue] = []
         self.amulets: list[int] = []
+        self.triggers: list[JsonValue] = []
         self.rule_texts: list[tuple[int, int, int, list[str]]] = []
         # Deck admission follows decklog_available, so a card no printing admits (such as
         # a manually registered unlisted EP without official text) stays out of the index.
@@ -145,6 +174,7 @@ class _Cards:
             for row in tables["printing"]
             if row["region"] == region and row["decklog_available"] is True
         }
+        trigger_faces = _trigger_faces(tables["printing"], region, icons)
         released = sorted(
             (string(card["id"]), card, view)
             for card in tables["card"]
@@ -153,9 +183,10 @@ class _Cards:
             if view["region"] == region and view["release_state"] == "released"
         )
         for position, (card_id, card, view) in enumerate(released):
-            front = faces[string(array(card["faces"])[0])]
+            front_id = string(array(card["faces"])[0])
+            front = faces[front_id]
             revision = revisions[_current(front, region)]
-            name = names.code_of_face(string(front["id"]))
+            name = names.code_of_face(front_id)
             zone = _ZONE_OF_ROLE.get(string(view["deck_role"] or ""), 0)
             self.ids.append(card_id)
             self.names.append(name)
@@ -164,6 +195,24 @@ class _Cards:
                 sum(1 << titles.index(string(t)) for t in array(revision["titles"]))
             )
             self.zones.append(zone)
+            if card_id in trigger_faces:
+                flags = {
+                    printing_id: face_icons[front_id] != "none"
+                    for printing_id, face_icons in trigger_faces[card_id].items()
+                    if front_id in face_icons
+                }
+                if flags:
+                    default = view.get("default_printing_id")
+                    self.triggers.append(
+                        [
+                            position,
+                            flags.get(default) if isinstance(default, str) else None,
+                            [
+                                [printing_id, flags[printing_id]]
+                                for printing_id in sorted(flags)
+                            ],
+                        ]
+                    )
             if zone in {2, 3} and card_id not in starting_amulet:
                 raise ConstructionIndexError(
                     f"Card {card_id} has unknown starting amulet status in {region}"

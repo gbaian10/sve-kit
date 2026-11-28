@@ -185,12 +185,18 @@ class Pool:
             }
         )
 
-    def build(self) -> JsonValue:
+    def build(self, trigger_icons: dict[str, JsonValue] | None = None) -> JsonValue:
         """The index as a reader sees it after parsing the written bytes."""
         view: View = self.tables
         return parse(
             canonical(
-                build_construction_index(self.manifest, view, self.region, MANIFEST_SHA)
+                build_construction_index(
+                    self.manifest,
+                    view,
+                    self.region,
+                    MANIFEST_SHA,
+                    trigger_icons=trigger_icons,
+                )
             )
         )
 
@@ -207,6 +213,28 @@ def cards_by_id(index: JsonValue) -> dict[str, dict[str, JsonValue]]:
         str(card_id): {key: array(values)[i] for key, values in columns.items()}
         for i, card_id in enumerate(array(columns["id"]))
     }
+
+
+def test_trigger_flags_follow_front_face_printing_and_edition() -> None:
+    pool = Pool()
+    pool.card("c:test", "Synthetic", titles=("cardfight_vanguard",))
+    pool.printing("c:test")
+    pool.printing("c:test")
+    pool.printing("c:test", region="en")
+    card = pool.tables["card"][0]
+    region = object_value(array(card["regions"])[0])
+    icons: dict[str, JsonValue] = {
+        "p:c:test:0": {"f:c:test": "none"},
+        "p:c:test:1": {"f:c:test": "critical"},
+        "p:c:test:2": {"f:other": "stand"},
+        "p:c:test:3": {"f:c:test": "draw"},
+    }
+    region["default_printing_id"] = "p:c:test:0"
+    expected = [["p:c:test:0", False], ["p:c:test:1", True]]
+    assert get(pool.build(icons), "trigger_icons") == [[0, False, expected]]
+    region["default_printing_id"] = "p:c:test:2"
+    assert get(pool.build(icons), "trigger_icons") == [[0, None, expected]]
+    assert "trigger_icons" not in object_value(pool.build())
 
 
 def construction_snapshot() -> Snapshot:
