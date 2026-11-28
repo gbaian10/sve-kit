@@ -87,6 +87,7 @@ from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.files import read_transition_files
 from sve_carddb.domains.registry.transitions.renewal import load_trusted_registry
 from sve_carddb.domains.registry.transitions.review_sources import ReviewSources
+from sve_carddb.domains.registry.trigger_icons import load_trigger_icons
 from sve_carddb.domains.routes import populate_routes
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.reader import load as load_rulings
@@ -122,6 +123,7 @@ from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources as TranslationSources
 from sve_carddb.export.project import Decisions, Projection, Settings, project
 from sve_carddb.export.transport import Batch, Ownership
+from sve_carddb.export.trigger_icons import vanguard_printing_faces
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 from sve_carddb.workflows.offline_names import composer
 
@@ -969,7 +971,25 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             decisions=decisions,
             publication_printings=printings,
         )
-        projection = replace(projection, program_printings=program_printings)
+        scope = vanguard_printing_faces(projection.tables)
+        trigger_icons: dict[str, dict[str, JsonValue]] = {}
+        for key, (region, observation) in load_trigger_icons(
+            authored_root(inputs.repo), archive=inputs.archive, store_id=inputs.store_id
+        ).items():
+            if scope.get(key) != (region, observation.card_no):
+                raise ValueError(
+                    f"Trigger icon is outside its Vanguard printing face: {key}"
+                )
+            trigger_icons.setdefault(observation.printing_id, {})[
+                observation.face_id
+            ] = observation.icon
+        projection = replace(
+            projection,
+            program_printings={}
+            if program_printings is None and trigger_icons
+            else program_printings,
+            trigger_icons=dict(trigger_icons),
+        )
         if author_inputs is not None and len(projection.programs) != len(
             author_inputs.index.records
         ):

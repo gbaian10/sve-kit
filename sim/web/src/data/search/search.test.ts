@@ -1578,7 +1578,7 @@ it.each(["keyword", "ability", "class", "collab"] as const)(
       state: {
         ...DEFAULT_QUERY,
         ...(kind === "keyword"
-          ? { mechanics: { "kw:ward": "has" as const } }
+          ? { mechanics: ["kw:ward"] }
           : kind === "ability"
             ? { abilityTypes: ["fanfare" as const] }
             : kind === "class"

@@ -207,7 +207,7 @@ fn title_deck_with_drive_check_reports_missing_icons_before_opening() {
     assert_eq!(startup, preflight);
     assert_eq!(
         startup.gaps(Viewer::P1),
-        ["CP03-110", "CP03-112"].map(|card_no| AdmissionGap {
+        ["CP03-110", "CP03-112", "CP03-117", "CP03-119", "CP03-120", "CP03-124", "CP03-127"].map(|card_no| AdmissionGap {
             card_no: card_no.into(),
             reason: AdmissionGapReason::MissingTriggerIcons,
         }),
@@ -221,10 +221,10 @@ fn title_deck_with_drive_check_reports_missing_icons_before_opening() {
     let filter = Game::check_player_decks(selected, &players).unwrap();
     assert_eq!(
         filter.gaps(Viewer::P1),
-        [AdmissionGap {
-            card_no: "CP03-123".into(),
+        ["CP03-110", "CP03-112", "CP03-117", "CP03-119", "CP03-120", "CP03-123", "CP03-124", "CP03-127"].map(|card_no| AdmissionGap {
+            card_no: card_no.into(),
             reason: AdmissionGapReason::MissingTriggerIcons,
-        }],
+        }),
     );
 }
 
@@ -238,14 +238,14 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
     players[1].main[0] = "CP03-124".into();
 
     let preflight = Game::check_player_decks(selection(), &players).unwrap();
+    assert_eq!(preflight.gaps(Viewer::P1), []);
     assert_eq!(
-        preflight.gaps(Viewer::P1),
+        preflight.gaps(Viewer::P2),
         [AdmissionGap {
-            card_no: "CP03-047".into(),
+            card_no: "CP03-124".into(),
             reason: AdmissionGapReason::MissingTriggerIcons,
         }],
     );
-    assert_eq!(preflight.gaps(Viewer::P2), []);
 
     players[0].main.retain(|number| number != "BP13-043");
     for transfer_card in ["BP13-043", "BP03-109"] {
@@ -256,7 +256,7 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
         assert_eq!(
             report.gaps(Viewer::P2),
             [AdmissionGap {
-                card_no: transfer_card.into(),
+                card_no: "CP03-124".into(),
                 reason: AdmissionGapReason::MissingTriggerIcons,
             }],
         );

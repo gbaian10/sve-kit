@@ -1,5 +1,6 @@
 import { isAbilityType } from "../abilityTypes"
 import { isLocationToken } from "../deckLocation"
+import { mechanicKey, PANEL_KEYWORDS, parseMechanicKey } from "../mechanics"
 import { compareCodePoints } from "../normalize"
 import { isClassMechanism, isCollabMechanism } from "../printedMechanisms"
 import { REPRESENTATIVE_RARITIES } from "../representative"
@@ -7,7 +8,6 @@ import {
   COST_CAP,
   DEFAULT_QUERY,
   defaultSecondarySort,
-  type MechanicState,
   QUERY_SORTS,
   QUERY_UNITS,
   type QueryState,
@@ -16,6 +16,8 @@ import {
   VIEW_MODES,
 } from "./model"
 
+// `mech` entries are `<keyword id>[.grants]`: the suffix marks a keyword the card gives to others, and
+// a keyword the card itself has carries none.
 // URL parameters: q class cost atk def type loc trait artist mech set rarity alt reprint unit rep prfirst
 // stamp serial errata restricted sort view. Sort clauses carry their own direction. Lists
 // are comma separated, de-duplicated and sorted so equal states always give equal URLs; unknown
@@ -67,14 +69,20 @@ function values(params: URLSearchParams, name: string, cap: number): number[] {
   return [...new Set(selected)].sort((a, b) => a - b)
 }
 
-function parseMechanics(text: string | null): Record<string, MechanicState> {
-  const out: Record<string, MechanicState> = {}
+function parseMechanics(text: string | null): string[] {
+  const keys = new Set<string>()
   for (const entry of text?.split(",") ?? []) {
-    const state: MechanicState = entry.startsWith("-") ? "not" : "has"
-    const id = state === "not" ? entry.slice(1) : entry
-    if (CODE.test(id)) out[id] = state
+    const condition = parseMechanicKey(entry)
+    if (!condition || !CODE.test(condition.keywordId)) continue
+    // Relations beyond "has" are only derived for the keywords the panel offers.
+    if (
+      condition.relation !== "has" &&
+      !PANEL_KEYWORDS.some((keyword) => keyword === condition.keywordId)
+    )
+      continue
+    keys.add(mechanicKey(condition.relation, condition.keywordId))
   }
-  return out
+  return [...keys].sort(compareCodePoints)
 }
 
 function parseSort(
@@ -184,9 +192,7 @@ export function formatQuery(state: QueryState): URLSearchParams {
     ].sort((a, b) => a - b)
     if (selected.length > 0) params.set(name, selected.join(","))
   }
-  const mechanics = Object.entries(state.mechanics)
-    .sort(([a], [b]) => compareCodePoints(a, b))
-    .map(([id, state]) => (state === "not" ? `-${id}` : id))
+  const mechanics = [...new Set(state.mechanics)].sort(compareCodePoints)
   if (mechanics.length > 0) params.set("mech", mechanics.join(","))
   if (state.mechanicsMatch === "all") params.set("mechmatch", "all")
   if (state.abilityTypesMatch === "all") params.set("abilitymatch", "all")

@@ -70,6 +70,7 @@ fn export_with(size: usize, abilities: &[Value]) -> (Value, String) {
     );
     let programs = json!({
         "format_version":"4.2.0",
+        "trigger_icons": {},
         "entries": (0..size).map(|index| json!({"id":number(index),"dsl_version":"1.0",
             "ast":{"card_id":identifier("c", index),"scope":"shared",
                 "faces":{(identifier("f", index)):{"abilities":abilities}}}})).collect::<Vec<_>>(),

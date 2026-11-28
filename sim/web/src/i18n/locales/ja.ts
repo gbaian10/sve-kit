@@ -311,9 +311,18 @@ export default {
     keywordLoading: "タグを読み込み中",
     keywordEnglishUnknown: "英語版は未タグ付け",
     keywordUnknown: "タグ付けは未着手です",
-    keywordIncomplete: "タグ付けは未完了",
-    keywordPartial: "いずれかに一致。未完了・漏れの可能性あり",
-    keywordUnknownCount: "自身の能力が未判定のカード：{{count}}枚",
+    keywordUnknownCount: "「{{relation}}」が未判定のカード：{{count}}枚",
+    keywordRelation: "キーワードとの関係",
+    keywordRelationSelected: "{{count}}件選択中",
+    keywordRelations: {
+      has: "自身が持つ",
+      grants: "他のカードに与える",
+    },
+    keywordRelationHints: {
+      has: "カード自身がこのキーワードを持つ",
+      grants: "効果で他のカードにこのキーワードを与える",
+    },
+    keywordRelationHas: "{{relation}}：{{label}}",
     classMechanisms: "クラスのメカニズム",
     collabMechanisms: "コラボ作品のメカニズム",
     mechanismMatch: "メカニズムの一致",
@@ -346,7 +355,6 @@ export default {
     abilityUnknownCount: "能力の種類が未判定のカード：{{count}}枚",
     abilityTypeHas: "能力の種類：{{label}}",
     abilityTypeChipQuick: "クイック",
-    keywordAll: "選択したすべてのキーワードに一致",
     abilityTypeNames: {
       quick: "クイック",
       fanfare: "ファンファーレ",
@@ -358,9 +366,7 @@ export default {
       act: "起動",
       fusion: "融合",
     },
-    keywordAny: "いずれかのキーワードに一致",
     keywordHas: "キーワード：{{label}}",
-    keywordNot: "キーワードなし：{{label}}",
     panel: "絞り込み条件",
     edition: "カードの版",
     cost: "コスト",
@@ -795,8 +801,10 @@ export default {
       choiceRestricted:
         "この制限のカードは {{max}} 種類までです（{{from}} より適用、現在 {{count}} 種類）。",
       formatUnsupported: "このフォーマットはまだチェックできません。",
-      triggerClassUnchecked:
-        "トリガーを持つカードはリーダーと同じクラスである必要があります。アイコンのデータがないためチェックしていません。",
+      triggerClassMismatch:
+        "トリガーを持つ「{{name}}」のクラスは{{cardClass}}です。リーダーと同じクラス（{{leaderClass}}）のカードを入れてください。",
+      triggerIconUnknown:
+        "一部のカードにはトリガーアイコンのデータがないため、そのカードのクラス制限は未確認です。",
       restrictionsUnknown:
         "公式の禁止・制限一覧が今日の時点まで確認できていません。新しい制限があるかもしれません。",
     },

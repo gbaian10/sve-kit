@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:snapshot:4.2.0",
-  "$comment": "4.2 program dependencies with 4.1 data containers.",
+  "$comment": "4.2 program dependencies and Trigger icons with 4.1 data containers.",
   "$defs": {
     "ID": {
       "type": "string",
@@ -18842,12 +18842,35 @@
             ],
             "additionalProperties": false
           }
+        },
+        "trigger_icons": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^p:[0-9a-f]{32}$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "^f:[0-9a-f]{32}$"
+            },
+            "additionalProperties": {
+              "enum": [
+                "critical",
+                "draw",
+                "stand",
+                "heal",
+                "none"
+              ]
+            }
+          }
         }
       },
       "required": [
         "format_version",
         "entries",
-        "printings"
+        "printings",
+        "trigger_icons"
       ],
       "additionalProperties": false
     },

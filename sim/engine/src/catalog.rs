@@ -7,6 +7,7 @@ use core::iter::once;
 use serde::{Deserialize, Serialize, de::IgnoredAny};
 use serde_json::{Value, json};
 
+use crate::ir::TriggerIcon;
 use crate::{EngineFailure, Result, invalid};
 
 pub(crate) mod current;
@@ -24,6 +25,28 @@ pub struct Card {
     pub number: String,
     /// Every face, in snapshot order.
     pub faces: Vec<Value>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum PrintedTriggerIcon {
+    None,
+    Critical,
+    Draw,
+    Stand,
+    Heal,
+}
+
+impl PrintedTriggerIcon {
+    pub(crate) const fn effect(self) -> Option<TriggerIcon> {
+        match self {
+            Self::None => None,
+            Self::Critical => Some(TriggerIcon::Critical),
+            Self::Draw => Some(TriggerIcon::Draw),
+            Self::Stand => Some(TriggerIcon::Stand),
+            Self::Heal => Some(TriggerIcon::Heal),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -133,9 +156,33 @@ pub struct Catalog {
     /// A collab printing's site name is display text, not the name rules compare.
     #[serde(default)]
     pub(crate) rules_names: BTreeMap<String, Vec<Option<String>>>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    trigger_icons: BTreeMap<String, BTreeMap<usize, PrintedTriggerIcon>>,
 }
 
 impl Catalog {
+    pub(crate) fn trigger_icon(
+        &self,
+        number: &str,
+        face: usize,
+    ) -> Result<Option<PrintedTriggerIcon>> {
+        if let Some(icon) = self
+            .trigger_icons
+            .get(number)
+            .and_then(|icons| icons.get(&face))
+        {
+            return Ok(Some(*icon));
+        }
+        let label = self.face(number, face)?["title"]
+            .as_str()
+            .unwrap_or_default();
+        // CR 14.4.1.1 defines the printed icons for Vanguard cards.
+        Ok(
+            (self.rule_bindings.title_code("", label)?.as_deref() != Some("cardfight_vanguard"))
+                .then_some(PrintedTriggerIcon::None),
+        )
+    }
+
     /// Consume `CurrentAuthorSources.selection_from_results()` from the trusted Python reader.
     ///
     /// # Errors

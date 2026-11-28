@@ -536,13 +536,13 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 
 版次的 `stamp` 為 `{kind:Text?,year:Text?}` 或 null，`serial` 為是否印有序號牌的 Bool?；未審查為 null，已確認沒有序號牌為 false。種類／年份由 [printing marks 作者輸入](../domains/printing-marks.md) 保存，年份不由卡片發行日推定，序號牌不等於賽季數字，也不保存個人序號。兩欄隨 printing bootstrap 匯出。
 
-`card_mechanic_coverage.has_complete_keyword_ids` 是只針對「本身有」的已確認集合，
+`card_mechanic_coverage.has_complete_keyword_ids` 是只針對「自身」（卡片自己持有）的已確認集合，
 按 ID 排序且不得重複，ID 必須屬於本快照 keyword universe。
 consumer 先讀同地區的 has 正標籤；沒有正標籤時，只有此集合或原有四關係 complete 集合中的 keyword 才可視為 absent。
 它不改變 `complete_all`、`complete_keyword_ids`、`partial_keyword_ids` 與 manifest 四關係 coverage 的語意。
 四關係的 complete 集合由已准入整卡程式的推導提供，目前涵蓋八個持有性質的關鍵字；其餘登錄概念的授予、提到與計數維持未知。
 EN 自己的 current 卡文產生 `en_override`，不依 JP 對應或引擎支援資格取得 has 完整性；
-未知／缺面／待定來源不授予否定結果。來源與解析邊界見[關鍵字機制](../domains/keyword-mechanics.md#本身有的日英全卡表檢查)。
+未知／缺面／待定來源不授予否定結果。來源與解析邊界見[關鍵字機制](../domains/keyword-mechanics.md#自身關鍵字的日英全卡表檢查)。
 
 `card_mechanic_coverage.ability_types` 是同地區卡文任一面明印的能力種類 code 陣列，按 code 排序且不重複；
 固定 code 為 quick、fanfare、last_words、on_evolve、on_attack、advanced_act、on_super_evolve、act、fusion。

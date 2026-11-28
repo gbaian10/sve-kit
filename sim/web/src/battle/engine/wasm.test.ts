@@ -15,7 +15,12 @@ beforeAll(() => {
 
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
 const content = (id: string, sha: string) => ({ id, sha256: sha })
-const programs = JSON.stringify({ format_version: "4.2.0", entries: [], printings: {} })
+const programs = JSON.stringify({
+  format_version: "4.2.0",
+  entries: [],
+  printings: {},
+  trigger_icons: {},
+})
 const manifest = "1".repeat(64)
 
 function inputs(programHash = sha256(programs)): string {

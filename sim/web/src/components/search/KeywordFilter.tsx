@@ -1,3 +1,4 @@
+import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import assailIcon from "../../assets/keywords/assail.svg"
@@ -7,23 +8,22 @@ import drainIcon from "../../assets/keywords/drain.svg"
 import guardIcon from "../../assets/keywords/guard.svg"
 import intimidateIcon from "../../assets/keywords/intimidate.svg"
 import type { SearchOptions } from "../../data"
-import type { MatchMode, MechanicState } from "../../domain/query/model"
+import {
+  MECHANIC_RELATIONS,
+  mechanicKey,
+  type MechanicRelation,
+  PANEL_KEYWORDS,
+  parseMechanicKey,
+} from "../../domain/mechanics"
+import type { MatchMode } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
+import { cn } from "../ui/cn"
+import { rovingRadioKeyDown } from "../ui/useRovingRadio"
 import { vocabularyOptionLabel } from "./facet-labels"
 import { Toggle } from "./FilterControls"
 import { FilterDropdown } from "./FilterDropdown"
 import { MatchModeControl } from "./MatchModeControl"
-
-const KEYWORD_ORDER = [
-  "kw:assail",
-  "kw:intimidate",
-  "kw:aura",
-  "kw:ward",
-  "kw:bane",
-  "kw:drain",
-  "kw:rush",
-  "kw:storm",
-] as const
+import { mechanicConditionLabel } from "./mechanic-labels"
 
 const KEYWORD_ICONS: Readonly<Record<string, string | undefined>> = {
   "kw:assail": assailIcon,
@@ -46,7 +46,7 @@ export function KeywordFilter({
   readonly options:
     | {
         readonly keywords: SearchOptions["keywords"]
-        readonly unknownCards?: number | undefined
+        readonly unknownCards?: SearchOptions["keywordUnknownCards"]
         readonly coverage: SearchOptions["keywordCoverage"]
       }
     | undefined
@@ -54,34 +54,48 @@ export function KeywordFilter({
   readonly onMatchChange?: (value: MatchMode) => void
   readonly textLang: TextLang
   readonly edition: Region
-  readonly selected: Readonly<Record<string, MechanicState>>
-  readonly onChange: (selected: Readonly<Record<string, MechanicState>>) => void
+  /** `mechanicKey` of each wanted keyword. */
+  readonly selected: readonly string[]
+  readonly onChange: (selected: readonly string[]) => void
 }) {
   const { t } = useTranslation()
-  const disabled = !options || options.coverage === "pending" || options.coverage === "unknown"
+  const id = useId()
+  const [relation, setRelation] = useState<MechanicRelation>("has")
+  const coverage = options?.coverage[relation]
+  const loading = !options || coverage === "pending"
+  const disabled = loading || coverage === "unknown"
+  const unknownCards = options?.unknownCards?.[relation]
+  const keywordLabel = (keywordId: string) => {
+    const keyword = options?.keywords.find((item) => item.id === keywordId)
+    return keyword ? vocabularyOptionLabel(keyword.name, textLang) : keywordId
+  }
+  const countOf = (target: MechanicRelation) =>
+    selected.filter((key) => parseMechanicKey(key)?.relation === target).length
   return (
     <FilterDropdown
       label={t("filters.keywords")}
-      selectedCount={Object.keys(selected).length}
+      selectedCount={selected.length}
       summary={
-        Object.keys(selected).length > 0
-          ? Object.keys(selected)
-              .map((id) => {
-                const keyword = options?.keywords.find((item) => item.id === id)
-                const label = keyword ? vocabularyOptionLabel(keyword.name, textLang) : id
-                return selected[id] === "not" ? t("filters.keywordNot", { label }) : label
+        selected.length > 0
+          ? selected
+              .map((key) => {
+                const condition = parseMechanicKey(key)
+                // The dropdown title already says "keyword", so a held keyword shows its bare name.
+                return condition?.relation === "has"
+                  ? keywordLabel(condition.keywordId)
+                  : mechanicConditionLabel(t, key, keywordLabel)
               })
               .join("、")
-          : !options || options.coverage === "pending"
+          : !options || options.coverage.has === "pending"
             ? t("filters.keywordLoading")
-            : disabled
+            : options.coverage.has === "unknown"
               ? t(edition === "en" ? "filters.keywordEnglishUnknown" : "filters.keywordUnknown")
               : t("rarityBadge.all")
       }
       onClear={
-        Object.keys(selected).length
+        selected.length
           ? () => {
-              onChange({})
+              onChange([])
             }
           : undefined
       }
@@ -90,50 +104,94 @@ export function KeywordFilter({
         <MatchModeControl
           label={t("filters.keywordMatch")}
           value={matchMode}
-          disabled={disabled}
+          disabled={!options}
           onChange={onMatchChange}
         />
       )}
-      <div className="grid grid-cols-4 gap-2">
-        {KEYWORD_ORDER.flatMap((id) => {
-          const keyword = options?.keywords.find((item) => item.id === id)
-          if (!keyword) return []
-          const icon = KEYWORD_ICONS[id]
+      <div
+        role="tablist"
+        aria-label={t("filters.keywordRelation")}
+        // Tabs share the row by their own width: the longest name must stay whole in a narrow popover.
+        className="flex border-b border-border"
+      >
+        {MECHANIC_RELATIONS.map((value) => {
+          const active = value === relation
+          const count = countOf(value)
           return (
-            <Toggle
-              key={keyword.id}
-              pressed={selected[keyword.id] === "has"}
-              className="h-10 min-w-0 gap-0.5 px-0.5 text-11"
-              disabled={disabled}
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              id={`${id}-${value}`}
+              aria-selected={active}
+              aria-controls={`${id}-panel`}
+              tabIndex={active ? 0 : -1}
               onClick={() => {
-                onChange(
-                  selected[keyword.id] === "has"
-                    ? Object.fromEntries(
-                        Object.entries(selected).filter(([id]) => id !== keyword.id),
-                      )
-                    : { ...selected, [keyword.id]: "has" },
-                )
+                setRelation(value)
               }}
+              onKeyDown={(event) => {
+                rovingRadioKeyDown(event, MECHANIC_RELATIONS, relation, setRelation, id)
+              }}
+              className={cn(
+                "-mb-px flex h-9 flex-auto items-center justify-center gap-1 border-b-2 px-1.5 text-13 font-semibold whitespace-nowrap",
+                "focus-visible:outline-2 focus-visible:outline-offset-2",
+                active
+                  ? "border-text-1 text-text-1"
+                  : "border-transparent text-text-2 hover:text-text-1",
+              )}
             >
-              {icon && <img src={icon} alt="" className="size-3.5 shrink-0 object-contain" />}
-              {vocabularyOptionLabel(keyword.name, textLang)}
-            </Toggle>
+              {t(`filters.keywordRelations.${value}`)}
+              {count > 0 && (
+                <span className="min-w-4.5 shrink-0 rounded-pill bg-text-1 px-1 text-11 leading-4.5 text-surface-1 tabular-nums">
+                  <span aria-hidden="true">{count}</span>
+                  <span className="sr-only">{t("filters.keywordRelationSelected", { count })}</span>
+                </span>
+              )}
+            </button>
           )
         })}
       </div>
-      <p className="mt-3 text-12 text-text-3" role="status">
-        {!options || options.coverage === "pending"
-          ? t("filters.keywordLoading")
-          : options.unknownCards !== undefined && options.unknownCards > 0
-            ? t("filters.keywordUnknownCount", { count: options.unknownCards })
+      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${relation}`}>
+        <p className="mt-2 text-12 text-text-2">{t(`filters.keywordRelationHints.${relation}`)}</p>
+        {/* Gaps in the tags sit above the buttons so a short popover never hides them. */}
+        <p className="mt-1 text-12 text-text-2 empty:hidden" role="status">
+          {loading
+            ? t("filters.keywordLoading")
             : disabled
               ? edition === "en"
                 ? t("filters.keywordEnglishUnknown")
                 : t("filters.keywordUnknown")
-              : options.coverage === "partial"
-                ? t("filters.keywordPartial")
-                : t(matchMode === "all" ? "filters.keywordAll" : "filters.keywordAny")}
-      </p>
+              : unknownCards !== undefined && unknownCards > 0
+                ? t("filters.keywordUnknownCount", {
+                    count: unknownCards,
+                    relation: t(`filters.keywordRelations.${relation}`),
+                  })
+                : null}
+        </p>
+        <div className="mt-2 grid grid-cols-4 gap-2">
+          {PANEL_KEYWORDS.flatMap((keywordId) => {
+            const keyword = options?.keywords.find((item) => item.id === keywordId)
+            if (!keyword) return []
+            const key = mechanicKey(relation, keywordId)
+            const pressed = selected.includes(key)
+            const icon = KEYWORD_ICONS[keywordId]
+            return (
+              <Toggle
+                key={keywordId}
+                pressed={pressed}
+                className="h-10 min-w-0 gap-0.5 px-0.5 text-11"
+                disabled={disabled}
+                onClick={() => {
+                  onChange(pressed ? selected.filter((other) => other !== key) : [...selected, key])
+                }}
+              >
+                {icon && <img src={icon} alt="" className="size-3.5 shrink-0 object-contain" />}
+                {vocabularyOptionLabel(keyword.name, textLang)}
+              </Toggle>
+            )
+          })}
+        </div>
+      </div>
     </FilterDropdown>
   )
 }

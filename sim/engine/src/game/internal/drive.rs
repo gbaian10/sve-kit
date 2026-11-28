@@ -2,9 +2,10 @@
 
 use super::observation::EffectOrigin;
 use super::{
-    Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, invalid,
+    Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, int, invalid,
     player_id, seat_name, unsupported,
 };
+use crate::catalog::PrintedTriggerIcon;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::CardOption;
 use crate::game::player::Viewer;
@@ -240,19 +241,21 @@ impl Game {
     }
 
     pub(super) fn internal_trigger_icon(&self, id: &str) -> Result<Option<TriggerIcon>> {
-        let card = &self.object(id)?.card;
-        let facts = &self.state.facts[card];
-        if facts["verified"] != true {
-            return Err(unsupported("Trigger icon requires verified facts"));
+        if !self.state.fixture_facts.is_null() {
+            let facts = &self.state.fixture_facts[&self.object(id)?.card];
+            if facts["verified"] != true {
+                return Err(unsupported("Trigger icon requires verified facts"));
+            }
+            let icon: PrintedTriggerIcon = serde_json::from_value(facts["trigger_icon"].clone())
+                .map_err(|_fixture_error| unsupported("unverified Trigger icon"))?;
+            return Ok(icon.effect());
         }
-        match facts["trigger_icon"].as_str() {
-            Some("none") => Ok(None),
-            Some("draw") => Ok(Some(TriggerIcon::Draw)),
-            Some("heal") => Ok(Some(TriggerIcon::Heal)),
-            Some("critical") => Ok(Some(TriggerIcon::Critical)),
-            Some("stand") => Ok(Some(TriggerIcon::Stand)),
-            _ => Err(unsupported("unverified Trigger icon")),
-        }
+        let source = self.information_source(id)?;
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.catalog
+            .trigger_icon(&source.card, face)?
+            .map(PrintedTriggerIcon::effect)
+            .ok_or_else(|| unsupported("Trigger icon requires verified facts"))
     }
 
     pub(super) fn internal_drive_answer(

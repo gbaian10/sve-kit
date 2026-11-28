@@ -2,7 +2,7 @@
 
 import re
 import stat
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
@@ -257,12 +257,24 @@ class Snapshot:
     manifest: dict[str, JsonValue]
     manifest_sha256: str
     tables: dict[str, list[Row]]
+    trigger_icons: Row = field(default_factory=dict)
 
 
 def load_snapshot(root: Path) -> Snapshot:
     """The same closure check as `load_export`, keeping the rows instead of the bytes."""
-    _path, raw, manifest, _members, tables = _verified(root)
-    return Snapshot(manifest, digest(raw), tables)
+    _path, raw, manifest, members, tables = _verified(root)
+    icons: Row = {}
+    if manifest["format_version"] == PROGRAM_DEPENDENCIES:
+        programs = next(
+            row
+            for row in map(object_value, array(manifest["files"]))
+            if row["role"] == "programs"
+        )
+        attachment = next(
+            member.raw for member in members if member.key == programs["path"]
+        )
+        icons = object_value(object_value(parse(attachment))["trigger_icons"])
+    return Snapshot(manifest, digest(raw), tables, icons)
 
 
 def load_battle_inputs(

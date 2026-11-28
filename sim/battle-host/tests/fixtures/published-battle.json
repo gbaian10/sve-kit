@@ -22,7 +22,7 @@
       },
       "programs": {
         "id": "programs-test",
-        "sha256": "5b948db71e774653ab8281b6318c8d1ef445756d00a9b88a57e8cdd18f3640a7"
+        "sha256": "0eefb8a3bfecd7165b89a281bb9a2e391da775629fed378a8eb9267746128147"
       },
       "region": "jp",
       "rules": {
@@ -129,5 +129,5 @@
     "rules": "{\"evidence\":[{\"checked_on\":\"2026-10-03\",\"id\":\"synthetic\",\"rule_refs\":[\"1.2.3\"],\"source_version_id\":\"src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}],\"format\":1,\"input\":{\"kind\":\"resolved\",\"snapshot_sha256\":\"60f1849de7273101813df5fd6c3bea064feba0b562bf55f51e8154973d8d876a\"},\"kind\":\"engine_rules\",\"resources\":[],\"scope\":{\"region\":\"jp\",\"rules_source_version_id\":\"src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"rules_version\":\"synthetic-1\"},\"titles\":[{\"anchor\":{\"face_id\":\"f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"kind\":\"face-id\",\"region\":\"jp\"},\"capabilities\":[],\"evidence\":[\"synthetic\"],\"title_code\":\"synthetic_empty\"}]}",
     "snapshot": "{\"faces\":[{\"card_class\":\"ニュートラル\",\"card_type\":\"フォロワー\",\"cost\":\"1\",\"hp\":\"1\",\"name\":\"t-anchor\",\"power\":\"1\",\"sections\":[],\"text\":\"Draw a card twice.\",\"title\":\"synthetic\",\"traits\":[]}],\"number\":\"t-anchor\"}\n{\"faces\":[{\"card_class\":\"ニュートラル\",\"card_type\":\"フォロワー\",\"cost\":\"1\",\"hp\":\"1\",\"name\":\"t-unused\",\"power\":\"1\",\"sections\":[],\"text\":null,\"title\":\"synthetic\",\"traits\":[]}],\"number\":\"t-unused\"}"
   },
-  "{\"entries\":[{\"ast\":{\"card_id\":\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"faces\":{\"f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\":{\"abilities\":[{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}},{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}}]}},\"scope\":\"shared\"},\"dsl_version\":\"1.0\",\"id\":\"synthetic\"}],\"format_version\":\"4.2.0\",\"printings\":{\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\":{\"representative\":\"test-t-anchor\",\"tokens\":[]}}}"
+  "{\"entries\":[{\"ast\":{\"card_id\":\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"faces\":{\"f:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\":{\"abilities\":[{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}},{\"fanfare\":{\"do\":[{\"draw\":{\"n\":1}}]},\"line\":1,\"ports\":{\"exports\":{},\"imports\":{}}}]}},\"scope\":\"shared\"},\"dsl_version\":\"1.0\",\"id\":\"synthetic\"}],\"format_version\":\"4.2.0\",\"printings\":{\"c:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\":{\"representative\":\"test-t-anchor\",\"tokens\":[]}},\"trigger_icons\":{}}"
 ]

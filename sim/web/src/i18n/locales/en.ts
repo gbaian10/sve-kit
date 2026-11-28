@@ -321,9 +321,18 @@ export default {
     keywordLoading: "Loading tags",
     keywordEnglishUnknown: "English edition is not tagged yet",
     keywordUnknown: "Tagging has not started",
-    keywordIncomplete: "Keyword tags are incomplete",
-    keywordPartial: "Any keyword; incomplete tags may miss cards",
-    keywordUnknownCount: "Self keywords are still undetermined for {{count}} cards",
+    keywordUnknownCount: "“{{relation}}” is still undetermined for {{count}} cards",
+    keywordRelation: "Keyword relation",
+    keywordRelationSelected: "{{count}} selected",
+    keywordRelations: {
+      has: "Has keyword",
+      grants: "Gives keyword",
+    },
+    keywordRelationHints: {
+      has: "The card itself has this keyword",
+      grants: "An effect gives this keyword to other cards",
+    },
+    keywordRelationHas: "{{relation}}: {{label}}",
     classMechanisms: "Class mechanisms",
     collabMechanisms: "Crossover mechanisms",
     mechanismMatch: "Mechanism match",
@@ -357,7 +366,6 @@ export default {
     abilityUnknownCount: "Ability types are still undetermined for {{count}} cards",
     abilityTypeHas: "Ability type: {{label}}",
     abilityTypeChipQuick: "Quick",
-    keywordAll: "Matches all selected keywords",
     abilityTypeNames: {
       quick: "Quick",
       fanfare: "Fanfare",
@@ -369,9 +377,7 @@ export default {
       act: "Activate",
       fusion: "Fusion",
     },
-    keywordAny: "Matches any selected keyword",
     keywordHas: "Keyword: {{label}}",
-    keywordNot: "Without keyword: {{label}}",
     panel: "Filters",
     edition: "Card edition",
     cost: "Cost",
@@ -812,8 +818,10 @@ export default {
       choiceRestricted:
         "From {{from}}, only {{max}} of these restricted choices may be used; the deck has {{count}}.",
       formatUnsupported: "This format cannot be checked yet.",
-      triggerClassUnchecked:
-        "Cards with a trigger icon must match the leader’s class; icon data is missing, so this is not checked.",
+      triggerClassMismatch:
+        "“{{name}}” has a trigger icon and is {{cardClass}}. Its class must match your leader’s ({{leaderClass}}).",
+      triggerIconUnknown:
+        "Some printings have no trigger icon data. The class restriction for those printings has not been checked.",
       restrictionsUnknown:
         "The official restriction list is not confirmed up to today; newer restrictions may apply.",
     },
