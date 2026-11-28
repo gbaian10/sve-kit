@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "../../components/ui/cn"
@@ -37,9 +37,15 @@ function loadPreviewImage(src: string): Promise<HTMLImageElement | null> {
   return loading
 }
 
+interface Target {
+  readonly key: string
+  readonly input: DeckImageInput
+}
+
 /**
  * The deck picture drawn on the page (the export dialog's small picture, without a file). `input`
- * is `null` while card image rows are still arriving; the previous picture is then put away.
+ * is `null` while card image rows may still arrive. A picture is shown only while it matches the
+ * current input; an older one keeps its space, unseen, until the new one is drawn.
  */
 export function DeckPicture({
   input,
@@ -50,54 +56,72 @@ export function DeckPicture({
 }) {
   const { t } = useTranslation()
   const host = useRef<HTMLDivElement>(null)
-  const [drawn, setDrawn] = useState<{
-    readonly input: DeckImageInput
-    readonly failed: boolean
-  } | null>(null)
+  // Inputs are rebuilt on unrelated renders; the picture follows what it shows, not the object.
+  const key = input === null ? null : JSON.stringify(input)
+  const [target, setTarget] = useState<Target | null>(null)
+  if (input !== null && key !== null && key !== target?.key) setTarget({ key, input })
+  const [drawn, setDrawn] = useState<{ readonly key: string; readonly failed: boolean } | null>(
+    null,
+  )
   useEffect(() => {
-    if (input === null) return
+    if (target === null) return
     let active = true
-    renderDeckImage(input, loadPreviewImage).then(
+    renderDeckImage(target.input, loadPreviewImage).then(
       (canvas) => {
         if (!active) return
         canvas.className = "block h-auto w-full"
         host.current?.replaceChildren(canvas)
-        setDrawn({ input, failed: false })
+        setDrawn({ key: target.key, failed: false })
       },
       () => {
-        if (active) setDrawn({ input, failed: true })
+        if (active) setDrawn({ key: target.key, failed: true })
       },
     )
     return () => {
       active = false
     }
-  }, [input])
-  const shown = input !== null && drawn !== null && !drawn.failed
-  const failed = input !== null && drawn?.input === input && drawn.failed
-  const stale = shown && drawn.input !== input
+  }, [target])
+  const settled = key !== null && drawn?.key === key
+  const current = settled && !drawn.failed
+  const failed = settled && drawn.failed
   return (
     <>
-      {/* While another input draws (a few milliseconds once its images are cached) the last
-          picture stays, dimmed, rather than blinking away; it is hidden while images are unknown. */}
       <div
         ref={host}
         role="img"
         aria-label={label}
-        aria-busy={stale}
-        hidden={!shown}
-        className={cn(
-          "overflow-hidden rounded-button border border-border transition-opacity",
-          stale && "opacity-50",
-        )}
+        hidden={drawn === null || failed}
+        className="overflow-hidden rounded-button border border-border"
+        // Hidden in place: the next picture takes over the same space without a jump.
+        style={current ? undefined : { visibility: "hidden" }}
       />
-      {/* Kept in the page so the live region announces when loading starts. */}
-      <p role="status" className="text-13 text-text-2 empty:hidden">
-        {(!shown || stale) && !failed ? t("decks.importPictureLoading") : ""}
+      {/* Present before it has text, so the change is announced; unseen while empty. */}
+      <p role="status" className={cn("text-13 text-text-2", (current || failed) && "sr-only")}>
+        {current || failed ? "" : t("decks.importPictureLoading")}
       </p>
       {failed && (
         <Notice tone="danger" role="alert">
           {t("decks.drawImageFailed")}
         </Notice>
+      )}
+      {/* The cards the picture shows, for screen readers to check them one by one. */}
+      {input !== null && (
+        <div className="sr-only">
+          {input.sections
+            .filter((section) => section.cards.length > 0)
+            .map((section) => (
+              <Fragment key={section.label}>
+                <p>{section.label}</p>
+                <ul>
+                  {section.cards.map((card, i) => (
+                    <li key={`${String(i)}-${card.label}`}>
+                      {t("decks.importCopies", { card: card.label, count: card.count })}
+                    </li>
+                  ))}
+                </ul>
+              </Fragment>
+            ))}
+        </div>
       )}
     </>
   )

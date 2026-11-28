@@ -81,21 +81,16 @@ export function deckImageInput({
 }
 
 /**
- * Whether some card's image row is still on its way (a reprint's rows come from the search
- * worker); drawing then would show a placeholder that a moment later becomes the card.
+ * Whether some card's image row may still arrive (a reprint's rows come from the search worker);
+ * drawing then would show a placeholder that a moment later becomes the card.
  */
 export function deckImagesPending(
   deck: DeckPictureDeck,
   facts: DeckFacts,
-  images: ImageIndex | undefined,
+  pending: (printingId: string, faceId: string) => boolean,
 ): boolean {
-  if (images === undefined) return true
   return [...(deck.leader ? [deck.leader] : []), ...deck.main, ...deck.evolve].some((entry) => {
     const summary = facts.summaryOf(entry.cardId, entry.printingId)
-    if (summary === undefined) return false
-    const { printingId, faceId } = summary
-    // A failed request will not bring the row; the card is then drawn as a placeholder.
-    if (images.failedFace?.(printingId, faceId) ?? images.failed) return false
-    return images.known?.(printingId, faceId) === false
+    return summary !== undefined && pending(summary.printingId, summary.faceId)
   })
 }

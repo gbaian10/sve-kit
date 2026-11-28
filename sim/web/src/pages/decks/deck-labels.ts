@@ -19,6 +19,8 @@ export interface ClassOption {
 /** The names a deck's basis is shown with: the six classes plus neutral, and the titles. */
 export function useDeckLabels(): {
   readonly classOptions: readonly ClassOption[] | undefined
+  /** The search that brings the class names failed; `basisLabel` then shows a class's code. */
+  readonly classOptionsFailed: boolean
   readonly titles: readonly TitleOption[] | undefined
   /** The edition `titles` belong to (the page's edition). */
   readonly titlesEdition: Region
@@ -28,7 +30,7 @@ export function useDeckLabels(): {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const textLang = UI_TEXT_LANG[currentUiLanguage(prefs.uiLanguage)]
-  const { classes } = useSetOptions()
+  const { classes, result } = useSetOptions()
   const { client, catalog } = useCardSnapshot()
   const edition = useRouteEdition()
   // After an edition change the previous region's catalog stays until the new one has loaded.
@@ -60,5 +62,12 @@ export function useDeckLabels(): {
       ? (classOptions?.find((option) => option.code === basis.classCode)?.label ??
         (basis.classCode === NEUTRAL_CLASS ? t("search.neutral") : basis.classCode))
       : t("decks.basis.titleNamed", { title: titleName(basis.titleCode) })
-  return { classOptions, titles, titlesEdition: edition, titleName, basisLabel }
+  return {
+    classOptions,
+    classOptionsFailed: classes === undefined && result.phase === "error",
+    titles,
+    titlesEdition: edition,
+    titleName,
+    basisLabel,
+  }
 }

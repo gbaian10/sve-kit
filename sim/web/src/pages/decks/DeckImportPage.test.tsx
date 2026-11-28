@@ -97,7 +97,8 @@ describe("DeckImportPage", () => {
       })
       const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
       await within(preview).findByRole("img", { name: "王族 的牌組圖片" }, { timeout: 25_000 })
-      expect(drawn).toHaveLength(2)
+      // The leader and the one main card, from the small files (redraws may repeat them).
+      expect(new Set(drawn).size).toBe(2)
       expect(drawn.every((src) => src.includes("/card_s/"))).toBe(true)
     } finally {
       if (decode) Object.defineProperty(HTMLImageElement.prototype, "decode", decode)

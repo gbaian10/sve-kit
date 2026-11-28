@@ -153,11 +153,15 @@ export function DeckImportPage() {
     }),
     [edition, understood],
   )
-  const images = useDeckImages(pictureCards, facts, data.images)
+  const { images, pending: imagePending } = useDeckImages(pictureCards, facts, data.images)
   const labels = useDeckLabels()
-  // Class names come with the search worker's options; until then a class shows as its code.
+  // Class names come with the search worker's options; until then (unless that search failed) a
+  // class would show as its code.
   const basisText =
-    understood === null || (understood.basis.kind === "class" && labels.classOptions === undefined)
+    understood === null ||
+    (understood.basis.kind === "class" &&
+      labels.classOptions === undefined &&
+      !labels.classOptionsFailed)
       ? null
       : labels.basisLabel(understood.basis)
   const hasPicture =
@@ -166,7 +170,7 @@ export function DeckImportPage() {
   const picture = useMemo(() => {
     if (facts === null || understood === null || !hasPicture || basisText === null) return null
     const deck = { ...pictureCards, name: deckName, basis: understood.basis }
-    if (deckImagesPending(deck, facts, images)) return null
+    if (deckImagesPending(deck, facts, imagePending)) return null
     return deckImageInput({
       deck,
       facts,
@@ -177,7 +181,7 @@ export function DeckImportPage() {
       t,
       basisLabel: () => basisText,
     })
-  }, [facts, understood, hasPicture, pictureCards, deckName, images, t, basisText])
+  }, [facts, understood, hasPicture, pictureCards, deckName, images, imagePending, t, basisText])
   const create = () => {
     if (preview === null || preview === "bad-code") return
     const deck = {
