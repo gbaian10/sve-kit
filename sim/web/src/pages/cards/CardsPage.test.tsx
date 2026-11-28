@@ -655,7 +655,7 @@ describe("CardsPage", () => {
       await open("/cards?mech=kw%3Award", { panel: false })
       await expectCount(3)
       expect(
-        screen.getByText(/\d+ 張卡的「本身有」尚無法判定/u, { selector: "p:not([role])" }),
+        screen.getByText(/\d+ 張卡的「自身」尚無法判定/u, { selector: "p:not([role])" }),
       ).toBeVisible()
     })
 
@@ -669,14 +669,14 @@ describe("CardsPage", () => {
       await expectCount(3)
       expect(router.state.location.search).toBe("?mech=kw%3Award")
       expect(screen.getByRole("button", { name: "移除條件：關鍵字：守護" })).toBeVisible()
-      expect(within(group).getByRole("status")).toHaveTextContent(/\d+ 張卡的「本身有」尚無法判定/u)
-      expect(screen.getAllByText(/\d+ 張卡的「本身有」尚無法判定/u)).toHaveLength(2)
+      expect(within(group).getByRole("status")).toHaveTextContent(/\d+ 張卡的「自身」尚無法判定/u)
+      expect(screen.getAllByText(/\d+ 張卡的「自身」尚無法判定/u)).toHaveLength(2)
       await userEvent.selectOptions(screen.getByRole("combobox", { name: "顯示方式" }), "card")
       await waitFor(() => expect(resultCount("張卡片")).toHaveTextContent("3 張卡片"))
       expect(router.state.location.search).toBe("?mech=kw%3Award&unit=card")
       await userEvent.click(screen.getByRole("button", { name: "移除條件：關鍵字：守護" }))
       expect(router.state.location.search).toBe("?unit=card")
-      expect(ward).toHaveAccessibleName("守護")
+      expect(ward).toHaveAttribute("aria-pressed", "false")
     })
   })
 })

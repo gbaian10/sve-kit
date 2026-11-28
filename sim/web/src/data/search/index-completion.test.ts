@@ -212,7 +212,7 @@ describe("printing completion without replacing the search index", () => {
   })
 })
 
-it("applies keyword unions before grouping and excludes unknown from negative queries", () => {
+it("applies keyword unions before grouping in every result unit", () => {
   const { basic, printing } = stages("jp")
   const source = columns(basic)
   const created = new SearchIndex(source, "jp")
@@ -223,7 +223,7 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
     expect(index.options.keywordCoverage.has).toBe("partial")
     const find = (
-      mechanics: Record<string, "has" | "not">,
+      mechanics: readonly string[],
       unit: "printing" | "art" | "card" = "card",
       extra = {},
     ) =>
@@ -232,34 +232,29 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
         state: { ...DEFAULT_QUERY, unit, mechanics, ...extra },
         limit: 100,
       })
-    const ward = find({ "kw:ward": "has" }).items.map((item) => item.key)
+    const ward = find(["kw:ward"]).items.map((item) => item.key)
     expect(ward).toEqual(["c:bp01-011", "c:bp01-031", "c:bp01-051"])
-    const union = find({ "kw:ward": "has", "kw:evolve": "has" }).items.map((item) => item.key)
+    const union = find(["kw:ward", "kw:evolve"]).items.map((item) => item.key)
     expect(union).toEqual(["c:bp01-011", "c:bp01-030", "c:bp01-031", "c:bp01-051", "c:bp01-081"])
-    const without = find({ "kw:ward": "not" }).items.map((item) => item.key)
-    expect(without).toContain("c:bp01-003")
-    expect(without).not.toContain("c:bp01-040")
-    expect(without).not.toContain("c:bp01-002")
-    expect(without).not.toContain("c:bp01-011")
-    const byName = find({ "kw:fanfare": "has" }, "card", {
+    const byName = find(["kw:fanfare"], "card", {
       text: "試作の魔導士",
       representative: "high",
     })
     expect(byName.items[0]?.printingId).toBe("p:bp01-021-sp")
-    const filtered = find({ "kw:fanfare": "has" }, "card", {
+    const filtered = find(["kw:fanfare"], "card", {
       text: "BP01-021",
       representative: "high",
       rarities: ["legend"],
     })
     expect(filtered.items[0]?.printingId).toBe("p:bp01-021")
     for (const unit of ["printing", "art", "card"] as const) {
-      const page = find({ "kw:fanfare": "has" }, unit, { text: "BP01-021", representative: "high" })
+      const page = find(["kw:fanfare"], unit, { text: "BP01-021", representative: "high" })
       expect(page.total).toBe(unit === "card" ? 1 : 2)
       if (unit === "card") expect(page.items[0]?.printingId).toBe("p:bp01-021")
       expect(page.items.map((item) => item.summary?.cardId)).toEqual(
         Array.from({ length: page.total }, () => "c:bp01-021"),
       )
-      expect(find({ "kw:ward": "has" }, unit, { classes: ["witch"] }).total).toBe(0)
+      expect(find(["kw:ward"], unit, { classes: ["witch"] }).total).toBe(0)
     }
   }
   const en = stages("en")
@@ -267,15 +262,13 @@ it("applies keyword unions before grouping and excludes unknown from negative qu
   const english = new SearchIndex(englishSource, "en")
   english.completeMechanics(englishSource)
   expect(english.options.keywordCoverage.has).toBe("partial")
-  for (const state of ["has", "not"] as const) {
-    const result = english.search({
-      edition: "en",
-      state: { ...DEFAULT_QUERY, unit: "card", mechanics: { "kw:ward": state } },
-      limit: 100,
-    })
-    expect(result.items.map((item) => item.key)).not.toContain("c:bp01-031")
-    if (state === "has") expect(result.items.map((item) => item.key)).toContain("c:bp01-051")
-  }
+  const result = english.search({
+    edition: "en",
+    state: { ...DEFAULT_QUERY, unit: "card", mechanics: ["kw:ward"] },
+    limit: 100,
+  })
+  expect(result.items.map((item) => item.key)).not.toContain("c:bp01-031")
+  expect(result.items.map((item) => item.key)).toContain("c:bp01-051")
 })
 
 it("rejects mechanic queries when every EN shared annotation is blocked", () => {
@@ -296,25 +289,23 @@ it("rejects mechanic queries when every EN shared annotation is blocked", () => 
   const index = new SearchIndex(source, "en")
   index.completeMechanics(source)
   expect(index.options.keywordCoverage).toEqual(perRelation("unknown"))
-  for (const state of ["has", "not"] as const) {
-    try {
-      index.search({
-        edition: "en",
-        state: { ...DEFAULT_QUERY, mechanics: { "kw:ward": state } },
-        limit: 100,
-      })
-      expect.fail("unknown coverage must reject the query")
-    } catch (error) {
-      expect(error).toBeInstanceOf(SearchQueryError)
-      expect((error as SearchQueryError).failure).toMatchObject({
-        kind: "unsupported-query",
-        facets: ["mechanics"],
-      })
-    }
+  try {
+    index.search({
+      edition: "en",
+      state: { ...DEFAULT_QUERY, mechanics: ["kw:ward"] },
+      limit: 100,
+    })
+    expect.fail("unknown coverage must reject the query")
+  } catch (error) {
+    expect(error).toBeInstanceOf(SearchQueryError)
+    expect((error as SearchQueryError).failure).toMatchObject({
+      kind: "unsupported-query",
+      facets: ["mechanics"],
+    })
   }
 })
 
-it("answers each keyword relation from program-derived tags and leaves other cards undetermined", () => {
+it("answers held and granted keywords separately and leaves unchecked cards undetermined", () => {
   const { basic, printing } = stages("jp")
   const fragments = [...basic, ...printing]
   const source = columns(fragments)
@@ -354,7 +345,7 @@ it("answers each keyword relation from program-derived tags and leaves other car
   created.completeMechanics(source)
   for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
     expect(index.options.keywordCoverage.grants).toBe("partial")
-    const find = (mechanics: Record<string, "has" | "not">, extra = {}) =>
+    const find = (mechanics: readonly string[], extra = {}) =>
       index
         .search({
           edition: "jp",
@@ -363,21 +354,19 @@ it("answers each keyword relation from program-derived tags and leaves other car
         })
         .items.map((item) => item.key)
     // The fixture's own card that grants Ward is found alongside the ingested one.
-    expect(find({ "kw:ward.grants": "has" })).toEqual(["c:bp01-031", "c:bp01-041"])
+    expect(find(["kw:ward.grants"])).toEqual(["c:bp01-031", "c:bp01-041"])
+    // Cards without a whole-card check stay undetermined instead of counting as "does not grant".
     const unknown = index.options.keywordUnknownCards?.grants ?? 0
     expect(unknown).toBeGreaterThan(0)
-    expect(unknown).toBeLessThan(find({}).length)
-    // Only a fully checked card can lack the relation; unexamined cards match neither side.
-    const without = find({ "kw:ward.grants": "not" })
-    expect(without).toContain("c:bp01-051")
-    expect(without).not.toContain("c:bp01-031")
-    expect(without.length).toBeLessThan(find({}).length - 2)
-    expect(find({ "kw:ward.refers": "not" })).toEqual(expect.arrayContaining(checked))
-    expect(find({ "kw:ward.refers": "has" })).toEqual([])
+    expect(unknown).toBeLessThan(find([]).length)
     // Wanted conditions combine across relations by the shared match mode.
-    const either = { "kw:ward.grants": "has", "kw:ward.counts": "has" } as const
-    expect(find(either)).toEqual(["c:bp01-031", "c:bp01-041"])
-    expect(find(either, { mechanicsMatch: "all" })).toEqual([])
+    expect(find(["kw:ward.grants", "kw:ward"])).toEqual([
+      "c:bp01-011",
+      "c:bp01-031",
+      "c:bp01-041",
+      "c:bp01-051",
+    ])
+    expect(find(["kw:ward.grants", "kw:ward"], { mechanicsMatch: "all" })).toEqual(["c:bp01-031"])
   }
 })
 
@@ -420,30 +409,18 @@ it("completes English self coverage independently of shared engine eligibility a
   const created = new SearchIndex(source, "en")
   created.completeMechanics(source)
   for (const index of [created, new SearchIndex(created.encode(), "en")]) {
-    // English wording only settles what a card itself has; the other relations stay untagged.
-    expect(index.options.keywordCoverage).toEqual({ ...perRelation("unknown"), has: "complete" })
+    // English wording only settles what a card itself has; granted keywords stay untagged.
+    expect(index.options.keywordCoverage).toEqual({ has: "complete", grants: "unknown" })
     expect(index.options.keywordUnknownCards?.has).toBe(0)
-    const find = (state: "has" | "not") =>
-      index
-        .search({
-          edition: "en",
-          state: { ...DEFAULT_QUERY, unit: "card", mechanics: { "kw:ward": state } },
-          limit: 100,
-        })
-        .items.map((item) => item.key)
-    expect(find("has")).toContain("c:bp01-031")
-    expect(find("not")).not.toContain("c:bp01-031")
-    expect(find("not")).toContain("c:bp01-051")
+    const find = (mechanics: readonly string[]) =>
+      index.search({
+        edition: "en",
+        state: { ...DEFAULT_QUERY, unit: "card", mechanics },
+        limit: 100,
+      })
+    expect(find(["kw:ward"]).items.map((item) => item.key)).toEqual(["c:bp01-031"])
     // An untagged relation must refuse the query even while another relation has answers.
-    for (const state of ["has", "not"] as const) {
-      expect(() =>
-        index.search({
-          edition: "en",
-          state: { ...DEFAULT_QUERY, mechanics: { "kw:ward.grants": state } },
-          limit: 100,
-        }),
-      ).toThrow(SearchQueryError)
-    }
+    expect(() => find(["kw:ward.grants"])).toThrow(SearchQueryError)
   }
 })
 
@@ -520,13 +497,10 @@ it("filters region-owned ability headers with any/all and preserves both matchin
     expect(find({ abilityTypes: ["act", "fanfare"], abilityTypesMatch: "all" })).toEqual([
       "c:bp01-031",
     ])
-    expect(find({ mechanics: { "kw:ward": "has", "kw:evolve": "has" } })).toEqual([
+    expect(find({ mechanics: ["kw:ward", "kw:evolve"] })).toEqual(["c:bp01-031", "c:bp01-051"])
+    expect(find({ mechanics: ["kw:ward", "kw:evolve"], mechanicsMatch: "all" })).toEqual([
       "c:bp01-031",
-      "c:bp01-051",
     ])
-    expect(
-      find({ mechanics: { "kw:ward": "has", "kw:evolve": "has" }, mechanicsMatch: "all" }),
-    ).toEqual(["c:bp01-031"])
     expect(find({ abilityTypes: ["quick"] })).toEqual([])
   }
 })

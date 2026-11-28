@@ -27,8 +27,6 @@ type ViewMode = (typeof VIEW_MODES)[number]
 
 export type MatchMode = "any" | "all"
 
-export type MechanicState = "has" | "not"
-
 export const NEUTRAL_CLASS = "neutral"
 
 /** Cost, attack and defense buttons run 0–9 and "10+"; the cap stands for that number or more. */
@@ -52,7 +50,6 @@ export interface QueryState {
   readonly traits: readonly string[]
   /** Artist ids of the edition; a printing whose front art credits any selected artist passes. */
   readonly artists: readonly string[]
-  /** Applies to the has selections of `mechanics`. */
   readonly mechanicsMatch: MatchMode
   readonly abilityTypes: readonly AbilityType[]
   readonly abilityTypesMatch: MatchMode
@@ -60,11 +57,8 @@ export interface QueryState {
   readonly classMechanismsMatch: MatchMode
   readonly collabMechanisms: readonly PrintedMechanism[]
   readonly collabMechanismsMatch: MatchMode
-  /**
-   * Keyed by `mechanicKey(relation, keyword id)`. Unlisted conditions are "either"; has selections use
-   * mechanicsMatch across every relation; not selections all require absence.
-   */
-  readonly mechanics: Readonly<Record<string, MechanicState>>
+  /** `mechanicKey(relation, keyword id)` of each wanted keyword; combined by mechanicsMatch across relations. */
+  readonly mechanics: readonly string[]
   readonly sets: readonly string[]
   readonly rarities: readonly string[]
   readonly altArtOnly: boolean
@@ -102,7 +96,7 @@ export const DEFAULT_QUERY: QueryState = {
   locations: [],
   traits: [],
   artists: [],
-  mechanics: {},
+  mechanics: [],
   mechanicsMatch: "any",
   abilityTypes: [],
   abilityTypesMatch: "any",
@@ -140,7 +134,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.locations.length > 0 ? 1 : 0) +
     (state.traits.length > 0 ? 1 : 0) +
     (state.artists.length > 0 ? 1 : 0) +
-    (Object.keys(state.mechanics).length > 0 ? 1 : 0) +
+    (state.mechanics.length > 0 ? 1 : 0) +
     (state.abilityTypes.length > 0 ? 1 : 0) +
     (state.classMechanisms.length > 0 ? 1 : 0) +
     (state.collabMechanisms.length > 0 ? 1 : 0) +

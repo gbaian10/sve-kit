@@ -1,11 +1,12 @@
 import type { Region } from "./search"
 
-export const MECHANIC_RELATIONS = ["has", "grants", "refers", "counts"] as const
-/** How a card relates to a keyword: holds it, gives it to others, mentions it, or counts it. */
+// The snapshot also carries "refers" and "counts"; so few cards use them that the search leaves them out.
+export const MECHANIC_RELATIONS = ["has", "grants"] as const
+/** How a card relates to a keyword: holds it, or gives it to other cards. */
 export type MechanicRelation = (typeof MECHANIC_RELATIONS)[number]
 
 export function perRelation<T>(value: T): Record<MechanicRelation, T> {
-  return { has: value, grants: value, refers: value, counts: value }
+  return { has: value, grants: value }
 }
 
 /** Keywords the search panel offers, in panel order; the derived relations cover exactly these. */

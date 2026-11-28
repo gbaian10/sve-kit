@@ -217,8 +217,7 @@ export class SearchEngine {
             await active.printings
           if (
             "query" in request &&
-            (("mechanics" in request.query.state &&
-              Object.keys(request.query.state.mechanics).length) ||
+            (("mechanics" in request.query.state && request.query.state.mechanics.length) ||
               ("abilityTypes" in request.query.state && request.query.state.abilityTypes.length) ||
               ("classMechanisms" in request.query.state &&
                 request.query.state.classMechanisms.length) ||

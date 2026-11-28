@@ -254,9 +254,7 @@ export function CardBrowser({
           {MECHANIC_RELATIONS.filter(
             (relation) =>
               printingOptions?.keyword.coverage[relation] === "partial" &&
-              Object.keys(query.mechanics).some(
-                (key) => parseMechanicKey(key)?.relation === relation,
-              ),
+              query.mechanics.some((key) => parseMechanicKey(key)?.relation === relation),
           ).map((relation) => (
             <p key={relation} className="text-11">
               {t("filters.keywordUnknownCount", {

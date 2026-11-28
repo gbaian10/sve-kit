@@ -155,15 +155,10 @@ export function ConditionChips({
       label: artistLabel(id),
       without: { ...query, artists: query.artists.filter((other) => other !== id) },
     })),
-    ...Object.entries(query.mechanics).map(([id, state]) => ({
-      key: `mechanic:${id}`,
-      label: mechanicConditionLabel(t, id, state, keywordLabel),
-      without: {
-        ...query,
-        mechanics: Object.fromEntries(
-          Object.entries(query.mechanics).filter(([other]) => other !== id),
-        ),
-      },
+    ...query.mechanics.map((key) => ({
+      key: `mechanic:${key}`,
+      label: mechanicConditionLabel(t, key, keywordLabel),
+      without: { ...query, mechanics: query.mechanics.filter((other) => other !== key) },
     })),
     ...query.abilityTypes.map((code) => ({
       key: `ability:${code}`,

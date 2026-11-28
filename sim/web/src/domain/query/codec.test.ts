@@ -20,7 +20,7 @@ describe("query codec", () => {
       locations: ["main", "token:spell"],
       traits: ["pixie"],
       artists: ["y:aa", "y:bb"],
-      mechanics: { "kw:a": "not", "kw:b": "has" },
+      mechanics: ["kw:b"],
       mechanicsMatch: "any",
       abilityTypes: [],
       abilityTypesMatch: "any",
@@ -125,9 +125,9 @@ describe("query codec", () => {
       classes: ["witch", "elf"],
       cost: [3, 1, 3],
       defense: [10, 0],
-      mechanics: { "kw:b": "has", "kw:a": "not" },
+      mechanics: ["kw:b", "kw:a"],
     })
-    expect(search).toBe("?q=bp01&class=elf%2Cwitch&cost=1%2C3&def=0%2C10&mech=-kw%3Aa%2Ckw%3Ab")
+    expect(search).toBe("?q=bp01&class=elf%2Cwitch&cost=1%2C3&def=0%2C10&mech=kw%3Aa%2Ckw%3Ab")
     expect(querySearch({ ...DEFAULT_QUERY, cost: [2] })).toBe("?cost=2")
     expect(querySearch({ ...DEFAULT_QUERY, attack: [12, -1] })).toBe("")
   })
@@ -243,20 +243,15 @@ it("round trips independent ability and keyword matching modes and drops unknown
   expect(formatQuery(DEFAULT_QUERY).has("ability")).toBe(false)
 })
 
-it("round trips keyword relations and drops unknown suffixes and off-panel relation keywords", () => {
+it("round trips held and granted keywords and drops conditions the search no longer offers", () => {
   const state = parseQuery(
     new URLSearchParams(
-      "mech=kw:ward,kw:ward.grants,-kw:storm.counts,kw:quick,kw:quick.grants,kw:ward.has,kw:ward.future",
+      "mech=kw:ward.grants,kw:ward,kw:ward,-kw:storm,kw:storm.counts,kw:rush.refers,kw:quick,kw:quick.grants,kw:ward.has",
     ),
   )
-  // Relations beyond "has" are only derived for the panel keywords; "has" keeps any registered id.
-  expect(state.mechanics).toEqual({
-    "kw:ward": "has",
-    "kw:ward.grants": "has",
-    "kw:storm.counts": "not",
-    "kw:quick": "has",
-  })
-  expect(formatQuery(state).get("mech")).toBe("kw:quick,-kw:storm.counts,kw:ward,kw:ward.grants")
+  // Excluded keywords and the two dropped relations are ignored; granted keywords are panel-only.
+  expect(state.mechanics).toEqual(["kw:quick", "kw:ward", "kw:ward.grants"])
+  expect(formatQuery(state).get("mech")).toBe("kw:quick,kw:ward,kw:ward.grants")
   expect(parseQuery(formatQuery(state))).toEqual(state)
 })
 

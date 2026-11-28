@@ -110,7 +110,7 @@ interface QueryState {
   mechanicsMatch: "any" | "all"; // 預設 any
   abilityTypes: AbilityType[]; // 九種原生能力種類；不含一般進化費用
   abilityTypesMatch: "any" | "all"; // 預設 any
-  mechanics: Record<MechanicKey, "has" | "not">; // 鍵＝關係＋關鍵字；沒列＝不管；has 依 mechanicsMatch，not 要全部 absent
+  mechanics: MechanicKey[]; // 關係＋關鍵字；空陣列＝不限；多個條件依 mechanicsMatch
   sets: SetCode[];
   rarities: RarityCode[];
   altArtOnly: boolean;
@@ -239,7 +239,8 @@ interface QueryState {
 ### 4.6 機制三態
 
 `domain/mechanics.ts` 的 `mechanicState(keywordId, relation, edition, projections, coverage, blocked)`，依快照格式 §2、§3.1。
-relation 是 `has`（本身有）、`grants`（給別的卡）、`refers`（效果提到）、`counts`（計算數量）之一，四種各自判定：
+查卡使用 `has`（自身）與 `grants`（賦予）兩種 relation，各自判定；
+快照另有 `refers`、`counts`，使用的卡極少，前端不提供篩選。
 
 1. `mechanic_projection` 有該 (card, keyword, scope) 且 relations 含該 relation → `present`。
 2. 沒有這張卡該 scope 的 `card_mechanic_coverage` 列 → `unknown`（尚未檢查）。
@@ -247,13 +248,13 @@ relation 是 `has`（本身有）、`grants`（給別的卡）、`refers`（效�
    再在 U∖complete 依 `partial_mode` 解出 partial。
 4. keyword ∈ complete → `absent`；relation 是 `has` 時 keyword ∈ has_complete_keyword_ids 也是 `absent`；∈ partial 或其餘 → `unknown`。
 5. 卡面地區是 EN 且 `card_engine_support.region_blocks` 有 EN block 時，shared scope 的結果降為 `unknown`。
-   EN 卡有自己的 `en_override` 列時只讀它；它目前只提供 `has`，所以 EN 的其他三種關係都是 `unknown`。
+   EN 卡有自己的 `en_override` 列時只讀它；它目前只提供 `has`，所以 EN 的 `grants` 都是 `unknown`。
 
-查詢條件的鍵是 `mechanicKey(relation, keywordId)`：`has` 直接用 keyword ID，其他關係加 `.<relation>` 後綴。
-搜尋索引以同樣的鍵保存每張卡的 present／absent；`has` 涵蓋全部登錄 keyword，其他三種關係只涵蓋查卡面板的八個關鍵字
+查詢只有「要有」條件，條件的鍵是 `mechanicKey(relation, keywordId)`：`has` 直接用 keyword ID，`grants` 加 `.grants` 後綴。
+搜尋索引以同樣的鍵保存每張卡的 present；`has` 涵蓋全部登錄 keyword，`grants` 只涵蓋查卡面板的八個關鍵字
 （由 DSL 推導的範圍，見[關鍵字機制](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)）。
-`SearchOptions.keywordCoverage`／`keywordUnknownCards` 按關係分開，未確認張數只算面板的八個關鍵字。
-面板以外的 keyword 只能從網址帶入 `has` 條件；它們未確認的卡同樣不會命中否定條件，但不計入這個張數提示。
+`absent` 與 `unknown` 的差別只用來計算提示：`SearchOptions.keywordCoverage`／`keywordUnknownCards` 按關係分開，
+未確認張數只算面板的八個關鍵字，提醒使用者結果可能漏掉尚未確認的卡。
 某關係在目前地區沒有任何卡被標註時為 `unknown`，帶該關係的查詢回 unsupported-query，不回 0 筆。
 
 另一個 keyword 是 present 不能推本項 absent。
@@ -386,10 +387,10 @@ relation 是 `has`（本身有）、`grants`（給別的卡）、`refers`（效�
 
 查卡面板在關鍵字下方另列「能力種類」，以三語介面名稱標示九種能力頭。
 同一群組可選 any（符合任一）或 all（全部符合）；關鍵字與能力種類兩組之間仍取交集。
-關鍵字區塊有四個關係分頁；每個關鍵字按鈕依序切換「要有 → 不要有 → 取消」，條件跨分頁累積。
-「符合任一／全部符合」套用在所有關係的「要有」條件；「不要有」條件一律全部成立。
-URL `mech` 的每一項是 `[-]<keyword id>[.<relation>]`：開頭 `-` 表示不要有，`has` 不寫關係（舊連結不變），
-`grants`／`refers`／`counts` 寫成後綴；未知後綴與面板八個關鍵字以外的非 `has` 條件在解析時丟棄。
+關鍵字區塊有「自身」「賦予」兩個分頁；關鍵字按鈕按一下選取、再按一下取消，條件跨分頁累積，
+「符合任一／全部符合」套用在兩個分頁的全部條件。
+URL `mech` 的每一項是 `<keyword id>[.grants]`：自身不寫後綴（舊連結不變），賦予寫 `.grants`；
+其他後綴、開頭帶 `-` 的項目，以及面板八個關鍵字以外的 `.grants` 條件在解析時丟棄。
 URL `mechmatch`／`abilitymatch` 為 all 時明示寫入，預設 any 不寫；`ability` 是排序去重的 code 清單。
 條件 chip 可逐項移除，清除全部會回到預設查詢。
 

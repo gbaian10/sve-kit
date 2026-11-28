@@ -80,21 +80,20 @@ it("uses relation-specific has coverage without claiming four-relation completen
   ).toBe("absent")
 })
 it("judges each relation on its own and keeps the wording check to what a card holds", () => {
-  const projections = [{ scope: "shared", keywordId: "kw:ward", relations: ["grants", "counts"] }]
+  const grants = [{ scope: "shared", keywordId: "kw:ward", relations: ["grants", "counts"] }]
   const checked = [complete({ completeKeywordIds: ["kw:ward"] })]
-  expect(mechanicState("kw:ward", "grants", "jp", projections, checked, false)).toBe("present")
-  expect(mechanicState("kw:ward", "counts", "jp", projections, checked, false)).toBe("present")
-  expect(mechanicState("kw:ward", "refers", "jp", projections, checked, false)).toBe("absent")
-  expect(mechanicState("kw:ward", "has", "jp", projections, checked, false)).toBe("absent")
+  expect(mechanicState("kw:ward", "grants", "jp", grants, checked, false)).toBe("present")
+  expect(mechanicState("kw:ward", "has", "jp", grants, checked, false)).toBe("absent")
+  expect(mechanicState("kw:storm", "grants", "jp", grants, checked, false)).toBe("unknown")
   const wordingOnly = [complete({ hasCompleteKeywordIds: ["kw:ward"] })]
   expect(mechanicState("kw:ward", "has", "jp", [], wordingOnly, false)).toBe("absent")
   expect(mechanicState("kw:ward", "grants", "jp", [], wordingOnly, false)).toBe("unknown")
 })
-it("keeps a held keyword's key bare and rejects unknown relation suffixes", () => {
+it("keeps a held keyword's key bare and rejects relation suffixes the search does not offer", () => {
   expect(mechanicKey("has", "kw:ward")).toBe("kw:ward")
   expect(mechanicKey("grants", "kw:ward")).toBe("kw:ward.grants")
   expect(parseMechanicKey("kw:ward")).toEqual({ relation: "has", keywordId: "kw:ward" })
-  expect(parseMechanicKey("kw:ward.counts")).toEqual({ relation: "counts", keywordId: "kw:ward" })
-  expect(parseMechanicKey("kw:ward.has")).toBeUndefined()
-  expect(parseMechanicKey("kw:ward.future")).toBeUndefined()
+  expect(parseMechanicKey("kw:ward.grants")).toEqual({ relation: "grants", keywordId: "kw:ward" })
+  for (const suffix of ["has", "refers", "counts", "future"])
+    expect(parseMechanicKey(`kw:ward.${suffix}`)).toBeUndefined()
 })

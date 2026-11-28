@@ -178,7 +178,6 @@ const CARD_COLUMNS = [
   "traitStart",
   "kinds",
   "present",
-  "absent",
   "abilities",
   "printedMechanisms",
   "errata",
@@ -218,7 +217,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 41
+export const INDEX_IMAGE_FORMAT = 42
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -563,7 +562,6 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
       ),
     )
     const present: string[] = []
-    const absent: string[] = []
     const known = perRelation(false)
     const unknown = perRelation(false)
     for (const relation of MECHANIC_RELATIONS) {
@@ -571,7 +569,6 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
       for (const keyword of relation === "has" ? keywords : panel) {
         const state = mechanicState(keyword, relation, edition, projected, covered, blocked)
         if (state === "present") present.push(mechanicKey(relation, keyword))
-        if (state === "absent") absent.push(mechanicKey(relation, keyword))
         if (!panel.includes(keyword)) continue
         if (state === "unknown") unknown[relation] = true
         else known[relation] = true
@@ -582,7 +579,6 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
     )
     return {
       present,
-      absent,
       known,
       unknown,
       abilities: strings(own?.["ability_types"]),
@@ -667,7 +663,6 @@ function build(
     edition,
   )) {
     cards.present.push(pool.encode([]))
-    cards.absent.push(pool.encode([]))
     cards.abilities.push(pool.encode([]))
     cards.printedMechanisms.push(pool.encode([]))
     const card = cards.id.length
@@ -1246,7 +1241,6 @@ export class SearchIndex {
         const id = this.pool.get(this.cards.id[card] ?? 0)
         const states = membership(id)
         this.cards.present[card] = this.pool.encode(states.present)
-        this.cards.absent[card] = this.pool.encode(states.absent)
         for (const relation of MECHANIC_RELATIONS) {
           known[relation] ||= states.known[relation]
           unknown[relation] += Number(states.unknown[relation])
@@ -1345,7 +1339,7 @@ export class SearchIndex {
     const facets: UnsupportedFacet[] = []
     // A relation no card is tagged for cannot answer either way, so it must not read as "no results".
     if (
-      Object.keys(state.mechanics).some((key) => {
+      state.mechanics.some((key) => {
         const condition = parseMechanicKey(key)
         if (!condition) return true
         const coverage = this.options.keywordCoverage[condition.relation]
@@ -1440,18 +1434,17 @@ export class SearchIndex {
         return 1
       return Math.min(nameRank, printed)
     }
-    const positive = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "has")
-    const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
+    const wanted = state.mechanics
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (state.errataOnly && this.cards.errata[card] !== 1) continue
       if (state.regionOnly && this.cards.regionOnly[card] !== 1) continue
       if (state.restrictionsOnly && this.cards.restricted[card] !== 1) continue
       const heldKeywords = arrayValue(this.pool.decode(this.cards.present[card] ?? 0))
       if (
-        positive.length &&
+        wanted.length &&
         !(state.mechanicsMatch === "all"
-          ? positive.every((id) => heldKeywords.includes(id))
-          : positive.some((id) => heldKeywords.includes(id)))
+          ? wanted.every((id) => heldKeywords.includes(id))
+          : wanted.some((id) => heldKeywords.includes(id)))
       )
         continue
       const heldAbilities = arrayValue(this.pool.decode(this.cards.abilities[card] ?? 0))
@@ -1460,13 +1453,6 @@ export class SearchIndex {
         !(state.abilityTypesMatch === "all"
           ? state.abilityTypes.every((id) => heldAbilities.includes(id))
           : state.abilityTypes.some((id) => heldAbilities.includes(id)))
-      )
-        continue
-      if (
-        negative.length &&
-        !negative.every((id) =>
-          arrayValue(this.pool.decode(this.cards.absent[card] ?? 0)).includes(id),
-        )
       )
         continue
       const printed = arrayValue(this.pool.decode(this.cards.printedMechanisms[card] ?? 0))
