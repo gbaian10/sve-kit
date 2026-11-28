@@ -26,13 +26,26 @@ fn resolve_draws(board: &mut Game, printing: &str, count: usize) {
     for remaining in (1..=count).rev() {
         let question = board.internal_pending_choice().unwrap().unwrap();
         let InputDomain::Pending(options) = &question.domain else { panic!("draw pending"); };
-        assert_eq!(options.len(), remaining, "Q756: one occurrence per card actually drawn");
+        assert_eq!(options.len(), remaining, "one occurrence per card actually drawn");
         assert!(options.iter().all(|option| option.card == printing && option.event == "Draw"), "pending labels reveal no drawn identity");
         let handle = options[0].handle;
         resolved(board.answer_internal_card(question.actor, question.token, Answer::Pending(handle)).unwrap());
         finish_checks(board);
     }
     assert!(board.internal_pending_choice().unwrap().is_none(), "all expected draw occurrences have resolved");
+}
+
+fn advance_to_next_start(board: &mut Game, active: &str) {
+    board.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
+    finish_checks(board);
+    if let Some(question) = board.internal_quick_choice().unwrap() {
+        board.answer_internal_card(question.actor, question.token, Answer::Quick(None)).unwrap();
+        finish_checks(board);
+    }
+    if board.projection(View::Referee).unwrap()["turn"]["active"] == active {
+        board.internal_rule_action(&json!({"do":"end-discard","select":[]})).unwrap();
+        finish_checks(board);
+    }
 }
 
 #[test]
@@ -99,16 +112,7 @@ fn the_normal_start_phase_draw_adds_a_card_without_growing_the_experiment() {
     let mut initial = position();
     initial["turn"]["active"] = json!("P2");
     let mut board = game(&initial);
-    board.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
-    finish_checks(&mut board);
-    if let Some(question) = board.internal_quick_choice().unwrap() {
-        board.answer_internal_card(question.actor, question.token, Answer::Quick(None)).unwrap();
-        finish_checks(&mut board);
-    }
-    if board.projection(View::Referee).unwrap()["turn"]["active"] == "P2" {
-        board.internal_rule_action(&json!({"do":"end-discard","select":[]})).unwrap();
-        finish_checks(&mut board);
-    }
+    advance_to_next_start(&mut board, "P2");
     resolve_draws(&mut board, "BP05-094", 0);
     let state = board.projection(View::Referee).unwrap();
     assert_eq!(state["turn"]["active"], "P1");
@@ -149,4 +153,73 @@ fn a_later_instruction_failure_restores_the_draw_and_its_queued_growth() {
     assert!(error.to_string().contains("damage state arithmetic overflow"), "failure must occur after the successful draw, in the later damage instruction");
     assert_eq!(board.projection(View::Referee).unwrap(), before, "the actual draw and earlier damage roll back together");
     assert!(board.internal_pending_choice().unwrap().is_none(), "the failed execution leaves no growth occurrence");
+}
+
+#[test]
+fn malocchio_gains_an_armageddon_counter_for_each_players_successful_draw() {
+    for active in ["P1", "P2"] {
+        let mut initial = position();
+        initial["turn"]["active"] = json!(active);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"malocchio","card":"GFB01b-006EN"}]);
+        let mut board = with_producer(&initial, draw(PlayerRef::Controller {}, 2));
+        activate(&mut board, active);
+        resolve_draws(&mut board, "GFB01b-006EN", 2);
+
+        let opposing_view = if active == "P1" { View::P2 } else { View::P1 };
+        let opponent = board.projection(opposing_view).unwrap().to_string();
+        assert!(!opponent.contains(&format!("{active}-first")));
+        assert!(!opponent.contains(&format!("{active}-second")));
+
+        let after_effect = board.projection(View::Referee).unwrap();
+        assert_eq!(after_effect[active]["hand"].as_array().unwrap().len(), 2);
+        assert_eq!(
+            after_effect["objects"]["malocchio"]["counters"]["Armageddon counter"],
+            2_u8
+        );
+
+        advance_to_next_start(&mut board, active);
+        resolve_draws(&mut board, "GFB01b-006EN", 1);
+        let after_start = board.projection(View::Referee).unwrap();
+        let next = if active == "P1" { "P2" } else { "P1" };
+        assert_eq!(after_start["turn"]["active"], next);
+        assert_eq!(after_start[next]["hand"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            after_start["objects"]["malocchio"]["counters"]["Armageddon counter"],
+            3_u8
+        );
+    }
+}
+
+#[test]
+fn malocchio_draw_trigger_requires_a_successful_draw() {
+    let mut initial = position();
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"malocchio","card":"GFB01b-006EN"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"recovered","card":"BP01-037"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([]);
+
+    let mut recover = movement(OwnerZone::Hand);
+    if let Action::Move { objects, .. } = &mut recover {
+        *objects = subjects_in(ZoneKind::Cemetery);
+    }
+    let mut board = with_producer(&initial, recover);
+    activate(&mut board, "P1");
+    resolve_draws(&mut board, "GFB01b-006EN", 0);
+    assert_eq!(
+        board.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["recovered"])
+    );
+
+    let mut empty_deck = with_producer(&initial, draw(PlayerRef::Controller {}, 1));
+    let activation = activate(&mut empty_deck, "P1");
+    assert!(
+        !activation.progress.facts.iter().any(|fact| matches!(fact, Fact::Draw(_))),
+        "an empty deck does not produce a draw fact"
+    );
+    finish_checks(&mut empty_deck);
+    let result = empty_deck.projection(View::Referee).unwrap();
+    assert_eq!(result["game"]["ended"], true);
+    assert_eq!(result["game"]["by"], "11.2.2");
 }
