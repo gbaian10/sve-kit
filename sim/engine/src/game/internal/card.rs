@@ -345,7 +345,8 @@ impl Game {
         seed: &str,
     ) -> Result<Self> {
         selected.check_runtime()?;
-        let mut game = Self::unopened(Arc::clone(&selected.catalogue), setup, facts, random, seed)?;
+        let mut game = Self::unopened(Arc::clone(&selected.catalogue), setup, random, seed)?;
+        game.state.fixture_facts = facts.clone();
         if game.state.objects.values().any(|object| {
             game.catalog
                 .rejected

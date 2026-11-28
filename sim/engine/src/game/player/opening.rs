@@ -98,7 +98,7 @@ impl Game {
         }
         let setup = json!({"pregame":true,"players":players});
         let random = json!({"first_chooser":seat(first_chooser)});
-        let mut game = Self::unopened(selected.catalogue, &setup, &Value::Null, &random, seed)?;
+        let mut game = Self::unopened(selected.catalogue, &setup, &random, seed)?;
         game.card_runtime = admitted.card_runtime;
         game.initialize_opening()?;
         // Validate the complete opening hand requirement before returning a live game.

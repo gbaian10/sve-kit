@@ -101,7 +101,15 @@ struct TriggerIconUse {
     control_transfer: Option<ControlTransfer>,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+impl TriggerIconUse {
+    fn merge(&mut self, other: &Self) {
+        self.reads_icon |= other.reads_icon;
+        self.starts_drive |= other.starts_drive;
+        self.control_transfer = self.control_transfer.max(other.control_transfer);
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum ControlTransfer {
     Receive,
     MayGive,
@@ -112,14 +120,27 @@ struct DeckClosure {
     cards: BTreeSet<String>,
     gaps: BTreeSet<AdmissionGap>,
     dependencies: BTreeMap<String, BTreeSet<String>>,
-    trigger_icons: BTreeMap<String, TriggerIconUse>,
+    trigger_icons: TriggerIconUse,
 }
 
 impl DeckClosure {
-    fn can_give_control(&self) -> bool {
-        self.trigger_icons
-            .values()
-            .any(|uses| uses.control_transfer == Some(ControlTransfer::MayGive))
+    fn missing_trigger_icons(&self, catalog: &Catalog) -> Result<Vec<AdmissionGap>> {
+        let mut gaps = Vec::new();
+        for card_no in &self.cards {
+            let Some(card) = catalog.cards.get(card_no) else {
+                continue;
+            };
+            for ordinal in 0..card.faces.len() {
+                if catalog.trigger_icon(card_no, ordinal)?.is_none() {
+                    gaps.push(AdmissionGap {
+                        card_no: card_no.clone(),
+                        reason: AdmissionGapReason::MissingTriggerIcons,
+                    });
+                    break;
+                }
+            }
+        }
+        Ok(gaps)
     }
 
     fn require_template(
@@ -280,9 +301,7 @@ fn closure(
         for ability in &candidate.program.card().abilities {
             walk::ability(ability, &mut dependencies);
         }
-        closure
-            .trigger_icons
-            .insert(number.clone(), dependencies.trigger_icons);
+        closure.trigger_icons.merge(&dependencies.trigger_icons);
         for name in dependencies.templates {
             closure.require_template(catalog, &name, &number, &mut required)?;
         }
@@ -401,40 +420,28 @@ impl Game {
             Arc::clone(&selected.catalogue),
             &Value::Null,
             &Value::Null,
-            &Value::Null,
             "strict-admission",
         )?;
         let failures = probe.prepare_strict_cards(selected, &required)?;
         let mut report = StrictAdmission::default();
-        let [first_title, second_title] = decks
-            .each_ref()
-            .map(|deck| matches!(deck.construction, DeckConstruction::Title(_)));
+        let [first, second] = &closures;
+        let reads_icon = first.trigger_icons.reads_icon || second.trigger_icons.reads_icon;
         // CR 14.4.5 uses the checking player's basis, including after a control transfer.
-        let drive_icon_requirements = [
-            first_title || (second_title && closures[0].can_give_control()),
-            second_title || (first_title && closures[1].can_give_control()),
-        ];
-        for ((closure, result), (deck, drive_needs_icons)) in closures
+        for ((closure, opponent), (deck, result)) in [(first, second), (second, first)]
             .into_iter()
-            .zip(&mut report.gaps)
-            .zip(decks.iter().zip(drive_icon_requirements))
+            .zip(decks.iter().zip(&mut report.gaps))
         {
             let mut gaps = closure.gaps.clone();
-            let is_title = matches!(deck.construction, DeckConstruction::Title(_));
-            gaps.extend(
-                closure
-                    .trigger_icons
-                    .iter()
-                    .filter(|(_, uses)| {
-                        uses.reads_icon
-                            || (drive_needs_icons && uses.starts_drive)
-                            || (is_title && uses.control_transfer.is_some())
-                    })
-                    .map(|(card_no, _)| AdmissionGap {
-                        card_no: card_no.clone(),
-                        reason: AdmissionGapReason::MissingTriggerIcons,
-                    }),
-            );
+            let own = &closure.trigger_icons;
+            let opposing = &opponent.trigger_icons;
+            let checks_icons = matches!(deck.construction, DeckConstruction::Title(_))
+                && (own.starts_drive
+                    || own.control_transfer.is_some()
+                    || (opposing.starts_drive
+                        && opposing.control_transfer == Some(ControlTransfer::MayGive)));
+            if checks_icons || reads_icon {
+                gaps.extend(closure.missing_trigger_icons(&selected.catalogue)?);
+            }
             gaps.extend(
                 super::check_card_deck_rules(selected, deck)?
                     .into_iter()

@@ -63,6 +63,7 @@ class Snapshot:
         if (
             programs["entries"] != list(projection.programs)
             or programs.get("printings") != projection.program_printings
+            or programs.get("trigger_icons", {}) != projection.trigger_icons
         ):
             raise ValueError("Export differs from public programs")
 
@@ -180,11 +181,12 @@ def export_snapshot(
             format_version = PROGRAMS if projection.programs else MEDIA
     if projection.programs and format_version == MEDIA:
         raise ValueError("Nonempty programs require snapshot format 4.1.0 or newer")
-    if (
-        projection.program_printings is not None
-        and format_version != PROGRAM_DEPENDENCIES
+    if format_version != PROGRAM_DEPENDENCIES and (
+        projection.program_printings is not None or projection.trigger_icons
     ):
-        raise ValueError("Program printing references require snapshot format 4.2.0")
+        raise ValueError(
+            "Program printing references and Trigger icons require snapshot format 4.2.0"
+        )
     selected = profile_for(format_version)
     payload_version = selected.payload_version("text")
     programs: Record = {
@@ -195,6 +197,7 @@ def export_snapshot(
         if projection.program_printings is None:
             raise ValueError("Missing program printing references")
         programs["printings"] = projection.program_printings
+        programs["trigger_icons"] = projection.trigger_icons
     properties = object_value(definition("Manifest", format_version)["properties"])
     profile = object_value(object_value(properties["partitioning"])["properties"])
     count = integer(object_value(profile["bucket_count"])["const"])

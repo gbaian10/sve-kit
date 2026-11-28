@@ -2,6 +2,10 @@ use super::*;
 use sve_engine::game::internal::DecisionView;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{InstalledChange, ObservedZone};
+use sve_engine::game::player::{
+    AdmissionGap, AdmissionGapReason, DeckConstruction, PlayerDeck, StrictStartError,
+};
+use sve_engine::catalog::{ProgramPrinting, SnapshotPrograms};
 
 // Synthetic icon controls isolate rule ordering from source-image verification; the holders are real current cards.
 
@@ -311,4 +315,108 @@ fn drive_decline_no_icon_empty_deck_and_unverified_icons_never_guess_a_trigger()
         before,
         "unverified icon data rejects atomically"
     );
+}
+
+fn vanguard_programs(omit: &str) -> SnapshotPrograms {
+    let (snapshot, keywords, _) = inputs();
+    let records: Value = serde_saphyr::from_str(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../authored/catalog/trigger-icons/jp/001.yaml"
+    ))).unwrap();
+    let numbers = ["CP03-016", "CP03-P10", "CP03-025", "CP03-026"];
+    let mut attachments = json!({
+        "format_version":"4.2.0",
+        "entries":[],
+        "printings":{},
+        "trigger_icons":{}
+    });
+    let mut printings = Vec::<ProgramPrinting>::new();
+    let mut native = Vec::new();
+    for number in numbers {
+        let candidate = &selection().current[number];
+        let observation = records["records"].as_array().unwrap().iter()
+            .find(|row| row["card_no"] == number).unwrap();
+        let id = observation["printing_id"].as_str().unwrap();
+        let face = observation["face_id"].as_str().unwrap();
+        let card_id = &candidate.card_id;
+        if number != omit {
+            attachments["trigger_icons"][id] = json!({(face): observation["icon"]});
+        }
+        let line = snapshot.lines().find(|line| {
+            serde_json::from_str::<Card>(line).unwrap().number == number
+        }).unwrap();
+        let printed: Value = serde_json::from_str(line).unwrap();
+        native.push(line);
+        printings.push(serde_json::from_value(json!({"printing_id": id, "card_id":card_id,
+            "card_no":number,"faces":[{"face_id":face,"revision_id":face,
+            "cost":printed["faces"][0]["cost"].as_str().unwrap().parse::<u64>().ok(),
+            "rules_name":printed["faces"][0]["name"]}]})).unwrap());
+        if attachments["printings"].get(card_id).is_some() {
+            continue;
+        }
+        let source = &candidate.expanded["cards"][&candidate.card_no];
+        let mut ast = json!({"card_id":card_id,"scope":"shared"});
+        for key in ["abilities", "faces", "deck_rule", "token"] {
+            if let Some(value) = source.get(key) {
+                ast[key] = value.clone();
+            }
+        }
+        for ability in ast.get_mut("abilities").and_then(Value::as_array_mut).into_iter().flatten() {
+            ability.as_object_mut().unwrap().remove("sources");
+        }
+        for face_program in ast.get_mut("faces").and_then(Value::as_object_mut).into_iter().flat_map(|faces| faces.values_mut()) {
+            for ability in face_program["abilities"].as_array_mut().into_iter().flatten() {
+                ability.as_object_mut().unwrap().remove("sources");
+            }
+        }
+        attachments["entries"].as_array_mut().unwrap()
+            .push(json!({"id":card_id,"dsl_version":"1.0","ast":ast}));
+        attachments["printings"][card_id] = json!({"representative":id,"tokens":[]});
+    }
+    let native = native.join("\n");
+    let titles = json!([rule_fixtures::title("cardfight_vanguard", numbers[0], json!([]))]);
+    let source = rule_fixtures::rules(&native, titles, json!([]));
+    let (rules, identity) = rule_fixtures::resolved(&native, &source.to_string()).unwrap();
+    SnapshotPrograms::new(&native, keywords, &attachments.to_string(), &printings, &rules, &identity)
+        .unwrap()
+}
+
+#[test]
+fn published_vanguard_printing_icons_reach_title_opening_and_twin_drive() {
+    let deck = |first| PlayerDeck {
+        construction: DeckConstruction::Title("cardfight_vanguard".into()),
+        main: [first, "CP03-025", "CP03-025", "CP03-016"].map(str::to_owned).to_vec(),
+        evolve: vec!["CP03-026".into()],
+    };
+    let decks = [deck("CP03-P10"), deck("CP03-016")];
+    let missing = vanguard_programs("CP03-P10");
+    let Err(StrictStartError::Admission(report)) = Game::start_player_game(
+        missing.select_all().unwrap(), decks.clone(), Viewer::P1, "printing-icons",
+    ) else {
+        panic!("an unreviewed printing cannot borrow its counterpart's evidence");
+    };
+    assert_eq!(report.gaps(Viewer::P1), [AdmissionGap {
+        card_no: "CP03-P10".into(), reason: AdmissionGapReason::MissingTriggerIcons,
+    }]);
+    assert_eq!(report.gaps(Viewer::P2), []);
+    let available = vanguard_programs("").select_all().unwrap();
+    Game::start_player_game(available.clone(), decks, Viewer::P1, "printing-icons").unwrap();
+
+    let mut initial = position("CP03-025", "CP03-026", 5);
+    title(&mut initial);
+    initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().pop();
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"first","card":"CP03-P10"},{"id":"drawn","card":"CP03-016"},
+        {"id":"second","card":"CP03-025"}
+    ]);
+    let mut game = Game::from_selected_effects(
+        available, &initial, &Value::Null, &Value::Null, "printing-icons",
+    ).unwrap();
+    let decision = question(attack(&mut game, "CP03-026"), TriggerIcon::Draw);
+    let result = resolved(answer(&mut game, &decision, true, None));
+    assert_eq!(checks(&result).len(), 2);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["hand"], json!(["drawn"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["first"]));
+    assert_eq!(view["P1"]["deck"], json!(["second"]));
 }

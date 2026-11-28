@@ -1,11 +1,12 @@
 //! Prepare one verified snapshot's programs for reuse by matches.
 
 use super::{CandidateAdmission, Catalog, Owner, SelectedEffects, accept, register_printing};
-use crate::catalog::EngineIdentityInput;
+use crate::catalog::{EngineIdentityInput, PrintedTriggerIcon};
 use crate::ir::lowering::{CurrentCardProgram, ProgramFace, lower_program};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
+use core::mem::take;
 use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Mutex;
@@ -30,6 +31,7 @@ struct Package {
     format_version: String,
     entries: Vec<Entry>,
     printings: BTreeMap<String, Printings>,
+    trigger_icons: BTreeMap<String, BTreeMap<String, PrintedTriggerIcon>>,
 }
 
 #[derive(Deserialize)]
@@ -77,7 +79,7 @@ impl SnapshotPrograms {
         rules: &str,
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
-        let package: Package = serde_json::from_str(programs).map_err(invalid)?;
+        let mut package: Package = serde_json::from_str(programs).map_err(invalid)?;
         if package.format_version != "4.2.0"
             || !matches!(identity, EngineIdentityInput::Resolved { region, .. } if region == "jp")
         {
@@ -85,9 +87,11 @@ impl SnapshotPrograms {
         }
         let mut catalogue = Catalog::from_snapshot(snapshot, keywords)?;
         let verified = PrintingIndex::new(&catalogue, printings)?;
+        let icons = take(&mut package.trigger_icons);
         let bound = verified.bind(package, &mut catalogue)?;
         catalogue.validate_token_templates()?;
         catalogue.bind_rules(snapshot, keywords, &[], rules, identity)?;
+        verified.bind_trigger_icons(&mut catalogue, icons)?;
         Ok(Self {
             catalogue: Arc::new(catalogue),
             programs: bound,
@@ -212,6 +216,43 @@ impl<'input> PrintingIndex<'input> {
             return Err(invalid("projected printing closure is incomplete"));
         }
         Ok(Self { by_id, by_card })
+    }
+
+    fn bind_trigger_icons(
+        &self,
+        catalogue: &mut Catalog,
+        icons: BTreeMap<String, BTreeMap<String, PrintedTriggerIcon>>,
+    ) -> Result<()> {
+        for (printing_id, faces) in icons {
+            // The verified public attachment also includes EN printings.
+            let Some(printing) = self.by_id.get(printing_id.as_str()) else {
+                continue;
+            };
+            if faces.is_empty() {
+                return Err(invalid("empty Trigger icon printing"));
+            }
+            let mut bound = BTreeMap::new();
+            for (face_id, icon) in faces {
+                let ordinal = printing
+                    .faces
+                    .iter()
+                    .position(|face| face.face_id == face_id)
+                    .ok_or_else(|| invalid("Trigger icon face belongs to another printing"))?;
+                let label = catalogue.face(&printing.card_no, ordinal)?["title"]
+                    .as_str()
+                    .unwrap_or_default();
+                if catalogue.rule_bindings.title_code("", label)?.as_deref()
+                    != Some("cardfight_vanguard")
+                {
+                    return Err(invalid("Trigger icon face is outside Vanguard"));
+                }
+                bound.insert(ordinal, icon);
+            }
+            catalogue
+                .trigger_icons
+                .insert(printing.card_no.clone(), bound);
+        }
+        Ok(())
     }
 
     fn bind(
