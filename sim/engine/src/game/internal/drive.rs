@@ -241,15 +241,16 @@ impl Game {
     }
 
     pub(super) fn internal_trigger_icon(&self, id: &str) -> Result<Option<TriggerIcon>> {
-        let source = self.information_source(id)?;
-        if let Some(facts) = self.state.fixture_facts.get(&source.card) {
+        if !self.state.fixture_facts.is_null() {
+            let facts = &self.state.fixture_facts[&self.object(id)?.card];
             if facts["verified"] != true {
                 return Err(unsupported("Trigger icon requires verified facts"));
             }
             let icon: PrintedTriggerIcon = serde_json::from_value(facts["trigger_icon"].clone())
-                .map_err(|_| unsupported("unverified Trigger icon"))?;
+                .map_err(|_fixture_error| unsupported("unverified Trigger icon"))?;
             return Ok(icon.effect());
         }
+        let source = self.information_source(id)?;
         let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
         self.catalog
             .trigger_icon(&source.card, face)?

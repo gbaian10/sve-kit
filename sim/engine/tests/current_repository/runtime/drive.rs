@@ -364,8 +364,8 @@ fn vanguard_programs(omit: &str) -> SnapshotPrograms {
         for ability in ast.get_mut("abilities").and_then(Value::as_array_mut).into_iter().flatten() {
             ability.as_object_mut().unwrap().remove("sources");
         }
-        for face in ast.get_mut("faces").and_then(Value::as_object_mut).into_iter().flat_map(|faces| faces.values_mut()) {
-            for ability in face["abilities"].as_array_mut().into_iter().flatten() {
+        for face_program in ast.get_mut("faces").and_then(Value::as_object_mut).into_iter().flat_map(|faces| faces.values_mut()) {
+            for ability in face_program["abilities"].as_array_mut().into_iter().flatten() {
                 ability.as_object_mut().unwrap().remove("sources");
             }
         }
@@ -398,7 +398,7 @@ fn published_vanguard_printing_icons_reach_title_opening_and_twin_drive() {
     assert_eq!(report.gaps(Viewer::P1), [AdmissionGap {
         card_no: "CP03-P10".into(), reason: AdmissionGapReason::MissingTriggerIcons,
     }]);
-    assert!(report.gaps(Viewer::P2).is_empty());
+    assert_eq!(report.gaps(Viewer::P2), []);
     let available = vanguard_programs("").select_all().unwrap();
     Game::start_player_game(available.clone(), decks, Viewer::P1, "printing-icons").unwrap();
 
@@ -406,16 +406,17 @@ fn published_vanguard_printing_icons_reach_title_opening_and_twin_drive() {
     title(&mut initial);
     initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().pop();
     initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"first","card":"CP03-P10"},{"id":"second","card":"CP03-025"}
+        {"id":"first","card":"CP03-P10"},{"id":"drawn","card":"CP03-016"},
+        {"id":"second","card":"CP03-025"}
     ]);
     let mut game = Game::from_selected_effects(
         available, &initial, &Value::Null, &Value::Null, "printing-icons",
     ).unwrap();
     let decision = question(attack(&mut game, "CP03-026"), TriggerIcon::Draw);
-    let result = resolved(answer(&mut game, &decision, false, None));
+    let result = resolved(answer(&mut game, &decision, true, None));
     assert_eq!(checks(&result).len(), 2);
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["P1"]["deck"],
-        json!(["first", "second"])
-    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["hand"], json!(["drawn"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["first"]));
+    assert_eq!(view["P1"]["deck"], json!(["second"]));
 }

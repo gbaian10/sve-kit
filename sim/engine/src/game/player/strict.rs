@@ -102,7 +102,7 @@ struct TriggerIconUse {
 }
 
 impl TriggerIconUse {
-    fn merge(&mut self, other: Self) {
+    fn merge(&mut self, other: &Self) {
         self.reads_icon |= other.reads_icon;
         self.starts_drive |= other.starts_drive;
         self.control_transfer = self.control_transfer.max(other.control_transfer);
@@ -301,7 +301,7 @@ fn closure(
         for ability in &candidate.program.card().abilities {
             walk::ability(ability, &mut dependencies);
         }
-        closure.trigger_icons.merge(dependencies.trigger_icons);
+        closure.trigger_icons.merge(&dependencies.trigger_icons);
         for name in dependencies.templates {
             closure.require_template(catalog, &name, &number, &mut required)?;
         }

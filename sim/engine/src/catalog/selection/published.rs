@@ -6,6 +6,7 @@ use crate::ir::lowering::{CurrentCardProgram, ProgramFace, lower_program};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
+use core::mem::take;
 use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Mutex;
@@ -86,7 +87,7 @@ impl SnapshotPrograms {
         }
         let mut catalogue = Catalog::from_snapshot(snapshot, keywords)?;
         let verified = PrintingIndex::new(&catalogue, printings)?;
-        let icons = core::mem::take(&mut package.trigger_icons);
+        let icons = take(&mut package.trigger_icons);
         let bound = verified.bind(package, &mut catalogue)?;
         catalogue.validate_token_templates()?;
         catalogue.bind_rules(snapshot, keywords, &[], rules, identity)?;
