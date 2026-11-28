@@ -19,7 +19,6 @@ export const COLLAB_MECHANISM_GROUPS = [
 ] as const
 export type ClassMechanism = (typeof CLASS_MECHANISM_GROUPS)[number]["mechanisms"][number]
 export type CollabMechanism = (typeof COLLAB_MECHANISM_GROUPS)[number]["mechanisms"][number]
-export type CollabTitle = (typeof COLLAB_MECHANISM_GROUPS)[number]["titleCode"]
 export const CLASS_MECHANISMS: readonly ClassMechanism[] = CLASS_MECHANISM_GROUPS.flatMap(
   (group) => group.mechanisms,
 )

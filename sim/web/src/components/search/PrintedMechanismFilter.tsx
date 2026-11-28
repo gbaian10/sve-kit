@@ -113,7 +113,7 @@ export function PrintedMechanismFilter({
                       ? t(`filters.printedMechanismAbbreviations.${code}`)
                       : undefined
                   }
-                  className="shrink-0 px-2 text-12"
+                  className="shrink-0 px-2! text-12!"
                   onClick={() => {
                     onChange(
                       selected.includes(code)
