@@ -36,12 +36,14 @@ uv --directory carddb run sve-carddb snapshot construction-index --export-dir <�
 | `copies` | `[卡片位置, "main" 或 "evolve", 上限]` |
 | `singleton_except` | `[卡片位置, [不受影響的構築名稱代號…]]` |
 | `start_amulet` | 有【スタートアミュレット】的卡片位置 |
+| `trigger_icons` | 選填。依卡片位置排序的 `[卡片位置, 預設版次是否有圖示或 null, [[永久版次 ID, 是否有圖示]…]]` |
 | `formats` | 賽制代碼 → `{coverage: [[from, until 或 null]], restrictions: [...]}` |
 
 - `cards.class`：`classes` 的位置；`-1` 表示沒有職業，只出現在 EP 等可放區 `none` 的卡
 - `cards.titles`：位元遮罩，第 i 位是 `titles[i]`
 - `cards.zone`：`zones` 的位置（`none`、`leader`、`main`、`evolve`）
 - 卡片位置是 `cards` 陣列的索引
+- `trigger_icons` 的版次依 ID 排序。`false` 表示已確認無圖示，缺少版次或預設值為 `null` 表示未知。
 - 構築名稱代號是不透明的分組鍵（[規格 §1.2](../../sim/deck-construction.md#12-構築索引邏輯形)）：只比較相同與否，
   代號在不同快照之間不保證相同；違規的 `values.name` 就是這個代號，介面顯示名稱時用 `cards` 第一張卡在快照裡的卡名
 - `restrictions[]`：`{id, kind, from, until, max, max_groups, members: [[構築名稱代號, scope, option]]}`；
@@ -56,6 +58,7 @@ uv --directory carddb run sve-carddb snapshot construction-index --export-dir <�
 | `class`、`titles` | 第 1 面該地區的 current `face_revision` |
 | `zone` | 該地區的 `deck_role`：`leader`、`main`、`evolve` 照用，`extra` 與缺值是 `none` |
 | `start_amulet` | `card_mechanic_coverage.printed_mechanisms` 有 `starting_amulet`；JP 地區覆寫優先於 shared，EN 只用自己的 `en_override` |
+| `trigger_icons` | 同份快照驗證過的 `programs.trigger_icons`。以同區版次與第 1 面投影有無圖示，未指定版次用該區 `default_printing_id` 的事實 |
 | `copies`、`singleton_except` | 第 1 面 current 效果文與 sections 的固定句型，見 §4 |
 | `formats` | 該地區的 `rules_profile`；`coverage` 取完整且不晚於 `manifest.data_as_of` 的日期，扣除 partial 與 announced 限制的區間；`restrictions` 取 `confirmed` 列 |
 

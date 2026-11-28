@@ -762,7 +762,9 @@ const zhTW = {
       startAmuletNames: "【スタートアミュレット】的卡必須同名。",
       choiceRestricted: "同一組限制的卡只能選 {{max}} 種（{{from}} 起），目前有 {{count}} 種。",
       formatUnsupported: "這個賽制尚未支援檢查。",
-      triggerClassUnchecked: "有トリガー圖示的卡職業要和主戰者相同；圖示資料還沒有，尚未檢查。",
+      triggerClassMismatch:
+        "「{{name}}」有 Trigger 圖示，職業是{{cardClass}}，必須與主戰者的職業（{{leaderClass}}）相同。",
+      triggerIconUnknown: "部分版次缺少 Trigger 圖示資料，這些版次的職業限制尚未檢查。",
       restrictionsUnknown: "官方禁限一覽尚未確認到今天，可能有新的限制。",
     },
     cell: {

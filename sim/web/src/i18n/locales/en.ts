@@ -812,8 +812,10 @@ export default {
       choiceRestricted:
         "From {{from}}, only {{max}} of these restricted choices may be used; the deck has {{count}}.",
       formatUnsupported: "This format cannot be checked yet.",
-      triggerClassUnchecked:
-        "Cards with a trigger icon must match the leader’s class; icon data is missing, so this is not checked.",
+      triggerClassMismatch:
+        "“{{name}}” has a trigger icon and is {{cardClass}}. Its class must match your leader’s ({{leaderClass}}).",
+      triggerIconUnknown:
+        "Some printings have no trigger icon data. The class restriction for those printings has not been checked.",
       restrictionsUnknown:
         "The official restriction list is not confirmed up to today; newer restrictions may apply.",
     },

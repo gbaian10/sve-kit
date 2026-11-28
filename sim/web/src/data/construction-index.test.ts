@@ -111,6 +111,30 @@ describe("loadConstructionIndex", () => {
     ])
   })
 
+  it("decodes known icons, confirmed absence and unknown printings separately", async () => {
+    const body = wire()
+    body["trigger_icons"] = [
+      [
+        0,
+        null,
+        [
+          ["p:icon", true],
+          ["p:none", false],
+        ],
+      ],
+    ]
+    const index = await serve(body).load()
+    const card = index.card("c:amulet")
+    expect(card?.triggerIcons).toEqual({
+      defaultPrinting: null,
+      printings: new Map([
+        ["p:icon", true],
+        ["p:none", false],
+      ]),
+    })
+    expect(index.card("c:carrot")?.triggerIcons).toBeUndefined()
+  })
+
   it("applies printed limits per name while preserving each deck's size limit", async () => {
     const body = wire()
     body["singleton_except"] = []
@@ -160,6 +184,10 @@ describe("loadConstructionIndex", () => {
     ["another region", (value: JsonObject) => ({ ...value, region: "en" })],
     ["a newer format", (value: JsonObject) => ({ ...value, construction_index_format: 2 })],
     ["an unknown rules name", (value: JsonObject) => ({ ...value, singleton_except: [[2, [9]]] })],
+    [
+      "a non-boolean Trigger icon flag",
+      (value: JsonObject) => ({ ...value, trigger_icons: [[0, null, [["p:bad", "yes"]]]] }),
+    ],
     [
       "uneven card columns",
       (value: JsonObject) => ({

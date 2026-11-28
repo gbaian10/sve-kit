@@ -93,21 +93,38 @@
         "name": "波状螺旋の水将 ベネディクト",
         "class": "elf",
         "titles": ["cardfight_vanguard"],
-        "zone": "main"
+        "zone": "main",
+        "trigger_icons": { "default": false, "printings": {} }
+      },
+      "CP03-015": {
+        "name": "バトルシップ・インテリジェンス",
+        "class": "elf",
+        "titles": ["cardfight_vanguard"],
+        "zone": "main",
+        "trigger_icons": { "default": true, "printings": {} }
+      },
+      "SYN-TRIGGER": {
+        "name": "合成：版次で異なるトリガー",
+        "class": "royal",
+        "titles": ["cardfight_vanguard", "umamusume_pretty_derby"],
+        "zone": "main",
+        "trigger_icons": { "default": true, "printings": { "p:trigger": true, "p:no-icon": false } }
       },
       "CP03-021": {
         "name": "士官候補生 エリック",
         "class": "elf",
         "titles": ["cardfight_vanguard"],
         "zone": "main",
-        "start_amulet": true
+        "start_amulet": true,
+        "trigger_icons": { "default": false, "printings": {} }
       },
       "CP03-041": {
         "name": "ういんがる・ぶれいぶ",
         "class": "royal",
         "titles": ["cardfight_vanguard"],
         "zone": "main",
-        "start_amulet": true
+        "start_amulet": true,
+        "trigger_icons": { "default": false, "printings": {} }
       },
       "SYN-PAIR-A": {
         "name": "合成：二擇一 A",
@@ -1841,7 +1858,7 @@
     {
       "id": "vanguard-ok",
       "rule": "14.4.2.1.1",
-      "note": "ヴァンガード作品名基準：有スタートアミュレット",
+      "note": "ヴァンガード作品名基準：有スタートアミュレット、同職業 Trigger",
       "deck": {
         "basis": {
           "kind": "title",
@@ -1850,7 +1867,8 @@
         "leader": "CP03-LD01",
         "main": [
           ["CP03-021", 1],
-          ["CP03-008", 3]
+          ["CP03-008", 2],
+          ["CP03-015", 1]
         ],
         "evolve": [],
         "fill": {
@@ -1865,12 +1883,112 @@
       "expect": {
         "legal": true,
         "violations": [],
-        "notes": [
+        "notes": []
+      }
+    },
+    {
+      "id": "vanguard-trigger-wrong-class",
+      "rule": "14.4.2.1.2",
+      "note": "異職業 Trigger，跨兩區同一 ID 只報一筆",
+      "deck": {
+        "basis": { "kind": "title", "title": "cardfight_vanguard" },
+        "leader": "CP03-LD01",
+        "main": [
+          ["CP03-021", 1],
+          ["SYN-TRIGGER", 3]
+        ],
+        "evolve": [["SYN-TRIGGER", 1, "p:trigger"]],
+        "fill": { "set": "vanguard", "count": 36 }
+      },
+      "context": { "format": "standard", "date": "2026-11-01" },
+      "expect": {
+        "legal": false,
+        "violations": [
           {
-            "code": "triggerClassUnchecked",
-            "clause": "14.4.2.1.2"
+            "code": "triggerClassMismatch",
+            "clause": "14.4.2.1.2",
+            "cards": ["SYN-TRIGGER"],
+            "values": { "cardClass": "royal", "leaderClass": "elf" }
+          },
+          {
+            "code": "evolveWrongCard",
+            "clause": "6.1.1.3",
+            "cards": ["SYN-TRIGGER"]
           }
-        ]
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "vanguard-trigger-confirmed-none",
+      "rule": "14.4.2.1.2",
+      "note": "選用確認無圖示的異職業版次",
+      "deck": {
+        "basis": { "kind": "title", "title": "cardfight_vanguard" },
+        "leader": "CP03-LD01",
+        "main": [
+          ["CP03-021", 1],
+          ["SYN-TRIGGER", 1, "p:no-icon"]
+        ],
+        "evolve": [],
+        "fill": { "set": "vanguard", "count": 38 }
+      },
+      "context": { "format": "standard", "date": "2026-11-01" },
+      "expect": { "legal": true, "violations": [], "notes": [] }
+    },
+    {
+      "id": "vanguard-trigger-unknown-printing",
+      "rule": "14.4.2.1.2",
+      "note": "所選版次未知，即使預設版次有圖示也只提示",
+      "deck": {
+        "basis": { "kind": "title", "title": "cardfight_vanguard" },
+        "leader": "CP03-LD01",
+        "main": [
+          ["CP03-021", 1],
+          ["SYN-TRIGGER", 1, "p:unknown"]
+        ],
+        "evolve": [],
+        "fill": { "set": "vanguard", "count": 38 }
+      },
+      "context": { "format": "standard", "date": "2026-11-01" },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": [{ "code": "triggerIconUnknown", "clause": "14.4.2.1.2" }]
+      }
+    },
+    {
+      "id": "other-title-trigger",
+      "rule": "14.4.2.1.2",
+      "note": "其他作品名基準無這條職業限制",
+      "deck": {
+        "basis": { "kind": "title", "title": "umamusume_pretty_derby" },
+        "leader": "CP01-LD01",
+        "main": [["SYN-TRIGGER", 1, "p:trigger"]],
+        "evolve": [],
+        "fill": { "set": "uma", "count": 39 }
+      },
+      "context": { "format": "standard", "date": "2026-11-01" },
+      "expect": { "legal": true, "violations": [], "notes": [] }
+    },
+    {
+      "id": "class-deck-trigger",
+      "rule": "14.4.2.1.2",
+      "note": "職業基準只報原有的職業違規",
+      "deck": {
+        "basis": { "kind": "class", "class": "elf" },
+        "leader": "CP03-LD01",
+        "main": [["SYN-TRIGGER", 1, "p:trigger"]],
+        "evolve": [],
+        "fill": { "set": "vanguard", "count": 39 }
+      },
+      "context": { "format": "standard", "date": "2026-11-01" },
+      "expect": {
+        "legal": false,
+        "violations": [
+          { "code": "classMismatch", "clause": "6.1.1.5.1", "cards": ["SYN-TRIGGER"] }
+        ],
+        "notes": []
       }
     },
     {
@@ -1903,12 +2021,7 @@
             "cards": []
           }
         ],
-        "notes": [
-          {
-            "code": "triggerClassUnchecked",
-            "clause": "14.4.2.1.2"
-          }
-        ]
+        "notes": []
       }
     },
     {
@@ -1944,12 +2057,7 @@
             "cards": ["CP03-021", "CP03-041"]
           }
         ],
-        "notes": [
-          {
-            "code": "triggerClassUnchecked",
-            "clause": "14.4.2.1.2"
-          }
-        ]
+        "notes": []
       }
     },
     {
