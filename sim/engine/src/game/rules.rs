@@ -419,8 +419,11 @@ impl Game {
             cause: json!({"rule":"7.2.4"}),
             ..Frame::default()
         };
-        if !prevent_draw {
-            drop(self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?);
+        if !prevent_draw
+            && let Some(drawn) =
+                self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?
+        {
+            self.internal_rule_draw_event(&seat, &drawn)?;
         }
         // Start checks can leave typed occurrences that must finish before Main begins.
         self.state.flow = json!({"kind":"main","stage":"start-check"});

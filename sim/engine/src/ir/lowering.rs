@@ -1193,11 +1193,17 @@ fn lowered_subscription(
             })
         }
         ast::PhaseSubscription::Drew(draw) => {
-            let ast::StartPhase::Start = draw.not_phase;
             let event = Binding::new(event_id, scope);
+            let predicate = match draw {
+                ast::DrawSubscription::OwnNonStart {
+                    not_phase: ast::StartPhase::Start,
+                    ..
+                } => super::events::draw::predicate(event),
+                ast::DrawSubscription::EveryPlayer { .. } => Expr::Literal(Bool(true)),
+            };
             Ok(EventPattern::Draw {
                 binding: event,
-                predicate: super::events::draw::predicate(event),
+                predicate,
             })
         }
         ast::PhaseSubscription::HandRevealed(reveal) => {

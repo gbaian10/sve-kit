@@ -2119,7 +2119,7 @@ impl Game {
             player,
             object,
             ordinal,
-            instruction: instruction.id,
+            instruction: Some(instruction.id),
         }))
     }
 }
