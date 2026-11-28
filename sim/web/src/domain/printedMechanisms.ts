@@ -1,8 +1,5 @@
-// The snapshot tags cards with mechanism codes but not with the class or title a mechanism belongs
-// to, so the filter's rows are listed here. Each class mechanism is printed only on its class's
-// cards (checked against the JP card text in card-data); each crossover mechanism comes from one
-// collaboration: Serve from CP01 Umamusume, Lesson from CP02 Cinderella Girls, Starting Amulet and
-// both Drives from CP03 Vanguard. Title codes are the snapshot's title vocabulary.
+// The snapshot does not say which class or title a mechanism belongs to. Each class mechanism is
+// printed only on its class's JP cards; each crossover one comes from one collaboration (CP01–CP03).
 export const CLASS_MECHANISM_GROUPS = [
   { classCode: "elf", mechanisms: ["combo"] },
   { classCode: "witch", mechanisms: ["spellchain", "stack", "earth_rite"] },

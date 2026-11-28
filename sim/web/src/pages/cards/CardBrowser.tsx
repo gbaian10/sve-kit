@@ -11,7 +11,7 @@ import {
 import { useTranslation } from "react-i18next"
 
 import type { SearchReadiness } from "../../app/snapshot"
-import { useCardSnapshot, usePrintingOptions, useSetOptions } from "../../app/snapshot"
+import { usePrintingOptions, useSetOptions } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardGrid, type CardGridProps, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
@@ -56,7 +56,6 @@ import type { Region, TextLang } from "../../domain/search"
 import { setCaption } from "../../domain/sets"
 import type { UiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
-import { titleLabel } from "../decks/deck-titles"
 import { FilterSheet } from "./FilterSheet"
 import { FilterSidebar } from "./FilterSidebar"
 import { type SidebarEdge, sidebarGridClass } from "./sidebar-layout"
@@ -181,7 +180,6 @@ export function CardBrowser({
   const prefs = usePrefs()
   const { sets, quickSets, setCounts, rarities } = useSetOptions()
   const printingOptions = usePrintingOptions()
-  const { catalog } = useCardSnapshot()
   const panelId = useId()
   const sidebarId = useId()
   const { page, cells, images, error: queryError, progress, loading: pageLoading, pages } = results
@@ -409,7 +407,7 @@ export function CardBrowser({
         classMechanisms: (
           <PrintedMechanismFilter
             group="classMechanisms"
-            groupName={classLabel}
+            classLabel={classLabel}
             options={printingOptions?.classMechanisms}
             selected={query.classMechanisms}
             matchMode={query.classMechanismsMatch}
@@ -424,7 +422,7 @@ export function CardBrowser({
         collabMechanisms: (
           <PrintedMechanismFilter
             group="collabMechanisms"
-            groupName={(code) => (catalog ? titleLabel(catalog, code, textLang) : code)}
+            classLabel={classLabel}
             options={printingOptions?.collabMechanisms}
             selected={query.collabMechanisms}
             matchMode={query.collabMechanismsMatch}

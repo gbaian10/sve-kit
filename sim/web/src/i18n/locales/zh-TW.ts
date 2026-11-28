@@ -331,8 +331,13 @@ const zhTW = {
       twin_drive: "雙重驅動",
     },
     printedMechanismAbbreviations: {
-      spellchain: "縮寫 SC（Spell Chain）",
-      necrocharge: "縮寫 NC（Necro Charge）",
+      spellchain: "縮寫 SC（Spellchain）",
+      necrocharge: "縮寫 NC（Necrocharge）",
+    },
+    collabTitleNames: {
+      umamusume_pretty_derby: "賽馬娘 Pretty Derby",
+      idolmaster_cinderella_girls: "偶像大師 灰姑娘女孩",
+      cardfight_vanguard: "卡片戰鬥!! 先導者",
     },
     collabTitleShortNames: {
       umamusume_pretty_derby: "賽馬娘",

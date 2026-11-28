@@ -15,7 +15,7 @@ it.each([
   await renderInRouter(
     <PrintedMechanismFilter
       group="classMechanisms"
-      groupName={(code) => `name:${code}`}
+      classLabel={(code) => `name:${code}`}
       options={{ coverage: "complete", unknownCards: 0, counts: {} }}
       selected={[]}
       matchMode="any"
@@ -34,7 +34,7 @@ it.each([
 it("keeps a crossover selection disabled while loading and explains unknown cards", async () => {
   const props = {
     group: "collabMechanisms" as const,
-    groupName: (code: string) => `name:${code}`,
+    classLabel: (code: string) => `name:${code}`,
     selected: [],
     matchMode: "any" as const,
     onChange: vi.fn(),
@@ -65,7 +65,7 @@ it("lays the buttons out in one row per class and title, abbreviations on hover"
     matchMode: "any" as const,
     onChange: vi.fn(),
     onMatchChange: vi.fn(),
-    groupName: (code: string) => `name:${code}`,
+    classLabel: (code: string) => `name:${code}`,
   }
   const { rerender } = await renderInRouter(
     <PrintedMechanismFilter {...props} group="classMechanisms" />,
@@ -81,11 +81,11 @@ it("lays the buttons out in one row per class and title, abbreviations on hover"
   expect(screen.getByRole("img", { name: "name:witch" })).toHaveAttribute("title", "name:witch")
   expect(within(witch).getByRole("button", { name: "魔力連鎖" })).toHaveAttribute(
     "title",
-    "縮寫 SC（Spell Chain）",
+    "縮寫 SC（Spellchain）",
   )
   rerender(<PrintedMechanismFilter {...props} group="collabMechanisms" />)
   await userEvent.click(screen.getByRole("button", { name: /^合作作品機制/u }))
-  const vanguard = screen.getByRole("group", { name: "name:cardfight_vanguard" })
+  const vanguard = screen.getByRole("group", { name: "卡片戰鬥!! 先導者" })
   expect(within(vanguard).getAllByRole("button")).toHaveLength(3)
-  expect(screen.getByTitle("name:cardfight_vanguard")).toHaveTextContent("先導者")
+  expect(screen.getByTitle("卡片戰鬥!! 先導者")).toHaveTextContent("先導者")
 })

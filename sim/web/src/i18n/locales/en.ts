@@ -356,8 +356,13 @@ export default {
       twin_drive: "Twin Drive",
     },
     printedMechanismAbbreviations: {
-      spellchain: "Abbreviation: SC (Spell Chain)",
-      necrocharge: "Abbreviation: NC (Necro Charge)",
+      spellchain: "Abbreviated as SC",
+      necrocharge: "Abbreviated as NC",
+    },
+    collabTitleNames: {
+      umamusume_pretty_derby: "Umamusume: Pretty Derby",
+      idolmaster_cinderella_girls: "THE IDOLM@STER CINDERELLA GIRLS",
+      cardfight_vanguard: "Cardfight!! Vanguard",
     },
     collabTitleShortNames: {
       umamusume_pretty_derby: "Umamusume",

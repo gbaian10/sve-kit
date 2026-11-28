@@ -17,7 +17,7 @@ import { MatchModeControl } from "./MatchModeControl"
 
 export function PrintedMechanismFilter({
   group,
-  groupName,
+  classLabel,
   options,
   selected,
   matchMode,
@@ -25,8 +25,8 @@ export function PrintedMechanismFilter({
   onMatchChange,
 }: {
   readonly group: "classMechanisms" | "collabMechanisms"
-  /** The snapshot's name for a row's class code or title code. */
-  readonly groupName: (code: string) => string
+  /** The snapshot's name for a class code. */
+  readonly classLabel: (code: string) => string
   readonly options: MechanismOptions | undefined
   readonly selected: readonly PrintedMechanism[]
   readonly matchMode: MatchMode
@@ -39,7 +39,7 @@ export function PrintedMechanismFilter({
   const rows =
     group === "classMechanisms"
       ? CLASS_MECHANISM_GROUPS.map(({ classCode, mechanisms }) => {
-          const name = groupName(classCode)
+          const name = classLabel(classCode)
           const labelId = `${id}-${classCode}`
           return {
             key: classCode,
@@ -57,7 +57,7 @@ export function PrintedMechanismFilter({
           }
         })
       : COLLAB_MECHANISM_GROUPS.map(({ titleCode, mechanisms }) => {
-          const name = groupName(titleCode)
+          const name = t(`filters.collabTitleNames.${titleCode}`)
           return {
             key: titleCode,
             mechanisms,

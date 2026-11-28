@@ -345,8 +345,13 @@ export default {
       twin_drive: "ツインドライブ",
     },
     printedMechanismAbbreviations: {
-      spellchain: "略称 SC（Spell Chain）",
-      necrocharge: "略称 NC（Necro Charge）",
+      spellchain: "略称 SC（Spellchain）",
+      necrocharge: "略称 NC（Necrocharge）",
+    },
+    collabTitleNames: {
+      umamusume_pretty_derby: "ウマ娘 プリティーダービー",
+      idolmaster_cinderella_girls: "アイドルマスター シンデレラガールズ",
+      cardfight_vanguard: "カードファイト!! ヴァンガード",
     },
     collabTitleShortNames: {
       umamusume_pretty_derby: "ウマ娘",
