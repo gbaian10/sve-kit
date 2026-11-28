@@ -195,6 +195,70 @@
       "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
     },
     {
+      "announced_on": "2026-11-12",
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "You may reveal a Condemned follower from among them and add it to your hand.",
+          "after": "You may reveal a Condemned card from among them and add it to your hand.",
+          "raw_before": {
+            "start": 29700,
+            "end": 29776,
+            "sha256": "sha256:ef3cf0c1ecb2a357f8eff39aab1418a66de847e645037bedc5865b40a13ce2d5"
+          },
+          "raw_after": {
+            "start": 29815,
+            "end": 29924,
+            "sha256": "sha256:084da612b24812ab1f93b4634af8bf1ed054b3d029908908f09893be8d70d584"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "card_no": "BP19-116EN",
+          "face_id": "f:31e7f8b452e75230940f6bdca5397d92",
+          "field": "effect",
+          "before_value": "You may reveal a Condemned follower from among them and add it to your hand.",
+          "after_value": "You may reveal a Condemned card from among them and add it to your hand.",
+          "locator": "blocks/0/BP19-116EN",
+          "scope": "fragment"
+        }
+      ],
+      "date_raw": "\n                                                                         Nov. 12, 2026                                              ",
+      "effective_on": null,
+      "exchange_offered": false,
+      "printings": [
+        {
+          "card_no": "BP19-116EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-568EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "reason": "Due to an oversight in the quality control process, the original text specifies follower instead of card, which makes the effect of the Fanfare ability more restrictive than intended.",
+      "region": "en",
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。公告未明列獨立生效日。",
+      "source": {
+        "id": "src:v1:c932d53a70daa519a1b6c6716c9da18b9f05b2c7152ff96a53f0f2907dbd09e5",
+        "url": "https://en.shadowverse-evolve.com/errata/azvaldt/",
+        "sha256": "sha256:63f8c344254ef900c5038df8c7a173a2aa597a2ae765e304f8820e927476c936",
+        "fetched_at": "2026-11-27T16:59:22.073242Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v2",
+        "batch_id": "sha256:1277c02e0693ac07f436a94560f816924ef3792937009e246de4e8a75f5f77c3",
+        "descriptor_sha256": "sha256:05556b4e5b7481cfe9da7e3904677191a834c9f6572c08805f4137fdda95d77e",
+        "first_receipt_id": "sha256:ac258359e1279353ef5df348e7f529793b114064eb7666f353654fe6be3244bb"
+      }
+    },
+    {
       "source": {
         "id": "src:v1:182dbb1a7a15ae658f934cb3bc24c87f196c506d0fb1786b055cf232426f737a",
         "url": "https://en.shadowverse-evolve.com/errata/beastcall-aria/",
@@ -515,6 +579,80 @@
         }
       ],
       "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "announced_on": "2026-11-12",
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Select up to 2 differently named {icon_nightmare|abysscraft} followers",
+          "after": "Select up to 2 differently named 2-cost {icon_nightmare|abysscraft} followers",
+          "raw_before": {
+            "start": 29744,
+            "end": 29914,
+            "sha256": "sha256:f6192107f99c9ea58625de5c07456b1c53f6c01883bf857fced8e67f978275bb"
+          },
+          "raw_after": {
+            "start": 29953,
+            "end": 30167,
+            "sha256": "sha256:0a7e7616d74a3ec165fc3c39b880ec430717bb7cf0a249f630dc21ee65a3c5e1"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "card_no": "BP22-077EN",
+          "face_id": "f:2b37e8a31387534782562b4b7887cebb",
+          "field": "effect",
+          "before_value": "Select up to 2 differently named {icon_nightmare|abysscraft} followers",
+          "after_value": "Select up to 2 differently named 2-cost {icon_nightmare|abysscraft} followers",
+          "locator": "blocks/0/BP22-077EN",
+          "scope": "fragment"
+        }
+      ],
+      "date_raw": "\n                                                                         Nov. 12, 2026                                              ",
+      "effective_on": null,
+      "exchange_offered": false,
+      "printings": [
+        {
+          "card_no": "BP22-077EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP22-SL21EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP22-U05EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP22-SP01EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "reason": "Due to an oversight in the quality control process, the original text did not specify the full conditions of the ability.",
+      "region": "en",
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。公告未明列獨立生效日。",
+      "source": {
+        "id": "src:v1:dd0db086956c092998b0aa0623d0a01920a4a2229649e2a93d7979da0d8f8b7a",
+        "url": "https://en.shadowverse-evolve.com/errata/cernunnos/",
+        "sha256": "sha256:f8f8a0cd38c288850fc24a762ac00cd701bc099c0caecf42b567080953eb83e0",
+        "fetched_at": "2026-11-27T16:57:21.142569Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v2",
+        "batch_id": "sha256:5d5d5c6bd40806ef9036c7529cf7858ea88dbb177bb6fb9f80b263a904147ecb",
+        "descriptor_sha256": "sha256:c05322404aa88f532c45665bdd42f8f5774b51c8a9b224431d8d7d9184b00f83",
+        "first_receipt_id": "sha256:3a9776fb9a076912cca26616fb77ed10272245de162efd26240fa8f1d2b0a3b5"
+      }
     },
     {
       "source": {
@@ -1086,6 +1224,70 @@
         }
       ],
       "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "announced_on": "2026-11-12",
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "Put the rest on the bottom of your deck in any order.",
+          "after": "Bury the rest.",
+          "raw_before": {
+            "start": 29734,
+            "end": 29787,
+            "sha256": "sha256:d1e88648c7016c1677b762e35a03b8e8b426d9bd023e83fdad2f65a462490fa5"
+          },
+          "raw_after": {
+            "start": 29856,
+            "end": 29870,
+            "sha256": "sha256:ae4dbaa95be0a8a78f3fbd3d55fba6680fa6679ab75a8c8e3a98013c7d3de79d"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "card_no": "BP22-115EN",
+          "face_id": "f:5666f7210ce45df4aac51365bc1284ef",
+          "field": "effect",
+          "before_value": "Put the rest on the bottom of your deck in any order.",
+          "after_value": "Bury the rest.",
+          "locator": "blocks/0/BP22-115EN",
+          "scope": "fragment"
+        }
+      ],
+      "date_raw": "\n                                                                         Nov. 12, 2026                                              ",
+      "effective_on": null,
+      "exchange_offered": false,
+      "printings": [
+        {
+          "card_no": "BP22-115EN",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "BP22-P67EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "reason": "Due to an oversight in the quality control process, the resolution of the Fanfare ability was incorrectly stated.",
+      "region": "en",
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。公告未明列獨立生效日。",
+      "source": {
+        "id": "src:v1:cfc73cd284de5b8140376b6c1ea572e9cee753b026d188f735465c106a7e9880",
+        "url": "https://en.shadowverse-evolve.com/errata/goblin-mage/",
+        "sha256": "sha256:78808fceb607eb4ac327d27a2c922db94d0e717b3650ab4c15ace4d25979294a",
+        "fetched_at": "2026-11-27T16:55:18.227388Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v2",
+        "batch_id": "sha256:cc04829cb66e5f011d3c1235ad45c649e6759106490cc2ef354a2c00f8ba972e",
+        "descriptor_sha256": "sha256:b190e3daa71afc9390f58f3f61575fbb59e7091c3891ae997578e47cb53da126",
+        "first_receipt_id": "sha256:075602ef354c502834465a9378572e586e66bcffca0a86fc866faf77bfb8fbca"
+      }
     },
     {
       "source": {
@@ -2679,6 +2881,65 @@
         }
       ],
       "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "announced_on": "2026-10-30",
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "Changes"
+          ],
+          "before": "you may put into your EX area.",
+          "after": "you may put it into your EX area.",
+          "raw_before": {
+            "start": 29802,
+            "end": 29832,
+            "sha256": "sha256:d29a4f3db908c1d2803fdae55136dd8a4db0d965d622108ffe5ddd08a912aa24"
+          },
+          "raw_after": {
+            "start": 29871,
+            "end": 29941,
+            "sha256": "sha256:d8ea46520e36ba7251fbcb569c96fb474f9f1a43875c81eba91333fa0fd97f88"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "card_no": "BP19-044EN",
+          "face_id": "f:d98e11ea25a4584685d8ecc53d11ed28",
+          "field": "effect",
+          "before_value": "you may put into your EX area.",
+          "after_value": "you may put it into your EX area.",
+          "locator": "blocks/0/BP19-044EN",
+          "scope": "fragment"
+        }
+      ],
+      "date_raw": "\n                                                                         Oct. 30, 2026                                              ",
+      "effective_on": null,
+      "exchange_offered": false,
+      "printings": [
+        {
+          "card_no": "BP19-044EN",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "reason": "This card’s ability text wording did not account for what can be put into the EX area.",
+      "region": "en",
+      "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。公告未明列獨立生效日。",
+      "source": {
+        "id": "src:v1:21d24d30cd4c801e095db57d1c6af4f4fabcc2c914fd0bfd102e40abf9b1f091",
+        "url": "https://en.shadowverse-evolve.com/errata/warden-of-the-trigger/",
+        "sha256": "sha256:3eaf83ca6089bd8140073ca8b20f3562c837dd31d86b968a9f8a06687bbbe034",
+        "fetched_at": "2026-11-27T17:01:33.744409Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v2",
+        "batch_id": "sha256:f3d5c86b845b7476b4f0349fede71319289421f46ef6577440c85c33799a66fa",
+        "descriptor_sha256": "sha256:c4e82baae6d4db3c6a4fe82af527c632a4c426b852c13d1de1da848f8da116d0",
+        "first_receipt_id": "sha256:33999a0ed085cc2893336a35dfc6d4107ec5b7484cc15365da2e85bfea42f96d"
+      }
     },
     {
       "source": {
