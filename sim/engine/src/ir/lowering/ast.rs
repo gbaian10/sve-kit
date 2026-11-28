@@ -59,6 +59,7 @@ pub(super) struct Ability {
     #[serde(rename = "ports")]
     pub _ports: Ports,
     pub imports: Option<IgnoredAny>,
+    #[serde(default, deserialize_with = "fanfare_body")]
     pub fanfare: Option<Body>,
     pub lastword: Option<Body>,
     pub attack_time: Option<Body>,
@@ -433,6 +434,32 @@ pub(super) struct Body {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+enum FanfareBody {
+    Instructions(Box<Body>),
+    NoEffect(NoEffectFanfare),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NoEffectFanfare {
+    #[serde(rename = "no_effect")]
+    _no_effect: True,
+}
+
+fn fanfare_body<'de, D>(deserializer: D) -> Result<Option<Body>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Ok(
+        Option::<FanfareBody>::deserialize(deserializer)?.map(|body| match body {
+            FanfareBody::Instructions(body) => *body,
+            FanfareBody::NoEffect(NoEffectFanfare { _no_effect: True }) => Body::default(),
+        }),
+    )
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
     #[serde(rename = "shuffle")]
@@ -459,6 +486,7 @@ pub(super) enum Step {
     Choose(Choose),
     Draw(Draw),
     Win(Win),
+    Lose(Lose),
     ExtraTurn(ExtraTurn),
     Pp(PpChange),
     Discard(Discard),
@@ -935,6 +963,20 @@ pub(super) struct Win {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct Lose {
+    pub who: DefeatedPlayers,
+}
+
+#[derive(Deserialize)]
+pub(super) enum DefeatedPlayers {
+    #[serde(rename = "opp")]
+    Opponent,
+    #[serde(rename = "opponents")]
+    Opponents,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct ExtraTurn {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
@@ -1097,6 +1139,7 @@ pub(super) enum MoveObjects {
     FilteredObserved(FilteredObserved),
     Field(Objects),
     Public(Box<PublicQuery>),
+    PublicUnion { any_of: Box<[PublicQuery; 2]> },
 }
 
 #[derive(Deserialize)]
@@ -1257,6 +1300,10 @@ pub(super) enum Until {
     ThisAndNextOppTurn,
     Game,
     #[serde(untagged)]
+    NextTurn {
+        next_turn: TurnBegin,
+    },
+    #[serde(untagged)]
     DuringNextTurn {
         during_next_turn: AttackTurnInterval,
     },
@@ -1282,6 +1329,20 @@ pub(super) struct RulePhaseInterval {
 pub(super) enum RuleWindowPhase {
     Start,
     Main,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TurnBegin {
+    pub who: StandPlayer,
+    #[serde(rename = "edge")]
+    pub _edge: BeginEdge,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BeginEdge {
+    Begin,
 }
 
 #[derive(Deserialize)]
@@ -1497,6 +1558,14 @@ pub(super) enum InstalledEffect {
     Cannot(Cannot),
     Prevent(Prevent),
     DamageCap(DamageCap),
+    HandLimit(HandLimit),
+    FanfareTriggers(u64),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HandLimit {
+    Unlimited,
 }
 
 #[derive(Deserialize)]
@@ -1588,6 +1657,7 @@ pub(super) struct PlayingQuery {
     pub name: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
     pub token: Option<bool>,
 }
 
@@ -2010,6 +2080,12 @@ pub(super) struct RoleReference {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct RoleObservation {
+    pub role: RoleReference,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Choose {
     pub position: Option<HandPosition>,
     #[serde(default)]
@@ -2302,6 +2378,9 @@ pub(super) enum Number {
     Power {
         power_of: Observation,
     },
+    PowerRole {
+        power_of: RoleObservation,
+    },
     Life {
         hp_of: BodyStatReference,
     },
@@ -2318,7 +2397,7 @@ pub(super) enum Number {
         history_sum: HistorySum,
     },
     LeaderLife {
-        leader_life: LeaderSide,
+        leader_life: Side,
     },
     Plus {
         plus: Box<[Self; 2]>,
@@ -2433,7 +2512,13 @@ pub(super) enum HistoryExclusion {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum HistoryWhere {
     Life(LifeHistoryFilter),
-    AbilityPlayed { kind: AbilityHistoryKind },
+    AbilityPlayed {
+        kind: AbilityHistoryKind,
+    },
+    AttackSource {
+        #[serde(rename = "ref")]
+        _source: This,
+    },
 }
 
 #[derive(Deserialize)]
@@ -2609,6 +2694,7 @@ impl CountKind {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
+    pub acted: Option<bool>,
     pub face_up: Option<bool>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -2849,11 +2935,23 @@ pub(super) struct DriveTriggerSubscription {
     pub during: Option<During>,
 }
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct DrawSubscription {
-    #[serde(rename = "who")]
-    pub _who: SelfPlayer,
-    pub not_phase: StartPhase,
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DrawSubscription {
+    OwnNonStart {
+        #[serde(rename = "who")]
+        _who: SelfPlayer,
+        not_phase: StartPhase,
+    },
+    EveryPlayer {
+        #[serde(rename = "who")]
+        _who: EveryDrawPlayer,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EveryDrawPlayer {
+    All,
 }
 
 #[derive(Deserialize)]
@@ -2992,8 +3090,8 @@ pub(super) struct DiscardBy {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct DiscardAbility {
-    pub who: SelfPlayer,
-    pub r#trait: String,
+    pub who: EntryPlayer,
+    pub r#trait: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -3105,6 +3203,7 @@ pub(super) enum CostCondition {
     Awakened(bool),
     Crimson(bool),
     LeaderLife(PlayerThreshold),
+    LeaderClass(String),
     InZone(PlayRestrictionZone),
     All(Vec<Self>),
     Any(Vec<Self>),
@@ -3366,6 +3465,7 @@ pub(super) enum ModeCondition {
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
+    LeaderClass(String),
     LeaderLife(PlayerThreshold),
 }
 
@@ -3430,6 +3530,7 @@ pub(super) struct ByKind {
 pub(super) enum Condition {
     MyTurn(bool),
     InZone(ObjectLocation),
+    PhysicalSourceInZone(String),
     Is(AttackTargetCondition),
     History(HistoryCondition),
     EnteredFrom(EntryOriginCondition),
@@ -3442,6 +3543,7 @@ pub(super) enum Condition {
     FinalLimitBreakPossible(String),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
+    LeaderClass(String),
 
     Crimson(bool),
     Combo(u64),
@@ -3753,6 +3855,7 @@ pub(super) struct ExSubscription {
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
     pub r#where: Option<Box<MovementCondition>>,
+    pub has_evolve: Option<True>,
     pub cost_le: Option<u64>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
@@ -4087,12 +4190,25 @@ pub(super) struct StaticGrant {
 pub(super) enum Cannot {
     Draw(CannotDraw),
     RulePhase(CannotRulePhase),
+    LoseDefense(CannotLoseDefense),
     Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotLoseDefense {
+    pub what: DefenseAction,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DefenseAction {
+    LoseDefense,
 }
 
 #[derive(Deserialize)]
@@ -4481,8 +4597,27 @@ pub(super) enum LifeDirection {
 pub(super) struct CannotAttack {
     pub what: AttackAction,
     pub on: Option<Objects>,
-    pub target: Option<Recipients>,
+    pub target: Option<AttackRecipients>,
     pub if_can_attack: Option<AttackableKind>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum AttackRecipients {
+    OwnerField {
+        who: AttackOwner,
+        kind: AttackableKind,
+        #[serde(rename = "leader_or")]
+        _leader_or: True,
+        zone: Option<FieldZone>,
+    },
+    Other(Recipients),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackOwner {
+    pub owner_of: This,
 }
 
 #[derive(Deserialize)]
@@ -4873,7 +5008,7 @@ pub(super) struct FlipFilter {
     pub _who: SelfPlayer,
     #[serde(rename = "zone")]
     pub _zone: FlipZone,
-    pub kind: SearchKind,
+    pub kind: Option<SearchKind>,
     pub face_up: Option<bool>,
     pub name: Option<String>,
     pub name_contains: Option<String>,

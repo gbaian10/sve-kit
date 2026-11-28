@@ -56,7 +56,7 @@
 | A.expr.zone_free | {who,zone} | 回 Nat；初版容量讀值為 field/ex |
 | A.cond 組合 | cmp:{left,op,right}、all、any、not | 數值 cmp.op=eq/ne/lt/le/gt/ge；PlayerExpr 只 eq/ne，左右同型 |
 | A.cond 解放狀態 | limit_broken、final_limit_broken、final_limit_break_possible | 讀取單一場上物件 |
-| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
+| A.cond 謂詞 | exists、on_field、in_zone、leader_life、hand、zone_free、my_turn、opp_turn、construction、leader_class、standing、acted、evolved、chosen、paid、did、entered_from、played_from、combo、spellchain、necro、awakened、crimson、entered_by、is、history | zone_free 在 Cond 須 ge/eq；is={ref,kind}；entered_by={ref,by} |
 | Sel 玩家／區域／種類 | who、zone、kind、class、not_class、trait、traits_any、traits_all、not_trait | zone 單值或集合；traits_all 與 traits_any 不合併；kind 可 same_as（§13 GAP-A-057） |
 | Sel 名稱 | name、names、name_contains、not_same_name_as_this | name 可 {same_as:{objects_of,view}}，不是任意字串替換 |
 | Sel 數值 | cost_*、orig_cost_*、hp_le、power_max | 比較 suffix 與數量 Expr 分開 |
@@ -115,8 +115,8 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
 | play_card／play_ability | {ref}（cost?:0；其餘費用覆寫尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until? | 無期限僅一次，有期限預設各次；不收 line/result |
-| player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
-| win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
+| player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開。apply.capture=play。手牌無上限只由 player_effect 安裝給己方，until 固定 game。入場曲倍增作用於下個己方回合。 |
+| win／lose／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
 | to.one_of | one_of、by、scope | create 的 scope=each/batch（§13 GAP-A-017） |
 | to.partition | order=printed、partition:[{zone,n / upto}…] | n 與 upto 互斥；順序與份額保留，upto 可任選且受目的區空位限制 |

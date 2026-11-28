@@ -15,6 +15,7 @@ use crate::ir::BatchOutcome;
 use crate::ir::LimitBreakEvent;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
+use crate::ir::player_rules::PlayerRule;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
     BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
@@ -104,6 +105,7 @@ mod ordering;
 mod phase_restrictions;
 mod play_target_cost;
 mod player;
+mod player_rules;
 mod player_stages;
 mod posture;
 mod processing;
@@ -1863,7 +1865,7 @@ impl Game {
         instruction: Box<Instruction>,
     ) -> Result<()> {
         match &instruction.action {
-            Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
+            Action::GameResult { .. } => self.internal_game_result(execution, &instruction)?,
             Action::Transfer { .. } => self.internal_transfer(execution, &instruction)?,
             Action::ScheduleTurn { .. } => self.internal_schedule_turn(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
@@ -1973,6 +1975,9 @@ impl Game {
             }
             action @ Action::InstallEffect { .. } if phase_rules::projection(action).is_some() => {
                 self.internal_install_phase_restriction(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. } if PlayerRule::from_effect(effect).is_some() => {
+                self.internal_install_player_rule(execution, &instruction)?;
             }
             Action::InstallEffect { effect, .. }
                 if matches!(effect.as_ref(), Effect::Continuous { .. }) =>
@@ -2114,7 +2119,7 @@ impl Game {
             player,
             object,
             ordinal,
-            instruction: instruction.id,
+            instruction: Some(instruction.id),
         }))
     }
 }

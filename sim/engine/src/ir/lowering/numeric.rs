@@ -51,6 +51,7 @@ pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duratio
         end: match until {
             Some(
                 ast::Until::NextPhase { .. }
+                | ast::Until::NextTurn { .. }
                 | ast::Until::DuringNextTurn { .. }
                 | ast::Until::DuringNextPhase { .. },
             ) => {
@@ -143,9 +144,7 @@ impl BodyContext<'_> {
             ast::LifeHolder::MasterOf { master_of } => {
                 self.selected_player(master_of, super::super::Role::Controller, path)?
             }
-            ast::LifeHolder::Bound(name) => PlayerRef::Bound {
-                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
-            },
+            ast::LifeHolder::Bound(name) => self.named_effect_player(name, path)?,
         };
         Ok(Action::Life {
             player,
@@ -163,9 +162,7 @@ impl BodyContext<'_> {
             Some(ast::LifeHolder::MasterOf { master_of }) => {
                 self.selected_player(master_of, super::super::Role::Controller, path)?
             }
-            Some(ast::LifeHolder::Bound(name)) => PlayerRef::Bound {
-                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
-            },
+            Some(ast::LifeHolder::Bound(name)) => self.named_effect_player(name, path)?,
         };
         Ok(Action::Draw {
             player,
@@ -552,7 +549,12 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
-            ast::InstalledEffect::PlayPermission(_) => return Err(unsupported(path)),
+            ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::HandLimit(_)
+            | ast::InstalledEffect::FanfareTriggers(_)
+            | ast::InstalledEffect::Cannot(ast::Cannot::LoseDefense(_)) => {
+                return Err(unsupported(path));
+            }
             ast::InstalledEffect::LoseAbilities(_) => {
                 if !matches!(&installation.on, ast::Objects::This(_))
                     && !matches!(&installation.on, ast::Objects::Bound(name) if self.follower_targets.contains(name))

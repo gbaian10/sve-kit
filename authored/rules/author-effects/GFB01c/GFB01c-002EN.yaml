@@ -1,0 +1,18 @@
+cards:
+  GFB01c-002EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - draw:
+                n: 2
+                who: self
+            - pp:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

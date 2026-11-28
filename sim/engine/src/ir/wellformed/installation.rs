@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
+use crate::ir::player_rules::PlayerRule;
 use crate::ir::prevention;
 use crate::ir::{
     AbilityKind, ActionPattern, Binding, Bool, CharacteristicPatch, ContinuousLayer, CostChange,
@@ -79,6 +80,15 @@ impl Checker {
         if let InstallationSubjects::Players { players, .. } = subjects {
             self.players(players)?;
             self.installed_duration(duration)?;
+            if let Some(rule) = PlayerRule::from_effect(effect) {
+                let Some(source) = rule.source(players, effect, duration) else {
+                    return self.reject();
+                };
+                if self.ability_source.as_ref() != Some(source) {
+                    return self.reject();
+                }
+                return self.ability_source(source);
+            }
             if phase_restrictions::effect_window(players, effect, duration).is_some() {
                 return Ok(());
             }

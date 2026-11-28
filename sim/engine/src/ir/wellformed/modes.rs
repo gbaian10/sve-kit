@@ -356,6 +356,17 @@ impl Checker {
             {
                 self.boolean(condition)
             }
+            Expr::Live(read)
+                if matches!(
+                    read.as_ref(),
+                    BoolRead::LeaderClass {
+                        player: PlayerRef::Controller {},
+                        ..
+                    }
+                ) =>
+            {
+                self.boolean(condition)
+            }
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }

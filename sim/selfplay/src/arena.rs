@@ -1,5 +1,6 @@
 //! Where matches are opened: a session factory plus the card facts the run needs.
 
+use crate::lineup::Lineup;
 use crate::pool::{Deck, Pools};
 use alloc::collections::BTreeMap;
 use core::fmt;
@@ -40,6 +41,8 @@ pub struct Arena {
     pub open: Open,
     /// Construction pools over the admitted cards.
     pub pools: Pools,
+    /// Listed decks drawn by weight in place of random construction.
+    pub lineup: Option<Lineup>,
     /// Wire printing identifier of every deck reference.
     pub printings: BTreeMap<String, String>,
     /// Native card number of every wire printing identifier, for reports.

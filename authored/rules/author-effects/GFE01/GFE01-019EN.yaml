@@ -1,0 +1,30 @@
+cards:
+  GFE01-019EN:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - life:
+                delta:
+                  count:
+                    who: self
+                    zone: hand
+                who: self
+        line: 2
+      - line: 3
+        super_evolve_time:
+          define:
+            cards_in_hand:
+              count:
+                who: self
+                zone: hand
+          do:
+            - buff:
+                hp: cards_in_hand
+                on: this
+                power: cards_in_hand
+    admission: light
+format: 2
+kind: author_effect_set

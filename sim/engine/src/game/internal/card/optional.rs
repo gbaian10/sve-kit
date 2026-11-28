@@ -79,8 +79,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                     ))
                 || (required && source_banish(&instruction.action))
                 || (required
-                    && matches!(instruction.action, Action::Banish { .. })
-                    && super::super::movement::deck_top(&instruction.action).is_some())
+                    && super::super::movement::own_deck_top_banish(&instruction.action).is_some())
                 || super::hand_payment::check_cost(&instruction.action)
                 || shuffle::payment(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)

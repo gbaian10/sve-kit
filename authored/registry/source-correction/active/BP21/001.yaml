@@ -1,0 +1,26 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: source_correction
+    owner: BP21
+    data:
+      id: x:5074c133e5df5fc0ab645c1484934429
+      printing_id: p:d04c916ff6ac5d56b03e22141ac21a04
+      face_id: f:152a1c9f450151ec9ba48f1020c7f8c0
+      field: cost
+      expected_raw_value: '3'
+      corrected_value: '-'
+      expected_source_hash: sha256:7cb249e73246fa1cb995f1df1e1459b540a0d13707c44be663119aa3a73ffa18
+      expected_source_version_id: src:v1:534f008165325735e74f7af1239297af9e22efa850d71b4776c175f236045aaf
+      source_hash_recipe: registry-observation-v2
+      reason: The official page lists a cost of 3, but this evolved printing has no printed card cost. The green 2 is an activated ability cost.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:0f3137f14c046d764fd6c929f8e2f935025abbbec16e8de1c6243e18a66e1160
+          image_src: /wordpress/wp-content/images/cardlist/BP21/BP21-SP02EN.png
+          region: en
+          locator: The top-left artwork has no printed cost box.

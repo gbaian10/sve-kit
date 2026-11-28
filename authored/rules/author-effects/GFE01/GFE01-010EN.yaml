@@ -1,0 +1,31 @@
+cards:
+  GFE01-010EN:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                sel:
+                  orig_cost_eq: 3
+                  trait: 兵士
+                  who: self
+                  zone: deck
+                to: ex
+                upto: 3
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      any_of:
+                        - name: Aramis
+                          who: self
+                        - name: Porthos
+                          who: self
+                        - name: Athos
+                          who: self
+                until: turn
+                who: self
+    admission: light
+format: 2
+kind: author_effect_set

@@ -208,6 +208,9 @@ pub(super) fn condition(
                 player: PlayerRef::Controller {},
             })));
         }
+        ast::CostCondition::LeaderClass(class) => {
+            return Ok(super::conditions::leader_class(class));
+        }
         ast::CostCondition::LeaderLife(threshold) => {
             super::conditions::leader_life_condition(threshold, path)?
         }

@@ -1,0 +1,149 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "PR",
+  "range": "600-699",
+  "products": {
+    "products-a13a5483ff5dbc17": [
+      {
+        "name": "Promo Cards",
+        "date": null,
+        "links": [
+          "/cards/searchresults?expansion=PR"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "PR-600EN",
+      "documents": {
+        "documents-a6941ba5e3977c58": {
+          "region": "en",
+          "record": {
+            "number": "PR-600EN",
+            "faces": [
+              {
+                "name": "Sacred Lion",
+                "info": {
+                  "Card Set": "Promo Cards",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Havencraft",
+                  "Format": "Any",
+                  "Rarity": "Promo",
+                  "Trait": "Lightborne / Beast"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "5",
+                  "power": "0"
+                },
+                "text": "Assail. Bane.\nThis doesn't take combat damage.\nStrike - Draw 2 cards. Discard a card. If you discarded a follower, deal 3 damage to each enemy leader. If you discarded an amulet, deal 3 damage to each enemy follower on the field.",
+                "sections": [],
+                "raw_text": "Assail. Bane.\nThis doesn't take combat damage.\nStrike - Draw 2 cards. Discard a card. If you discarded a follower, deal 3 damage to each enemy leader. If you discarded an amulet, deal 3 damage to each enemy follower on the field.",
+                "speech": null,
+                "illustrator": "Tatsuyaki",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-600EN.png",
+                "trait_raw": "Lightborne / Beast",
+                "traits": [
+                  "Lightborne",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2536 (Nov. 6, 2026)",
+                "question": "What does \"combat damage\" mean?",
+                "answer": "\"Combat damage\" refers to the damage that an attacking follower and a target follower deal to each other in combat."
+              }
+            ],
+            "products_ref": "products-a13a5483ff5dbc17",
+            "related_cards": [
+              {
+                "label": "{PR-599EN|Sacred Lion}",
+                "href": "/cards/?cardno=PR-599EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8271cd28ce14354b6daf6ea0726838888cf5869294aad07f6eb8afb71518dedb",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=PR-600EN",
+            "fetched_at": "2026-11-27T13:40:38.306050Z"
+          },
+          "document_ref": "documents-a6941ba5e3977c58"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-601EN",
+      "documents": {
+        "documents-eb75ae227d2eac51": {
+          "region": "en",
+          "record": {
+            "number": "PR-601EN",
+            "faces": [
+              {
+                "name": "Haru Urara [I'll Win Someday!]",
+                "info": {
+                  "Card Set": "Promo Cards",
+                  "Card Type": "Follower",
+                  "Class": "Forestcraft",
+                  "Format": "Any",
+                  "Rarity": "Promo",
+                  "Trait": "Umamusume",
+                  "Universe": "Umamusume: Pretty Derby"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "1"
+                },
+                "text": "When this is discarded by an ability of an Umamusume card you control, draw a card.",
+                "sections": [
+                  "{icon_carrot|[feed]} {icon_cost01|[cost01]}: Race this.\n{icon_fanfare|[fanfare]} Select another Umamusume follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+                ],
+                "raw_text": "When this is discarded by an ability of an Umamusume card you control, draw a card.\n----------\n{icon_carrot|[feed]} {icon_cost01|[cost01]}: Race this.\n{icon_fanfare|[fanfare]} Select another Umamusume follower on your field and give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-601EN.png",
+                "trait_raw": "Umamusume",
+                "traits": [
+                  "Umamusume"
+                ]
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-a13a5483ff5dbc17",
+            "related_cards": [
+              {
+                "label": "{CP01-085EN|Carrot}",
+                "href": "/cards/?cardno=CP01-085EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5acca740baeb9f6510ba4da893fee5162b826a0f633575146490682e068f9e8e",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=PR-601EN",
+            "fetched_at": "2026-11-27T13:40:41.225447Z"
+          },
+          "document_ref": "documents-eb75ae227d2eac51"
+        }
+      ]
+    }
+  ]
+}

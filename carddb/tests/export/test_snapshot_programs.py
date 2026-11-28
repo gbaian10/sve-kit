@@ -23,7 +23,7 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse, 
 from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_snapshot
-from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.reader import _program_printings, read_snapshot
 from sve_carddb.export.transport import Ownership, export_snapshot
 
 from ..support.snapshot_contract_fixtures import _reseal, fixture
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from referencing.jsonschema import Schema
 
     from sve_carddb.export.project import Projection
+    from sve_carddb.export.reader import Row, View
     from sve_carddb.export.transport import Snapshot
 
 
@@ -278,6 +279,42 @@ def test_program_printings_reject_inexact_closure(
     sealed = _reseal(manifest, payloads)
     with pytest.raises((ValueError, ValidationError)):
         read_snapshot(manifest, sealed)
+
+
+def test_only_english_programs_can_depend_on_an_english_token_printing() -> None:
+    view: View = {
+        "printing": [
+            {
+                "id": f"{card}-print",
+                "card_id": card,
+                "region": region,
+                "card_no_state": "official",
+                "faces": [{"face_id": f"{card}-face"}],
+            }
+            for card, region in (("jp", "jp"), ("en", "en"), ("token", "en"))
+        ],
+        "face_revision": [
+            {"id": "token-revision", "region": "en", "special_kinds": ["token"]}
+        ],
+        "face": [
+            {
+                "id": "token-face",
+                "ordinal": 0,
+                "current": [{"region": "en", "revision_id": "token-revision"}],
+            }
+        ],
+    }
+    entries: list[Row] = [{"ast": {"card_id": card}} for card in ("jp", "en", "token")]
+    bindings: Row = {
+        "jp": {"representative": "jp-print", "tokens": []},
+        "en": {"representative": "en-print", "tokens": ["token-print"]},
+        "token": {"representative": "token-print", "tokens": []},
+    }
+    programs: Row = {"format_version": "4.2.0", "printings": bindings}
+    _program_printings(view, programs, entries)
+    object_value(bindings["jp"])["tokens"] = ["token-print"]
+    with pytest.raises(ValueError, match="not an admitted token printing"):
+        _program_printings(view, programs, entries)
 
 
 def test_preview_reader_loads_program_profiles(

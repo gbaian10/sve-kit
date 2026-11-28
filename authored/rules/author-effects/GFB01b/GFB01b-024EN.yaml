@@ -1,0 +1,37 @@
+cards:
+  GFB01b-024EN:
+    abilities:
+      - auto:
+          do:
+            - dice:
+                bind: die
+                who: turn
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: le
+                    right: 3
+                else:
+                  - life:
+                      delta: 1
+                      who: self
+                  - draw:
+                      n: 1
+                      who: self
+                then:
+                  - life:
+                      delta: 1
+                      who: turn
+                  - draw:
+                      n: 1
+                      who: turn
+          on:
+            phase:
+              which: main
+              whose: turn
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

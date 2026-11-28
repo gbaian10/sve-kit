@@ -2,7 +2,6 @@
 
 #![expect(
     clippy::unwrap_used,
-    clippy::indexing_slicing,
     reason = "A malformed synthetic export or an unwritable temporary folder invalidates these tests."
 )]
 #![expect(
@@ -35,11 +34,21 @@ fn identifier(prefix: &str, index: usize) -> String {
 /// Sixty vanilla neutral followers, each with an empty program: enough names for any deck.
 /// One attack on a leader ends the match, which keeps these debug-build matches short.
 fn export() -> (Value, String) {
-    let snapshot = (0..CARDS)
+    export_with(CARDS, &[])
+}
+
+fn export_with(size: usize, abilities: &[Value]) -> (Value, String) {
+    let text = (!abilities.is_empty()).then_some("Synthetic fanfare.");
+    let fields = if abilities.is_empty() {
+        json!([])
+    } else {
+        json!([{"kind": "effect"}])
+    };
+    let snapshot = (0..size)
         .map(|index| {
             json!({"number":number(index),"faces":[{"name":number(index),
                 "card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"20",
-                "hp":"1","traits":[],"text":null,"sections":[],"title":"synthetic"}]})
+                "hp":"1","traits":[],"text":text,"sections":[],"title":"synthetic"}]})
             .to_string()
         })
         .collect::<Vec<_>>()
@@ -52,19 +61,19 @@ fn export() -> (Value, String) {
     references.wording = Some(
         serde_json::from_value(json!({
             "manifest_sha256": format!("sha256:{}", fixture::MANIFEST),
-            "faces": (0..CARDS).map(|index| json!({"card_no":number(index),"native_face":0_u8,
+            "faces": (0..size).map(|index| json!({"card_no":number(index),"native_face":0_u8,
                 "face_id":identifier("f", index),
-                "revisions":[{"revision_id":format!("revision-{index}"),"fields":[]}]}))
+                "revisions":[{"revision_id":format!("revision-{index}"),"fields":fields}]}))
                 .collect::<Vec<_>>(),
         }))
         .unwrap(),
     );
     let programs = json!({
         "format_version":"4.2.0",
-        "entries": (0..CARDS).map(|index| json!({"id":number(index),"dsl_version":"1.0",
+        "entries": (0..size).map(|index| json!({"id":number(index),"dsl_version":"1.0",
             "ast":{"card_id":identifier("c", index),"scope":"shared",
-                "faces":{(identifier("f", index)):{"abilities":[]}}}})).collect::<Vec<_>>(),
-        "printings": (0..CARDS).map(|index| (identifier("c", index),
+                "faces":{(identifier("f", index)):{"abilities":abilities}}}})).collect::<Vec<_>>(),
+        "printings": (0..size).map(|index| (identifier("c", index),
             json!({"representative":format!("test-{}", number(index)),"tokens":[]})))
             .collect::<serde_json::Map<_, _>>(),
     })
@@ -75,7 +84,7 @@ fn export() -> (Value, String) {
         "engine_identity":{"Resolved":{"region":"jp","snapshot_sha256":references.snapshot_sha256,
             "faces":[{"card_no":number(0),"face_ordinal":0_u8,"face_id":identifier("f", 0),
                 "rules_name_id":"synthetic-name","title_code":"synthetic_empty"}]}},
-        "printings": (0..CARDS).map(|index| json!({"printing_id":format!("test-{}", number(index)),
+        "printings": (0..size).map(|index| json!({"printing_id":format!("test-{}", number(index)),
             "card_no":number(index),"card_id":identifier("c", index),
             "faces":[{"face_id":identifier("f", index),"revision_id":format!("revision-{index}"),
                 "cost":1_u8,"rules_name":number(index)}]})).collect::<Vec<_>>(),
@@ -108,6 +117,10 @@ impl Drop for Folder {
 /// The reader's output folder and the export root holding the program blob.
 fn written(folder: &Folder) {
     let (reader, programs) = export();
+    write_export(folder, &reader, &programs);
+}
+
+fn write_export(folder: &Folder, reader: &Value, programs: &str) {
     let text = |name: &str| reader.get(name).and_then(Value::as_str).unwrap().to_owned();
     let root = folder.0.join("reader");
     create_dir_all(&root).unwrap();
@@ -228,6 +241,219 @@ fn seeds_run_from_a_composed_export_and_their_records_replay() {
     );
 }
 
+/// A listed deck of `size` cards, one copy each from `first` on.
+fn listed(label: &str, weight: u64, first: usize, size: usize) -> Value {
+    let main: serde_json::Map<String, Value> = (first..first.saturating_add(size))
+        .map(|index| (number(index), json!(1)))
+        .collect();
+    json!({"label": label, "weight": weight,
+        "construction": {"kind": "title", "value": "synthetic_empty"}, "main": main})
+}
+
+#[test]
+fn listed_decks_are_drawn_by_weight_and_their_cards_counted() {
+    let folder = Folder::new("listed");
+    written(&folder);
+    run(&[
+        "prepare",
+        &folder.text("reader"),
+        &folder.text("export"),
+        &folder.text("inputs"),
+    ])
+    .unwrap();
+    let mut unknown = listed("unknown", 5, 0, 40);
+    unknown["main"]["t-999"] = json!(1);
+    unknown["main"].as_object_mut().unwrap().remove("t-000");
+    let mut wrong_section = listed("wrong section", 5, 0, 41);
+    wrong_section["main"]
+        .as_object_mut()
+        .unwrap()
+        .remove("t-040");
+    wrong_section["evolve"] = json!({"t-040": 1});
+    let mut unknown_class = listed("unknown class", 5, 0, 40);
+    unknown_class["construction"] = json!({"kind": "class", "value": "invalid-class"});
+    let list = json!({"decks": [
+        listed("low", 1, 0, 40),
+        listed("high", 3, 20, 40),
+        listed("short", 5, 0, 39),
+        unknown,
+        listed("idle", 0, 0, 40),
+        wrong_section,
+        unknown_class,
+    ]});
+    write(folder.0.join("decks.json"), list.to_string()).unwrap();
+    let log = run(&[
+        "run",
+        "--decks",
+        &folder.text("decks.json"),
+        &folder.text("inputs/inputs.json"),
+        &folder.text("inputs/programs.json"),
+        &folder.text("out"),
+        "0",
+        "8",
+        "2",
+    ])
+    .unwrap();
+    assert!(log.contains("2 listed decks, 5 refused"), "{log}");
+    let refused: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/refused-decks.json")).unwrap())
+            .unwrap();
+    assert_eq!(
+        refused,
+        json!([
+            {"label": "short", "reason": "main deck has 39 cards"},
+            {"label": "unknown", "reason": "admission: MissingSnapshot"},
+            {"label": "idle", "reason": "weight is zero"},
+            {"label": "wrong section", "reason": "t-040 is in the wrong deck section"},
+            {"label": "unknown class", "reason": "invalid-class is not a snapshot class"}
+        ])
+    );
+
+    let summary: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/summary.json")).unwrap()).unwrap();
+    assert_eq!(summary["failures"], json!([]), "{summary}");
+    let lineup = summary["lineup"].as_array().unwrap();
+    let seats = |label: &str| {
+        lineup
+            .iter()
+            .find(|deck| deck["label"] == label)
+            .map_or(0, |deck| deck["seats"].as_u64().unwrap())
+    };
+    assert_eq!(seats("low").saturating_add(seats("high")), 16, "{summary}");
+    assert!(seats("low") > 0 && seats("high") > 0, "{summary}");
+    let mirrors: u64 = lineup
+        .iter()
+        .map(|deck| deck["mirrors"].as_u64().unwrap())
+        .sum();
+    assert!(mirrors > 0, "{summary}");
+    for deck in lineup {
+        let results: u64 = ["wins", "losses", "draws", "failures"]
+            .iter()
+            .map(|field| deck[field].as_u64().unwrap())
+            .sum();
+        assert_eq!(results, deck["seats"].as_u64().unwrap(), "{deck}");
+    }
+
+    let cards: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/cards.json")).unwrap()).unwrap();
+    // Either deck contains t-020, including in a mirror.
+    assert_eq!(cards["t-020"]["built"], 8);
+    assert!(cards.get("t-060").is_none());
+    let total = |field: &str| -> u64 {
+        cards
+            .as_object()
+            .unwrap()
+            .values()
+            .map(|card| card[field].as_u64().unwrap())
+            .sum()
+    };
+    // Vanilla followers are played onto the field; nothing evolves and no ability exists.
+    assert!(total("played") > 0, "{cards}");
+    assert_eq!(total("played"), total("entered"), "{cards}");
+    for field in ["abilities", "resolved", "evolved", "failed"] {
+        assert_eq!(total(field), 0, "{field}");
+    }
+}
+
+#[test]
+fn a_deck_list_that_plays_nothing_is_refused() {
+    let folder = Folder::new("unlisted");
+    written(&folder);
+    run(&[
+        "prepare",
+        &folder.text("reader"),
+        &folder.text("export"),
+        &folder.text("inputs"),
+    ])
+    .unwrap();
+    let inputs = [
+        folder.text("inputs/inputs.json"),
+        folder.text("inputs/programs.json"),
+    ];
+    let attempt = |list: &str| {
+        write(folder.0.join("decks.json"), list).unwrap();
+        run(&[
+            "run",
+            "--decks",
+            &folder.text("decks.json"),
+            &inputs[0],
+            &inputs[1],
+            &folder.text("out"),
+            "0",
+            "1",
+        ])
+        .unwrap_err()
+    };
+    let none = json!({"decks": [listed("short", 1, 0, 39)]}).to_string();
+    assert_eq!(
+        attempt(&none),
+        "deck list: no deck can be played (1 refused)"
+    );
+    let refused: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/refused-decks.json")).unwrap())
+            .unwrap();
+    assert_eq!(
+        refused,
+        json!([{"label": "short", "reason": "main deck has 39 cards"}])
+    );
+    assert!(attempt("{}").starts_with("deck list: missing field"));
+}
+
+#[test]
+fn a_legal_listed_deck_can_play_and_count_fanfares_without_a_random_pool() {
+    let folder = Folder::new("small-pool");
+    let (reader, programs) = export_with(
+        40,
+        &[json!({
+            "fanfare": {"do": [{"buff": {"on": "this", "power": 1}}]},
+            "line": 1,
+            "ports": {"exports": {}, "imports": {}}
+        })],
+    );
+    write_export(&folder, &reader, &programs);
+    run(&[
+        "prepare",
+        &folder.text("reader"),
+        &folder.text("export"),
+        &folder.text("inputs"),
+    ])
+    .unwrap();
+    let list = json!({"decks": [listed("small", 1, 0, 40)]});
+    write(folder.0.join("decks.json"), list.to_string()).unwrap();
+    run(&[
+        "run",
+        "--decks",
+        &folder.text("decks.json"),
+        &folder.text("inputs/inputs.json"),
+        &folder.text("inputs/programs.json"),
+        &folder.text("out"),
+        "0",
+        "1",
+    ])
+    .unwrap_or_else(|error| {
+        let refused = read_to_string(folder.0.join("out/refused-decks.json"));
+        panic!("{error}: {refused:?}");
+    });
+    let summary: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/summary.json")).unwrap()).unwrap();
+    assert_eq!(summary["failures"], json!([]), "{summary}");
+    assert_eq!(summary["lineup"][0]["mirrors"], 1);
+    assert_eq!(summary["cards"]["eligible"], 40);
+    assert_eq!(summary["cards"]["never_built"], json!([]));
+
+    let cards: Value =
+        serde_json::from_str(&read_to_string(folder.0.join("out/cards.json")).unwrap()).unwrap();
+    let mut played_any = false;
+    for card in cards.as_object().unwrap().values() {
+        let plays = card["played"].as_u64().unwrap();
+        played_any |= plays > 0;
+        // Each follower has one mandatory, non-terminal fanfare and no activated ability.
+        assert_eq!(card["abilities"], plays, "{card}");
+        assert_eq!(card["resolved"], plays, "{card}");
+    }
+    assert!(played_any, "{cards}");
+}
+
 #[test]
 fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
     let (reader, programs) = export();
@@ -240,25 +466,25 @@ fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
         "identity": fixture::identity(&programs, reader["rules"].as_str().unwrap()),
     });
     let published = Published::new(&inputs.to_string(), &programs).unwrap();
-    assert_eq!(published.excluded, Vec::new());
-    assert_eq!(published.unprogrammed, 0);
+    assert_eq!(published.excluded(), []);
+    assert_eq!(published.unprogrammed(), 0);
 
     let limits = Limits::default();
-    let first = play(&published.arena, 11, limits);
-    let again = play(&published.arena, 11, limits);
+    let first = play(published.arena(), 11, limits);
+    let again = play(published.arena(), 11, limits);
     assert!(matches!(first.end, End::Finished { .. }), "{:?}", first.end);
     assert_eq!(first.record, again.record);
-    assert_ne!(first.record, play(&published.arena, 12, limits).record);
+    assert_ne!(first.record, play(published.arena(), 12, limits).record);
     assert_eq!(first.costs.len(), first.record.steps.len());
     for deck in &first.record.setup.decks {
         assert!((40..=50).contains(&deck.main.len()), "{deck:?}");
     }
 
-    let replayed = replay(&published.arena, &first.record, limits);
+    let replayed = replay(published.arena(), &first.record, limits);
     assert_eq!(replayed.end, first.end);
     assert_eq!(replayed.record, first.record);
 
-    let failure_of = |record: &Record| match replay(&published.arena, record, limits).end {
+    let failure_of = |record: &Record| match replay(published.arena(), record, limits).end {
         End::Failed(failure) => (failure.kind, failure.detail),
         End::Finished { .. } => panic!("a changed record must not replay to a result"),
     };
@@ -279,7 +505,7 @@ fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
     assert_eq!(failure_of(&shorter).0, "record_end");
 
     let stopped = play(
-        &published.arena,
+        published.arena(),
         11,
         Limits {
             decisions: 5,

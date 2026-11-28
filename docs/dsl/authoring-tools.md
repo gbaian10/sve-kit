@@ -6,17 +6,18 @@
 
 ## 輸入 profile
 
-公開 profile 讀取已審查的 card-data 與身分登錄，指定 JP 批次即可；`revision` 可省略，不要求作者固定 Git SHA。
+公開 profile 讀取已審查的 card-data 與身分登錄。指定 JP 批次，處理英版獨有卡或對本專案執行整庫 `author check` 時也指定 EN 批次。`revision` 可省略，不要求作者固定 Git SHA。
 
 ```json
 {
   "profile": "public",
   "repo": "/absolute/project",
-  "jp_batch_id": "<已審 JP batch id>"
+  "jp_batch_id": "<已審 JP batch id>",
+  "en_batch_id": "<已審 EN batch id>"
 }
 ```
 
-`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 仍需 `database`、`recipe`、`frozen_inputs` 以確認建置與 JP 批次，依 CLI 型別接受配置；一般作者使用公開 profile 即可。來源歸檔及已審解析輸入的完整性契約不變。
+`authored`／`card_data` 可指定其他絕對根目錄。資料庫 profile 另需 `database`、`recipe`、`frozen_inputs`，並核對指定的地區批次與建置 recipe 相符。整庫檢查所用的公開批次列在 [card-input.json](../../tests/engine/card-input.json)。
 
 ## 查詢與手寫
 
@@ -25,9 +26,9 @@ uv --directory /absolute/project/carddb run sve-carddb author inspect \
   --inputs /absolute/work/public.json --card SYN-01
 ```
 
-`inspect` 顯示永久身分、各卡面的規則行、已存作者檔及具名本體，並回報該卡的定位或材料化錯誤。
+`inspect` 顯示永久身分、各卡面的規則行、已存作者檔及具名本體，並回報該卡的定位或材料化錯誤。EN 規則行另外列出可辨識的印刷能力標記與獨立關鍵字。Quick 法術的獨立圖示對應 `keywords: [quick]`；起動能力的 Q 圖示修飾同一個 `activate`。
 
-主檔與索引只登錄每張永久卡片的一個代表 `record_key`；同卡的 JP 印刷別名由 current 選用依永久身分展開，不重複寫入主檔。
+主檔與索引只登錄每張永久卡片的一個代表 `record_key`。同卡在來源地區的印刷別名由 current 選用依永久身分展開。英版獨有卡以 EN 官網卡文的行與補充段落對應 DSL，能力頭與印刷關鍵字依該卡及[英文綜合規則](https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf)判讀。
 
 主檔可直接寫整卡 DSL，也可引用具名本體：
 
@@ -78,6 +79,10 @@ records:
 シュヴァルグラン的翻面是入場能力本文的條件式指示，並非進化付款。
 
 `flip_down.ref` 可直接指定自己進化牌堆的正面集合，例如 `{who: self, zone: evolve_deck, kind: evolve_follower, face_up: true}`；沿用公開進化牌堆篩選，翻面後撤銷對手的公開位置知識。具名結果仍記錄實際成功翻面的成員。
+
+## 翻開進化牌組卡片作為費用
+
+`cost.flip_up: {sel: {who: self, zone: evolve_deck}, n: 1}` 讓能力控制者從自己的進化牌組選一張裏面卡支付費用。省略 `kind` 時包含進化護符、進階從者等所有符合區域與表裏方向的卡片。卡文明寫進化從者時加上 `kind: evolve_follower`。支付前只有控制者可看選項，翻面成功後才公開，卡片保留在原區域與世代。
 
 ## 本文翻開進化牌組卡片
 
@@ -167,8 +172,12 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 `orig_cost_of: {objects_of: milled, view: before}` 讀取自己從牌庫頂成功送墓的成員原費總和，可與 `per` 及 `times` 組合判斷奇偶。用具名回條的成功成員判斷是否有牌送墓，避免將空集合算成偶數牌。
 
 `banish.top.n` 可用自己牌庫的張數搭配 `half_up` 計算消滅張數。`banish.result` 對應的 `count_of` 讀取成功消滅的張數。
+本文可用 `banish: {top: {who: opp, n: 7}}` 消滅唯一對手牌庫頂的至多七張牌。
+對手的牌庫只接受固定正整數。牌庫不足時消滅剩餘牌，不產生抽牌失敗，未移動的牌保持隱藏。
 
 正式模式的 `pay.cost` 若含 `pp: x`，選定模式後宣告一次 X，並隨打出支付該模式的全部費用。模式本文的 `search.upto: x` 讀已支付的 X，零張上限不搜尋也不洗牌。搜尋入場的具名結果可用 `grant.on: {follow: entered}` 授予實際入場的從者關鍵字。
+
+`reveal_until.sel` 可省略原費條件，表示翻到指定張數的任何從者為止（GFB01c-004EN「Reveal cards from the top of your deck until you reveal 2 followers」）；`orig_cost_le` 與 `orig_cost_gt` 至多擇一。
 
 `reveal_until.sel.orig_cost_gt` 以嚴格大於比對牌庫從者的印刷原費。下限可讀公開的單一正式目標
 （`{orig_cost_of: target}`），或讀成功送墓的單一場上從者材料（`{orig_cost_of: {objects_of: material, view: before}}`）。
@@ -190,6 +199,12 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 
 `player_effect: {who: self, until: turn, effect: {prevent: {kind: ability}}}` 讓自己的領袖免受指定種類的傷害。`prevent` 不帶 `next_only` 時整回合有效。
 同行若也保護從者，可用本回合的 `grant` 授予場上當時符合條件的從者防傷常在能力。
+
+`player_effect: {who: self, effect: {hand_limit: unlimited}, until: game}` 自此移除己方的規則手牌上限。效果會留到本局結束，能力來源離場後仍有效。結束階段略過該玩家的規則棄牌，卡片效果指定的棄牌仍照常結算。[GFB01a-003EN、Q746](https://en.shadowverse-evolve.com/cards/?cardno=GFB01a-003EN)
+
+`player_effect: {who: self, effect: {fanfare_triggers: 2}, until: {during_next_turn: {who: self}}}` 使下個己方回合的各個入場曲各觸發兩次。該回合可由額外回合程序開啟。多次安裝若作用於同一玩家的同一回合，只觸發兩次。兩次誘發各自進入待機與結算，因此適正打出 Chronos 時，兩次結算會各排入一個額外回合。[Loki Q777](https://en.shadowverse-evolve.com/cards/?cardno=GFB01c-008EN&faq=) [Chronos Q1386](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-008EN&faq=)
+
+`player_effect: {who: self, effect: {cannot: {what: lose_defense}}, until: {next_turn: {who: self, edge: begin}}}` 讓己方主戰者從結算後到下個己方回合開始前不能失去防禦值。保護依實際傷害對象判定。受到保護的主戰者不會因傷害或防禦值減少指示失去防禦，設定更低的防禦值與支付扣防費用也無效。被防止的傷害不產生傷害事實、失去防禦的紀錄或吸血回復。保護允許防禦值提高，也會在緊接的己方額外回合開始時解除。[Yggdrasil Q1346–Q1351](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-003EN)
 
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
@@ -230,6 +245,10 @@ do:
 `upto` 可選零張，獨立的後續指示仍會執行（ECP02-029 的生命回復）。
 
 擲骰使用 `dice: {bind: die}`（可明示 `who: self`），降低為既有 `Action::Dice`，共用洗牌與隨機選取的可重現亂數串流。後續本文用 `{dice: die}` 讀取該次最終接受點數；未定義、先讀後擲或重複命名均拒絕。骰值不由玩家宣告。
+
+`leader_class: ロイヤル` 判斷能力控制者自己的主戰者是否為指定職業，對應英版卡文的「If your leader is 〔職業〕」。職業名與卡片篩選的 `class` 相同，使用日文職業名。依英文綜合規則 6.1.1.5.1，主戰者職業即主戰者卡的職業；引擎讀職業構築開局時記錄的主戰者職業，沒有記錄（例如作品構築）時不成立。指示結算、付款或宣告模式時取當下的能力控制者，控制權轉移後改讀新控制者的主戰者。對局行為已驗證本文的 `if`、`play.cost_delta.if`（GFB01b-023EN）及 `choice.instead[].if`。Cross Craft 等多張主戰者的賽制尚未支援。
+
+`life.who`、`draw.who` 與 `dice.who` 可用 `turn` 指當回合玩家、`non_turn` 指兩人局的非回合玩家。每個擲骰指示保留該玩家最後接受的骰值，可用 `cmp` 比較兩個具名結果。需要逐一處理雙方重擲時，可先令 `turn` 擲骰，再令 `non_turn` 擲骰。兩邊分別使用大於等於條件可保留平手時雙方都執行的結果。
 
 在 `each_player` 的同一段 `stages` 中用 `dice: {bind: die, who: p}`，並在後續抽牌或隨機棄牌明寫 `who: p`。回合玩家先完成該段，骰值與重擲許可都屬於各自的擲骰者。
 
@@ -318,9 +337,13 @@ static:
 
 一般持續能力使用同一個 `grant.abilities` 入口，例如 `abilities: [{static: {effects: [{prevent: {kind: any}}]}}]`。支援既有的防傷、固定傷害加減與傷害上限宣告，以及只授予關鍵字的單層持續能力；本文、受益者、提供者與期限沿用同一份授予狀態。查詢持續授予時讀取印刷及已施加的能力，避免再次遞迴查詢完整持續授予結果；持續授予另一份持續授予能力、在授予的持續能力中再授予 Definition，以及未接線的限制宣告會被拒絕。不同施加仍保留獨立來源，傷害替代的參照會區分施加次數，不公開已離場提供者的物件 ID。
 
+來源從者的常在攻擊限制可指定 `target: {who: {owner_of: this}, kind: follower, leader_or: true, zone: field}`，涵蓋該從者原持有者的主戰者及其控制的場上從者。易主後仍依原持有者判定。原持有者的牌如果由別人控制，仍以其目前所在的場判定能否攻擊。[Hulking Dragonewt Q1369、Q1370](https://en.shadowverse-evolve.com/cards/?cardno=GFD02-007EN&faq=)
+
 場上持續能力可用 `static: {effects: [{must_attack: {on: {who: opp, zone: field, kind: follower}}}]}` 要求符合條件的從者每回合盡可能攻擊一次；也可放在 `grant.abilities`。結束主階段時，只有本世代本回合尚未宣告攻擊，且依共同攻擊規則存在合法對象的從者才會阻止結束；多個來源不增加所需次數。其他打出、起動、選擇不站立仍依原規則進行，攻擊禁令、入場限制、守護等也繼續適用。`while: {not: {standing: this}}` 依能力持有者目前姿態判定；持有者離場或失去該能力後不再提供要求（CP04-012，Q2401–Q2409）。
 
 本文授予可指定 `until: {during_next_turn: {who: self | opp}}`，只在下一個實際開始的指定玩家回合持有該能力或關鍵字；安裝時尚未生效。共用回合排程處理額外回合與跳過回合，指定回合結束後清除。授予仍綁定受益物件世代，普通離場重入不繼承；尚未取得的能力不屬於當下失去能力的截止點。ネア使用此期限授予上述持續要求，持有者的橫置條件仍即時判定。
+
+本文授予的 `until: {next_turn: {who: self, edge: begin}}` 在結算時立即生效，持續到效果控制者下個實際回合開始前。同一玩家連續取得額外回合時也依此到期；受益者沿用既有授予的世代綁定。[Forest Archelon](https://en.shadowverse-evolve.com/cards/?cardno=GFD01-020EN)
 
 固定播放減費可寫成 `grant: {on: {who: self, zone: ex, name: カーバンクルの煌めき}, abilities: [{play: {cost_delta: -2}}]}`。它降低為同一個靜態能力中的既有 `CostModifier`，以受益物件自身為範圍，經共同播放費用計算、合併獨立減費並把實際費用限制在零以上；不建立另一套費用狀態。只接受固定非正整數，不接受改成固定費用、條件式或可選費用。宣告在 EX 與播放解決區有效，外層施加仍可使用既有的本回合期限。在 EX 到解決區、解決區到場的播放規則移動，以及 EX 直接入場時，與其他已支援授予一同攜帶原效果；入場觀察前就可讀到承接後的能力，普通移區不繼承舊世代。
 
@@ -409,6 +432,8 @@ name:
 
 數值算式接受 `plus`、`minus`、`times`（各恰兩項）、`min`（非空列表）、`half_up: E`（將 `E / 2` 朝正無窮方向取整）與 `per: {of, unit}`。`per` 是「N 枚につき」：`of` 除以正整數 `unit` 後向下取整（負數往負無限大取整），`unit` 為零在載入時拒絕；有號溢位使整個指示失敗、不改變局面。`max` 尚未接線。傷害事件頭（`damaged`／`dealt_damage`）的本文用 `{event: amount}` 讀該次實際傷害值。批次觀察 EX 離開的 `moved` 事件也用 `{event: amount}`，讀符合條件的成功移動張數。`dice_rolled` 的本文用 `{event: value}` 讀取最終接受的骰值。其他事件頭、起動與入場曲不提供這些事件數值。
 
+在 `each_player` 程序或 `by_kind` 的主戰者分支內，`{leader_life: p}` 以已綁定的玩家名稱 `p` 讀取該玩家主戰者目前的防禦值。可用 `per` 搭配乘減算式判斷奇偶。
+
 `play.cost_delta` 可使用既有公開計數、`minus`／`times`／`per`／`min` 運算與 `play.define` 別名，依付款時的公開數量加減印刷費用；正數為加費，負數為減費，所有修正合計後才以零為下限。場上、EX、墓場與自己表向進化卡的計數沿用一般數值與選擇器檢查，不能藉此篩選隱藏手牌／牌庫。消滅區只接受不加篩選的整區張數（`{count: {who: self, zone: banish}}`，BP17-051「自分の消滅領域の枚数」），與本文讀消滅區張數相同；加上種類等篩選仍拒絕。`in_zone: {ref: this, zone: ex}` 在減費條件中讀取本次打出前保存的來源區域，因此卡片移入結算區後仍能正確付款；目前接受手牌與 EX，且可與公開存在／數量條件組合。
 
 場上持續打出費用修改可用 `static.effects: [{cost_mod: {when_playing: {who: opp, kind: spell}, delta: 1}}]`；`when_playing` 可依玩家、卡種、類型、職業、卡名、原始費用上限及 token 篩選，或用 `any_of` 組合。省略區域時包含手牌與 EX，明示 `zone: ex` 時讀本次打出前保存的來源區域。持續來源每次付款依目前場上能力重算，來源離場或失去能力後停止套用；`static.while` 使用已准入的公開付款條件，但不接受僅本次打出才有的來源區域讀值（`in_zone`）。
@@ -453,11 +478,17 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 所有觸發能力都可用 `targets` 宣告正式目標；費用時點依[作者語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)區分頭付款與本文付款。控制者在檢查時點打出待機能力時選擇目標，沒有足夠合法目標就不發動，不執行後續效果。謝幕在來源離場後選擇目標。目標宣告前不執行本體；同一印刷行的入場曲與謝幕仍以不同 `scope` 區分。模式目標、單一目標組的分配傷害，以及 `at: resolution` 公開計數讀值沿用共同打出規則。模式目標（`option: N`）的候選須是不依賴其他選擇的公開集合；「場の他のフォロワー」的 `other: true` 只排除能力持有者自身，可用於模式目標（BP15-114）。
 
+`fanfare: {no_effect: true}` 表示印刷的入場曲確實誘發、進待機並結算，本文無遊戲指示（如 New Year's Soul Devil）。此形狀只接受 `no_effect: true`，費用、目標與指示應使用普通入場曲本文。
+
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
+
+`enter_field.sel` 也接受 `has_evolve: true`（「【進化】を持つフォロワーが場に出たとき」，GFE01-017EN），只能與 `who: self`、`kind: follower` 並用，依入場後的有效能力判斷是否持有進化能力；延遲進場監看與其他事件頭仍拒絕。
 
 `enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。同一處也接受 `cost_le: N`，以進場當下的有效費用篩選主體（BP04-063）。
 
 事件本文的 `it` 共用標頭的型別綁定，可指向進場、入 EX、攻擊、進化、離場及破壞的主體；`this` 始終是能力來源。進場使用新世代，離場與破壞使用離場前世代；舊事件的主體離場後再回場，不會強化回來的新世代。沒有卡片主體的時點及起動能力不能使用 `it`，也不以來源代替缺少的事件欄位。本文條件可用 `exists: {in: it, trait: 獣}` 檢查該主體是否符合靜態篩選（BP09-002「場に出たフォロワーが獣・フォロワーなら、代わりに…」寫成 `if`／`else` 兩種強化），可與 `not`、`all`、`any` 組合；判斷比照已選正式目標：讀主體目前仍屬於事件那個世代時的特徵，主體已換世代（例如離場、破壞後）就不符合，不會改讀離場前的快照。
+
+墓場的單一正式目標可用 `power_of` 讀攻擊力；墓場從者沒有數值修正，讀印刷值（GFB01c-021EN 以墓場惡魔的攻擊力傷害敵方從者，之後再召喚它）。目標離開墓場後讀為 0；墓場目標的其他讀值（`hp_of`、`orig_cost_of` 等）仍拒絕。
 
 「前者の攻撃力」「それの攻撃力」這類在本文前段強化後才讀的值，寫成 `power_of: <目標>`（BP17-090、BP13-008、BP07-007、BP08-058）：接受至多一體、只從場上或 EX 選取的正式目標或本文 `choose`（雙方皆可），讀它結算到這一步時的目前攻擊力，因此包含同一本文先前的強化；EX 的從者讀它在 EX 目前保留的攻擊力，護符、已離開原區域或換世代時讀為 0。多張目標、手牌或其他區域的目標仍拒絕；要固定在選擇當下的數值時仍用 `at: selection`。
 
@@ -577,6 +608,8 @@ X 配模式仍維持拒絕。BP15-046 的必要公開兩張陰陽師手牌可與
 EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_cemetery: true`（「EXエリアのこれを墓場に置く」，BP12-054）與指定名稱的 `banish` 材料；`act_self` 仍只能由場上的來源支付。從者、法術、護符與各種 token 都可帶 EX 起動能力（BP11-004、BP12-095、BP17-099）。
 自身加另外兩張同名卡時，材料使用 `sel.other: true` 排除來源；正式目標與材料都在付款前固定。
 材料不足或 PP 不足時整份付款不成立，不先扣 PP 或移動任何卡片；場上來源不能冒用 EX 起動。
+
+數值 `{history_count: {event: attacked, window: this_turn, where: {ref: this}}}` 讀取場上來源同一世代本回合的攻擊宣告次數。直立後次數仍保留，換回合或重新入場時重新計算。把此讀值用於 `static.while` 與 `cannot: {what: attack, on: this}`，即可限制每張從者的攻擊上限。
 
 場上的印刷持續禁令可用 `cannot: {what: attack, on: {who: all, zone: field, kind: follower}, target: {leaders: all}, if_can_attack: follower}` 表示「能攻擊從者時不能攻擊領袖」。每個攻擊者各自用正式攻擊合法性查詢判定，求值時只排除該提供者的這條領袖禁令；其他禁攻、入場限制、守護、指定攻擊與威壓照常適用。對手有從者不代表能攻擊該從者，多個同類禁令也不會互相遞迴；來源離場或失能後停止套用。這不要求玩家一定攻擊，也不阻止結束主階段（BP06-113，Q871）。省略 `if_can_attack` 保持原有禁攻行為；目前此條件只接場上印刷能力、領袖目標，不接本文安裝型或一般 `A.cond` 合法攻擊 predicate。
 
@@ -747,7 +780,11 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 `win: {who: self}` 表示能力控制者在效果處理中勝利，沿用共用勝負判定及禁止檢查。勝利即停止剩餘效果並清除所有待解問題，不先執行下一個檢查時機；因此斯巴達克斯先抽空牌庫、再滿足勝利條件時，勝利先於空牌庫的規則敗北。條件只在本次程序指定處檢查，不因其他待機能力稍後抽牌而重驗（Q1162、Q1480）。此變體不含對手／全體、`result` 或 `precondition`；不提供常駐的禁止勝利／敗北能力。
 
+`lose: {who: opp}` 指定對手直接敗北，`lose: {who: opponents}` 指定每位對手。各目標玩家的 `cannot: {what: lose}` 個別生效。現行兩人引擎中，對手敗北會立即結束對局並記錄對手的敗北事件。若敗北被禁止，繼續結算同一能力的後續指示（Malocchio，Q759、Q760）。
+
 手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者與明寫 `who: self` 的自身手牌訂閱可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定。CP05-076 同時用 `by: {ability_of: {who: self, trait: 闇属性}}` 檢查捨棄來源的能力。
+
+「被敵方能力捨棄時」寫成 `discarded: {ref: this, who: self, from: hand, by: {ability_of: {who: opp}}}`（GFB01d-023EN）：只在捨棄來源是對手控制的能力時誘發，可省略類型；己方來源仍須寫 `trait`。
 
 自身手牌棄牌能力可在本文用 `pay: {cost: {pp: 3}, do: [{move: {ref: this, to: field}}]}`（CP05-072）。付款是控制者在結算時可選擇支付的固定正整數 PP。回場只跟隨本次棄牌成功移到墓場的同一世代。拒付或 PP 不足時，棄牌仍成立，回場不執行。
 
@@ -793,6 +830,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 移動沿用共同的世代、衍生物消去及事件捕捉程序，洗牌清除舊位置知識。
 單獨指示的 `who` 使用 `self`；`each_player` 的階段內可使用該階段的玩家綁定。
 
+`each_player` 的階段內可寫 `choose: {by: p, from: {who: p, zone: cemetery, ...}}`，讓每位玩家從自己的墓場選卡（GFB01d-005EN「各玩家可將自己墓場的 1 張護符加入手牌」）；選擇者必須是墓場持有者本人，由效果控制者代選其他玩家墓場仍拒絕。
+
 墓場選定的卡回牌組後洗牌，必須相鄰寫成：
 
 ```yaml
@@ -830,6 +869,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。`delta` 與非負整數 `set` 二擇一：`set: 0` 把該卡的打出費用設為 0（CP01-035「このターン、それをプレイする際、コストを0にする」、BP02-091 不限本回合），沿用同一個移動回條與費用狀態，只套用到實際移到 EX 的新世代；正數 `delta`、負數 `set` 或與 `next_only` 並用仍拒絕。
 
 同一次私有 Look 可在 `either` 結算分支中選牌，依分支移到手牌或 EX（BP20-049）。每個分支自行記錄成功移動回條並排完剩餘成員，不重新看頂牌，也不把分支內的結果綁定帶到分支外。EX 已滿而未成功移動的成員仍屬餘集，不能按選取清單直接扣掉。
+
+結算時從自己手牌的 `choose` 也可用 `distinct_by: class`（GFB01c-003EN「捨棄任意張不同職業的卡」），每個職業至多選一張，中立也算一個職業；可選張數上限是手牌中的職業數。
 
 `choose` 從同一次 Look 選牌可用 `distinct_by: class` 要求職業互異（BP21-050），搭配 `kind: follower`、`orig_cost_le: 4`、`upto: 2` 及 `may: true`。職業在提示產生時與候選一起保存，作答不能選同職業的兩張；只有一個職業時可選一張，也可不選。玩家提示沿用群組約束，每個職業的群組至多選一張；接續入場沿用場上空位上限，餘集仍扣除成功入場回條。
 
@@ -949,6 +990,8 @@ apply:
 
 已宣告正式目標的角色也可作姿態指示的對象，例如 `act: {role: {of: enemies, name: rest}}`。它與傷害角色共用同一份已選取集合，不再詢問第二次選取；`n: 2` 搭配一體 primary 與 remaining 可表示兩個相異從者的不同指示。
 
+至多一體的角色可用 `power_of: {role: {of: pair, name: second}}` 讀目前攻擊力：`if_nonempty: 1` 角色一律可讀，`remaining` 只在正式目標至多兩體時可讀（GFB01b-023EN「選擇場上 2 體從者，各自受到另一體攻擊力的傷害」）。讀法與單一正式目標的 `power_of` 相同，離開場上時讀為 0。
+
 權威端的 `awaiting.domain` 在既有 `kind: targets` 題目增加 `roles` 陣列，
 每項為 `{role: <題內整數>, cardinality: {if_nonempty: 1}}` 或
 `{role: <題內整數>, cardinality: {remaining: true}}`；沒有角色的題目回傳空陣列。
@@ -987,6 +1030,7 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。`unclassified_keyword_use` 不能用例外放行：查卡的關鍵字關係由程式推導並宣告整卡已檢查，未分類的寫法須先補上對照規則，見[關鍵字機制契約](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)。
 
 `check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keyword-registry.yaml` 以 `role: counter` 登錄規則名稱。
+指示物名稱可登錄日文 `ja` 或英文 `en`，至少要有一種。其他規則名稱仍使用 `ja`。作者檔可使用登錄代碼或名稱。對局優先顯示日文；英版獨有的指示物顯示其英文名稱。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 
@@ -1137,6 +1181,10 @@ cmp:
 
 `instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（目前未開放有篩選的消滅區計數，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。`instead[].if.leader_life` 接受任一玩家主戰者體力與常數的單一比較（`eq`／`le`／`ge` 擇一），例如 CP04-091 的「自分のリーダーの体力が10以下なら、代わりに2つまで」寫 `{leader_life: {who: self, le: 10}}`；PP、EP 等其他玩家資源仍不開放。三者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
 
+`instead[].if.leader_class` 讀取能力控制者記錄的主戰者職業。例如 `n: 1` 搭配
+`instead: [{if: {leader_class: ニュートラル}, upto: 3}]`，中立主戰者可選一至三個模式。
+在模式宣告時固定本次上限，沒有主戰者職業紀錄時沿用原上限。
+
 ## 手牌選牌的公開動態費用上限
 
 單一手牌 `choose.from` 可用 `orig_cost_le: {resource: {who: self, kind: pp}}` 讀取選牌時自己的剩餘 PP，並以 `not_same_name_as_this: true` 排除能力持有者同名卡（BP21-093）。上限沿用公開數值運算，在出題時依目前狀態固定；卡片或能力成本已支付時讀取付款後餘額，最大 PP 不代替目前 PP。候選及答案仍只向選牌者公開，後續 `move: {ref: picked, to: field, result: entered}` 沿用私有手牌入場及容量處理，無須支付被選從者的打出費用。手牌聯集的各分支仍沿用既有靜態篩選。
@@ -1149,7 +1197,7 @@ cmp:
 
 正式目標的動態張數及既有動態費用上限可讀來源自己的指示物數量與來源資訊數值（攻擊力、體力及費用），例如 `upto: {counter: {on: this, name: 魔力カウンター}}`，或 `from.orig_cost_le: {power_of: this}`。讀值與候選無關，沿用原本的公開選取、張數及印刷原費檢查。
 
-`search.sel.orig_cost_eq` 同樣接受 Number，以等於比較候選的印刷原費。`orig_cost_of: <正式目標>` 讀至多一體、只從場上或 EX 選取的正式目標的印刷原費（BP12-114「元のコストX…Xは選んだフォロワーの元のコスト」、BP13-053「元のコスト+2」寫 `plus`）；原費是印刷值，目標在讀取前離場（例如同一本文先破壞）仍讀得到。載入時確認該 binding 來自公開、至多一張、候選全在場上或 EX 的選取，私下選取（例如對手手牌）的原費不能當公開數值；同一模式的後一個目標可讀前一個目標的原費，模式可否選取以綁定前題後的可行答案判斷。其他區域、多張目標與回條成員的原費仍不支援。
+`search.sel.orig_cost_eq` 同樣接受 Number，以等於比較候選的印刷原費。`orig_cost_of: <正式目標>` 讀至多一張公開正式目標的印刷原費。候選可全部在場上或 EX（BP12-114、BP13-053），也可全部在墓場（GFE02-T04EN 的結算條件）。目標移區後仍可讀同一張牌的印刷原費。載入時核對綁定來源及選取上限，私下選取或多張目標不提供此讀值。同一模式的後一個目標可讀前一個符合上述條件的目標原費，模式可否選取以綁定前題後的可行答案判斷。
 
 目標張數在準備正式問題時求值，負數依數量規則以零處理；精確張數同時固定上下限，`upto` 的下限保持零。宣告型正式目標讀取宣告當下的目前 PP，可能早於本次付款；結算型手牌 `choose` 則讀取該指示出題時的餘額。結果存入既有選擇問題，不在付款或結算時重新讀取。搜尋的數值篩選則在搜尋指示開始、發現私有候選前固定，保留有其他條件時可找不到的規則；例如 BP04-098 用 `PP最大值 - 1` 表示嚴格較低的原費，BP07-091 用自己的 EX 卡數作上限。
 
@@ -1231,6 +1279,8 @@ CP05-057 在進化時及超進化時使用
 將自己一張符合條件的手牌作為成本移到自己 EX；`to_deck_bottom` 使用相同選材形狀，改放自己牌庫底。
 例如 BP14-118 支付後才計算 EX 宴樂卡張數，BP14-008 置底後回復領袖體力，
 BP17-071 將自身橫置與手牌到 EX 放在同一個 `cost.steps`。
+
+結算時從自己手牌選出的卡移到牌庫底時可加 `result`，以 `count_of` 讀實際放回的張數（GFB01b-018EN「將至多 2 張手牌以任意順序放到牌庫底，抽相同張數」）。同時放回多張需要排序選擇，目前寫成每次 `choose` 至多 1 張並依序移到牌庫底，先放的牌在上方，玩家藉此決定順序。
 
 「これを{アクト}デッキの下に置く」寫成 `cost.steps: [{act_self: true}, {to_deck_bottom: {sel: {in: this}, n: 1}}]`（BP07-012）。
 `in: this` 指付款的來源自身，降低為與自身送墓相同的來源移動，改放持有者牌庫底；正式目標先選，可選來源自身，
@@ -1369,7 +1419,7 @@ Twin Drive 在每次事件時捕捉觀察者，兩次檢查與 trigger 效果都
 公開頂牌觀察在選出的從者／護符實際入場後，可把觀察集合扣除該次移動 before 成員的餘集移入手牌。沿用觀察回條與成功移動回條的共同作用域；因場上容量未能移動的成員仍屬餘集，不以原先選取清單替代成功結果。
 
 `reveal: {top: {who: self, n: 1}, bind: shown}` 在能力本文頂層公開牌庫頂，不移動卡片。
-它沿用同一批 Look Before 成員，後續不重新查詢最新頂牌。條件、模式及付款分支內的此入口仍拒絕。
+它沿用同一批 Look Before 成員，後續不重新查詢最新頂牌。一般 `if` 分支內可公開（GFB01a-005EN「主戰者是皇家護衛時公開牌庫頂 10 張」），該次觀察只供同一分支的後續步驟讀取，分支結束後讀它仍拒絕；模式、付款及 `optional` 分支內的此入口仍拒絕。
 
 公開後，`agg: {of: {in: shown}, attr: cost, fn: sum}` 讀該批卡片的成本總和；
 `attr: orig_cost` 讀原本成本。`count: {in: {objects_of: shown, view: before}, kind: follower}`
@@ -1527,6 +1577,10 @@ CR 1.3.5／5.18.2.2 推論，與作者語法規格相同；Q2704 確認新クレ
 接收方場上的空位在交付當下才讀：BP13-043 的程序先讓雙方依序指定，再從回合方起依序交付，
 後交付的一方看得到先交付造成的空位變化（Q1766）。`result` 與 `precondition` 仍不准入。
 
+`give: {ref: this, to: opp}` 或 `to: other_players` 可將場上的來源從者或護符交給接收者。
+直接引用能力來源的世代；來源已移區、接收方場上已滿，或來源已由接收方控制時，這個指示不移動卡片。
+因此 Loki 讓 Hulking Dragonewt 在兩人局結算兩次入場曲時，第二次結算後仍留在第一位接收者場上。[Q1378](https://en.shadowverse-evolve.com/cards/?cardno=GFD02-007EN)
+
 這不是離場再進場：所有者、物件世代、傷害、數值修正、計數器、進化與出走關聯都保留，
 裝備沿既有規則跟隨穿戴者的控制者，不產生入場或ファンファーレ。
 離場時仍去所有者的區域，離場能力使用離場前的控制者。
@@ -1577,6 +1631,7 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 
 `create.token: {allocate: {among: [甲, 乙], total: 3}}` 讓玩家選各模板的張數。用 `to: {one_of: [field, ex], by: self, scope: each}` 可逐張指定目的區，`upto` 允許少放或不放，`max_per_zone` 可限制各區張數。選擇依當前空位與可用模板產生。
 
+`pp.delta` 可讀單一正式目標的印刷原費 `{orig_cost_of: ally}`（GFB01b-022EN「回復等同其費用的 PP」）；印刷原費必為非負，回復量因此可證明非負。
 `pp.delta` 可用 `count: {in: {objects_of: milled, view: before}, kind: spell}` 計算從自己牌庫頂實際送墓的咒術，整手公開的具名結果也可用 `orig_cost_eq` 篩選。送墓條件可在同一個前態篩選交集卡種與印刷關鍵字。
 
 `exists: {in: chosen, racing: true}` 可在正文依已選從者當前的出走狀態分支。
@@ -1593,7 +1648,7 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 
 玩家出牌費用修正可用 `until: {during_next_turn: {who: self | opp}}` 指定只在下一個實際開始的指定玩家回合生效；安裝當下尚未生效。額外回合、跳過回合沿用回合排程，該回合結束後清除修正。修正的對象篩選仍相對於原效果控制者。
 
-`cost_mod.when_playing.orig_cost_eq` 依印刷原費精確篩選，可與來源區域、卡種及種族條件交集；例如 CP04-004 只降低自己 EX 中原費 1 的プリコネ從者費用。它不比較目前費用或實付 PP，多個有效來源的減費照常相加；來源失去能力後停止提供修正。
+`cost_mod.when_playing.orig_cost_eq` 依印刷原費精確篩選，`orig_cost_ge` 篩選印刷原費達到門檻的卡。兩者可與來源區域、卡種及種族條件交集。CP04-004 只降低自己 EX 中原費 1 的プリコネ從者費用，Wish Wielder 則降低原費至少 7 的從者打出費用。它不比較目前費用或實付 PP，多個有效來源的減費照常相加；來源失去能力後停止提供修正。
 
 出牌費用條件的 `count: {who: self, zone: hand, other: true}` 在當次報價時讀手牌張數，排除正在打出的來源本身。來源原在 EX 時不扣除任何手牌；讀值只計張數，不開放手牌內容或對手手牌篩選。
 

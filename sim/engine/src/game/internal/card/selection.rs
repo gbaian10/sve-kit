@@ -293,14 +293,29 @@ impl TargetWait {
         })
     }
 
-    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
-    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+    /// Every candidate stood in this zone when the pick was made.
+    pub(in crate::game::internal) fn chosen_from(&self, zone: &str) -> bool {
+        self.characteristics
+            .iter()
+            .all(|(_, saved)| saved.zone == zone)
+    }
+
+    fn public_single(&self) -> bool {
         self.decision.visibility == (Visibility::Public {})
             && self.bounds.maximum.is_some_and(|maximum| maximum.0 <= 1)
+    }
+
+    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
+    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+        self.public_single()
             && self
                 .characteristics
                 .iter()
                 .all(|(_, saved)| matches!(saved.zone.as_str(), "field" | "ex"))
+    }
+
+    pub(in crate::game::internal) fn public_original_cost_single(&self) -> bool {
+        self.public_board_single() || (self.public_single() && self.chosen_from("cemetery"))
     }
 
     fn is_private_look_member(&self, member: ObjectRef) -> bool {
@@ -496,6 +511,24 @@ impl TargetWait {
                 count = count.saturating_add(1);
             }
             return Ok(count);
+        }
+        if self.groups.members.len() == 1
+            && !self.distinct_names
+            && self.cost_cap.is_none()
+            && let Some(classes) = &self.distinct_classes
+        {
+            // One card per distinct class is always a compatible answer, so the class count
+            // bounds the selection without enumerating subsets of a large hand.
+            let class_count = classes
+                .iter()
+                .map(|(_, class)| class.as_str())
+                .collect::<BTreeSet<_>>()
+                .len();
+            let class_count = u64::try_from(class_count).map_err(invalid)?;
+            return Ok(self
+                .bounds
+                .maximum
+                .map_or(class_count, |maximum| maximum.0.min(class_count)));
         }
         if self.groups.members.len() == 1
             && let Some(maximum) = self.bounds.maximum.filter(|maximum| maximum.0 <= 2)
@@ -1021,6 +1054,18 @@ fn check_public_resolution(decision: &Decision, constraint: &SelectionConstraint
             check_predicate(predicate, *binding, false)?;
         }
         Selector::Bound { .. } => {}
+        // "Each player ... from their cemetery": each player chooses from its own public cemetery.
+        Selector::Zone {
+            zone: ZoneKind::Cemetery,
+            view: SelectionView::Current {},
+            players,
+            binding,
+            predicate,
+        } if players.relation == PlayerRelation::SelfPlayer
+            && players.relative_to == decision.actor =>
+        {
+            check_predicate(predicate, *binding, false)?;
+        }
         selector if earlier_public_selection(selector) => public_zone_selector(selector)?,
         selector => target_selector(selector)?,
     }

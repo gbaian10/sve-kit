@@ -1,0 +1,22 @@
+cards:
+  GFE01-004EN:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  prevent:
+                    kind: any
+                on:
+                  kind: follower
+                  trait: 兵士
+                  who: self
+                  zone: field
+                until: turn
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

@@ -214,9 +214,11 @@ impl BodyContext<'_> {
                     name,
                     ObjectReceipt::Movement {
                         receipt: match value.to {
-                            // A whole-zone return is one unordered move, not a placed order.
+                            // A whole-zone return is one unordered move, not a placed order;
+                            // a chosen hand card placed at a fixed deck edge is one move too.
                             ast::Destination::Deck
-                                if !matches!(value.r#ref, Some(ast::MoveObjects::Whole(_))) =>
+                                if !matches!(value.r#ref, Some(ast::MoveObjects::Whole(_)))
+                                    && !self.selected_hand_move(value) =>
                             {
                                 MovementReceipt::Order {
                                     receipt: ReceiptReference::new(receipt),
@@ -689,7 +691,7 @@ impl BodyContext<'_> {
             } else {
                 let query = public_query.ok_or_else(|| unsupported(path))?;
                 let objects = self.public_move_objects(query, path)?;
-                Self::fixed_deck_move(value, objects, path)
+                Self::fixed_deck_move(value, objects, false, path)
             };
         }
         if value.position.is_some()
@@ -741,6 +743,9 @@ impl BodyContext<'_> {
         if let Some(action) = self.hand_departure_self_move(value, path)? {
             return Ok(action);
         }
+        if let Some(ast::MoveObjects::PublicUnion { any_of }) = &value.r#ref {
+            return self.public_field_ex_return(value, any_of, path);
+        }
         if matches!(value.to, ast::Destination::Field) {
             return self.field_move(value, path);
         }
@@ -771,6 +776,34 @@ impl BodyContext<'_> {
             path,
         )?;
         self.observed_destination(value, cards, path)
+    }
+
+    fn public_field_ex_return(
+        &mut self,
+        value: &ast::Move,
+        queries: &[ast::PublicQuery; 2],
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let [first, second] = queries;
+        if !matches!(value.to, ast::Destination::Hand)
+            || first.who != second.who
+            || !matches!(
+                (&first.zone, &second.zone),
+                (ast::PublicZone::Field, ast::PublicZone::Ex)
+                    | (ast::PublicZone::Ex, ast::PublicZone::Field)
+            )
+            || value.top.is_some()
+            || value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        let sets = vec![
+            self.public_move_objects(first, &format!("{path}/ref/any_of/0"))?,
+            self.public_move_objects(second, &format!("{path}/ref/any_of/1"))?,
+        ];
+        Ok(owner_put(Selector::Union { sets }, OwnerZone::Hand))
     }
 
     fn observed_destination(
@@ -877,7 +910,15 @@ impl BodyContext<'_> {
         } else {
             self.objects(objects, path)?
         };
-        Self::fixed_deck_move(value, objects, path)
+        Self::fixed_deck_move(value, objects, self.selected_hand_move(value), path)
+    }
+
+    /// "Put cards from your hand on the bottom of your deck. Draw that many" counts a privately
+    /// chosen hand card's move.
+    fn selected_hand_move(&self, value: &ast::Move) -> bool {
+        value.order.is_none()
+            && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name)))
+                if self.hand_targets.contains(name))
     }
 
     fn ordinary_move_source(
@@ -927,9 +968,10 @@ impl BodyContext<'_> {
     fn fixed_deck_move(
         value: &ast::Move,
         objects: Selector,
+        counted: bool,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.order.is_some() || value.result.is_some() {
+        if value.order.is_some() || (value.result.is_some() && !counted) {
             return Err(unsupported(path));
         }
         Ok(Action::Move {
@@ -1078,7 +1120,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let own = matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller));
+        let opponent = matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Opponent));
         if !own
+            && !opponent
             && !matches!(&top.who, ast::DeckHolder::Bound(name) if self.players.contains_key(name))
         {
             return Err(unsupported(path));

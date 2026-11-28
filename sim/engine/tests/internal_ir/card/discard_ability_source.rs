@@ -468,7 +468,7 @@ fn optional_ex_movement_follows_only_the_triggering_successful_generation() {
 }
 
 #[test]
-fn source_filters_reject_other_players_kinds_and_missing_self_hand_authority() {
+fn source_filters_reject_unknown_players_kinds_and_missing_self_hand_authority() {
     let valid = observer(true, json!([{"life":{"who":"self","delta":1_u8}}]));
     lowerer().lower(&tree(&valid, &discard_all())).unwrap();
     for case in 0_u8..11 {
@@ -493,7 +493,7 @@ fn source_filters_reject_other_players_kinds_and_missing_self_hand_authority() {
                 head["on"]["discarded"]["by"]["ability_of"]["trait"] = json!("");
             }
             4 => {
-                head["on"]["discarded"]["by"]["ability_of"]["who"] = json!("opp");
+                head["on"]["discarded"]["by"]["ability_of"]["who"] = json!("all");
             }
             5 => {
                 head["on"]["discarded"]["by"]["ability_of"]
@@ -1090,4 +1090,38 @@ fn conditional_pp_payment_cannot_move_to_ex_instead_of_returning_to_field() {
     .unwrap();
     game.load_internal_card("unit-follower", &checked)
         .unwrap_err();
+}
+
+#[test]
+fn an_enemy_ability_source_observes_only_discards_caused_by_an_opponent() {
+    for (actor, expected) in [(2_u32, 2_u8), (1, 0)] {
+        let mut state = initial();
+        state["players"]["P1"]["zones"]["hand"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"h2","card":"unit-follower"}));
+        let mut source = discard_all();
+        if actor == 2 {
+            state["turn"]["active"] = json!("P2");
+            state["players"]["P1"]["zones"]["field"] = json!([]);
+            state["players"]["P2"]["zones"]["field"] = json!([{"id":"p","card":"unit-amulet"}]);
+            source["activate"]["do"][0]["discard"]["who"] = json!("opp");
+        }
+        let mut head = observer(false, json!([{"life":{"who":"self","delta":1_u8}}]));
+        head["on"]["discarded"]["by"] = json!({"ability_of":{"who":"opp"}});
+        let mut game = fixture(&head, &source, None, &state);
+        resolved(activate(&mut game, actor));
+        assert_eq!(drain(&mut game), expected, "actor P{actor}");
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            20_u8 + expected
+        );
+    }
+}
+
+#[test]
+fn an_own_ability_source_still_requires_a_trait() {
+    let mut head = observer(false, json!([{"life":{"who":"self","delta":1_u8}}]));
+    head["on"]["discarded"]["by"] = json!({"ability_of":{"who":"self"}});
+    lowerer().lower(&tree(&head, &discard_all())).unwrap_err();
 }

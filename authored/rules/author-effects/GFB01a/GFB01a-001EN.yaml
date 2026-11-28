@@ -1,0 +1,21 @@
+cards:
+  GFB01a-001EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_le: 2
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

@@ -553,6 +553,7 @@ variants!(NatRead {
     ZoneCapacity { player: PlayerRef, zone: CapacityZone, property: CapacityProperty } => ["read.zone-capacity"],
     Combo { player: PlayerRef, execution: ExecutionRef } => ["read.combo"],
     HistoryCount { query: HistoryQuery, count: HistoryCount } => ["read.history.count"],
+    SourceAttacksThisTurn {} => ["read.attack.count.source"],
     TurnOrdinal { player: PlayerRef } => ["read.turn.ordinal"]
 });
 tags!(CapacityZone { Field, Ex });
@@ -561,13 +562,16 @@ tags!(SpellCountTime {
     AtResolution,
     AtPlay
 });
+tags!(PhysicalSourceZone { Field, Ex });
 variants!(BoolRead {
+    PhysicalSourceInZone { zone: PhysicalSourceZone } => ["read.physical-source-in-zone"],
     FieldEntryOrigin { object: ObjectOperand, zone: ZoneKind } => ["read.field-entry-origin"],
     FieldEntryMethod { object: ObjectOperand, method: EntryMethod } => ["read.field-entry-method"],
     CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
     CardPlayTarget { execution: ExecutionRef, decision: DecisionId, selection: Binding<Selector>, predicate: PlayTargetMatch } => ["read.card-play-target"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],
+    LeaderClass { player: PlayerRef, class: ClassId } => ["read.leader-class"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
     LimitBreak { object: ObjectOperand, state: LimitBreakState } => ["read.limit-break"],
     HistoryExists { query: HistoryQuery } => ["read.history.exists"],

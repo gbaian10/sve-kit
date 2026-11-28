@@ -185,6 +185,14 @@ pub(super) fn leader_life_condition(
     })
 }
 
+/// Reads the class of the ability controller's leader, so a transferred card follows its new controller.
+pub(super) fn leader_class(class: &str) -> Expr<Bool> {
+    Expr::Live(Box::new(BoolRead::LeaderClass {
+        player: PlayerRef::Controller {},
+        class: super::super::ClassId(class.to_owned()),
+    }))
+}
+
 impl BodyContext<'_> {
     pub(super) fn attack_target_objects(&mut self, path: &str) -> Result<Selector, LoweringError> {
         let Some(super::super::events::subject::SubjectFields::Attack(event)) = self.subject_event
@@ -232,6 +240,7 @@ impl BodyContext<'_> {
         }
         let count = ast::Number::Count {
             count: ast::CountQuery {
+                acted: None,
                 face_up: None,
                 class: None,
                 not_class: None,
@@ -399,6 +408,16 @@ impl BodyContext<'_> {
             },
             ast::Condition::MyTurn(false) => return Err(unsupported(path)),
             ast::Condition::InZone(location) => self.objects_in_play_zone(location, path)?,
+            ast::Condition::PhysicalSourceInZone(zone) => {
+                let zone = match zone.as_str() {
+                    "field" => super::super::PhysicalSourceZone::Field,
+                    "ex" => super::super::PhysicalSourceZone::Ex,
+                    _ => return Err(unsupported(path)),
+                };
+                return Ok(Expr::Live(Box::new(BoolRead::PhysicalSourceInZone {
+                    zone,
+                })));
+            }
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;
@@ -456,6 +475,7 @@ impl BodyContext<'_> {
                     player: PlayerRef::Controller {},
                 })));
             }
+            ast::Condition::LeaderClass(class) => return Ok(leader_class(class)),
             ast::Condition::Awakened(false) | ast::Condition::Crimson(false) => {
                 return Err(unsupported(path));
             }
@@ -789,15 +809,33 @@ impl BodyContext<'_> {
         if matches!(history.event, ast::HistoryEvent::Banished) {
             return Err(unsupported(path));
         }
-        let query = self.history_query(history, path)?;
-        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
-            value: Expr::Live(Box::new(NatRead::HistoryCount {
-                query,
+        let read = if matches!(
+            &history.r#where,
+            Some(ast::HistoryWhere::AttackSource { .. })
+        ) {
+            if !matches!(history.event, ast::HistoryEvent::Attacked)
+                || history.who.is_some()
+                || history.sel.is_some()
+                || history.from.is_some()
+                || history.to.is_some()
+                || history.at_least.is_some()
+                || history.exclude.is_some()
+                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+            {
+                return Err(unsupported(path));
+            }
+            NatRead::SourceAttacksThisTurn {}
+        } else {
+            NatRead::HistoryCount {
+                query: self.history_query(history, path)?,
                 count: match history.distinct {
                     Some(ast::HistoryDistinct::Subjects) => super::super::HistoryCount::Subjects,
                     None | Some(ast::HistoryDistinct::Facts) => super::super::HistoryCount::Facts,
                 },
-            })),
+            }
+        };
+        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Live(Box::new(read)),
         })))
     }
 
@@ -1211,7 +1249,10 @@ impl BodyContext<'_> {
                     path,
                 ),
                 // 「前者の攻撃力」: the chosen object's attack when read, after earlier buffs.
-                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
+                ast::Observation::Binding(name)
+                    if self.single_targets.contains(name)
+                        || self.cemetery_targets.contains(name) =>
+                {
                     let reference = self
                         .targets
                         .get(name)
@@ -1224,6 +1265,22 @@ impl BodyContext<'_> {
                 }
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
+            // "The second's attack": a single-object role of one distinct target selection.
+            ast::Number::PowerRole { power_of } => {
+                let key = (power_of.role.of.clone(), power_of.role.name.clone());
+                if !self.single_roles.contains(&key) {
+                    return Err(unsupported(path));
+                }
+                let reference = self
+                    .target_roles
+                    .get(&key)
+                    .copied()
+                    .ok_or_else(|| unsupported(path))?;
+                Ok(Expr::Compute(Box::new(IntOperation::Sum {
+                    objects: Selector::Bound { reference },
+                    property: super::super::NumericProperty::Attack,
+                })))
+            }
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
             ast::Number::Cost { cost_of } => match cost_of {
                 ast::Observation::Binding(name) if name == "it" => {
@@ -1259,7 +1316,10 @@ impl BodyContext<'_> {
                     self.source_stats,
                 )),
                 // 「選んだフォロワーの元のコスト」: printed, so it survives the target leaving.
-                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
+                ast::Observation::Binding(name)
+                    if self.single_targets.contains(name)
+                        || self.cemetery_targets.contains(name) =>
+                {
                     let reference = self
                         .targets
                         .get(name)
@@ -1311,7 +1371,18 @@ impl BodyContext<'_> {
             }
             ast::Number::HistorySum { history_sum } => self.history_sum_number(history_sum, path),
             ast::Number::LeaderLife { leader_life } => {
-                Ok(player_resource(*leader_life, PlayerResource::Life))
+                let player = match leader_life {
+                    ast::Side::Controller => PlayerRef::Controller {},
+                    ast::Side::Opponent => super::super::events::timing::opponent(),
+                    ast::Side::Bound(name) => PlayerRef::Bound {
+                        binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+                    },
+                    ast::Side::All => return Err(unsupported(path)),
+                };
+                Ok(Expr::Live(Box::new(IntRead::PlayerResource {
+                    player,
+                    property: PlayerResource::Life,
+                })))
             }
             ast::Number::Alias(name) => {
                 if let Some(binding) = self.declared_numbers.get(name) {
@@ -1489,6 +1560,9 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if count.acted.is_some() && !matches!(count.zone, ast::CountZone::Field) {
+            return Err(unsupported(path));
+        }
         if matches!(count.kind, Some(ast::CountKind::Crest))
             && (!matches!(count.zone, ast::CountZone::Ex)
                 || !matches!(count.who, ast::Side::Controller))

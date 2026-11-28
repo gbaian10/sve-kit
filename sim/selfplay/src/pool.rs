@@ -11,11 +11,12 @@ use rand::seq::SliceRandom as _;
 use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
 
-const NEUTRAL: &str = "ニュートラル";
-const MAIN_MINIMUM: usize = 40;
-const MAIN_SPREAD: usize = 10;
-const EVOLVE_MAXIMUM: usize = 10;
-const NAME_LIMIT: usize = 3;
+pub(crate) const NEUTRAL: &str = "ニュートラル";
+pub(crate) const MAIN_MINIMUM: usize = 40;
+pub(crate) const MAIN_MAXIMUM: usize = 50;
+const MAIN_SPREAD: usize = MAIN_MAXIMUM - MAIN_MINIMUM;
+pub(crate) const EVOLVE_MAXIMUM: usize = 10;
+pub(crate) const NAME_LIMIT: usize = 3;
 
 /// One deck-eligible printing and the facts construction needs.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -130,8 +131,7 @@ impl Pools {
                     .filter_map(|index| cards.get(*index))
                     .any(|card| card.start_amulet);
                 // Enough names for the largest deck even at one copy each.
-                names.len() >= MAIN_MINIMUM.saturating_add(MAIN_SPREAD)
-                    && (!pool.mandatory_amulet || amulet)
+                names.len() >= MAIN_MAXIMUM && (!pool.mandatory_amulet || amulet)
             })
             .collect();
         Self { cards, pools }

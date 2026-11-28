@@ -12,10 +12,14 @@ use crate::ir::{
 };
 
 pub(crate) fn opponent() -> PlayerRef {
+    opponent_of(PlayerRef::Controller {})
+}
+
+pub(crate) fn opponent_of(relative_to: PlayerRef) -> PlayerRef {
     PlayerRef::RequireOne {
         players: Box::new(PlayerSet {
             relation: PlayerRelation::Opponents,
-            relative_to: PlayerRef::Controller {},
+            relative_to,
             cardinality: Cardinality {
                 minimum: Nat(1),
                 maximum: Some(Nat(1)),

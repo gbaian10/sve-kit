@@ -1483,7 +1483,7 @@ pub(super) fn check_payment(
                 movement,
                 reason: MoveReason::Put,
             } => objects == &[ObjectOperand::SourceHolder {}] && material::source_put(movement),
-            action @ Action::Banish { .. } if super::movement::deck_top(action).is_some() => !quick,
+            action if super::movement::own_deck_top_banish(action).is_some() => !quick,
             action if reveal_payment::selected(action, &play.parameters) => !quick,
             Action::ScheduleTurn {
                 player: PlayerRef::Controller {},

@@ -352,10 +352,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
             }
             _ if policy.opaque_leaves() => Ok(CheckedInteger {
                 plan: Integer::Effect(Box::new(expression.clone())),
-                bounds: Bounds {
-                    lower: i64::MIN,
-                    upper: i64::MAX,
-                },
+                bounds: number_bounds::integer(expression),
                 constant: None,
             }),
             _ => Err(unsupported("token integer count operation")),

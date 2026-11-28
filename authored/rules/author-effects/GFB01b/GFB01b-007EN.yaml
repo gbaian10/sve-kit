@@ -1,0 +1,50 @@
+cards:
+  GFB01b-007EN:
+    abilities:
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: armageddon_counter
+                        on: this
+                    op: ge
+                    right: 10
+                then:
+                  - destroy:
+                      ref:
+                        kind: follower
+                        who: opp
+                        zone: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: armageddon_counter
+                        on: this
+                    op: ge
+                    right: 20
+                then:
+                  - damage:
+                      n: 10
+                      to:
+                        leaders: opponents
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: armageddon_counter
+                        on: this
+                    op: ge
+                    right: 30
+                then:
+                  - lose:
+                      who: opponents
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

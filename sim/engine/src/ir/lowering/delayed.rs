@@ -204,7 +204,7 @@ impl BodyContext<'_> {
         let child = self.card_allocator.scope(path)?;
         let event = Binding::new(self.allocator.id(path)?, child);
         let fields = SubjectFields::Entry(event);
-        let mut predicate = super::movement::movement_filter(
+        let filter = super::movement::movement_filter(
             entry
                 .who
                 .as_ref()
@@ -214,8 +214,12 @@ impl BodyContext<'_> {
             false,
             path,
             super::movement::FilterSupport::EntryCost,
-        )?
-        .predicate(fields);
+        )?;
+        // Delayed entry watchers do not capture the entered object's abilities.
+        if filter.keyword.is_some() {
+            return Err(unsupported(path));
+        }
+        let mut predicate = filter.predicate(fields);
         if let Some(by) = &entry.entered_by {
             let Expr::Compute(root) = &mut predicate else {
                 return Err(unsupported(path));

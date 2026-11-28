@@ -1,6 +1,8 @@
 //! Conservative bounds describe successful checked results, never runtime clamping.
 
-use super::{Arithmetic, Expr, Int, IntFrozen, IntOperation, IntRead, PlayerResource};
+use super::{
+    Arithmetic, Expr, Int, IntFrozen, IntOperation, IntRead, NumericProperty, PlayerResource,
+};
 
 #[derive(Clone, Copy)]
 pub(crate) struct Bounds {
@@ -132,6 +134,14 @@ pub(crate) fn integer(expression: &Expr<Int>) -> Bounds {
                 else_value,
                 ..
             } => integer(then_value).union(integer(else_value)),
+            // Printed original costs are never negative, so neither is their sum.
+            IntOperation::Sum {
+                property: NumericProperty::OriginalCost,
+                ..
+            } => Bounds {
+                lower: 0,
+                upper: i64::MAX,
+            },
             _ => unknown,
         },
         Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => unknown,

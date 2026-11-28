@@ -48,7 +48,21 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         let mut sets = vec![RecipientSet::Objects {
             objects: shape.attacker.clone(),
         }];
-        sets.extend(shape.target.cloned());
+        if let Some(target) = shape.target {
+            if attack_restrictions::is_owner_field(target) {
+                if shape.query.is_some()
+                    || *shape.condition != Expr::Literal(Bool(true))
+                    || *shape.attacker
+                        != (Selector::Objects {
+                            objects: vec![ObjectOperand::SourceHolder {}],
+                        })
+                {
+                    return Err(unsupported("source owner's field attack restriction"));
+                }
+            } else {
+                sets.push(target.clone());
+            }
+        }
         let body = Program {
             scope: ability.scope,
             steps: sets

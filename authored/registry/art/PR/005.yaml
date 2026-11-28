@@ -1,0 +1,19 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: art
+    owner: PR
+    data:
+      id: a:ae946f6119265f76bbac205c82189d4f
+      card_id: c:55d991631a9859f2a822bac81abfbbbc
+      face_id: f:6e1d110133205ee99c4447dc815c4614
+      classification: unclassified
+      uses:
+        - printing_id: p:4abbe330ef1d5829b67b32e180739f02
+          face_id: f:6e1d110133205ee99c4447dc815c4614
+      observation:
+        region: en
+        card_no: PR-521EN
+        observation_hash: sha256:a9a94d13c5d291fdebb0bb0e53d14da57f448e3e24ceb309c9e59333620166aa
+        rules_hash: sha256:67f0e96d7c72be5863d1372e26e6cea8f7b23e1e1ca680435d0fddd2f07e0adc
+        recipe: registry-observation-v2

@@ -1,0 +1,21 @@
+cards:
+  GFB01b-006EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - aura
+        line: 2
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: armageddon_counter
+                on: this
+          on:
+            drew:
+              who: all
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

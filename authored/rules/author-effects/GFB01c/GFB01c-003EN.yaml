@@ -1,0 +1,34 @@
+cards:
+  GFB01c-003EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - bane
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - choose:
+                any: true
+                bind: chosen
+                distinct_by: class
+                from:
+                  who: self
+                  zone: hand
+            - discard:
+                ref: chosen
+                result: discarded
+            - draw:
+                n:
+                  count_of: discarded
+                who: self
+          zone: hand
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

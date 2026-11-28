@@ -41,7 +41,10 @@ from sve_carddb.domains.construction.adoption_models import (
     RestrictionRecord,
 )
 from sve_carddb.domains.digital.links.loader import link_id
-from sve_carddb.domains.effects.author_current import CurrentAuthorSources
+from sve_carddb.domains.effects.author_current import (
+    CurrentAuthorSources,
+    english_only_cards,
+)
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.domains.effects.programs import populate as populate_programs
@@ -946,7 +949,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             with db.transaction():
                 program_printings = populate_programs(
                     db,
-                    CurrentAuthorSources(db),
+                    CurrentAuthorSources(db, english_only_cards(identity.snapshot)),
                     author_inputs,
                     expander,
                 )

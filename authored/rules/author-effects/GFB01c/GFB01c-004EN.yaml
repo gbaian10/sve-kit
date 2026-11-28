@@ -1,0 +1,35 @@
+cards:
+  GFB01c-004EN:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - evolve_time:
+          do:
+            - reveal_until:
+                bind: revealed
+                matched: matched
+                n: 2
+                sel:
+                  kind: follower
+                  who: self
+                  zone: deck
+            - move:
+                ref:
+                  in: matched
+                result: entered
+                to: field
+            - move:
+                order: shuffle
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: revealed
+                to: deck
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

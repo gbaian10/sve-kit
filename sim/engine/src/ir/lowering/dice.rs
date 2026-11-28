@@ -27,12 +27,7 @@ impl BodyContext<'_> {
     ) -> Result<PlayerRef, LoweringError> {
         match &value.who {
             None | Some(ast::Side::Controller) => Ok(PlayerRef::Controller {}),
-            Some(ast::Side::Bound(name)) => self
-                .players
-                .get(name)
-                .copied()
-                .map(|binding| PlayerRef::Bound { binding })
-                .ok_or_else(|| unsupported(path)),
+            Some(ast::Side::Bound(name)) => self.named_effect_player(name, path),
             Some(ast::Side::Opponent | ast::Side::All) => Err(unsupported(path)),
         }
     }

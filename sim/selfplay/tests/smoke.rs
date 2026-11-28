@@ -146,6 +146,7 @@ fn arena() -> Arena {
             ))
         }),
         pools: Pools::new(pool, &BTreeSet::new()),
+        lineup: None,
         printings,
         numbers,
     }

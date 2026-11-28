@@ -351,6 +351,25 @@ def test_inspect_lists_rule_lines_and_exact_body_definitions(
     assert object_value(array(alias["existing"])[0])["record_key"] == "BP06-048"
 
 
+def test_public_inspect_reads_native_english_markers(
+    repository_workspace: authoring.Workspace,
+) -> None:
+    angel = authoring.inspect(repository_workspace, "GFE01-018EN")
+    lines = [
+        object_value(line)
+        for entry in array(angel["fields"])
+        for line in array(object_value(entry)["lines"])
+    ]
+    assert [line.get("ability_types") for line in lines] == [
+        ["evolve"],
+        None,
+        ["fanfare"],
+    ]
+    assert [line.get("keywords") for line in lines] == [None, ["ward"], None]
+    assert angel["resolution_diagnostic"] is None
+    assert angel["existing"]
+
+
 def test_alias_cannot_create_a_second_index_record(
     workspace: authoring.Workspace,
     output_root: Path,

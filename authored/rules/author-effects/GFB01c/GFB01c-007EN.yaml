@@ -1,0 +1,45 @@
+cards:
+  GFB01c-007EN:
+    abilities:
+      - auto:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - move:
+                ref: follower
+                result: entered
+                to: field
+          targets:
+            - bind: follower
+              from:
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 20
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

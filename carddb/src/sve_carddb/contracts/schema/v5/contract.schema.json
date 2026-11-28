@@ -26937,7 +26937,7 @@
           "$ref": "#/$defs/DSLNodes.Ports"
         },
         "fanfare": {
-          "$ref": "#/$defs/DSLNodes.A.head.trigger"
+          "$ref": "#/$defs/DSLNodes.A.head.fanfare"
         }
       },
       "required": [
@@ -28379,6 +28379,22 @@
         }
       ]
     },
+    "DSLNodes.A.act.lose": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "type": "string",
+          "enum": [
+            "opp",
+            "opponents"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
     "DSLNodes.A.act.lose-abilities": {
       "type": "object",
       "properties": {
@@ -28877,6 +28893,97 @@
       "required": [
         "who",
         "effect"
+      ]
+    },
+    "DSLNodes.A.act.player-effect.defense": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "const": {
+            "cannot": {
+              "what": "lose_defense"
+            }
+          }
+        },
+        "until": {
+          "const": {
+            "next_turn": {
+              "who": "self",
+              "edge": "begin"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
+    "DSLNodes.A.act.player-effect.fanfare": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "fanfare_triggers": {
+              "const": 2
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "fanfare_triggers"
+          ]
+        },
+        "until": {
+          "const": {
+            "during_next_turn": {
+              "who": "self"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
+    "DSLNodes.A.act.player-effect.hand-limit": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "hand_limit": {
+              "const": "unlimited"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "hand_limit"
+          ]
+        },
+        "until": {
+          "const": "game"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
       ]
     },
     "DSLNodes.A.act.pp": {
@@ -29845,10 +29952,16 @@
           "$ref": "#/$defs/DSLNodes.A.cond.crimson"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.cond.leader-class"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.cond.exists"
         },
         {
           "$ref": "#/$defs/DSLNodes.A.cond.in-zone"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.A.cond.physical-source-in-zone"
         },
         {
           "$ref": "#/$defs/DSLNodes.A.cond.entered-from"
@@ -30296,6 +30409,18 @@
       ],
       "type": "object"
     },
+    "DSLNodes.A.cond.leader-class": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_class": {
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
+        }
+      },
+      "required": [
+        "leader_class"
+      ],
+      "type": "object"
+    },
     "DSLNodes.A.cond.leader-life": {
       "additionalProperties": false,
       "properties": {
@@ -30404,6 +30529,21 @@
       },
       "required": [
         "paid"
+      ],
+      "type": "object"
+    },
+    "DSLNodes.A.cond.physical-source-in-zone": {
+      "additionalProperties": false,
+      "properties": {
+        "physical_source_in_zone": {
+          "enum": [
+            "field",
+            "ex"
+          ]
+        }
+      },
+      "required": [
+        "physical_source_in_zone"
       ],
       "type": "object"
     },
@@ -37338,6 +37478,26 @@
         "cost"
       ]
     },
+    "DSLNodes.A.head.fanfare": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DSLNodes.A.head.trigger"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "no_effect": {
+              "type": "boolean",
+              "const": true
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "no_effect"
+          ]
+        }
+      ]
+    },
     "DSLNodes.A.head.feed": {
       "type": "object",
       "properties": {
@@ -43197,18 +43357,12 @@
         "zone",
         "kind"
       ],
-      "oneOf": [
-        {
-          "required": [
-            "orig_cost_le"
-          ]
-        },
-        {
-          "required": [
-            "orig_cost_gt"
-          ]
-        }
-      ]
+      "not": {
+        "required": [
+          "orig_cost_le",
+          "orig_cost_gt"
+        ]
+      }
     },
     "DSLNodes.A.sel.zone-objects": {
       "type": "object",
@@ -43845,10 +43999,26 @@
           "$ref": "#/$defs/DSLNodes.A.act.apply"
         },
         "player_effect": {
-          "$ref": "#/$defs/DSLNodes.A.act.player-effect"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DSLNodes.A.act.player-effect"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.act.player-effect.hand-limit"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.act.player-effect.fanfare"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.act.player-effect.defense"
+            }
+          ]
         },
         "win": {
           "$ref": "#/$defs/DSLNodes.A.act.player-action"
+        },
+        "lose": {
+          "$ref": "#/$defs/DSLNodes.A.act.lose"
         },
         "skip_turn": {
           "$ref": "#/$defs/DSLNodes.A.act.player-action"

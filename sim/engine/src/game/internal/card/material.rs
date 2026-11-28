@@ -503,8 +503,7 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
             check_parameter(decision).is_ok() && flip_cost::payment(action, decision)
         });
     }
-    if matches!(action, Action::Banish { .. }) && super::super::movement::deck_top(action).is_some()
-    {
+    if super::super::movement::own_deck_top_banish(action).is_some() {
         return true;
     }
     let Some(objects) = cost_objects(action) else {
@@ -520,6 +519,7 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
     };
     play.parameters.iter().any(|decision| {
         check_parameter(decision).is_ok()
+            && !flip_cost::private_material(decision)
             && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
             if binding == reference && constraint.groups.first().is_some_and(|group|
                 zones(&group.selector).is_ok_and(|zones|
@@ -1081,10 +1081,7 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<(Quantity, Vec<ObjectRef>, Vec<Characteristics>)> {
-        let top = match &instruction.action {
-            action @ Action::Banish { .. } => super::super::movement::deck_top(action),
-            _ => None,
-        };
+        let top = super::super::movement::own_deck_top_banish(&instruction.action);
         let members = if let Some((player, count)) = top {
             let members = self.deck_top_members(execution, player, count)?;
             if u64::try_from(members.len()).map_err(invalid)? != count {

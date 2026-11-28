@@ -7,7 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.build import string
-from sve_carddb.domains.registry.records import SectionCorrection
+from sve_carddb.domains.registry.records import SectionCorrection, correction_value
 
 if TYPE_CHECKING:
     from sve_carddb.domains.registry.review import Inputs
@@ -75,13 +75,15 @@ def project_corrections(
         )
         face = card.faces[index]
         field = string(data, "field")
-        if field not in {"effect", "card_type", "name"}:
+        if field not in {"effect", "card_type", "name", "cost"}:
             raise ValueError("Unsupported correction field")
         raw = (
             face.text
             if field == "effect"
             else face.name
             if field == "name"
+            else (face.cost if region == "jp" else face.stats["cost"])
+            if field == "cost"
             else (face.card_type if region == "jp" else face.info["Card Type"])
         )
         section = (
@@ -112,7 +114,7 @@ def project_corrections(
             marker.append(
                 {
                     "field": field,
-                    "corrected_from": raw,
+                    "corrected_from": correction_value(field, raw),
                     "is_corrected": True,
                     "reason": data["reason"],
                 }
@@ -140,7 +142,12 @@ def project_corrections(
                 "field": field,
                 "source_observation_hash": source_hash,
                 "status": status,
-                "value": data["corrected_value"] if status == "applied" else raw,
+                "value": raw
+                if status == "conflict"
+                else correction_value(
+                    field,
+                    string(data, "corrected_value") if status == "applied" else raw,
+                ),
                 "corrections": marker,
                 **(
                     {

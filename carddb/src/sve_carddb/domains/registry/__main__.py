@@ -9,8 +9,11 @@ from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from sve_carddb.domains.parsed_cards.models import JPDocument
+from sve_carddb.domains.parsed_cards.storage import load as load_parsed
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.corrections import project_corrections
+from sve_carddb.domains.registry.projection import en_card, jp_card
 from sve_carddb.domains.registry.review import read_inputs
 from sve_carddb.domains.registry.storage import load, plan_files, write_files
 from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
@@ -18,8 +21,37 @@ from sve_carddb.domains.registry.transitions.writer import Recipe
 from sve_carddb.domains.registry.validate import check_cursors, validate
 
 if TYPE_CHECKING:
+    from sve_carddb.domains.registry.review import Inputs
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
     from sve_carddb.domains.registry.storage import Entry, Index
+
+
+def _verify_cost_sources(root: Path, inputs: Inputs) -> None:
+    """Reproduce the exact cost observation from its admitted card-page version."""
+    corrections = tuple(
+        item for item in inputs.decisions.corrections if item.field == "cost"
+    )
+    if not corrections:
+        return
+    parsed = load_parsed(root.parent / "card-data")
+    observations = parsed.observations()
+    for item in corrections:
+        version = item.expected_source_version_id
+        assert version is not None
+        observed = observations.get(version)
+        if observed is None or observed.document.region != item.region:
+            raise ValueError(f"Missing cost correction source: {item.card_no}")
+        document = observed.document
+        projected = (
+            jp_card(document.record)
+            if isinstance(document, JPDocument)
+            else en_card(document.record)
+        )
+        cards = inputs.jp if item.region == "jp" else inputs.en
+        if projected != cards[item.card_no]:
+            raise ValueError(
+                f"Cost correction source differs from registry input: {item.card_no}"
+            )
 
 
 def _registry(
@@ -92,6 +124,7 @@ def main() -> None:
             "original_art": args.original_art,
         }
         inputs = read_inputs(paths, args.decisions, args.images, as_of=args.as_of)
+        _verify_cost_sources(root, inputs)
         index, existing, reviewed = _registry(root, args.renewal_inputs)
         if existing:
             validate(list(existing.values()))

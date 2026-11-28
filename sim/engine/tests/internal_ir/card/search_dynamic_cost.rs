@@ -94,9 +94,10 @@ fn search_reads_the_original_cost_of_the_chosen_target() {
 }
 
 #[test]
-fn only_a_single_field_or_ex_target_lends_its_original_cost() {
+fn only_a_single_public_target_lends_its_original_cost() {
     spell(&json!({"who":"self","zone":"ex","kind":"follower"})).unwrap();
-    spell(&json!({"who":"self","zone":"cemetery","kind":"follower"})).unwrap_err();
+    spell(&json!({"who":"self","zone":"cemetery","kind":"follower"})).unwrap();
+    spell(&json!({"who":"self","zone":"hand","kind":"follower"})).unwrap_err();
     unit_spell(&json!({
         "targets":[{"bind":"chosen","from":{"who":"opp","zone":"field","kind":"follower"},"n":2}],
         "do":[{"search":{"sel":{"who":"self","zone":"deck","kind":"follower",

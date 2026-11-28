@@ -227,13 +227,14 @@ fn fixed_deck_top_lowering_admits_own_ex_and_banish_receipts() {
     );
 
     for banish in [
-        json!({"top":{"who":"opp","n":1}}),
+        json!({"top":{"who":"opponents","n":1}}),
+        json!({"top":{"who":"opp","n":{"count":{"who":"self","zone":"cemetery"}}}}),
         json!({"top":{"who":"self","n":0}}),
     ] {
         input["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{"banish":banish}]);
         assert!(
             lowerer().lower(&input).is_err(),
-            "fixed top banishment outside an each-player stage rejects foreign decks and zero counts"
+            "top banishment rejects an opponent group, dynamic opponent counts and zero counts"
         );
     }
 }
@@ -352,7 +353,7 @@ fn cards(prefix: &str, count: usize) -> Value {
 }
 
 /// Plays the synthetic follower and answers its pending fanfare and any first-target question.
-fn play_fanfare(initial: &Value, body: &Value) -> Value {
+fn resolve_fanfare(initial: &Value, body: &Value) -> Game {
     let mut game = Game::new(catalog(), initial, &Value::Null, &Value::Null, "deck-top").unwrap();
     game.load_internal_card("unit-follower", &fanfare_follower(body))
         .unwrap();
@@ -376,7 +377,13 @@ fn play_fanfare(initial: &Value, body: &Value) -> Value {
                 .unwrap();
         }
     }
-    game.projection(View::Referee).unwrap()
+    game
+}
+
+fn play_fanfare(initial: &Value, body: &Value) -> Value {
+    resolve_fanfare(initial, body)
+        .projection(View::Referee)
+        .unwrap()
 }
 
 /// P1 plays the follower; P2 has `deck` hidden cards and `grave` cemetery cards.
@@ -390,6 +397,40 @@ fn mill_position(deck: usize, grave: usize) -> Value {
 
 fn zone_len(view: &Value, seat: &str, zone: &str) -> usize {
     view[seat][zone].as_array().unwrap().len()
+}
+
+#[test]
+fn opponent_deck_banish_takes_only_available_top_cards() {
+    let body = json!({"do":[
+        {"banish":{"top":{"who":"opp","n":2},"result":"banished"}},
+        {"life":{"who":"self","delta":{"count_of":"banished"}}}
+    ]});
+    for (deck, banished, remaining) in [
+        (3, json!(["top0", "top1"]), json!(["top2"])),
+        (1, json!(["top0"]), json!([])),
+    ] {
+        let mut initial = mill_position(deck, 0);
+        initial["players"]["P1"]["leader"]["life"] = json!(10);
+        let game = resolve_fanfare(&initial, &body);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P2"]["banish"], banished);
+        assert_eq!(view["P2"]["deck"], remaining);
+        assert_eq!(view["P1"]["deck"], json!(["mine0", "mine1"]));
+        assert_eq!(
+            view["P1"]["leader"]["life"],
+            if deck == 3 { 12 } else { 11 }
+        );
+        assert_ne!(view["game"]["ended"], true);
+        let public = game.projection(View::P1).unwrap();
+        assert!(
+            !public["known_cards"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|card| card["id"] == "top2"),
+            "the controller cannot identify the opponent's untouched tail"
+        );
+    }
 }
 
 #[test]

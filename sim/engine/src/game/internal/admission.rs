@@ -39,6 +39,7 @@ use crate::ir::events::{drive, equipment};
 use crate::ir::flip_cost;
 use crate::ir::hand_position;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice, revealed_choice};
+use crate::ir::player_rules::PlayerRule;
 use crate::ir::player_stages;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
@@ -199,13 +200,21 @@ fn keyword_source_paths(
     }
     paths.insert(format!("{path}/instruction/source/origin"));
     paths.insert(format!("{path}/instruction/source/origin/keyword"));
-    if let Action::InstallEffect { effect, .. } = action
-        && prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+    let nested = if let Action::InstallEffect { effect, .. } = action
+        && (prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+            || super::player_rules::check(action, origin).is_ok())
     {
-        let prefix = format!("{path}/instruction/action/effect/source/origin");
-        paths.insert(prefix.clone());
-        paths.insert(format!("{prefix}/keyword"));
-    }
+        "effect/source"
+    } else if let Action::GameResult { source, .. } = action
+        && source == origin
+    {
+        "source"
+    } else {
+        return;
+    };
+    let prefix = format!("{path}/instruction/action/{nested}/origin");
+    paths.insert(prefix.clone());
+    paths.insert(format!("{prefix}/keyword"));
 }
 
 #[expect(
@@ -616,6 +625,10 @@ fn check_action(
     super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
+    if matches!(action, Action::InstallEffect { effect, .. } if PlayerRule::from_effect(effect).is_some())
+    {
+        return super::player_rules::check(action, source).map(|_| ());
+    }
     if phase_restrictions::projection(action).is_some() {
         return Ok(());
     }
@@ -962,12 +975,14 @@ fn supported(code: &str) -> bool {
             | "duration.next-phase-edge"
             | "duration.next-phase-interval"
             | "duration.next-turn-end"
+            | "duration.next-turn-edge"
             | "duration.next-turn-interval"
             | "duration.no-expiry"
             | "duration.resolution"
             | "duration.source-zone-exit"
             | "duration.turn"
             | "effect.continuous"
+            | "effect.rule-modifier"
             | "effect.cost-delta"
             | "effect.cost-modifier"
             | "effect.cost-set"
@@ -1012,6 +1027,7 @@ fn supported(code: &str) -> bool {
             | "internal.DamageFlags.Ability"
             | "internal.Declinable.MayDecline"
             | "internal.Declinable.Required"
+            | "internal.Edge.Begin"
             | "internal.Edge.End"
             | "internal.EntryMethod.AbilityPut"
             | "internal.EntryMethod.Play"
@@ -1045,6 +1061,7 @@ fn supported(code: &str) -> bool {
             | "internal.ObjectProperty.Cost"
             | "internal.ObjectProperty.Names"
             | "internal.Outcome.Win"
+            | "internal.Outcome.Lose"
             | "internal.OwnerZone.Banish"
             | "internal.OwnerZone.Cemetery"
             | "internal.OwnerZone.Deck"
@@ -1092,6 +1109,8 @@ fn supported(code: &str) -> bool {
             | "internal.ZoneKind.Cemetery"
             | "internal.ZoneKind.Deck"
             | "internal.ZoneKind.Evolve"
+            | "internal.PhysicalSourceZone.Ex"
+            | "internal.PhysicalSourceZone.Field"
             | "internal.ZoneKind.Ex"
             | "internal.ZoneKind.Field"
             | "internal.ZoneKind.Hand"
@@ -1112,10 +1131,13 @@ fn supported(code: &str) -> bool {
             | "predicate.player-equals"
             | "read.card-play-origin"
             | "read.combo"
+            | "read.attack.count.source"
             | "read.cost"
             | "read.crimson"
+            | "read.leader-class"
             | "read.field-entry-method"
             | "read.field-entry-origin"
+            | "read.physical-source-in-zone"
             | "read.history.count"
             | "read.history.sum"
             | "read.limit-break"
@@ -1150,6 +1172,9 @@ fn supported(code: &str) -> bool {
             | "reference.object-generation"
             | "reference.selected"
             | "reference.snapshot"
+            | "rule.double-fanfare"
+            | "rule.cannot-lose-defense"
+            | "rule.unlimited-hand"
             | "selector.difference"
             | "selector.extremum"
             | "selector.filter"
@@ -1202,9 +1227,11 @@ fn supported(code: &str) -> bool {
             | "shape.BoolFrozen.EntryAdditionalMaterial"
             | "shape.BoolRead.CardPlayOrigin"
             | "shape.BoolRead.Crimson"
+            | "shape.BoolRead.LeaderClass"
             | "shape.BoolRead.FieldEntryMethod"
             | "shape.BoolRead.FieldEntryOrigin"
             | "shape.BoolRead.LimitBreak"
+            | "shape.BoolRead.PhysicalSourceInZone"
             | "shape.BoolRead.State"
             | "shape.BoxPilotMode.Boxed"
             | "shape.BoxPilotMode.Pilot"
@@ -1250,11 +1277,13 @@ fn supported(code: &str) -> bool {
             | "shape.DurationEnd.EndResolution"
             | "shape.DurationEnd.NextPhaseEdge"
             | "shape.DurationEnd.NextTurnEnd"
+            | "shape.DurationEnd.NextTurnEdge"
             | "shape.DurationEnd.NoTemporalExpiry"
             | "shape.DurationEnd.SourceZoneExit"
             | "shape.Effect.Continuous"
             | "shape.Effect.CostModifier"
             | "shape.Effect.Permission"
+            | "shape.Effect.RuleModifier"
             | "shape.EffectReference.CurrentInstallation"
             | "shape.EffectSource.Any"
             | "shape.EffectTarget.Dynamic"
@@ -1314,6 +1343,7 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.DistinctCount"
             | "shape.NatOperation.ReceiptCount"
             | "shape.NatRead.Combo"
+            | "shape.NatRead.SourceAttacksThisTurn"
             | "shape.NatRead.HistoryCount"
             | "shape.NatRead.OtherHandCount"
             | "shape.NatRead.TurnOrdinal"
@@ -1373,6 +1403,9 @@ fn supported(code: &str) -> bool {
             | "shape.RemoveScope.AllAtTime"
             | "shape.RepeatBody.Program"
             | "shape.RideDriveOperation.GainDrive"
+            | "shape.RuleModifier.DoubleFanfare"
+            | "shape.RuleModifier.CannotLoseDefense"
+            | "shape.RuleModifier.UnlimitedHand"
             | "shape.ScheduleAnchor.NextTurn"
             | "shape.SelectionView.Current"
             | "shape.Selector.Bound"

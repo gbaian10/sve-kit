@@ -104,6 +104,12 @@ struct Object {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Player {
     leader: Value,
+    #[serde(default, skip_serializing_if = "core::ops::Not::not")]
+    unlimited_hand: bool,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    double_fanfare: BTreeSet<i64>,
+    #[serde(default, skip_serializing_if = "core::ops::Not::not")]
+    defense_protected: bool,
     pp: Value,
     ep: i64,
     ep_capacity: i64,
@@ -490,6 +496,9 @@ impl Game {
                 seat.into(),
                 Player {
                     leader: entry["leader"].clone(),
+                    unlimited_hand: false,
+                    double_fanfare: BTreeSet::new(),
+                    defense_protected: false,
                     pp: entry["pp"].clone(),
                     ep,
                     ep_capacity,

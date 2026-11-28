@@ -1,0 +1,49 @@
+cards:
+  GFE01-020EN:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 3
+                who: self
+            - each_player:
+                as: player
+                stages:
+                  - - choose:
+                        bind: summoned
+                        by: player
+                        from:
+                          kind: follower
+                          who: player
+                          zone: hand
+                        upto: 1
+                    - move:
+                        ref: summoned
+                        result: entered
+                        to: field
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 2
+                  sel:
+                    who: self
+                    zone: hand
+          do:
+            - move:
+                position: bottom
+                ref: chosen
+                to: deck
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: all
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

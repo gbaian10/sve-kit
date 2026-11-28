@@ -124,7 +124,7 @@ impl BodyContext<'_> {
         origin: &AbilitySource,
     ) -> Result<Vec<Located<Node>>, LoweringError> {
         let top = value.top.as_ref().ok_or_else(|| unsupported(path))?;
-        if self.scope != self.resolution_scope
+        if self.scope != self.public_reveal_scope
             || value.r#ref.is_some()
             || value.random.is_some()
             || top.n == 0
@@ -144,6 +144,9 @@ impl BodyContext<'_> {
             },
         );
         self.receipt_reads.published_looks.insert(look);
+        if self.scope != self.resolution_scope {
+            self.branch_reveals.push(value.bind.clone());
+        }
         let objects = self.public_observation(&value.bind, path)?;
         let reveal = ReceiptId(self.card_allocator.id(path)?);
         [
@@ -182,6 +185,17 @@ impl BodyContext<'_> {
             })
         })
         .collect()
+    }
+
+    /// A branch-local reveal stays readable only inside the branch that published it.
+    pub(super) fn forget_branch_reveals(&mut self, outer: usize) {
+        for name in self.branch_reveals.split_off(outer) {
+            if let Some(ObjectReceipt::Look { receipt }) = self.observations.remove(&name)
+                && let ReceiptLocation::Local { id } = receipt.location()
+            {
+                self.receipt_reads.published_looks.remove(id);
+            }
+        }
     }
 
     pub(super) fn public_reveal_move(

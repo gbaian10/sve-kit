@@ -9,6 +9,7 @@ use super::{
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::movement::ENTRY_WITHOUT_FANFARE;
+use crate::game::internal::search::matches_keyword;
 use crate::game::{Frame, Object};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
@@ -252,6 +253,11 @@ impl Game {
         }
         let observers = self.entry_observers()?;
         let (reads_original_cost, reads_effective_cost) = self.entry_cost_reads(&observers);
+        let reads_keyword = observers
+            .iter()
+            .flat_map(|(_, abilities)| abilities)
+            .filter_map(|ability| filter(&ability.node))
+            .any(|plan| plan.keyword.is_some());
         let active = player_id(self.active())?;
         let effect_source = self.internal_entry_effect_source(frame);
         let (cause, actor, method) = entry_cause(frame)?;
@@ -271,6 +277,10 @@ impl Game {
             let mut subject = SubjectInformation::from_characters(&characters, original_cost);
             if reads_effective_cost {
                 subject.effective_cost = Some(self.internal_effective_cost(&old.id)?);
+            }
+            // Entry batches have installed effective information, so this is the entered card.
+            if reads_keyword && matches_keyword(self, &old.id, KeywordId::Evolution)? {
+                subject.keywords = &[KeywordId::Evolution];
             }
             let mut matched = Vec::new();
             for (holder, abilities) in &observers {
@@ -323,24 +333,34 @@ impl Game {
             let position = self.entry_position(event.controller, &old.id)?;
             candidates.extend(self.delayed_entry_pending(&installed, &event, &header, position)?);
             for (holder, ability, controller) in matched {
-                let source = self.internal_card_source(holder, ability.node.id, controller)?;
-                let information = SourceInformation::current(self, source)?;
-                let mut pending = self.new_pending(
-                    holder,
-                    source,
-                    ability.clone(),
-                    information,
-                    header.clone(),
-                    None,
-                )?;
-                pending.source_position = position;
-                #[cfg(feature = "runner")]
-                retain_entry_cause(&mut pending, entered, &old.id);
-                pending.timing = Some(EventPayload::EnterField {
-                    event: event.clone(),
-                });
-                pending.capture_subject_information(self)?;
-                candidates.push(pending);
+                let doubled = matches!(
+                    ability.node.source.origin,
+                    AbilityOrigin::Keyword {
+                        keyword: KeywordId::Fanfare,
+                        ..
+                    }
+                ) && self.internal_fanfare_doubled(controller)?;
+                let occurrences: u8 = if doubled { 2 } else { 1 };
+                for _ in 0..occurrences {
+                    let source = self.internal_card_source(holder, ability.node.id, controller)?;
+                    let information = SourceInformation::current(self, source)?;
+                    let mut pending = self.new_pending(
+                        holder,
+                        source,
+                        ability.clone(),
+                        information,
+                        header.clone(),
+                        None,
+                    )?;
+                    pending.source_position = position;
+                    #[cfg(feature = "runner")]
+                    retain_entry_cause(&mut pending, entered, &old.id);
+                    pending.timing = Some(EventPayload::EnterField {
+                        event: event.clone(),
+                    });
+                    pending.capture_subject_information(self)?;
+                    candidates.push(pending);
+                }
             }
         }
         self.internal_admit_pending(candidates)

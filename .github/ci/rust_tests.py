@@ -57,7 +57,7 @@ INPUTS = (
 # hatch-vcs writes this during uv installs; the package exposes the version,
 # but repository_current's outputs do not consume it.
 BUILD_OUTPUTS = frozenset({"carddb/src/sve_carddb/_version.py"})
-GENERATOR = b"repository_current cards.jsonl selection.json battle-projection.jsonl v3"
+GENERATOR = b"repository_current cards.jsonl selection.json battle-projection.jsonl v4"
 OUTPUTS = ("cards.jsonl", "selection.json", "battle-projection.jsonl")
 KEPT_INPUTS = 8
 

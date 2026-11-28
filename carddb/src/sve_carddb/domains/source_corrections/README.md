@@ -16,7 +16,8 @@ carry `images=None`, declare no image evidence use and write no
 
 The importer reuses `registry.corrections.correction_status`. An active correction
 first checks for an upstream fix, then requires both exact old value and the
-complete `registry-observation-v2` hash. Proposed corrections are retained without
+complete `registry-observation-v2` hash. Active cost corrections also match the
+exact card-page source version. Proposed corrections are retained without
 an application. Conflict applications have no successful result and the build
 record becomes `needs_review`; upstream fixes become `upstream_fixed`, keep the
 existing result and report a retirement warning.
@@ -29,8 +30,9 @@ from the new evidence representation without changing public content.
 
 `populate_text_observations` writes `source_correction`, `correction_evidence` and
 `correction_application` in the same transaction as the text graph. Successful
-effect corrections link their result text and revision; type corrections link
-their rule revision. Raw observations keep their original revisions. Corrected
+effect corrections link their result text and revision. Type and cost corrections
+link their rule revision. The cost marker uses the public nullable integer type.
+Raw observations keep their original revisions. Corrected
 revisions have separate IDs, `change_kind=source_correction` and an
 original-revision `supersedes_id`; `correction_application` links each one back to
 its correction. No effective date is invented.

@@ -194,7 +194,18 @@ impl SubjectFields {
     }
 
     fn keyword(self, keyword: KeywordId) -> Option<Expr<Bool>> {
-        let Self::Cemetery(event) = self else {
+        let (event, policy) = if let Self::Cemetery(event) = self {
+            (
+                EventContext::LeaveField { event },
+                EventSnapshotPolicy::BeforeExit,
+            )
+        } else if let Self::Entry(event) = self {
+            // An entering follower's abilities are read as it is on the field.
+            (
+                EventContext::EnterField { event },
+                EventSnapshotPolicy::AfterEntry,
+            )
+        } else {
             return None;
         };
         Some(Expr::Compute(Box::new(Predicate::HasAbility {
@@ -203,8 +214,8 @@ impl SubjectFields {
                     object: Box::new(ObjectOperand::FromExpression {
                         value: Box::new(self.object()),
                     }),
-                    event: EventContext::LeaveField { event },
-                    policy: EventSnapshotPolicy::BeforeExit,
+                    event,
+                    policy,
                 },
                 view: CharacteristicView::Effective,
             })),
@@ -226,8 +237,11 @@ impl SubjectFields {
             return None;
         };
         let keyword = predicate.keyword?;
-        (keyword == KeywordId::Ward && self.keyword(keyword).as_ref() == Some(expression))
-            .then_some(keyword)
+        let paired = matches!(
+            (keyword, self),
+            (KeywordId::Ward, Self::Cemetery(_)) | (KeywordId::Evolution, Self::Entry(_))
+        );
+        (paired && self.keyword(keyword).as_ref() == Some(expression)).then_some(keyword)
     }
 
     pub(crate) fn object(self) -> Expr<ObjectRef> {
@@ -1088,14 +1102,17 @@ impl SubjectFilter {
         if !self.name_contains_any.is_empty() && self.name_contains.is_some() {
             return false;
         }
-        if self.keyword.is_some() {
+        if let Some(keyword @ (KeywordId::Ward | KeywordId::Evolution)) = self.keyword {
             return *self
                 == (Self {
                     own: Some(true),
                     kind: Some(CardKind::Follower),
-                    keyword: Some(KeywordId::Ward),
+                    keyword: Some(keyword),
                     ..Self::default()
                 });
+        }
+        if self.keyword.is_some() {
+            return false;
         }
         true
     }

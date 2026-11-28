@@ -395,7 +395,7 @@ def official_registry(
 ) -> list[Entry]:
     root = Path(__file__).resolve().parents[4] / "authored"
     index = official_snapshot.files.index()
-    assert index.next_int_id == {"en": 67421, "jp": 28078}
+    assert index.next_int_id == {"en": 67990, "jp": 28078}
     assert all(
         path.stat().st_size <= TARGET_BYTES
         for directory in (root / "ids", root / "registry")
@@ -411,11 +411,11 @@ def test_official_registry_special_mappings(official_registry: list[Entry]) -> N
         for entry in official_registry
         if entry.kind == "printing"
     }
-    assert len(printings) == 15497
-    assert sum(region == "en" for region, _ in printings) == 7420
+    assert len(printings) == 16066
+    assert sum(region == "en" for region, _ in printings) == 7989
     ids = region_allocations(official_registry)
     assert sorted(ids["jp"]) == list(range(20001, 28078))
-    assert sorted(ids["en"]) == list(range(60001, 67421))
+    assert sorted(ids["en"]) == list(range(60001, 67990))
     pairs = [
         ("BP09-P50EN", "DSD01b-T01"),
         ("BP02-070EN", "BP02-071"),
@@ -467,6 +467,7 @@ def test_official_curation_and_corrections(official_registry: list[Entry]) -> No
             ("PR-342EN",),
             ("PR-395EN",),
             ("PR-448EN",),
+            ("PR-521EN",),
             ("PR-543EN",),
         )
     }
@@ -491,14 +492,14 @@ def test_official_curation_and_corrections(official_registry: list[Entry]) -> No
                 if entry.kind == "region_mapping_review"
             ]
         )
-        == 124
+        == 148
     )
     corrections = [
         entry for entry in official_registry if entry.kind == "source_correction"
     ]
-    assert len(corrections) == 11
+    assert len(corrections) == 12
     active = [entry for entry in corrections if entry.data["state"] == "active"]
-    assert len(active) == 11
+    assert len(active) == 12
     original = next(
         entry
         for entry in active
@@ -603,6 +604,50 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
     assert checked["BP02-070EN"].faces[0].info["Card Type"] == "Spell"
     assert inputs.en["BP02-070EN"].faces[0].info["Card Type"] == "Follower"
     assert correction.state == "needs_review"
+
+
+def test_cost_correction_allows_mapping_and_preserves_the_raw_observation(
+    inputs: Inputs,
+) -> None:
+    number = "BP02-070EN"
+    inputs.jp["BP02-071"].faces[0].cost = "-"
+    inputs.en[number].faces[0].stats["cost"] = "3"
+    inputs.mapping.reskins.clear()
+    raw = inputs.en[number].model_dump()
+    with pytest.raises(ValueError, match="cost mismatch: BP02-070EN -> BP02-071"):
+        build(inputs, {})
+
+    version = "src:v1:" + "a" * 64
+    inputs.decisions.corrections = [
+        Correction(
+            region="en",
+            card_no=number,
+            field="cost",
+            expected_raw_value="3",
+            corrected_value="-",
+            expected_source_version_id=version,
+            image_sha256="sha256:" + "b" * 64,
+            locator="The evolved card has no printed cost",
+            state="active",
+            reason="The printed card has no cost.",
+        )
+    ]
+    entries = build(inputs, {})
+    validate(entries)
+    record = next(entry for entry in entries if entry.kind == "source_correction")
+    assert record.data["expected_source_version_id"] == version
+    (result,) = project_corrections(inputs, entries)
+    assert result["status"] == "applied"
+    assert result["value"] is None
+    assert result["corrections"] == [
+        {
+            "field": "cost",
+            "corrected_from": 3,
+            "is_corrected": True,
+            "reason": "The printed card has no cost.",
+        }
+    ]
+    assert inputs.en[number].model_dump() == raw
 
 
 @pytest.mark.parametrize(

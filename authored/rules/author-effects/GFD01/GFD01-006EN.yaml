@@ -1,0 +1,22 @@
+cards:
+  GFD01-006EN:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                ref:
+                  any_of:
+                    - kind: follower
+                      who: opp
+                      zone: field
+                    - who: opp
+                      zone: ex
+                to: hand
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

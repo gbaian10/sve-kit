@@ -29,6 +29,8 @@ mod condition_inputs;
 mod current_fixture;
 #[path = "card/deck_edges.rs"]
 mod deck_edges;
+#[path = "card/defense_window.rs"]
+mod defense_window;
 #[path = "card/dice.rs"]
 mod dice;
 #[path = "card/event_batches.rs"]
@@ -51,6 +53,8 @@ mod event_subject_condition;
 mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]
 mod exchange_routes;
+#[path = "card/fanfare_multiplicity.rs"]
+mod fanfare_multiplicity;
 #[path = "card/formal_target_groups.rs"]
 mod formal_target_groups;
 #[path = "card/granted_delayed.rs"]
@@ -77,6 +81,8 @@ mod played_original_cost;
 mod played_traits;
 #[path = "card/player_declarations.rs"]
 mod player_declarations;
+#[path = "card/player_hand_limit.rs"]
+mod player_hand_limit;
 #[path = "card/player_main_actions.rs"]
 mod player_main_actions;
 #[path = "card/player_policy.rs"]
@@ -893,8 +899,14 @@ mod cemetery_pair_capacity;
 #[path = "card/ward_bypass.rs"]
 mod ward_bypass;
 
+#[path = "card/english_small_mechanisms.rs"]
+mod english_small_mechanisms;
 #[path = "card/layer3_attack_aura.rs"]
 mod layer3_attack_aura;
+#[path = "card/leader_class.rs"]
+mod leader_class;
+#[path = "card/target_stat_reads.rs"]
+mod target_stat_reads;
 
 #[path = "card/layer3_conditional_quick.rs"]
 mod layer3_conditional_quick;
@@ -1133,3 +1145,6 @@ mod layer3_entry_source;
 
 #[path = "card/spell_chain.rs"]
 mod spell_chain;
+
+#[path = "card/physical_source_zone.rs"]
+mod physical_source_zone;

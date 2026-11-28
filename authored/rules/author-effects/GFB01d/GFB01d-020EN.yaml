@@ -1,0 +1,27 @@
+cards:
+  GFB01d-020EN:
+    abilities:
+      - keywords:
+          - aura
+        line: 1
+      - evolve_time:
+          do:
+            - act:
+                ref:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+      - auto:
+          do:
+            - set_stat:
+                hp: 5
+                on: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

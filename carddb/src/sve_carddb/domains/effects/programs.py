@@ -1,6 +1,5 @@
 """Project every admitted author, including light admission, into public DSL programs."""
 
-from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import Json
@@ -57,25 +56,8 @@ def _ability(value: dict[str, JsonValue]) -> JsonValue:
 
 
 def _printing_references(
-    db: Database, results: tuple[CardResult, ...]
+    current: CurrentAuthorSources, results: tuple[CardResult, ...]
 ) -> dict[str, JsonValue]:
-    printings: dict[str, list[str]] = defaultdict(list)
-    for row in db.select(
-        "printing",
-        ("id", "card_no"),
-        where={"region": "jp", "card_no_state": "official"},
-    ):
-        number, printing = row.values["card_no"], row.values["id"]
-        assert isinstance(number, str)
-        assert isinstance(printing, str)
-        printings[number].append(printing)
-
-    def printing_id(number: str) -> str:
-        matched = printings[number]
-        if len(matched) != 1:
-            raise ValueError(f"Program printing is missing or ambiguous: {number}")
-        return matched[0]
-
     references: dict[str, JsonValue] = {}
     for result in results:
         if isinstance(result, CardRejected):
@@ -83,13 +65,17 @@ def _printing_references(
         authored = object_value(
             object_value(result.tree["cards"])[result.record.record_key]
         )
+        region = current.source_region(result.record.card_id)
         dependencies = {
-            printing_id(string(object_value(source)["card_no"]))
+            current.printing_id(
+                string(object_value(source)["card_no"]),
+                region="jp" if region == "jp" else None,
+            )
             for source in array(authored.get("token_sources", []))
         }
         tokens: list[JsonValue] = [*sorted(dependencies)]
         references[result.record.card_id] = {
-            "representative": printing_id(result.record.record_key),
+            "representative": current.printing_id(result.record.record_key),
             "tokens": tokens,
         }
     return references
@@ -103,7 +89,7 @@ def populate(
 ) -> dict[str, JsonValue]:
     """Admit complete programs and return their permanent printing references."""
     results = current.validate_inputs(inputs, expander)
-    references = _printing_references(db, results)
+    references = _printing_references(current, results)
     documents: dict[str, tuple[str, str, str]] = {}
     for result in results:
         if isinstance(result, CardRejected):

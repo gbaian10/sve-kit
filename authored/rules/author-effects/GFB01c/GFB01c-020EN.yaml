@@ -1,0 +1,35 @@
+cards:
+  GFB01c-020EN:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                else:
+                  - damage:
+                      n: 2
+                      to: enemy
+                then:
+                  - damage:
+                      n: 5
+                      to: enemy
+            - if:
+                cond:
+                  necro: 20
+                then:
+                  - damage:
+                      n: 3
+                      to:
+                        leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+format: 2
+kind: author_effect_set

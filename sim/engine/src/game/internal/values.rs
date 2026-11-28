@@ -833,7 +833,7 @@ impl Execution {
     }
 
     /// A printed original cost belongs to the card, so a moved target still has it.
-    /// Only a public pick of at most one field or EX card lends it; a private pick never does.
+    /// A public pick of at most one field, EX or cemetery card lends it.
     fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
         let Selector::Bound { reference } = objects else {
             return Err(unsupported("original cost of an unselected object"));
@@ -841,7 +841,7 @@ impl Execution {
         if !self
             .targets
             .get(&reference.key())
-            .is_some_and(super::card::selection::TargetWait::public_board_single)
+            .is_some_and(super::card::selection::TargetWait::public_original_cost_single)
         {
             return Err(unsupported(
                 "original cost of a private or multiple selection",
@@ -867,6 +867,9 @@ impl Execution {
         objects: &Selector,
         property: NumericProperty,
     ) -> Result<i64> {
+        // Only a target picked from a cemetery lends its printed stats there (GFB01c-021EN).
+        let cemetery_pick = matches!(objects, Selector::Bound { reference }
+            if self.targets.get(&reference.key()).is_some_and(|wait| wait.chosen_from("cemetery")));
         super::aggregates::checked_sum(
             self.objects(game, objects)?.into_iter().map(|object| {
                 let id = self.object_id(object)?;
@@ -879,20 +882,36 @@ impl Execution {
                 if current.zone == "field" {
                     return super::aggregates::numeric_value(game, id, property);
                 }
-                if current.zone != "ex" {
-                    return Ok(0);
-                }
                 let field = if property == NumericProperty::Attack {
                     "power"
                 } else {
                     "hp"
                 };
+                // A cemetery follower carries no modifiers, so its printed stats are its stats.
+                if current.zone == "cemetery" && cemetery_pick {
+                    return super::cost::printed_cost(&game.face(id)?[field]);
+                }
+                if current.zone != "ex" {
+                    return Ok(0);
+                }
                 current.state[field]
                     .as_i64()
                     .ok_or_else(|| invalid("public follower stat"))
             }),
             "numeric aggregate overflow",
         )
+    }
+
+    fn source_attacks_this_turn(&self, game: &Game) -> Result<Nat> {
+        let count = game
+            .state
+            .objects
+            .get(&self.context.source)
+            .filter(|object| {
+                object.generation == self.context.generation.0 && object.zone == "field"
+            })
+            .map_or(0, |object| int(&object.state["attacks_this_turn"]));
+        Ok(Nat(u64::try_from(count).map_err(invalid)?))
     }
 
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {
@@ -920,6 +939,7 @@ impl Execution {
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }
+            NatRead::SourceAttacksThisTurn {} => self.source_attacks_this_turn(game),
             NatRead::HistoryCount { query, count } => {
                 let plan = HistoryPlan::compile(query).ok_or_else(|| {
                     unsupported(if *count == HistoryCount::Facts {
@@ -1372,6 +1392,19 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
+            BoolRead::PhysicalSourceInZone { zone } => {
+                use crate::ir::PhysicalSourceZone;
+
+                let seat = seat_name(self.context.controller)?;
+                let zone = match zone {
+                    PhysicalSourceZone::Field => "field",
+                    PhysicalSourceZone::Ex => "ex",
+                };
+                // This check identifies the physical source without refreshing its effect references.
+                Ok(Bool(
+                    game.zone_ids(seat, zone).contains(&self.context.source),
+                ))
+            }
             BoolRead::LimitBreak { object, state } => {
                 if let Some(reference) = self.current_limit_break_subject(game, object)? {
                     return game
@@ -1435,6 +1468,12 @@ impl Execution {
                             .counters
                             .get(&format!("{seat}.leader_hp_decreased"))
                             .is_some_and(|count| *count > 0),
+                ))
+            }
+            BoolRead::LeaderClass { player, class } => {
+                let player = game.player(seat_name(self.player(game, player)?)?)?;
+                Ok(Bool(
+                    player.leader["class"].as_str() == Some(class.0.as_str()),
                 ))
             }
             _ => Err(unsupported("boolean expression")),

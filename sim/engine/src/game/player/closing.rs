@@ -49,12 +49,7 @@ impl Game {
             }
             Some("discard") => ClosingQuestion::Discard {
                 cards: self.closing_cards(actor, &self.zone_ids(self.active(), "hand"))?,
-                count: u64::try_from(
-                    self.zone_count(self.active(), "hand")
-                        .saturating_sub(7)
-                        .max(0),
-                )
-                .map_err(invalid)?,
+                count: self.hand_excess(self.active())?,
             },
             _ => return Ok(None),
         };

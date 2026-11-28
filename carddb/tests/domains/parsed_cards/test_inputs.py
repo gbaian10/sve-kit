@@ -1,6 +1,7 @@
 """Exercise portable inputs against the real archive and all physical projections."""
 
 import json
+import sys
 from dataclasses import replace
 from pathlib import Path
 
@@ -15,12 +16,15 @@ from sve_carddb.domains.parsed_cards.codec import decode, encode
 from sve_carddb.domains.parsed_cards.commands import app
 from sve_carddb.domains.parsed_cards.filing import number_range
 from sve_carddb.domains.parsed_cards.generate import generate
-from sve_carddb.domains.parsed_cards.models import Index
+from sve_carddb.domains.parsed_cards.models import ENDocument, Index
 from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.domains.parsed_cards.serialization import combine, separate
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.parsed_cards.storage import load, write
 from sve_carddb.domains.parsed_cards.wire import CardFile
+from sve_carddb.domains.registry.__main__ import main as registry_main
+from sve_carddb.domains.registry.projection import en_card
+from sve_carddb.domains.registry.review import Correction, InitDecisions
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
@@ -57,6 +61,86 @@ def _batch(
     _put(store, resource, raw)
     batch = seal_batch(store)
     return FrozenSources(store.root, store.store_id, batch.batch_id), number
+
+
+@pytest.mark.parametrize(
+    ("scenario", "message"),
+    [
+        ("original", None),
+        ("unknown_version", "Missing cost correction source"),
+        ("different_observation", "Cost correction source differs from registry input"),
+    ],
+)
+def test_registry_cli_requires_the_admitted_cost_observation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, scenario: str, message: str | None
+) -> None:
+    sources, number = _batch(tmp_path / "archive", "en")
+    catalog = generate(
+        [("en", sources)], {("en", number): "SYN"}, producer_revision=REVISION
+    )
+    write(tmp_path / "card-data", catalog)
+    version, observation = next(iter(catalog.observations().items()))
+    assert isinstance(observation.document, ENDocument)
+    card = en_card(observation.document.record)
+    face = card.faces[0]
+    if scenario == "different_observation":
+        face.text = "Different observation with the original cost."
+    images = tmp_path / "images"
+    picture = images / "en" / Path(*Path(face.image).parts[-2:])
+    picture.parent.mkdir(parents=True)
+    picture.write_bytes(b"synthetic cost evidence")
+    decisions = InitDecisions(
+        corrections=[
+            Correction(
+                region="en",
+                card_no=number,
+                field="cost",
+                expected_raw_value="-",
+                corrected_value="3",
+                expected_source_version_id="src:v1:" + "f" * 64
+                if scenario == "unknown_version"
+                else version,
+                image_sha256=digest(picture.read_bytes()),
+                locator="Cost box",
+                reason="Synthetic cost correction",
+                state="active",
+            )
+        ]
+    )
+    bodies = {
+        "jp": "",
+        "en": card.model_dump_json() + "\n",
+        "candidates": json.dumps(
+            {"en_no": number, "category": "C", "jp_candidates": []}
+        )
+        + "\n",
+        "confirmations": "en_no\tjp_no\tverdict\tconfirmed_on\n",
+        "original-art": "",
+        "decisions": decisions.model_dump_json(),
+    }
+    authored = tmp_path / "authored"
+    authored.mkdir()
+    argv = [
+        "registry",
+        "--images",
+        str(images),
+        "--authored",
+        str(authored),
+        "--as-of",
+        "2026-11-25",
+    ]
+    for flag, body in bodies.items():
+        source = tmp_path / (flag + ".txt")
+        source.write_text(body, encoding="utf-8")
+        argv.extend(("--" + flag, str(source)))
+    monkeypatch.setattr(sys, "argv", argv)
+    if message is None:
+        registry_main()
+        assert (authored / "ids/index.yaml").is_file()
+    else:
+        with pytest.raises(ValueError, match=message):
+            registry_main()
+        assert not tuple(authored.iterdir())
 
 
 @pytest.mark.parametrize("region", ["jp", "en"])

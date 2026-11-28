@@ -1,0 +1,44 @@
+format: 2
+kind: ruling
+id: R-0023
+revision: 1
+question: Empyreal Unicorn 的結束階段能力依玩家防禦奇偶分流時，兩個模式如何排程？
+decision: 本專案把每位玩家的強制模式視為一個含選擇的處理。由回合玩家完整結算自己的模式，再由非回合玩家完成自己的模式。
+evidence:
+  - ref: CR 1.3.4.1
+    kind: supporting
+    version: "1.28.0"
+    url: https://en.shadowverse-evolve.com/wordpress/wp-content/uploads/2026/11/26163033/SVEE-Comprehensive-Rules_v1.28.0_261119.pdf
+    quote: the active player
+    note: 多位玩家所做的含選擇處理以回合玩家為先。現行讀法把完整模式視為一次含選擇的處理。
+  - ref: CR 1.3.4.1
+    kind: counter
+    version: "1.28.0"
+    quote: executed simultaneously
+    note: 同一條文要求無選擇的處理同時進行，並以雙方同時抽牌再依序選擇為例。偶數模式本身沒有實際選擇，因此也可先依回合順序選送墓，再同批增減防禦，最後抽牌。
+  - ref: Q1360
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-024EN&faq=
+    question: "If my leader's defense is an odd number at the start of my end phase, and I have no followers on my field, do I still choose (1) and give my leader -1 defense?"
+    quote: Yes, you do.
+    date: "2025-07-18"
+    note: 奇數模式在沒有可送墓從者時仍扣防，未裁定與另一模式的先後。
+  - ref: Q1361
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=GFD01-024EN&faq=
+    question: 'If I only have a Heavenly Aegis, which has Aura and "this follower can''t be destroyed by abilities" on my field, can this follower''s ability cause me to bury it?'
+    quote: you are the one selecting Heavenly Aegis. Also, burying a card isn't the same as destroying it.
+    date: "2025-07-18"
+    note: 送墓由該位玩家選擇自己的從者，未裁定與另一模式的先後。
+  - ref: project
+    kind: project
+    date: "2026-11-28"
+    reason: 依卡文的逐人選模式保留完整模式的結算。另一種讀法是將埋葬、增減防禦和抽牌拆成跨玩家的獨立處理，待官方裁定再複核。
+strength: inferred
+decided_on: "2026-11-28"
+applies_to: [K.each-player]
+hint:
+  zh-TW: 本專案解讀。回合玩家先完成自己的奇數或偶數模式，再由非回合玩家完整結算自己的模式。
+  ja: 本プロジェクトの解釈。ターンプレイヤーが自身の奇数または偶数のモードをすべて解決し、その後で非ターンプレイヤーが自身のモードを解決します。
+  en: "Project interpretation: the active player resolves their entire odd or even mode, then the non-active player resolves their mode."
+note: 已驗證逐席讀法使非回合玩家在選送墓從者時看見回合玩家已回復並抽牌。拆批讀法在該時點尚未改變這兩項公開資訊。

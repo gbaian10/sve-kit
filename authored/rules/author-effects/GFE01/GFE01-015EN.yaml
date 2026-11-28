@@ -1,0 +1,39 @@
+cards:
+  GFE01-015EN:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                to: ex
+                token: Unicorn
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  leader_class: ビショップ
+                then:
+                  - buff:
+                      on: chosen
+                      power:
+                        history_count:
+                          event: life_changed
+                          where:
+                            direction: up
+                          who: self
+                          window: this_turn
+          on:
+            life_changed:
+              direction: up
+              who: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

@@ -1,0 +1,33 @@
+cards:
+  GFD01-005EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        who: self
+                        zone: deck
+                      to: field
+                  - grant:
+                      keywords:
+                        - storm
+                      on:
+                        kind: follower
+                        orig_cost_le: 7
+                        other: true
+                        trait: 獣
+                        who: self
+                        zone: field
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

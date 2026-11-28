@@ -1,0 +1,22 @@
+cards:
+  GFE01-011EN:
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - keywords:
+          - storm
+          - intimidate
+        line: 2
+      - attack_time:
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: ex
+              n: 1
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set

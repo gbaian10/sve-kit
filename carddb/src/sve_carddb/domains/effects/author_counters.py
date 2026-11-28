@@ -52,7 +52,7 @@ def _registered_names(authored: Path) -> set[str]:
         name
         for code, rule in load(authored).registry.rule_names.items()
         if rule.role == "counter"
-        for name in (code, rule.ja, *rule.aliases)
+        for name in (code, *rule.spellings())
     }
 
 

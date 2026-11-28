@@ -122,6 +122,17 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn named_effect_player(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        match name {
+            "non_turn" => Ok(timing::opponent_of(PlayerRef::Active {})),
+            _ => self.named_player(name, path),
+        }
+    }
+
     /// A query's players: relative to the controller, or exactly an enclosing procedure's player.
     pub(super) fn side_set(
         &self,
@@ -346,6 +357,7 @@ impl BodyContext<'_> {
             | ast::Number::Dice { .. }
             | ast::Number::Counter { .. }
             | ast::Number::Power { .. }
+            | ast::Number::PowerRole { .. }
             | ast::Number::Life { .. }
             | ast::Number::Cost { .. }
             | ast::Number::OriginalCost { .. }

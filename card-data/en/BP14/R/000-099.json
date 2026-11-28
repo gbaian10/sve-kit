@@ -1,0 +1,327 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP14",
+  "range": "R/000-099",
+  "products": {
+    "products-7baa80be21635bcb": [
+      {
+        "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+        "date": "Nov. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP21-BP22",
+          "https://en.shadowverse-evolve.com/products/bp2122/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP14-R018EN",
+      "documents": {
+        "documents-cb9dd68b4ad09b33": {
+          "region": "en",
+          "record": {
+            "number": "BP14-R018EN",
+            "faces": [
+              {
+                "name": "Taketsumi, Aconite Paladin",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Festive / Commander"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "3",
+                  "power": "2"
+                },
+                "text": "{icon_adv|[adv]} {icon_cost04|[cost04]}, banish this: You may summon a Taketsumi, Creator of Paradise from your evolve deck. Activate only if there are at least 5 Festive cards or at least 10 {icon_royal|[swordcraft]} cards in your cemetery.\n{icon_fanfare|[fanfare]} Draw a card. Discard a card. Put a Glittering Gold token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_adv|[adv]} {icon_cost04|[cost04]}, banish this: You may summon a Taketsumi, Creator of Paradise from your evolve deck. Activate only if there are at least 5 Festive cards or at least 10 {icon_royal|[swordcraft]} cards in your cemetery.\n{icon_fanfare|[fanfare]} Draw a card. Discard a card. Put a Glittering Gold token into your EX area.",
+                "speech": null,
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP14-R018EN.png",
+                "trait_raw": "Festive / Commander",
+                "traits": [
+                  "Festive",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1820 (Jan. 16, 2026)",
+                "question": "If I play this follower's advanced activated ability, can I evolve another follower in the same turn?",
+                "answer": "No. You can only activate one advanced activated ability or evolve ability per turn."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP14-R019EN|Taketsumi, Creator of Paradise}",
+                "href": "/cards/?cardno=BP14-R019EN"
+              },
+              {
+                "label": "{BP22-T07EN|Glittering Gold}",
+                "href": "/cards/?cardno=BP22-T07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7d0a227fa7a5d1065395d7fb6f8e929f5819b08156e04ebf2ab275e538095498",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-R018EN",
+            "fetched_at": "2026-11-27T13:32:21.387721Z"
+          },
+          "document_ref": "documents-cb9dd68b4ad09b33"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-R019EN",
+      "documents": {
+        "documents-039ebab061310dfa": {
+          "region": "en",
+          "record": {
+            "number": "BP14-R019EN",
+            "faces": [
+              {
+                "name": "Taketsumi, Creator of Paradise",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Advanced",
+                  "Class": "Swordcraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Festive / Commander"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "6",
+                  "power": "5"
+                },
+                "text": "{icon_fanfare|[fanfare]} Summon 2 Sootspawn tokens.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field. Deal 5 damage to it and 3 damage to its leader.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Summon 2 Sootspawn tokens.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field. Deal 5 damage to it and 3 damage to its leader.",
+                "speech": "{icon_royal|[swordcraft]}{icon_cost02|[cost02]} Sootspawn (Follower - Festive) {icon_power|[attack]}2/{icon_hp|[defense]}2 | Ward. {icon_lastword|[lastwords]} Select an enemy follower on the field and deal it 2 damage.",
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP14-R019EN.png",
+                "trait_raw": "Festive / Commander",
+                "traits": [
+                  "Festive",
+                  "Commander"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1822 (Jan. 16, 2026)",
+                "question": "When playing Biofabrication, can I select a faceup advanced follower in my evolve deck?",
+                "answer": "No. Advanced followers are not evolved followers."
+              },
+              {
+                "title": "Q1821 (Jan. 16, 2026)",
+                "question": "When playing Rimewind, can I select an enemy advanced follower?",
+                "answer": "Yes. Advanced followers are also considered unevolved followers."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP14-R018EN|Taketsumi, Aconite Paladin}",
+                "href": "/cards/?cardno=BP14-R018EN"
+              },
+              {
+                "label": "{BP22-T07EN|Glittering Gold}",
+                "href": "/cards/?cardno=BP22-T07EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fb9135e4ef36e6eb086e02e7e3c7d7de70b87fd9f0d5f4d5cf3ef41f454cf7b5",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-R019EN",
+            "fetched_at": "2026-11-27T13:32:24.154354Z"
+          },
+          "document_ref": "documents-039ebab061310dfa"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-R070EN",
+      "documents": {
+        "documents-2f233bc82024951f": {
+          "region": "en",
+          "record": {
+            "number": "BP14-R070EN",
+            "faces": [
+              {
+                "name": "Itsurugi, Eager Admirer",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Festive / Demon / Beast"
+                },
+                "stats": {
+                  "cost": "2",
+                  "hp": "2",
+                  "power": "3"
+                },
+                "text": "{icon_adv|[adv]} {icon_cost04|[cost04]}, banish this: You may summon an Itsurugi, Paradise's End from your evolve deck. Activate only if there are at least 5 Festive cards or at least 10 {icon_nightmare|[abysscraft]} cards in your cemetery.\n{icon_fanfare|[fanfare]} Put a Wolfling's Struggle token into your EX area.",
+                "sections": [],
+                "raw_text": "{icon_adv|[adv]} {icon_cost04|[cost04]}, banish this: You may summon an Itsurugi, Paradise's End from your evolve deck. Activate only if there are at least 5 Festive cards or at least 10 {icon_nightmare|[abysscraft]} cards in your cemetery.\n{icon_fanfare|[fanfare]} Put a Wolfling's Struggle token into your EX area.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP14-R070EN.png",
+                "trait_raw": "Festive / Demon / Beast",
+                "traits": [
+                  "Festive",
+                  "Demon",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1820 (Jan. 16, 2026)",
+                "question": "If I play this follower's advanced activated ability, can I evolve another follower in the same turn?",
+                "answer": "No. You can only activate one advanced activated ability or evolve ability per turn."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP14-R071EN|Itsurugi, Paradise's End}",
+                "href": "/cards/?cardno=BP14-R071EN"
+              },
+              {
+                "label": "{BP14-T05EN|Wolfling's Struggle}",
+                "href": "/cards/?cardno=BP14-T05EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f0bf58f1e0892c376f189d687f45f724f9845de7bededa5cc329218403415491",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-R070EN",
+            "fetched_at": "2026-11-27T13:32:52.759245Z"
+          },
+          "document_ref": "documents-2f233bc82024951f"
+        }
+      ]
+    },
+    {
+      "card_no": "BP14-R071EN",
+      "documents": {
+        "documents-9b9a988599e6bfd9": {
+          "region": "en",
+          "record": {
+            "number": "BP14-R071EN",
+            "faces": [
+              {
+                "name": "Itsurugi, Paradise's End",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Advanced",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Festive / Demon / Beast"
+                },
+                "stats": {
+                  "cost": "4",
+                  "hp": "5",
+                  "power": "6"
+                },
+                "text": "{icon_fanfare|[fanfare]} Select up to 3 enemy followers on the field. Deal 5 damage to one and 2 damage to the others.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, deal 1 damage to its leader and give your leader {icon_hp|[defense]}+1.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Select up to 3 enemy followers on the field. Deal 5 damage to one and 2 damage to the others.\nDuring your turn, whenever an enemy follower is put from the field into the cemetery, deal 1 damage to its leader and give your leader {icon_hp|[defense]}+1.",
+                "speech": null,
+                "illustrator": "Mikeboshi",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP14-R071EN.png",
+                "trait_raw": "Festive / Demon / Beast",
+                "traits": [
+                  "Festive",
+                  "Demon",
+                  "Beast"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1854 (Jan. 16, 2026)",
+                "question": "If I select 2 followers for this follower's Fanfare ability, do I deal 5 damage to one and 2 damage to the other?",
+                "answer": "Yes, that's correct."
+              },
+              {
+                "title": "Q1853 (Jan. 16, 2026)",
+                "question": "If multiple enemy followers are put from the field into the cemetery at the same time during my turn, does this follower's automatic ability trigger for each of them?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1852 (Jan. 16, 2026)",
+                "question": "If an enemy token follower is put from the field into the cemetery during my turn, does this follower's automatic ability trigger?",
+                "answer": "Yes, it does."
+              },
+              {
+                "title": "Q1822 (Jan. 16, 2026)",
+                "question": "When playing Biofabrication, can I select a faceup advanced follower in my evolve deck?",
+                "answer": "No. Advanced followers are not evolved followers."
+              },
+              {
+                "title": "Q1821 (Jan. 16, 2026)",
+                "question": "When playing Rimewind, can I select an enemy advanced follower?",
+                "answer": "Yes. Advanced followers are also considered unevolved followers."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP14-R070EN|Itsurugi, Eager Admirer}",
+                "href": "/cards/?cardno=BP14-R070EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9094bd80dc64e8e79cb00a7459b924e41217111722e9c46c6fb3de47e99e963f",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP14-R071EN",
+            "fetched_at": "2026-11-27T13:32:55.291162Z"
+          },
+          "document_ref": "documents-9b9a988599e6bfd9"
+        }
+      ]
+    }
+  ]
+}

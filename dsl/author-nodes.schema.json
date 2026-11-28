@@ -1128,10 +1128,16 @@
           "$ref": "#/$defs/A.cond.crimson"
         },
         {
+          "$ref": "#/$defs/A.cond.leader-class"
+        },
+        {
           "$ref": "#/$defs/A.cond.exists"
         },
         {
           "$ref": "#/$defs/A.cond.in-zone"
+        },
+        {
+          "$ref": "#/$defs/A.cond.physical-source-in-zone"
         },
         {
           "$ref": "#/$defs/A.cond.entered-from"
@@ -3206,6 +3212,16 @@
       ],
       "type": "object"
     },
+    "A.cond.physical-source-in-zone": {
+      "additionalProperties": false,
+      "properties": {
+        "physical_source_in_zone": {
+          "enum": ["field", "ex"]
+        }
+      },
+      "required": ["physical_source_in_zone"],
+      "type": "object"
+    },
     "A.cond.entered-from": {
       "additionalProperties": false,
       "properties": {
@@ -3538,6 +3554,18 @@
       },
       "required": [
         "crimson"
+      ],
+      "type": "object"
+    },
+    "A.cond.leader-class": {
+      "additionalProperties": false,
+      "properties": {
+        "leader_class": {
+          "$ref": "#/$defs/NonemptyText"
+        }
+      },
+      "required": [
+        "leader_class"
       ],
       "type": "object"
     },
@@ -15057,10 +15085,7 @@
       },
       "additionalProperties": false,
       "required": ["who", "zone", "kind"],
-      "oneOf": [
-        {"required": ["orig_cost_le"]},
-        {"required": ["orig_cost_gt"]}
-      ]
+      "not": {"required": ["orig_cost_le", "orig_cost_gt"]}
     },
     "A.act.reveal-until": {
       "type": "object",
@@ -15386,6 +15411,22 @@
         {
           "$ref": "#/$defs/A.act.pp.to-max"
         }
+      ]
+    },
+    "A.act.lose": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "type": "string",
+          "enum": [
+            "opp",
+            "opponents"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
       ]
     },
     "A.act.player-action": {
@@ -15732,6 +15773,97 @@
       "required": [
         "who",
         "effect"
+      ]
+    },
+    "A.act.player-effect.hand-limit": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "hand_limit": {
+              "const": "unlimited"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "hand_limit"
+          ]
+        },
+        "until": {
+          "const": "game"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
+    "A.act.player-effect.defense": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "const": {
+            "cannot": {
+              "what": "lose_defense"
+            }
+          }
+        },
+        "until": {
+          "const": {
+            "next_turn": {
+              "who": "self",
+              "edge": "begin"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
+      ]
+    },
+    "A.act.player-effect.fanfare": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "effect": {
+          "type": "object",
+          "properties": {
+            "fanfare_triggers": {
+              "const": 2
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "fanfare_triggers"
+          ]
+        },
+        "until": {
+          "const": {
+            "during_next_turn": {
+              "who": "self"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "effect",
+        "until"
       ]
     },
     "A.act.make-type": {
@@ -16645,10 +16777,26 @@
           "$ref": "#/$defs/A.act.apply"
         },
         "player_effect": {
-          "$ref": "#/$defs/A.act.player-effect"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.act.player-effect"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.hand-limit"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.fanfare"
+            },
+            {
+              "$ref": "#/$defs/A.act.player-effect.defense"
+            }
+          ]
         },
         "win": {
           "$ref": "#/$defs/A.act.player-action"
+        },
+        "lose": {
+          "$ref": "#/$defs/A.act.lose"
         },
         "skip_turn": {
           "$ref": "#/$defs/A.act.player-action"
@@ -16912,6 +17060,26 @@
         },
         {
           "$ref": "#/$defs/A.fusion.any"
+        }
+      ]
+    },
+    "A.head.fanfare": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/A.head.trigger"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "no_effect": {
+              "type": "boolean",
+              "const": true
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "no_effect"
+          ]
         }
       ]
     },
@@ -17392,7 +17560,7 @@
       "type": "object",
       "properties": {
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         },
         "lastword": {
           "$ref": "#/$defs/A.head.trigger"
@@ -18109,7 +18277,7 @@
           "$ref": "#/$defs/Ports"
         },
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         }
       },
       "required": [
@@ -19679,7 +19847,7 @@
       "type": "object",
       "properties": {
         "fanfare": {
-          "$ref": "#/$defs/A.head.trigger"
+          "$ref": "#/$defs/A.head.fanfare"
         },
         "lastword": {
           "$ref": "#/$defs/A.head.trigger"

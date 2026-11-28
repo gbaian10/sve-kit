@@ -1,0 +1,47 @@
+cards:
+  GFB01d-002EN:
+    abilities:
+      - keywords:
+          - bane
+          - ward
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  all:
+                    - exists:
+                        kind: follower
+                        who: opp
+                        zone: field
+                    - cmp:
+                        left:
+                          agg:
+                            attr: power
+                            fn: max
+                            of:
+                              kind: follower
+                              who: opp
+                              zone: field
+                        op: ge
+                        right:
+                          agg:
+                            attr: power
+                            fn: max
+                            of:
+                              kind: follower
+                              who: all
+                              zone: field
+                then:
+                  - damage:
+                      n: 4
+                      to:
+                        leader: opp
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

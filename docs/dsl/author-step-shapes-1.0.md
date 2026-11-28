@@ -34,6 +34,10 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 
 執行期的私有 Look 選卡可用 `choose.from: {in: seen, except: {in: seen, name: 指定名字}}` 排除一個字面名字，並與既有種類／特徵條件交集。此准入要求相同 observation 與非空名字，不接受公開目標、搜尋、聯集、分組或和 `not_same_name_as_this` 合用；這不改變下方一般 schema 的其他尚未准入形狀。
 
+`move: {ref: {any_of: [{who: opp, zone: field, kind: follower}, {who: opp, zone: ex}]}, to: hand}`
+在結算時對場上和 EX 各查一次公開集合，再於同一指示將聯集移回各卡持有者的手牌。
+兩支查詢沿用各區的公開篩選。此形狀限定同一玩家範圍的一支場上和一支 EX，目的地為手牌。
+
 ## 動作逐 variant
 
 | 動作 | 必填／變體 | 可選與互斥（長形另有 M） | 真例／合成 |
@@ -71,8 +75,9 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | play_card | ref:O | cost?:0；其餘費用覆寫尚不接受 | BP13-036 |
 | play_ability | of:O；trigger 或 ability:{ub:true,n:正安全整數} | cost_policy:normal/waive_original；兩支互斥 | BP14-023、A-016e |
 | apply | on:O、effect:E | until:U、capture:play | BP12-109、CP04-060 |
-| player_effect | who:P、effect:E | until:U | BP14-046 |
+| player_effect | who:P、effect:E | until:U。手牌無上限固定 `who: self`、`effect: {hand_limit: unlimited}`、`until: game`。入場曲倍增固定 `who: self`、`effect: {fanfare_triggers: 2}`、`until: {during_next_turn: {who: self}}`。防禦保護固定 `who: self`、`effect: {cannot: {what: lose_defense}}`、`until: {next_turn: {who: self, edge: begin}}` | BP14-046、GFB01a-003EN、GFB01c-008EN、GFD01-003EN |
 | win/skip_turn/extra_turn | who:P | 三個不同操作 | BP04-003、合成、EBD02-007；BP05-086 是費用，非 skip_turn 動作例 |
+| lose | who:opp 或 opponents | 指定對手直接敗北 | GFB01b-007EN，Q759、Q760 |
 | make_type | on:O、type:CardKind | until:U | BP05-001 |
 | evolve | ref:O | into:CardName／非空 CardName[]／ObjectSel；不收直接 param | A-060；BP09-004 的能力頭不算動作例 |
 | transform | ref:O、into:CardName或{allocate:{among:CardName[],each_exactly_once:true}} | entry_effects:E[]；into 不借 evolve 列表 | A-016j |

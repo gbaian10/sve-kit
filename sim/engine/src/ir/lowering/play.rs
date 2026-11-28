@@ -85,7 +85,11 @@ fn check_choice_shape(
         )
         || target.from.other
         || target.from.has_state_filter()
-        || target.distinct_by.is_some()
+        || target.distinct_by.as_ref().is_some_and(|distinct| {
+            // "Any number of cards of different classes" groups private hand cards by their
+            // printed class.
+            !matches!(distinct, ast::ChoiceDistinct::Class)
+        })
         || target.cost_sum_le.is_some()
         || target.from.leader.is_some()
         || target.from.leaders.is_some()
@@ -405,7 +409,7 @@ impl BodyContext<'_> {
                     },
                 },
                 binding,
-                target_roles: self.lower_target_roles(target, path)?,
+                target_roles: self.lower_target_roles(target, cardinality, path)?,
             },
             cardinality,
         ))
@@ -549,6 +553,7 @@ impl BodyContext<'_> {
     fn lower_target_roles(
         &mut self,
         target: &ast::Target,
+        cardinality: Cardinality,
         path: &str,
     ) -> Result<Option<super::super::TargetRoleSpec>, LoweringError> {
         let Some(roles) = &target.roles else {
@@ -573,6 +578,14 @@ impl BodyContext<'_> {
             let binding = Binding::new(self.allocator.id(path)?, self.scope);
             self.target_roles
                 .insert((target.bind.clone(), name.clone()), binding);
+            // "The first" and "the second": the remainder of at most two objects is a single
+            // object too.
+            if matches!(role, ast::TargetRole::IfNonempty { if_nonempty: 1 })
+                || cardinality.maximum == Some(Nat(2))
+            {
+                self.single_roles
+                    .insert((target.bind.clone(), name.clone()));
+            }
             lowered.push(super::super::TargetRole {
                 role: Nat(u64::try_from(index).map_err(|_private| unsupported(path))?),
                 cardinality: match role {
@@ -629,6 +642,16 @@ impl BodyContext<'_> {
         {
             self.single_targets.insert(target.bind.clone());
         }
+        // Cemetery targets lend printed attack and cost, without exposing effective board stats.
+        if cardinality.maximum == Some(Nat(1))
+            && target.any_of.is_none()
+            && matches!(
+                &target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+            )
+        {
+            self.cemetery_targets.insert(target.bind.clone());
+        }
         match &target.from.zone {
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
                 if cardinality.maximum == Some(Nat(1)) =>
@@ -671,10 +694,11 @@ impl BodyContext<'_> {
             target.from.zone,
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
         ) && (target.from.leader_or
-            || !matches!(
+            || !(matches!(
                 target.from.who,
                 Some(ast::Side::Controller | ast::Side::Opponent)
-            ))
+            ) || matches!((&target.from.who, &self.holder_choice),
+                (Some(ast::Side::Bound(holder)), Some(chooser)) if holder == chooser)))
         {
             return Err(unsupported(path));
         }
@@ -1202,6 +1226,7 @@ impl BodyContext<'_> {
                 reason = "New count filters must require an explicit admission decision."
             )]
             let ast::CountQuery {
+                acted: None,
                 face_up: None,
                 class: None,
                 not_class: None,
@@ -1382,11 +1407,16 @@ impl BodyContext<'_> {
                 targets: BTreeMap::new(),
                 follower_targets: BTreeSet::new(),
                 target_roles: BTreeMap::new(),
+                single_roles: BTreeSet::new(),
                 ability_holders: BTreeSet::new(),
                 single_targets: BTreeSet::new(),
+                cemetery_targets: BTreeSet::new(),
+                holder_choice: None,
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
                 resolution_scope: self.resolution_scope,
+                public_reveal_scope: self.resolution_scope,
+                branch_reveals: vec![],
                 resolution_captures: vec![],
                 event_captures: vec![],
                 event_trigger: None,
@@ -1427,8 +1457,10 @@ impl BodyContext<'_> {
                 context.targets.clone_from(&self.targets);
                 context.follower_targets.clone_from(&self.follower_targets);
                 context.target_roles.clone_from(&self.target_roles);
+                context.single_roles.clone_from(&self.single_roles);
                 context.ability_holders.clone_from(&self.ability_holders);
                 context.single_targets.clone_from(&self.single_targets);
+                context.cemetery_targets.clone_from(&self.cemetery_targets);
                 context
                     .recipient_targets
                     .clone_from(&self.recipient_targets);
@@ -1636,6 +1668,7 @@ fn choice_count(
         }
         ast::ModeCondition::EnteredFrom(_) => return Err(unsupported(path)),
         ast::ModeCondition::EnteredBy(condition) => context.entered_by(condition, path)?,
+        ast::ModeCondition::LeaderClass(class) => super::conditions::leader_class(class),
         ast::ModeCondition::LeaderLife(threshold) => Expr::Compute(Box::new(
             super::conditions::leader_life_condition(threshold, path)?,
         )),

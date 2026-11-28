@@ -350,6 +350,14 @@ impl Game {
         self.internal_commit_rule_discard(pending)?;
         Ok(())
     }
+
+    pub(in crate::game) fn hand_excess(&self, seat: &str) -> Result<u64> {
+        if self.player(seat)?.unlimited_hand {
+            return Ok(0);
+        }
+        u64::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0)).map_err(invalid)
+    }
+
     fn next_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.close()?;
         self.internal_numeric_end_turn(turn)?;
@@ -362,6 +370,7 @@ impl Game {
         self.internal_player_play_end_turn(turn);
         self.internal_preventions_end_turn(turn);
         self.internal_phase_restrictions_end_turn();
+        self.internal_expire_fanfare_multiplier()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
@@ -371,6 +380,7 @@ impl Game {
         self.internal_preventions_begin_turn()?;
         self.internal_player_cost_begin_turn()?;
         self.internal_attack_restrictions_begin_turn()?;
+        self.player_mut(&seat)?.defense_protected = false;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =
@@ -409,8 +419,11 @@ impl Game {
             cause: json!({"rule":"7.2.4"}),
             ..Frame::default()
         };
-        if !prevent_draw {
-            drop(self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?);
+        if !prevent_draw
+            && let Some(drawn) =
+                self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?
+        {
+            self.internal_rule_draw_event(&seat, &drawn)?;
         }
         // Start checks can leave typed occurrences that must finish before Main begins.
         self.state.flow = json!({"kind":"main","stage":"start-check"});
@@ -438,6 +451,35 @@ impl Game {
             }
             self.seal_player_event_batch(player_batch);
         }
+        Ok(())
+    }
+
+    pub(super) fn lose_for_players(&mut self, players: Vec<String>, frame: &Frame) -> Result<()> {
+        let mut losers = Vec::new();
+        for seat in players {
+            if !self.restricted(&format!("{seat}.leader"), "lose")? {
+                losers.push(seat);
+            }
+        }
+        if losers.is_empty() {
+            return Ok(());
+        }
+        // In a two-seat game, a single loss immediately gives the other seat the win.
+        let winner = match losers.as_slice() {
+            [loser] => Some(other(loser)),
+            _ => None,
+        };
+        self.state.game = json!({"ended":true,"winner":winner,"by":"1.2.4"});
+        let group = self.group();
+        let player_batch = self.player_event_mark();
+        for loser in losers {
+            self.emit(
+                json!({"kind":"敗北","player":loser,"ability":frame.reference}),
+                &frame.cause,
+                group,
+            );
+        }
+        self.seal_player_event_batch(player_batch);
         Ok(())
     }
 
@@ -505,7 +547,7 @@ impl Game {
         if !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "discard"
-            && self.zone_count(self.active(), "hand") <= 7
+            && self.hand_excess(self.active())? == 0
         {
             self.next_turn()?;
             return self.checks();

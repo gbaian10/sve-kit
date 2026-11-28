@@ -180,13 +180,14 @@ def load_candidate_registry(
 
 
 def load_identity_registry(
-    root: Path, *, repository: Path | None = None
+    root: Path, *, repository: Path | None = None, include_mapping_reviews: bool = False
 ) -> RegistrySnapshot:
     """Read immutable identities for authoring and candidates, without approving reviews.
 
     Only review renewals and append-only art uses may coexist with this view.
     Their history and unchanged identity are checked, but frozen evidence is not
-    replayed. Both kinds are omitted, so this is not a publication registry.
+    replayed. Art is omitted. Authors may retain mapping decisions for source region
+    selection, but this view does not approve their evidence for publication.
     """
     checked = load_candidate_registry(root, repository=repository)
     return RegistrySnapshot(
@@ -195,7 +196,8 @@ def load_identity_registry(
             {
                 key: record
                 for key, record in checked.records.items()
-                if record.kind not in {"art", "region_mapping_review"}
+                if record.kind != "art"
+                and (include_mapping_reviews or record.kind != "region_mapping_review")
             }
         ),
     )

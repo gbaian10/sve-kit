@@ -1,0 +1,146 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP21",
+  "range": "SP/000-099",
+  "products": {
+    "products-7baa80be21635bcb": [
+      {
+        "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+        "date": "Nov. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP21-BP22",
+          "https://en.shadowverse-evolve.com/products/bp2122/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "BP21-SP01EN",
+      "documents": {
+        "documents-0b33c016958079b1": {
+          "region": "en",
+          "record": {
+            "number": "BP21-SP01EN",
+            "faces": [
+              {
+                "name": "Lumiore, Prestigious Gold",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Dragonewt"
+                },
+                "stats": {
+                  "cost": "6",
+                  "hp": "4",
+                  "power": "4"
+                },
+                "text": "{icon_fanfare|[fanfare]} Discard a card: Search your deck for a 2-cost Dragonewt follower and 1-cost Dragonewt follower, summon them, then shuffle.\nAt the start of your end phase, if there are at least 3 Dragonewt followers on your field, deal 3 damage to each enemy leader and enemy follower on the field.",
+                "sections": [],
+                "raw_text": "{icon_fanfare|[fanfare]} Discard a card: Search your deck for a 2-cost Dragonewt follower and 1-cost Dragonewt follower, summon them, then shuffle.\nAt the start of your end phase, if there are at least 3 Dragonewt followers on your field, deal 3 damage to each enemy leader and enemy follower on the field.",
+                "speech": null,
+                "illustrator": "oima hiromu",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/BP21-SP01EN.png",
+                "trait_raw": "Dragonewt",
+                "traits": [
+                  "Dragonewt"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q2491 (Nov. 6, 2026)",
+                "question": "Can I choose to summon a 2-cost Dragonewt follower and not summon a 1-cost Dragonewt follower?",
+                "answer": "Yes, you can."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:174a0bb50eec5c90967b59e8a6ecf057e9ace0b750a949b790bc0e92ac252973",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP21-SP01EN",
+            "fetched_at": "2026-11-27T13:30:18.921491Z"
+          },
+          "document_ref": "documents-0b33c016958079b1"
+        }
+      ]
+    },
+    {
+      "card_no": "BP21-SP02EN",
+      "documents": {
+        "documents-08f1d5fecd014586": {
+          "region": "en",
+          "record": {
+            "number": "BP21-SP02EN",
+            "faces": [
+              {
+                "name": "Mono, Garnet Rebel",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Abysscraft",
+                  "Format": "Any",
+                  "Rarity": "Special",
+                  "Trait": "Machina / Demon"
+                },
+                "stats": {
+                  "cost": "3",
+                  "hp": "4",
+                  "power": "5"
+                },
+                "text": "Storm.\n{icon_act|[act]} {icon_cost02|[cost02]}, banish an Alpha Drive from your cemetery: Give each Machina follower on your field {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and Rush. Activate only once per turn.",
+                "sections": [],
+                "raw_text": "Storm.\n{icon_act|[act]} {icon_cost02|[cost02]}, banish an Alpha Drive from your cemetery: Give each Machina follower on your field {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and Rush. Activate only once per turn.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP21/BP21-SP02EN.png",
+                "trait_raw": "Machina / Demon",
+                "traits": [
+                  "Machina",
+                  "Demon"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP07-069EN|Mono, Garnet Rebel}",
+                "href": "/cards/?cardno=BP07-069EN"
+              },
+              {
+                "label": "{BP07-075EN|Alpha Drive}",
+                "href": "/cards/?cardno=BP07-075EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:534f008165325735e74f7af1239297af9e22efa850d71b4776c175f236045aaf",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP21-SP02EN",
+            "fetched_at": "2026-11-27T13:30:21.977808Z"
+          },
+          "document_ref": "documents-08f1d5fecd014586"
+        }
+      ]
+    }
+  ]
+}

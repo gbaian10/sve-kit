@@ -7,14 +7,19 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, object_value
+from sve_carddb.domains.effects.author_current import english_only_cards
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
     SourceError,
     parse_document,
 )
+from sve_carddb.domains.registry.records import CardData, Observation, PrintingData
+from sve_carddb.domains.registry.snapshot import RegistryRecord, RegistrySnapshot
+from sve_carddb.domains.registry.storage import RegistryFiles
 from sve_carddb.workflows import authoring
 
 from ...support.direct_current_fixture import synthetic_current
+from ...support.registry_preview_fixtures import mapping_review
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -85,6 +90,73 @@ def test_printing_lookup_sees_rows_written_after_the_first_lookup(
                 | {"id": "SYN-02", "card_no": "SYN-02", "card_no_state": "official"},
             )
         assert current.printing_card("SYN-02") == card_id
+
+
+@pytest.mark.parametrize("excluded", ["jp_printing", "unreviewed", "provisional"])
+def test_english_only_requires_confirmed_identity_review_and_no_jp_printing(
+    excluded: str,
+) -> None:
+    hash_value = "sha256:" + "a" * 64
+    review = mapping_review(hash_value)
+    card = CardData(
+        id=review.card_id,
+        layout="single",
+        identity_state="provisional" if excluded == "provisional" else "confirmed",
+        home_set_id="SYN",
+    )
+    en = PrintingData(
+        id="p:" + "1" * 32,
+        card_id=card.id,
+        region="en",
+        card_no="SYN-01EN",
+        variant_key="synthetic",
+        home_set_id="SYN",
+        source_face_map=(),
+        observation=Observation(
+            region="en",
+            card_no="SYN-01EN",
+            recipe="registry-observation-v2",
+            observation_hash=hash_value,
+            rules_hash=hash_value,
+        ),
+    )
+    records = {
+        "card": RegistryRecord("card", "card", "test", card, "synthetic", b""),
+        "en": RegistryRecord("en", "printing", "test", en, "synthetic", b""),
+    }
+    if excluded != "unreviewed":
+        records["review"] = RegistryRecord(
+            "review", "region_mapping_review", "test", review, "synthetic", b""
+        )
+    if excluded == "jp_printing":
+        jp = en.model_copy(
+            update={
+                "id": "p:" + "2" * 32,
+                "region": "jp",
+                "card_no": "SYN-01",
+                "observation": en.observation.model_copy(
+                    update={"region": "jp", "card_no": "SYN-01"}
+                ),
+            }
+        )
+        records["jp"] = RegistryRecord("jp", "printing", "test", jp, "synthetic", b"")
+    assert english_only_cards(RegistrySnapshot(RegistryFiles(b"", ()), records)) == (
+        frozenset()
+    )
+
+
+def test_a_japanese_card_rejects_its_official_english_number(tmp_path: Path) -> None:
+    with synthetic_current(tmp_path) as current:
+        printing = current.db.rows("printing")[0].values
+        with current.db.transaction():
+            current.db.insert(
+                "printing",
+                dict(printing)
+                | {"id": "english", "region": "en", "card_no": "SYN-01EN"},
+            )
+        assert current.printing_card("SYN-01") == printing["card_id"]
+        with pytest.raises(SourceError, match="record_key_identity_mismatch"):
+            current.printing_card("SYN-01EN")
 
 
 @pytest.mark.parametrize("mutation", ["insert", "update", "delete"])

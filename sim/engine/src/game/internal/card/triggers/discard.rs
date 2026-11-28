@@ -271,7 +271,7 @@ impl Game {
                     else {
                         continue;
                     };
-                    if !subject_condition::controlled_by(source.controller, actor)? {
+                    if subject_condition::controlled_by(source.controller, actor)? != by.own {
                         continue;
                     }
                     if execution.id != execution_id
@@ -280,14 +280,16 @@ impl Game {
                     {
                         return Err(invalid("discard cause authority disagrees"));
                     }
-                    if cause_traits.is_none() {
-                        cause_traits = Some(execution.source_traits(self)?);
-                    }
-                    let Some(traits) = &cause_traits else {
-                        continue;
-                    };
-                    if !subject_condition::traits(traits, &by.trait_id)? {
-                        continue;
+                    if let Some(trait_id) = &by.trait_id {
+                        if cause_traits.is_none() {
+                            cause_traits = Some(execution.source_traits(self)?);
+                        }
+                        let Some(traits) = &cause_traits else {
+                            continue;
+                        };
+                        if !subject_condition::traits(traits, trait_id)? {
+                            continue;
+                        }
                     }
                 }
                 let source = self.internal_card_source(&holder, ability.node.id, actor)?;

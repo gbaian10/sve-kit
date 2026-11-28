@@ -237,7 +237,7 @@ pub(super) fn player_banish(control: &Control) -> Option<(&Instruction, Binding<
         .then_some((instruction, *player, *count))
 }
 
-/// A checked fixed top slice: another player's deck may only be put into its owner's cemetery.
+/// A checked fixed top slice, with private deck access limited by the destination.
 pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
     let (objects, own_only) = match action {
         Action::Banish { objects } => (objects, true),
@@ -275,6 +275,7 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
             && zone.kind == ZoneKind::Deck
             && (!own_only
                 || zone.player == (PlayerRef::Controller {})
+                || (matches!(action, Action::Banish { .. }) && zone.player == opponent())
                 || top_to_ex_player(action)
                     .is_some_and(|player| matches!(player, PlayerRef::Bound { .. }))) =>
         {
@@ -282,6 +283,13 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
         }
         _ => None,
     }
+}
+
+pub(super) fn own_deck_top_banish(action: &Action) -> Option<(&PlayerRef, u64)> {
+    if !matches!(action, Action::Banish { .. }) {
+        return None;
+    }
+    deck_top(action).filter(|(player, _)| **player == (PlayerRef::Controller {}))
 }
 
 pub(super) fn declared_deck_banish(action: &Action) -> Option<&Expr<Nat>> {
@@ -684,6 +692,8 @@ impl Game {
                 "movement member validation needs a movement instruction",
             ));
         };
+        let field_ex_return = method == MoveMethod::Put
+            && matches!(objects, Selector::Union { sets } if super::ordering::public_field_ex_union(sets));
         for &member in members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
@@ -716,8 +726,11 @@ impl Game {
                     && member.generation == execution.context.generation
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
+                let public_departure =
+                    matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
+                        || (field_ex_return && object.zone == "ex");
                 if kind == ZoneKind::Hand
-                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
+                    && !public_departure
                     && !private_observed_move
                     && !resolving_source
                 {

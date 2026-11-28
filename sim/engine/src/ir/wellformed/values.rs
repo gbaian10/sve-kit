@@ -135,7 +135,7 @@ impl Checker {
     fn sum(&mut self, objects: &Selector, property: NumericProperty) -> Checked {
         if let Selector::Bound { reference } = objects
             && property == NumericProperty::OriginalCost
-            && (!self.env.public_board_singles.contains(&reference.key())
+            && (!self.env.public_cost_singles.contains(&reference.key())
                 || self.env.access.get(&reference.key()) != Some(&Visibility::Public {}))
         {
             return self.reject();
@@ -267,6 +267,7 @@ impl Checker {
                 self.player(player)
             }
             NatRead::HistoryCount { query, count } => self.history_count_read(query, *count),
+            NatRead::SourceAttacksThisTurn {} => Ok(()),
             NatRead::Combo { player, execution } => {
                 if *execution != (ExecutionRef::Current {}) {
                     return self.reject();
@@ -296,11 +297,13 @@ impl Checker {
             Expr::Live(read) => match read.as_ref() {
                 BoolRead::Awakening { player }
                 | BoolRead::Crimson { player }
+                | BoolRead::LeaderClass { player, .. }
                 | BoolRead::OwnTurn { player } => self.player(player),
                 BoolRead::CardPlayOrigin {
                     execution: ExecutionRef::Current {},
                     ..
-                } => Ok(()),
+                }
+                | BoolRead::PhysicalSourceInZone { .. } => Ok(()),
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::FieldEntryOrigin { object, .. }
                 | BoolRead::FieldEntryMethod { object, .. }

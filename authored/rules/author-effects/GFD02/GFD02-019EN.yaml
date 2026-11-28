@@ -1,0 +1,49 @@
+cards:
+  GFD02-019EN:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  leader_class: ロイヤル
+                else:
+                  - buff:
+                      hp: 2
+                      on: ally
+                      power: 2
+                  - grant:
+                      keywords:
+                        - storm
+                      on: ally
+                then:
+                  - buff:
+                      hp: 2
+                      on:
+                        kind: follower
+                        other: true
+                        who: self
+                        zone: field
+                      power: 2
+                  - grant:
+                      keywords:
+                        - storm
+                      on:
+                        kind: follower
+                        other: true
+                        who: self
+                        zone: field
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set

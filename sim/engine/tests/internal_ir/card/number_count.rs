@@ -117,6 +117,69 @@ fn class_and_negative_class_count_queries_intersect_kind_and_controller() {
 }
 
 #[test]
+fn field_counts_read_current_posture_for_the_requested_player_and_kind() {
+    let count =
+        |acted| json!({"count":{"who":"opp","zone":"field","kind":"follower","acted":acted}});
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"draw":{"n":count(true)}},
+        {"if":{
+            "cond":{"cmp":{"left":count(false),"op":"eq","right":1_u8}},
+            "then":[{"life":{"who":"self","delta":1_u8}}]
+        }},
+        {"act":{"ref":{"who":"opp","zone":"field","kind":"follower"}}},
+        {"draw":{"n":count(false)}}
+    ]}));
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},
+        {"id":"ally","card":"unit-follower","state":{"acted":true}}
+    ]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"first","card":"unit-spell"},{"id":"second","card":"unit-spell"},
+        {"id":"third","card":"unit-spell"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"acted","card":"unit-follower","state":{"acted":true}},
+        {"id":"standing","card":"unit-follower"},
+        {"id":"amulet","card":"unit-amulet","state":{"acted":true}}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "count-follower-posture",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    activate(&mut game, 1);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!(["first"]));
+    assert_eq!(state["P1"]["leader"]["life"], 21_u8);
+    assert_eq!(state["objects"]["standing"]["acted"], true);
+}
+
+#[test]
+fn count_posture_rejects_non_field_zones() {
+    for zone in ["hand", "deck", "ex", "cemetery", "banish", "evolve_deck"] {
+        let count = json!({"who":"self","zone":zone,"acted":false});
+        assert!(
+            lowerer()
+                .lower(&tree(
+                    &json!({"cost":{"pp":0},"do":[{"draw":{"n":{"count":count}}}]}),
+                ))
+                .is_err(),
+            "{zone} does not have field posture"
+        );
+    }
+}
+
+#[test]
 fn scalar_zone_counts_reject_hidden_characteristic_filters_and_unknown_keywords() {
     for query in [
         json!({"who":"self","zone":"banish","class":"エルフ"}),

@@ -1,0 +1,84 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: printing
+    owner: BP12
+    data:
+      id: p:45ed189b175a51c0a731b153a1d4fcab
+      card_id: c:b878064cc68d5937bb7b6896e09aa1eb
+      region: en
+      card_no: BP12-R071EN
+      variant_key: standard
+      home_set_id: BP12
+      source_face_map:
+        - source_index: 0
+          face_id: f:dfbbf16c2e4658189aad79b4647c50d5
+      observation:
+        region: en
+        card_no: BP12-R071EN
+        observation_hash: sha256:36734f662630a81a99c7870a12c6d4981f00e9b004a1af68bbb6fa343ce15fe1
+        rules_hash: sha256:dc013fb96ba07431ab471dbcd6c7f49fcbcc921f8a588ca811a4d4dc9c48ab3c
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: EBD03-004
+        target_observation:
+          region: jp
+          card_no: EBD03-004
+          observation_hash: sha256:d45f9b36c2727e43b0d09bbcbb194d21ebb0e3218bd287207965c7da8960bcdd
+          rules_hash: sha256:d6e0a8d12388f2fe1d2d746c2ec7d6442c68c1035ebc8b7cb57ecc6a568737df
+          recipe: registry-observation-v2
+  - kind: printing
+    owner: BP12
+    data:
+      id: p:290ae780c2ac5236b5ad59c2aa9bfa54
+      card_id: c:ca342c7c6c995d1eb3ee9434d4d2d3dc
+      region: en
+      card_no: BP12-R086EN
+      variant_key: standard
+      home_set_id: BP12
+      source_face_map:
+        - source_index: 0
+          face_id: f:8e874e6d952250089c3fdab3f27a9f3c
+      observation:
+        region: en
+        card_no: BP12-R086EN
+        observation_hash: sha256:5100077c05885756c94f616e4d624fb219386d481f51690a15168b937f235864
+        rules_hash: sha256:0aeedf959375c21bee70e133c0ae205ee6e27001fd68252841c22bbde6c5fadd
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP12-086
+        target_observation:
+          region: jp
+          card_no: BP12-086
+          observation_hash: sha256:2d7ae78335a4688a47aca46752cce5c675cc14ea44fe651f3973bb273751fd22
+          rules_hash: sha256:f42b7c092fd7ab6b2120294859997be1e186967a604c5473e2d47d586a683cca
+          recipe: registry-observation-v2
+  - kind: printing
+    owner: BP12
+    data:
+      id: p:f314c89cc74c55c6847dc17809dc6c5a
+      card_id: c:6de6a09e8e69574dbe53d884c7f7bf31
+      region: en
+      card_no: BP12-R087EN
+      variant_key: standard
+      home_set_id: BP12
+      source_face_map:
+        - source_index: 0
+          face_id: f:fe856e09506657bc86b5436d79e2bdd1
+      observation:
+        region: en
+        card_no: BP12-R087EN
+        observation_hash: sha256:a254db7c82c1c0bf8943fd1e575730f7a247ab9b80bcb4e19884ce9b0bf047b8
+        rules_hash: sha256:65f85f694895313e4784e2529fdfa147d8437f36c39a345e285d9f00a0a27e97
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP12-087
+        target_observation:
+          region: jp
+          card_no: BP12-087
+          observation_hash: sha256:f81a68b0db6037cf9abc8bdeb17ce5d4da9979589eb9a8d71c0eef8d917061f8
+          rules_hash: sha256:83e694c42382d17eaae7f115e5f3e40ded221a5667e7d76d4e2c2ee6ffe178b3
+          recipe: registry-observation-v2

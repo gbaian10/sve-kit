@@ -1,0 +1,28 @@
+cards:
+  GFE01-013EN:
+    abilities:
+      - keywords:
+          - intimidate
+          - aura
+        line: 1
+      - line: 2
+        params:
+          n: 1
+        use: draw_exact_fanfare.v1
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - give:
+                ref: this
+                to: other_players
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+format: 2
+kind: author_effect_set
