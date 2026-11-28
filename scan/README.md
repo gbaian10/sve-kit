@@ -22,7 +22,7 @@ It also turns phone photos of physical cards into card images, for cards the off
 ## Common tasks
 
 Commands below are `python -m sve_scan …` run as `uv --directory scan run python -m sve_scan …`, with the three
-variables of "Where data lives" set. `rec-ft` and `det-e` stand for the work-folder file names of the current
+variables of "Where data lives" set. `rec-ft2` and `det-e` stand for the work-folder file names of the current
 models.
 
 ### New cards or a new card data version (models unchanged)
@@ -32,9 +32,9 @@ index from the new export and publish it:
 
 ```bash
 python -m sve_scan gallery                                            # card images of the export
-uv --directory scan run --group train python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft
-python -m sve_scan index rec-ft                                       # index/rec-ft/{jp,en}.* and build.json
-python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # same versions: only the index changes
+uv --directory scan run --group train python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft2
+python -m sve_scan index rec-ft2                                      # index/rec-ft2/{jp,en}.* and build.json
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft2               # same versions: only the index changes
 ```
 
 - About 7.5 minutes on a 10-core CPU with an RTX 3070: gallery 2.7 min, hub 0.4 min (GPU), index 4.4 min, the
@@ -48,8 +48,8 @@ python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # same vers
 ### Check a model
 
 ```bash
-python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # recogniser, real photos
-python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # deck photos of the held-out events
+python -m sve_scan eval-rec rec-ft2 <evaluation folder> ...          # recogniser, real photos
+python -m sve_scan deck-label rec-ft2 det-e labels.json deck-det-e   # deck photos of the held-out events
 python -m sve_scan eval-deck deck-det-e                             # deck recall from the step above
 ```
 
@@ -60,7 +60,7 @@ MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
 ### Train a new model version
 
 Continue the latest stage with the recipe in "Recogniser" or "Corner finder" (`INIT=<previous tag>`), check it,
-then release it with the next version number (`release <out dir> 2 <det tag> 1 rec-ft` for a new corner finder).
+then release it with the next version number (`release <out dir> 2 <det tag> 1 rec-ft2` for a new corner finder).
 A new recogniser always needs a new index: rerun `rec-hub` and `index` with its tag before `release`.
 
 ## Card photos
@@ -89,14 +89,14 @@ shadow on it. If the table's glare falls on the card, move the card; any orienta
 
 ### What applies to which card
 
-| Step | Every card | Pale-bordered cards | One frame design (`--template`) |
-| --- | --- | --- | --- |
-| Find the card, straighten it to 63:88, turn it upright | ✓ | | |
-| Rounded corners like official images (3 mm radius, soft edge, faint outer ring) | ✓ | | |
-| Checks: phone tilt, card size in the photo, glare | ✓ | | |
-| White balance, soft-shadow removal and the uneven-light check, all measured on the border | | ✓ | |
-| Tone range: border to official white, darkest 1% to a fixed black | | ✓ (no template) | |
-| Name bar lightness pulled to the official value; a faded badge brought up toward it (at most 1.4×) | | | ✓ (bordered cards only) |
+| Step                                                                                               | Every card | Pale-bordered cards | One frame design (`--template`) |
+| -------------------------------------------------------------------------------------------------- | ---------- | ------------------- | ------------------------------- |
+| Find the card, straighten it to 63:88, turn it upright                                             | ✓          |                     |                                 |
+| Rounded corners like official images (3 mm radius, soft edge, faint outer ring)                    | ✓          |                     |                                 |
+| Checks: phone tilt, card size in the photo, glare                                                  | ✓          |                     |                                 |
+| White balance, soft-shadow removal and the uneven-light check, all measured on the border          |            | ✓                   |                                 |
+| Tone range: border to official white, darkest 1% to a fixed black                                  |            | ✓ (no template)     |                                 |
+| Name bar lightness pulled to the official value; a faded badge brought up toward it (at most 1.4×) |            |                     | ✓ (bordered cards only)         |
 
 A card counts as pale-bordered when more than 80% of a band just inside its edge is pale; otherwise it is
 full art and keeps the camera's colours. Full-art cards have no reference printed on them, so their colour and
@@ -128,20 +128,20 @@ uv --directory scan run pytest            # what CI runs; needs no GPU and no pr
 
 Every location comes from the environment; the repo holds no machine paths.
 
-| Variable | Contents |
-| --- | --- |
-| `SVE_SCAN_EXPORT` | A public export root: `snapshots/` and `images/<size>/<int_id>.webp` (the gallery source) |
-| `SVE_SCAN_WORK` | Generated files: gallery, banks, checkpoints, ONNX models, indexes, evaluation results, logs |
-| `SVE_SCAN_DATA` | Private photos and material derived from them; never published, never in the repo |
+| Variable          | Contents                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| `SVE_SCAN_EXPORT` | A public export root: `snapshots/` and `images/<size>/<int_id>.webp` (the gallery source)    |
+| `SVE_SCAN_WORK`   | Generated files: gallery, banks, checkpoints, ONNX models, indexes, evaluation results, logs |
+| `SVE_SCAN_DATA`   | Private photos and material derived from them; never published, never in the repo            |
 
 Layout under `SVE_SCAN_DATA`:
 
-| Path | Contents |
-| --- | --- |
-| `real/<folder>/manifest.jsonl` | Labelled real photos, one row per photo: `{file, region, card_no, [conditions], [exclude]}` |
-| `real/phone-2026-10-18/`, `real/det-train/` | The maintainer's own aim-frame saves and side-seat bursts, evaluation only |
-| `web-x/sample-events-orig/<event>/` | Deck photos from players' social media posts; `auto-labels/` holds classes and labels |
-| `web-det/pokemon-card-segmentation/` | An open CC0 card segmentation set, real training data for the corner finder |
+| Path                                        | Contents                                                                                    |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `real/<folder>/manifest.jsonl`              | Labelled real photos, one row per photo: `{file, region, card_no, [conditions], [exclude]}` |
+| `real/phone-2026-10-18/`, `real/det-train/` | The maintainer's own aim-frame saves and side-seat bursts, evaluation only                  |
+| `web-x/sample-events-orig/<event>/`         | Deck photos from players' social media posts; `auto-labels/` holds classes and labels       |
+| `web-det/pokemon-card-segmentation/`        | An open CC0 card segmentation set, real training data for the corner finder                 |
 
 Data sources are described only as "second-hand marketplace listing photos" and "players' social media posts".
 Texture banks and real photos are not distributed; only the code that builds the banks is published.
@@ -183,7 +183,7 @@ python -m sve_scan banks texbank.npz <out dir>/sleeve_material.npz realbank.npz 
 
 ### 3. Recogniser
 
-The current model was trained in two stages:
+The current model was trained in three stages:
 
 ```bash
 # stage 1: from ImageNet weights, 40 epochs, foil textures only
@@ -196,9 +196,12 @@ INIT=rec-base LR_SCALE=0.25 SIBLINGS=art FRAME_P=0.6 FRAME_SMIN=0.4 HOLO_P=0.2 D
   REAL_P=0.4 TEXBANK=texbank.npz REAL2_P=0.3 REALBANK=realbank.npz PROCBANK=procbank.npz WR_P=0.2 HS_P=0.2 MISC_P=0.1 \
   python -m sve_scan rec-train mobilenetv3_large_100.ra_in1k 12 rec-ft
 
-python -m sve_scan rec-export mobilenetv3_large_100.ra_in1k rec-ft   # rec-ft.w8.onnx (weights-only int8)
-python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft      # hub correction values
-python -m sve_scan index rec-ft                                       # index/rec-ft/{jp,en}.* and build.json
+# stage 3: continue stage 2 the same way on a gallery with new sets or a new frame style
+INIT=rec-ft LR_SCALE=0.25 <stage 2 variables> python -m sve_scan rec-train mobilenetv3_large_100.ra_in1k 12 rec-ft2
+
+python -m sve_scan rec-export mobilenetv3_large_100.ra_in1k rec-ft2  # rec-ft2.w8.onnx (weights-only int8)
+python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft2     # hub correction values
+python -m sve_scan index rec-ft2                                      # index/rec-ft2/{jp,en}.* and build.json
 ```
 
 - Training once from scratch with every bank mixed in regresses (the foil share gets diluted). A new version must
@@ -208,6 +211,10 @@ python -m sve_scan index rec-ft                                       # index/re
   few cards win every uncertain photo. The index step refuses hub values made for another gallery
 - A new set: rerun `gallery`, `rec-hub` and `index`; the models need no retraining (about 8% of cards are held out
   of training to keep checking that)
+- Stage 3 added a set with a new frame style (GBF) and many English-only cards. Continuing stage 2 re-creates the
+  class weights from the current gallery, so new cards need no special handling. Against stage 2 on the same
+  index, it raised top-1 on the maintainer's photos of the new set from .927 to .964 and kept the real-photo sets
+  within run-to-run noise (397 and 399 of 429)
 
 ### 4. Corner finder
 
@@ -248,10 +255,10 @@ python -m sve_scan det export det-e det_det-e.w8.onnx
 ### 5. Evaluation
 
 ```bash
-python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # single card: card-level top-1 / top-5
-python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # then eval-deck for deck recall
+python -m sve_scan eval-rec rec-ft2 <evaluation folder> ...          # single card: card-level top-1 / top-5
+python -m sve_scan deck-label rec-ft2 det-e labels.json deck-det-e   # then eval-deck for deck recall
 python -m sve_scan eval-deck deck-det-e
-python -m sve_scan eval-det rec-ft det.json det-e:global            # corner finder: useful boxes, corner error
+python -m sve_scan eval-det rec-ft2 det.json det-e:global            # corner finder: useful boxes, corner error
 ```
 
 - Results go to `SVE_SCAN_WORK/eval/`; the same inputs and models give the same results
@@ -261,7 +268,7 @@ python -m sve_scan eval-det rec-ft det.json det-e:global            # corner fin
 ### 6. Release files
 
 ```bash
-python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # det-1 = stage 5, rec-1 = stage 2
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft2               # det-1 = stage 5, rec-1 = stage 3
 ```
 
 Writes `models/<sha256>.onnx`, `index/<sha256>.*` and `manifest.json` for the publish step, which uploads them under
