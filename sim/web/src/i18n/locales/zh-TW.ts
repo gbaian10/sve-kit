@@ -812,6 +812,7 @@ const zhTW = {
     importPlaceholder: "3 BP01-001\n2 BP01-002 …\n或 SVEK-…\n或 DeckLog 代碼（例如 6LPM7）",
     importBadCode: "無法讀取這個分享碼。",
     importPreviewTitle: "辨識結果",
+    importPictureLoading: "正在載入卡圖…",
     importCounts: "主牌組 {{main}} 張・進化牌組 {{evolve}} 張・候補 {{side}} 張",
     importLeader: "主戰者：{{name}}",
     importName: "名稱：{{name}}",

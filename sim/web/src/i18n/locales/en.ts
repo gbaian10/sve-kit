@@ -867,6 +867,7 @@ export default {
     importPlaceholder: "3 BP01-001\n2 BP01-002 …\nor SVEK-…\nor a DeckLog code (e.g. 6LPM7)",
     importBadCode: "This share code cannot be read.",
     importPreviewTitle: "What was read",
+    importPictureLoading: "Loading card images…",
     importCounts: "Main deck {{main}} · Evolve deck {{evolve}} · Maybeboard {{side}}",
     importLeader: "Leader: {{name}}",
     importName: "Name: {{name}}",

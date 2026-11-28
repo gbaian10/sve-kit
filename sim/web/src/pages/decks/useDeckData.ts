@@ -137,7 +137,7 @@ const CHUNK = 20
  * the main-thread index for the rest.
  */
 export function useDeckImages(
-  deck: Deck,
+  deck: Pick<Deck, "edition" | "leader" | "main" | "evolve" | "side">,
   facts: DeckFacts | null,
   fallback: ImageIndex | undefined,
 ): ImageIndex | undefined {

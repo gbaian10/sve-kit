@@ -849,6 +849,7 @@ export default {
       "3 BP01-001\n2 BP01-002 …\nまたは SVEK-…\nまたはデッキログのコード（例：6LPM7）",
     importBadCode: "この共有コードは読み取れません。",
     importPreviewTitle: "読み取り結果",
+    importPictureLoading: "カード画像を読み込み中…",
     importCounts: "メインデッキ {{main}} 枚・エボルヴデッキ {{evolve}} 枚・候補 {{side}} 枚",
     importLeader: "リーダー：{{name}}",
     importName: "名前：{{name}}",

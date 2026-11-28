@@ -94,8 +94,9 @@ function recordingContext() {
     (...args: unknown[]) => {
       calls.push({ name, args })
     }
+  // Placeholder labels wrap by measured width: ten units a character.
   const ctx = new Proxy<Record<string, unknown>>(
-    {},
+    { measureText: (text: string) => ({ width: text.length * 10 }) },
     {
       get: (target, key) =>
         typeof key === "string" && key in target ? target[key] : record(String(key)),
@@ -174,6 +175,31 @@ describe("deck image drawing", () => {
     expect(canvas.width).toBe(5226)
     expect(calls.find((c) => c.name === "scale")?.args[0]).toBeCloseTo(5226 / 1200, 2)
     expect(texts()).not.toContain("unused")
+  })
+
+  it("draws a named frame for a missing card image when asked to", async () => {
+    const { ctx, calls, texts } = recordingContext()
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    )
+    const loaded = new Image()
+    await renderDeckImage(
+      {
+        size: "small",
+        title: "D",
+        subtitle: "",
+        leader: { src: undefined, label: "Leader" },
+        leaderLine: "",
+        sections: [{ label: "Main", cards: [card("ok", 3), card("broken", 2)] }],
+        footer: "",
+        missing: "placeholder",
+        colors,
+      },
+      (src) => Promise.resolve(src === "/img/ok" ? loaded : null),
+    )
+    expect(calls.filter((c) => c.name === "drawImage").map((c) => c.args[0])).toEqual([loaded])
+    // The frames carry the names; both counts are still drawn.
+    expect(texts()).toEqual(expect.arrayContaining(["Leader", "broken", "3", "2"]))
   })
 
   it("fails when the browser gives no 2D context", async () => {

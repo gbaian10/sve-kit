@@ -19,13 +19,18 @@ import {
   readImport,
 } from "../../domain/deck/import"
 import { createDeck, totalCount } from "../../domain/deck/model"
+import type { DeckEntry } from "../../domain/deck/types"
 import { deckLogReferenceOf } from "../../domain/decklog"
 import type { Region } from "../../domain/search"
 import { decksStore, useDecks } from "../../settings"
 import { PageTitle } from "../PageTitle"
-import { useDeckData } from "./useDeckData"
+import { deckImageInput, deckImagesPending } from "./deck-image-input"
+import { useDeckLabels } from "./deck-labels"
+import { DeckPicture } from "./DeckPicture"
+import { useDeckData, useDeckImages } from "./useDeckData"
 
 const CODE_PARAM = "d"
+const NO_CARDS: readonly DeckEntry[] = []
 
 function readSafely(text: string, read: () => ImportedDeck): ImportedDeck | "bad-code" | null {
   if (text.trim() === "") return null
@@ -131,16 +136,54 @@ export function DeckImportPage() {
     deckLogState !== null && deckLogState !== "loading" && "error" in deckLogState
       ? deckLogState.error
       : undefined
+  const understood = preview !== null && preview !== "bad-code" ? preview : null
+  const deckName =
+    understood?.name ??
+    (deckLogDeck
+      ? t("decks.importDeckLogName", { code: deckLogDeck.code })
+      : t("decks.importedName"))
+  // The picture's cards: reprints' image rows come from the search worker, as in the builder.
+  const pictureCards = useMemo(
+    () => ({
+      edition,
+      leader: understood?.leader ?? null,
+      main: understood?.main ?? NO_CARDS,
+      evolve: understood?.evolve ?? NO_CARDS,
+      side: NO_CARDS,
+    }),
+    [edition, understood],
+  )
+  const images = useDeckImages(pictureCards, facts, data.images)
+  const labels = useDeckLabels()
+  // Class names come with the search worker's options; until then a class shows as its code.
+  const basisText =
+    understood === null || (understood.basis.kind === "class" && labels.classOptions === undefined)
+      ? null
+      : labels.basisLabel(understood.basis)
+  const hasPicture =
+    understood !== null &&
+    (understood.leader !== null || understood.main.length + understood.evolve.length > 0)
+  const picture = useMemo(() => {
+    if (facts === null || understood === null || !hasPicture || basisText === null) return null
+    const deck = { ...pictureCards, name: deckName, basis: understood.basis }
+    if (deckImagesPending(deck, facts, images)) return null
+    return deckImageInput({
+      deck,
+      facts,
+      images,
+      size: "small",
+      file: "card_s",
+      missing: "placeholder",
+      t,
+      basisLabel: () => basisText,
+    })
+  }, [facts, understood, hasPicture, pictureCards, deckName, images, t, basisText])
   const create = () => {
     if (preview === null || preview === "bad-code") return
     const deck = {
       ...createDeck(
         {
-          name:
-            preview.name ??
-            (deckLogDeck
-              ? t("decks.importDeckLogName", { code: deckLogDeck.code })
-              : t("decks.importedName")),
+          name: deckName,
           edition,
           format: preview.format ?? "standard",
           basis: preview.basis,
@@ -263,6 +306,9 @@ export function DeckImportPage() {
           aria-label={t("decks.importPreviewTitle")}
           className="flex flex-col gap-2 rounded-button border border-border bg-surface-1 p-3 text-13"
         >
+          {hasPicture && (
+            <DeckPicture input={picture} label={t("decks.imageAlt", { name: deckName })} />
+          )}
           {deckLogDeck && (
             <p className="text-text-2">
               {t("decks.importDeckLogSource", { code: deckLogDeck.code })}

@@ -67,6 +67,45 @@ describe("DeckImportPage", () => {
     expect(router.state.location.pathname).toBe("/decks")
   }, 60_000)
 
+  it("draws the deck from the small card images before the deck is made", async () => {
+    // jsdom has no canvas or image decoding; stand-ins record which pictures are drawn.
+    const drawn: string[] = []
+    const context = new Proxy<Record<string, unknown>>(
+      { measureText: (text: string) => ({ width: text.length * 10 }) },
+      {
+        get: (target, key) =>
+          typeof key === "string" && key in target
+            ? target[key]
+            : (...args: unknown[]) => {
+                if (key === "drawImage" && args[0] instanceof HTMLImageElement)
+                  drawn.push(args[0].src)
+              },
+      },
+    )
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+      context as unknown as CanvasRenderingContext2D,
+    )
+    const decode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode")
+    Object.defineProperty(HTMLImageElement.prototype, "decode", {
+      configurable: true,
+      value: () => Promise.resolve(),
+    })
+    try {
+      await openImport()
+      fireEvent.change(screen.getByRole("textbox", { name: "牌組文字、分享碼或 DeckLog 代碼" }), {
+        target: { value: "# 王族\n3 BP01-001\n1 SD01-L01" },
+      })
+      const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
+      await within(preview).findByRole("img", { name: "王族 的牌組圖片" }, { timeout: 25_000 })
+      expect(drawn).toHaveLength(2)
+      expect(drawn.every((src) => src.includes("/card_s/"))).toBe(true)
+    } finally {
+      if (decode) Object.defineProperty(HTMLImageElement.prototype, "decode", decode)
+      else Reflect.deleteProperty(HTMLImageElement.prototype, "decode")
+      vi.restoreAllMocks()
+    }
+  }, 60_000)
+
   it("opens a share link with its preview and lists ids the snapshot does not have", async () => {
     const code = encodeDeckCode({
       edition: "jp",
