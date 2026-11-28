@@ -1112,6 +1112,67 @@ it("gives GBF appearances their own PR group alongside other rarity filters", as
   }
 })
 
+it("files PR pack leaders without an official rarity under PR without a badge", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  // The official site lists PR pack leaders (PR-017 and others) with "-" as their rarity.
+  const unrated = { rarity_code: null, rarity_raw: "-", rarity_badge: null, premium: null }
+  const overrides: Record<string, JsonObject> = {
+    "p:sd01-001": unrated,
+    "p:pr-001": unrated,
+    "p:bp01-001": { rarity_code: "pr", rarity_badge: { style: "none" } },
+  }
+  const fragments = snapshot.bootstrap.map((fragment) =>
+    fragment.table === "printing"
+      ? {
+          ...fragment,
+          rows: fragment.rows.map((row) => ({ ...row, ...overrides[stringValue(row["id"])] })),
+        }
+      : fragment,
+  )
+  // A printing's home set is its fragment's owner, so the SD01 leader moves into the PR fragment.
+  const owns = (id: string) => (fragment: (typeof fragments)[number]) =>
+    fragment.table === "printing" && fragment.rows.some((row) => row["id"] === id)
+  const leader = fragments.find(owns("p:sd01-001"))
+  const promo = fragments.find(owns("p:pr-001"))
+  if (!leader || !promo) throw new Error("missing printing fragments")
+  const moved = leader.rows.filter((row) => row["id"] === "p:sd01-001")
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    fragments.map((fragment) =>
+      fragment === leader
+        ? { ...fragment, rows: fragment.rows.filter((row) => row["id"] !== "p:sd01-001") }
+        : fragment === promo
+          ? { ...fragment, rows: [...fragment.rows, ...moved] }
+          : fragment,
+    ),
+  )
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const ids = (rarities: readonly string[]) =>
+      index
+        .search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, unit: "printing", rarities } })
+        .items.map((item) => item.printingId)
+    for (const rarities of [["pr"], ["pr:none"]]) {
+      expect(ids(rarities)).toContain("p:sd01-001")
+      expect(ids(rarities)).toContain("p:bp01-001")
+    }
+    // A PR pack printing that is not a leader stays unrated.
+    expect(ids(["unrated"])).toContain("p:pr-001")
+    expect(ids(["unrated"])).not.toContain("p:sd01-001")
+    expect(ids(["pr"])).not.toContain("p:pr-001")
+    expect(index.options.prBadgeStyles).toContain("none")
+    const counts = index.options.rarityCounts
+    expect(counts["pr:none"]).toBe(ids(["pr:none"]).length)
+    expect(counts["pr"]).toBe(ids(["pr"]).length)
+    expect(counts["unrated"]).toBe(ids(["unrated"]).length)
+  }
+})
+
 it("filters leader frames per printing, intersects rarity and restores the index", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()

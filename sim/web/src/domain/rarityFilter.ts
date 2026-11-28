@@ -13,24 +13,51 @@ const PR_STYLE_ORDER: readonly string[] = [
   "unknown",
 ]
 
+// The PR pack's family code. Its leaders carry no rarity (the site lists them as "-", and the
+// six it lists as PR are corrected to match); the filter files them under PR without a badge
+// while the card itself keeps showing none.
+export const PR_PACK = "pr"
+
+/** What the rarity filter reads from one printing. */
+interface RarityFilterInput {
+  readonly rarityCode: string | null
+  readonly premium: boolean
+  /** The PR appearance style (`rarity_badge.style`); absent means not recorded. */
+  readonly badgeStyle?: string | undefined
+  /** The family code of the printing's home set. */
+  readonly owner?: string | undefined
+  readonly type?: string | undefined
+}
+
+/** The rarity token a printing is filed under, plus its PR appearance when that token is PR. */
+export function filterRarity({
+  rarityCode,
+  badgeStyle,
+  owner,
+  type,
+}: Omit<RarityFilterInput, "premium">): { readonly rarity: string; readonly style?: string } {
+  const rarity = rarityCode ?? ""
+  if (rarity === "" || rarity === "-")
+    return owner === PR_PACK && type === "leader"
+      ? { rarity: PROMO_RARITY, style: "none" }
+      : { rarity: UNRATED_RARITY }
+  return rarity === PROMO_RARITY ? { rarity, style: badgeStyle ?? "unknown" } : { rarity }
+}
+
 /** Applies official rarity tokens and the shared premium dimension to one printing. */
 export function matchesRaritySelection(
-  rarityCode: string | null,
-  premium: boolean,
+  printing: RarityFilterInput,
   selected: readonly string[],
-  badgeStyle?: string,
 ): boolean {
   if (selected.length === 0) return true
   const premiumOnly = selected.includes(PREMIUM_RARITY)
-  if (premium !== premiumOnly) return false
+  if (printing.premium !== premiumOnly) return false
   const raritySelections = selected.filter((token) => token !== PREMIUM_RARITY)
   if (raritySelections.length === 0) return true
-  const rarity = rarityCode ?? ""
-  return raritySelections.some((token) => {
-    if (token === UNRATED_RARITY) return rarity === "" || rarity === "-"
-    if (token.startsWith("pr:")) return rarity === "pr" && token === `pr:${badgeStyle ?? "unknown"}`
-    return token === rarity
-  })
+  const { rarity, style } = filterRarity(printing)
+  return raritySelections.some((token) =>
+    token.startsWith("pr:") ? style !== undefined && token === `pr:${style}` : token === rarity,
+  )
 }
 
 /** Vocabulary rarities in chip order; codes the order does not know keep their own order after it. */

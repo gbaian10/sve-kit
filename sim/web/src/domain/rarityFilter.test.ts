@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest"
 import { formatQuery, parseQuery } from "./query/codec"
 import { DEFAULT_QUERY } from "./query/model"
 import {
+  filterRarity,
   matchesRaritySelection,
   orderRarityTokens,
+  PR_PACK,
   PREMIUM_RARITY,
   toggleFacet,
 } from "./rarityFilter"
@@ -39,8 +41,12 @@ describe("premium rarity selection", () => {
       ...Array.from({ length: 182 }, () => ({ rarity: "other", premium: false })),
     ]
     const count = (selected: readonly string[]) =>
-      bp01.filter((printing) => matchesRaritySelection(printing.rarity, printing.premium, selected))
-        .length
+      bp01.filter((printing) =>
+        matchesRaritySelection(
+          { rarityCode: printing.rarity, premium: printing.premium },
+          selected,
+        ),
+      ).length
 
     expect(count(["sr"])).toBe(56)
     expect(count([PREMIUM_RARITY])).toBe(35)
@@ -48,11 +54,13 @@ describe("premium rarity selection", () => {
   })
 
   it("keeps unrated premium printings unrated and intersects premium with PR", () => {
-    expect(matchesRaritySelection(null, true, ["unrated", PREMIUM_RARITY])).toBe(true)
-    expect(matchesRaritySelection("-", true, ["unrated", PREMIUM_RARITY])).toBe(true)
-    expect(matchesRaritySelection("pr", true, ["pr", PREMIUM_RARITY])).toBe(true)
-    expect(matchesRaritySelection("pr", false, ["pr", PREMIUM_RARITY])).toBe(false)
-    expect(matchesRaritySelection("br", true, ["pr", PREMIUM_RARITY])).toBe(false)
+    const matches = (rarityCode: string | null, premium: boolean, selected: string[]) =>
+      matchesRaritySelection({ rarityCode, premium }, selected)
+    expect(matches(null, true, ["unrated", PREMIUM_RARITY])).toBe(true)
+    expect(matches("-", true, ["unrated", PREMIUM_RARITY])).toBe(true)
+    expect(matches("pr", true, ["pr", PREMIUM_RARITY])).toBe(true)
+    expect(matches("pr", false, ["pr", PREMIUM_RARITY])).toBe(false)
+    expect(matches("br", true, ["pr", PREMIUM_RARITY])).toBe(false)
   })
 
   it("orders the premium token after printed rarities and before PR", () => {
@@ -74,5 +82,36 @@ describe("premium rarity selection", () => {
       "pr:sp",
       "pr:none",
     ])
+  })
+})
+
+describe("PR pack leaders without an official rarity", () => {
+  // PR-017 and the other PR pack leaders are listed with "-"; PR-660 carries an official PR.
+  const prLeader = { rarityCode: "-", premium: false, owner: PR_PACK, type: "leader" }
+  const prLeaderWithRarity = {
+    rarityCode: "pr",
+    premium: false,
+    badgeStyle: "none",
+    owner: PR_PACK,
+    type: "leader",
+  }
+  const prEp = { rarityCode: "-", premium: false, owner: PR_PACK, type: "token" }
+  const bp01Leader = { rarityCode: "-", premium: false, owner: "bp01", type: "leader" }
+
+  it("files them under PR without a badge, not under unrated", () => {
+    expect(filterRarity(prLeader)).toEqual({ rarity: "pr", style: "none" })
+    for (const selected of [["pr"], ["pr:none"], ["pr:sr", "pr:none"]])
+      expect(matchesRaritySelection(prLeader, selected)).toBe(true)
+    for (const selected of [["unrated"], ["pr:sr"], ["pr:unknown"], ["br"]])
+      expect(matchesRaritySelection(prLeader, selected)).toBe(false)
+    expect(matchesRaritySelection(prLeaderWithRarity, ["pr:none"])).toBe(true)
+  })
+
+  it("keeps other unrated printings unrated", () => {
+    for (const printing of [prEp, bp01Leader, { rarityCode: null, premium: false }]) {
+      expect(filterRarity(printing)).toEqual({ rarity: "unrated" })
+      expect(matchesRaritySelection(printing, ["unrated"])).toBe(true)
+      expect(matchesRaritySelection(printing, ["pr"])).toBe(false)
+    }
   })
 })

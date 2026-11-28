@@ -20,7 +20,12 @@ import {
   STAT_CAP,
   statSelected,
 } from "../../domain/query/model"
-import { matchesRaritySelection, PREMIUM_RARITY, UNRATED_RARITY } from "../../domain/rarityFilter"
+import {
+  filterRarity,
+  matchesRaritySelection,
+  PR_PACK,
+  PREMIUM_RARITY,
+} from "../../domain/rarityFilter"
 import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
@@ -209,7 +214,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 40
+export const INDEX_IMAGE_FORMAT = 41
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -347,6 +352,13 @@ function prBadgeFilterStyle(row?: JsonObject): string {
   return (row && badgeOf(row)?.style) ?? "unknown"
 }
 
+/** A printing's type as the index files it: its front face's revision shown in this edition. */
+function printingTypeOf(index: CardIndex, row: JsonObject, edition: Region): string | undefined {
+  const front = index.facesOf(stringValue(row["card_id"]))[0]
+  const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
+  return printingTypeCode(row, revision) ?? undefined
+}
+
 function optionsOf(
   bootstrap: BootstrapColumns,
   index: CardIndex,
@@ -360,17 +372,28 @@ function optionsOf(
       .filter((row) => row["region"] === edition)
       .map((row) => stringValue(row["home_set_id"])),
   )
+  const familyCodes = new Map(
+    index.families.map((row) => [stringValue(row["id"]), stringValue(row["code"])]),
+  )
   const rarityCounts: Record<string, number> = {}
+  const prBadgeStyles = new Set<string>()
   for (const row of printingRows) {
     // Locator-only rows do not yet carry an official classification.
     if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
-    const official = typeof row["rarity_code"] === "string" ? row["rarity_code"] : ""
+    const owner = familyCodes.get(stringValue(row["home_set_id"]))
+    const { rarity, style } = filterRarity({
+      rarityCode: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,
+      badgeStyle: prBadgeFilterStyle(row),
+      owner,
+      // Only PR pack printings can be filed by their type.
+      ...(owner === PR_PACK ? { type: printingTypeOf(index, row, edition) } : {}),
+    })
     const premium = row["premium"] === true
-    const token = !official || official === "-" ? UNRATED_RARITY : official
-    const countToken = premium ? PREMIUM_RARITY : token
+    const countToken = premium ? PREMIUM_RARITY : rarity
     rarityCounts[countToken] = (rarityCounts[countToken] ?? 0) + 1
-    if (official === "pr" && !premium) {
-      const child = `pr:${prBadgeFilterStyle(row)}`
+    if (style !== undefined && !premium) {
+      prBadgeStyles.add(style)
+      const child = `pr:${style}`
       rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
     }
   }
@@ -440,16 +463,7 @@ function optionsOf(
     traitCounts,
     artists: [],
     artistCounts: {},
-    prBadgeStyles: [
-      ...new Set(
-        printingRows
-          .filter(
-            (row) =>
-              row["region"] === edition && row["rarity_code"] === "pr" && row["premium"] !== true,
-          )
-          .map(prBadgeFilterStyle),
-      ),
-    ],
+    prBadgeStyles: [...prBadgeStyles],
     rarities: bootstrap
       .rows("vocabulary")
       .filter((row) => row["kind"] === "rarity" && row["active"] === true)
@@ -1371,10 +1385,14 @@ export class SearchIndex {
         )) &&
       (!state.artists.length || this.artistAllowed(state.artists, printing)) &&
       matchesRaritySelection(
-        this.pool.get(this.printings.rarity[printing] ?? 0),
-        this.printings.premium[printing] === 1,
+        {
+          rarityCode: this.pool.get(this.printings.rarity[printing] ?? 0),
+          premium: this.printings.premium[printing] === 1,
+          badgeStyle: this.pool.get(this.printings.badge[printing] ?? 0),
+          owner: this.pool.get(this.printings.owner[printing] ?? 0),
+          type: this.pool.get(this.printings.type[printing] ?? 0),
+        },
         state.rarities,
-        this.pool.get(this.printings.badge[printing] ?? 0),
       ) &&
       (!state.altArtOnly || this.printings.alt[printing] === 1) &&
       (!state.stampOnly || this.printings.stamp[printing] === 1) &&

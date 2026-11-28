@@ -153,19 +153,19 @@ describe("rarity chips", () => {
     [
       "zh-TW",
       "無分類",
-      "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP",
+      "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP；PR 卡包的主戰者歸在「PR（無標籤）」",
       "無分類（4）",
     ],
     [
       "ja",
       "分類なし",
-      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
+      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）。PRパックのリーダーは「PR（ラベルなし）」に含みます",
       "分類なし（4）",
     ],
     [
       "en",
       "Unrated",
-      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards",
+      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards; PR pack leaders are under PR (No badge)",
       "Unrated (4)",
     ],
   ] as const)(

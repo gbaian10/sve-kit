@@ -411,7 +411,8 @@ export default {
     premium: "プレミアム",
     premiumHint: "プレミアムはBR・SR・GR・分類なしにのみ存在し、PRのプレミアムは未収録です",
     unrated: "分類なし",
-    unratedHint: "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
+    unratedHint:
+      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）。PRパックのリーダーは「PR（ラベルなし）」に含みます",
     selected: "{{count}} 件選択",
     none: "ラベルなし",
     unknown: "未確認",
