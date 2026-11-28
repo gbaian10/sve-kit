@@ -71,16 +71,10 @@ describe("premium rarity selection", () => {
     ])
   })
 
-  it("orders GBF between SL and UR, and its PR appearance the same way", () => {
-    expect(orderRarityTokens(["pr:none", "pr:sp", "ur", "pr:gbf", "gbf", "pr:sl", "sl"])).toEqual([
-      "sl",
-      "gbf",
-      "ur",
-      "pr:sl",
-      "pr:gbf",
-      "pr:sp",
-      "pr:none",
-    ])
+  it("shows GBF after PR, while its PR appearance keeps the ladder position", () => {
+    expect(
+      orderRarityTokens(["unrated", "pr:none", "pr:sp", "ur", "pr:gbf", "gbf", "pr:sl", "sl"]),
+    ).toEqual(["sl", "ur", "pr:sl", "pr:gbf", "pr:sp", "pr:none", "gbf", "unrated"])
   })
 })
 

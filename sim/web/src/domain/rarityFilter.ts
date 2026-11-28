@@ -5,8 +5,14 @@ import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 export const UNRATED_RARITY = "unrated"
 export const PREMIUM_RARITY = "premium"
 
-// The rarity ladder runs low to high, then Premium and PR.
-const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PREMIUM_RARITY, PROMO_RARITY]
+// Chips follow the rarity ladder, then Premium and PR; the rarely seen GBF is shown after PR
+// although it ranks between SL and UR everywhere else.
+const RARITY_ORDER: readonly string[] = [
+  ...RARITY_LADDER.filter((code) => code !== "gbf"),
+  PREMIUM_RARITY,
+  PROMO_RARITY,
+  "gbf",
+]
 // PR appearances follow the same ladder, then the two that have no badge.
 const PR_STYLE_ORDER: readonly string[] = [
   ...RARITY_LADDER.filter((code) => (BADGE_STYLES as readonly string[]).includes(code)),

@@ -84,9 +84,9 @@ describe("rarity chips", () => {
     )
   })
 
-  it("draws GBF in its ladder position and leaves it out of an edition without GBF printings", async () => {
+  it("draws GBF after PR and leaves it out of an edition without GBF printings", async () => {
     const { unmount } = await renderInRouter(<Harness gbfCount={3} />)
-    expect(chips()).toEqual(["BR", "GBF", "SP", "SSP", "PR", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "GBF", "無分類"])
     expect(screen.getByRole("button", { name: "GBF" }).querySelector("img")).toHaveAttribute(
       "src",
       gbf,
