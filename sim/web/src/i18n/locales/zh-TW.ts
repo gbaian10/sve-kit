@@ -394,7 +394,7 @@ const zhTW = {
     premiumHint: "只有 BR、SR、GR 與無分類有碎閃；PR 的碎閃尚未收錄",
     unrated: "無分類",
     unratedHint:
-      "官方沒有登記稀有度的卡，例如 Token、主戰者；PR 卡包裡沒有稀有度的卡（主戰者、EP、SEP）歸在「PR（無標籤）」",
+      "沒有稀有度的卡，例如 Token 和主戰者。PR 卡包內沒有稀有度的版次（例如主戰者、EP、SEP）歸在「PR（無標籤）」。",
     selected: "已選 {{count}} 項",
     none: "無標籤",
     unknown: "待確認",

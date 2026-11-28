@@ -38,7 +38,6 @@ export function filterRarity({
   return rarity === PROMO_RARITY ? { rarity, style: badgeStyle ?? "unknown" } : { rarity }
 }
 
-/** Applies official rarity tokens and the shared premium dimension to one printing. */
 export function matchesRaritySelection(
   printing: RarityFilterInput,
   selected: readonly string[],
