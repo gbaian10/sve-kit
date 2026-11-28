@@ -207,7 +207,6 @@ export function badgeOf(row: JsonObject): RarityBadge | null {
   return (row["rarity_badge"] as RarityBadge | null | undefined) ?? null
 }
 
-/** Official rarity controls sorting; the appearance only describes this printing's badge. */
 function printingRarity(row: JsonObject) {
   return {
     code: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,

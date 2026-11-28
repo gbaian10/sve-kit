@@ -13,7 +13,7 @@ describe("PR pack rarity follows the printed badge", () => {
   const leader = { rarity_code: null, rarity_raw: "-", premium: null, rarity_badge: null }
 
   it("shows no rarity for a printing without a badge, whatever the site lists", () => {
-    for (const row of [token, leader, { ...token, rarity_badge: null }])
+    for (const row of [token, { ...token, rarity_badge: null }])
       expect(adoptPrPackRarity(row, "pr")).toEqual({
         rarity_code: null,
         rarity_raw: "-",

@@ -158,13 +158,13 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 
 PR 卡包（family code `pr`）的官網稀有度標法不一致，快照照原值保存，但 Web 分類與顯示這個卡包的版次時不看
 `rarity_code`／`rarity_raw`，只看 `rarity_badge`：有標籤（style 不是 `none`）視為 PR 並按外觀分級；
-`none` 或 null 視為沒有稀有度，卡片不顯示稀有度。這條規則只在 Web 讀入版次列時套用一次。
+`none` 或 null 視為沒有稀有度，卡片不顯示稀有度。Web 由同一條規則取得顯示及篩選用的版次稀有度。
 
 Web 的 `rarity` 篩選依上述採用的稀有度代碼歸類。沒有稀有度的 PR 卡包版次歸入 `pr:none`，其他沒有可用代碼的版次歸入 `unrated`。
 碎閃版次計入 `premium`。選取「碎閃」時，可再按上述稀有度分類縮小結果。
 PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
 計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；PR 子項目互斥且完整，加總等於父項目。
-例如 `rarity=sp,pr:br,unrated` 同時包含官方 SP、官方 PR 的 BR 標籤外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
+`rarity=sp,pr:br,unrated` 同時選取查卡分類為 SP、PR（BR）與無分類的版次。圖牌依卡面外觀顯示。
 
 `printing.rarity_badge` 是與 `rarity_code` 一同載入的可空物件：`null` 表示待確認；
 `{style: "none"}` 表示已確認無標籤；其他 style 為 `br / sr / gr / lg / sl / sp / gbf`，

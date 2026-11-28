@@ -5,15 +5,9 @@ import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 export const UNRATED_RARITY = "unrated"
 export const PREMIUM_RARITY = "premium"
 
-// Chips follow the rarity ladder, then Premium and PR; the rarely seen GBF is shown after PR
-// although it ranks between SL and UR everywhere else.
-const RARITY_ORDER: readonly string[] = [
-  ...RARITY_LADDER.filter((code) => code !== "gbf"),
-  PREMIUM_RARITY,
-  PROMO_RARITY,
-  "gbf",
-]
-// PR appearances follow the same ladder, then the two that have no badge.
+const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PREMIUM_RARITY, PROMO_RARITY]
+// The rarity panel moves the rarely seen GBF to the end of the badge row.
+const RARITY_CHIP_ORDER = [...RARITY_ORDER.filter((code) => code !== "gbf"), "gbf"]
 const PR_STYLE_ORDER: readonly string[] = [
   ...RARITY_LADDER.filter((code) => (BADGE_STYLES as readonly string[]).includes(code)),
   "none",
@@ -61,8 +55,8 @@ export function matchesRaritySelection(
 /** Vocabulary rarities in chip order; codes the order does not know keep their own order after it. */
 export function orderRarities<T extends { readonly code: string }>(rarities: readonly T[]): T[] {
   const rank = (code: string) => {
-    const index = RARITY_ORDER.indexOf(code)
-    return index === -1 ? RARITY_ORDER.length : index
+    const index = RARITY_CHIP_ORDER.indexOf(code)
+    return index === -1 ? RARITY_CHIP_ORDER.length : index
   }
   return rarities.toSorted((a, b) => rank(a.code) - rank(b.code))
 }
@@ -72,7 +66,7 @@ export function prStyleTokens(styles: readonly string[]): string[] {
   return PR_STYLE_ORDER.filter((style) => styles.includes(style)).map((style) => `pr:${style}`)
 }
 
-/** Selected rarity tokens (`lg`, `pr`, `pr:gr`, `unrated`) in the filter's display order. */
+/** Selected rarity tokens in ladder order, with their PR appearances grouped together. */
 export function orderRarityTokens(tokens: readonly string[]): string[] {
   const key = (token: string): [number, number] => {
     if (token === UNRATED_RARITY) return [RARITY_ORDER.length + 1, 0]
