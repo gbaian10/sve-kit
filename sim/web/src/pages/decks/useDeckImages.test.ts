@@ -6,18 +6,28 @@ import type { DeckEntry } from "../../domain/deck/types"
 import type { DeckFacts } from "./deck-info"
 import { useDeckImages } from "./useDeckData"
 
-// Each request answers as the test sets for its first printing; by default it is still running.
+// Answers are set per printing, wherever a request places it: the request takes the phase of
+// any printing it carries, summarises the ones marked found and knows the rows marked known.
 interface Answer {
-  readonly phase: string
-  readonly recent?: readonly { printingId: string; summary?: object }[]
-  readonly images?: ImageIndex
+  readonly phase: "complete" | "error"
+  readonly found?: boolean
+  readonly known?: boolean
 }
 const answers = new Map<string, Answer>()
 const requested: string[][] = []
 vi.mock("../../app/snapshot", () => ({
   useRecentSummaries: (ids: readonly string[]) => {
     requested.push([...ids])
-    return answers.get(ids[0] ?? "") ?? { phase: "pending", images: undefined }
+    const phase = ids.map((id) => answers.get(id)?.phase).find(Boolean) ?? "pending"
+    const known = ids.filter((id) => answers.get(id)?.known === true)
+    return {
+      phase,
+      recent: ids.map((id) => ({
+        printingId: id,
+        ...(answers.get(id)?.found === true ? { summary: {} } : {}),
+      })),
+      images: phase === "complete" ? knowing(known) : undefined,
+    }
   },
   useCardSnapshot: () => undefined,
   useImageIndex: () => undefined,
@@ -58,26 +68,19 @@ describe("useDeckImages", () => {
     expect(result.current.pending("p1", "f")).toBe(false)
     expect(result.current.pending("p60", "f")).toBe(true)
     // The last request comes back: p60's rows are fetched next, then it is settled.
-    answers.set("p60", { phase: "complete", recent: [{ printingId: "p60", summary: {} }] })
+    answers.set("p60", { phase: "complete", found: true })
     rerender()
     expect(result.current.pending("p60", "f")).toBe(true)
-    answers.set("p60", {
-      phase: "complete",
-      recent: [{ printingId: "p60", summary: {} }],
-      images: knowing(["p60"]),
-    })
+    answers.set("p60", { phase: "complete", found: true, known: true })
     rerender()
     expect(result.current.pending("p60", "f")).toBe(false)
   })
 
   it("settles a printing the worker lacks, and one whose own request failed, but no other", () => {
     answers.clear()
-    answers.set("p0", {
-      phase: "complete",
-      recent: [{ printingId: "p2" }],
-      images: knowing([]),
-    })
-    answers.set("p20", { phase: "error" })
+    // p2 is missing from the worker's snapshot; p25's request failed.
+    answers.set("p2", { phase: "complete" })
+    answers.set("p25", { phase: "error" })
     const { result } = renderHook(() => useDeckImages(deck, facts, fallback))
     expect(result.current.pending("p2", "f")).toBe(false)
     expect(result.current.pending("p25", "f")).toBe(false)

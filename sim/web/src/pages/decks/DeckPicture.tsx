@@ -66,9 +66,11 @@ export function DeckPicture({
   // image that failed to decode gets another try.
   if (key !== (target?.key ?? null))
     setTarget(input === null || key === null ? null : { key, input })
-  const [drawn, setDrawn] = useState<{ readonly key: string; readonly failed: boolean } | null>(
-    null,
-  )
+  // Tied to the drawing that made it: a retry of the same deck shows loading, not the old error.
+  const [drawn, setDrawn] = useState<{
+    readonly target: Target
+    readonly failed: boolean
+  } | null>(null)
   useEffect(() => {
     if (target === null) return
     let active = true
@@ -77,19 +79,19 @@ export function DeckPicture({
         if (!active) return
         canvas.className = "block h-auto w-full"
         host.current?.replaceChildren(canvas)
-        setDrawn({ key: target.key, failed: false })
+        setDrawn({ target, failed: false })
       },
       () => {
-        if (active) setDrawn({ key: target.key, failed: true })
+        if (active) setDrawn({ target, failed: true })
       },
     )
     return () => {
       active = false
     }
   }, [target])
-  const settled = key !== null && drawn?.key === key
-  const current = settled && !drawn.failed
-  const failed = settled && drawn.failed
+  // The canvas shows a deck's content whichever drawing made it; an error belongs to its drawing.
+  const current = key !== null && drawn?.target.key === key && !drawn.failed
+  const failed = target !== null && drawn?.target === target && drawn.failed
   return (
     <>
       <div

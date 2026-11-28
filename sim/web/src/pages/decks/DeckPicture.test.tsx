@@ -94,6 +94,9 @@ describe("DeckPicture", () => {
     rerender(<DeckPicture input={null} label="R" cardLang="en" />)
     rerender(<DeckPicture input={deck("Retry", ["Gamma"])} label="R" cardLang="en" />)
     expect(drawings).toHaveLength(2)
+    // While the second try draws, it says so instead of repeating the first error.
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.getByRole("status")).toHaveTextContent("Loading card images")
     await finish("Retry")
     expect(screen.getByRole("img", { name: "R" })).toBeVisible()
   })
