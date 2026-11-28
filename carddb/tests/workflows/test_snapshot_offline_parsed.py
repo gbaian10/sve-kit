@@ -66,6 +66,11 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
             "kind": "printing_rarity_badges",
             "records": [],
         },
+        "catalog/rarity-corrections.yaml": {
+            "format": 1,
+            "kind": "printing_rarity_corrections",
+            "records": [],
+        },
         "rules/keyword-registry.yaml": {
             "format": 1,
             "kind": "keyword_registry",

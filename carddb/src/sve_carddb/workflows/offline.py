@@ -81,6 +81,10 @@ from sve_carddb.domains.registry.preview.review_inputs import (
     ReviewInputPin,
 )
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
+from sve_carddb.domains.registry.rarity_corrections import (
+    load_rarity_corrections,
+    populate_rarity_corrections,
+)
 from sve_carddb.domains.registry.records import EnglishPrintingData, PrintingData
 from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
 from sve_carddb.domains.registry.snapshot import load_registry
@@ -727,6 +731,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     badges = load_badges(authored_root(inputs.repo))
+    rarity_corrections = load_rarity_corrections(authored_root(inputs.repo))
     leader_frames = load_leader_frames(authored_root(inputs.repo))
     reprints = load_reprints(authored_root(inputs.repo))
     marks = load_marks(authored_root(inputs.repo))
@@ -799,7 +804,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 sources=translation_sources,
             )
             mark("db: adoptions")
-            rarity_diagnostics = populate_rarities(db)
+            rarity_diagnostics = populate_rarity_corrections(db, rarity_corrections)
+            rarity_diagnostics += populate_rarities(db)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
             context = BuildContext.from_inputs(

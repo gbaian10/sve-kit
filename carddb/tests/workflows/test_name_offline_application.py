@@ -66,6 +66,11 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         "catalog/rarity-badges.yaml",
         {"format": 1, "kind": "printing_rarity_badges", "records": []},
     )
+    install(
+        root / "authored",
+        "catalog/rarity-corrections.yaml",
+        {"format": 1, "kind": "printing_rarity_corrections", "records": []},
+    )
     (root / "authored/rules/rulings").mkdir(parents=True)
     install(
         root / "authored",

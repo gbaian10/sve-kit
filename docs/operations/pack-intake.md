@@ -281,10 +281,11 @@ sve-carddb images build-index --inputs /private/run/recipe.json \
 
 卡面外觀要逐張看圖，沒有自動判定：
 
-| 資料         | 位置                                                                                                    | 什麼時候要補                                                                           |
-| ------------ | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| 主戰者卡名框 | `authored/catalog/leader-name-frames.yaml`（[契約](../schema/domains/authored-layout.md#主戰者卡名框)） | 新的主戰者版次。沒寫只會顯示待確認，匯出報告沒有對應的缺項欄位，要自己列出新主戰者比對 |
-| 卡面標籤外觀 | `authored/catalog/rarity-badges.yaml`（[契約](../schema/domains/authored-layout.md#卡面標籤外觀)）      | PR 卡：官方稀有度只標 PR 或「-」，等級要看卡框。缺項列在匯出報告的 `missing_pr_badges` |
+| 資料         | 位置                                                                                                    | 什麼時候要補                                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 主戰者卡名框 | `authored/catalog/leader-name-frames.yaml`（[契約](../schema/domains/authored-layout.md#主戰者卡名框)） | 新的主戰者版次。沒寫只會顯示待確認，匯出報告沒有對應的缺項欄位，要自己列出新主戰者比對                                             |
+| 卡面標籤外觀 | `authored/catalog/rarity-badges.yaml`（[契約](../schema/domains/authored-layout.md#卡面標籤外觀)）      | PR 卡：官方稀有度只標 PR 或「-」，等級要看卡框。缺項列在匯出報告的 `missing_pr_badges`                                             |
+| 稀有度更正   | `authored/catalog/rarity-corrections.yaml`（[契約](../schema/domains/authored-layout.md#稀有度更正)）   | 官網稀有度與卡面矛盾、維護者決定以卡面為準時（例如 PR 卡包主戰者官網標 PR、卡面無稀有度）。官網日後修正會列在 `rarity_diagnostics` |
 
 標誌卡與編號卡要有同圖分組當比對參照，排在步驟 11。
 

@@ -33,6 +33,7 @@
 | legacy，僅供轉換                                                    | 模板採納政策／核可收據                               | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用                                                                                                                                                                                           |
 | 定案（新格式）                                                      | 模板參數辨識規則                                     | `translations/parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval                                                                                                                                                                                                                                                                                                                                                   |
 | 技術契約                                                            | 卡面標籤外觀                                         | `catalog/rarity-badges.yaml` 單檔，見下方「卡面標籤外觀」                                                                                                                                                                                                                                                                                                                                                                                            |
+| 技術契約                                                            | 稀有度更正                                           | `catalog/rarity-corrections.yaml` 單檔，見下方「稀有度更正」                                                                                                                                                                                                                                                                                                                                                                                         |
 | 技術契約                                                            | 再錄版次                                             | `catalog/reprints.yaml` 單檔，見下方「再錄版次」                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 定案（技術契約）                                                    | 來源綁定的插畫裁切覆寫                               | `images/crops.yaml` 單檔，`format: 1, kind: image_crop_overrides, records`、全檔查重，依[覆寫契約](../images/image-crop-overrides.md)                                                                                                                                                                                                                                                                                                                |
 | 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔                                 | `rules/author-effects/<卡包>/<record_key>.yaml`（既有數字分片保留）、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index/<卡包>.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md)                                                                                                                                                          |
@@ -112,6 +113,37 @@ records:
     card_no: SYN-001
     style: br
     text: BR
+```
+
+### 稀有度更正
+
+`catalog/rarity-corrections.yaml` 是可修改的單一檔案，封套為 `format: 1`、`kind: printing_rarity_corrections`、`records`。
+官網稀有度欄與卡面矛盾、且維護者決定以卡面為準時，在這裡登錄更正；card-data 與來源歸檔保留官網原值，不改寫。
+每列以 `printing_id` 為鍵，必填審閱標註 `region`、`card_no`，以及官網原樣 `expected_raw_value`、更正後的 `corrected_value`、
+`reason` 與至少一筆 `evidence`（與來源更正相同的 `card_image` 證據：卡圖 sha256、官網 `image_src`、`region`、`locator`）。
+兩個值都必須是該地區稀有度正規化認得的標籤（例如 jp 的 `PR`、`-`），且不得相同；證據地區須與記錄相同。
+未知欄位、重複 printing_id、不存在的版次與地區／卡號不符都使建置失敗。
+
+建置在稀有度正規化之前套用：暫存的 `rarity_raw` 等於 `expected_raw_value` 時改成 `corrected_value`，再照常正規化；
+已等於 `corrected_value` 表示官網已修正，記錄保留並在建置報告的 `rarity_diagnostics` 以 `correction_upstream_fixed` 提醒退役；
+兩者皆非則建置失敗。卡面標籤外觀（`rarity-badges.yaml`）與此獨立。
+
+```yaml
+format: 1
+kind: printing_rarity_corrections
+records:
+  - printing_id: p:synthetic
+    region: jp
+    card_no: SYN-001
+    expected_raw_value: "PR"
+    corrected_value: "-"
+    reason: The printed card shows no rarity mark.
+    evidence:
+      - kind: card_image
+        sha256: "sha256:<64 hex>"
+        image_src: /cardlist/SYN/syn-001.png
+        region: jp
+        locator: Bottom-left card number line
 ```
 
 ## 2. 分片與來源

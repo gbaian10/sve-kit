@@ -103,6 +103,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     )
     install(
         case.case.root,
+        "catalog/rarity-corrections.yaml",
+        {"format": 1, "kind": "printing_rarity_corrections", "records": []},
+    )
+    install(
+        case.case.root,
         "translations/parameter-rules/current.yaml",
         {"format": 2, "kind": "template_parameter_rules", "rules": []},
     )

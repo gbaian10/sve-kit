@@ -646,6 +646,13 @@ comparison_hash、basis_printing_id、basis_released_on；依據版次引用 pri
 建置 schema 13 起 `rarity_badge_style` 值域為 `br / sr / gr / lg / sl / sp / none`，schema 21 加入 `gbf`。
 `rarity_badge_text` 保存卡面原樣字樣，不保留舊值或遷移。
 
+## 稀有度更正
+
+`catalog/rarity-corrections.yaml` 在稀有度正規化之前改寫暫存 printing 的 `rarity_raw`，不新增欄位，也不改建置 schema。
+更正後的值照一般規則決定 `rarity_code`／`premium`；官網原值留在 card-data、來源歸檔與更正記錄。
+官網已改成更正值時，建置報告的 `rarity_diagnostics` 列出 `correction_upstream_fixed`，不阻擋建置。契約見
+[authored 佈局「稀有度更正」](../domains/authored-layout.md#稀有度更正)。
+
 ## 主戰者卡名框
 
 建置 schema 12 新增 printing 的 nullable `leader_name_frame`，從
