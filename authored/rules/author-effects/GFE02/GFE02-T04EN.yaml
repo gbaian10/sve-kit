@@ -13,10 +13,11 @@ cards:
               n: 1
           do:
             - if:
-                cond:
-                  any:
-                    - necro: 20
-                    - cmp: { left: { orig_cost_of: summoned }, op: le, right: 5 }
+                cond: { cmp: { left: { orig_cost_of: summoned }, op: le, right: 5 } }
                 then:
                   - move: { ref: summoned, to: field, result: entered }
-            - move: { ref: this, to: cemetery }
+            - if:
+                cond: { necro: 20 }
+                then:
+                  - move: { ref: summoned, to: field, result: charged_entry }
+                  - move: { ref: this, to: cemetery }
