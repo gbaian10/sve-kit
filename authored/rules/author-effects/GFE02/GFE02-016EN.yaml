@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-016EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [quick]
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+            - bind: returned
+              from: { who: self, zone: cemetery, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: { count: { who: self, zone: cemetery, kind: follower } } }
+            - if:
+                cond: { necro: 20 }
+                then:
+                  - move: { ref: returned, to: hand }

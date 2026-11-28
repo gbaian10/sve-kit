@@ -1,0 +1,12 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-T03EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        lastword:
+          do:
+            - damage: { to: { leaders: opponents }, n: 1 }

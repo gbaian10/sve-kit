@@ -1,0 +1,16 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-006EN:
+    admission: light
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - line: 2
+        fanfare:
+          do:
+            - choose:
+                bind: summoned
+                from: { who: self, zone: hand, kind: follower, trait: 魔界, orig_cost_le: 7 }
+                upto: 1
+            - move: { ref: summoned, to: field, result: entered }

@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-011EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [assail]
+      - line: 2
+        auto:
+          zone: ex
+          on: { phase: { which: end, whose: self } }
+          do:
+            - damage: { to: { leaders: opponents }, n: 2 }
+      - line: 3
+        activate:
+          zone: cemetery
+          cost: { pp: 2 }
+          do:
+            - move: { ref: this, to: ex }

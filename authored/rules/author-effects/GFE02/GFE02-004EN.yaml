@@ -1,0 +1,16 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-004EN:
+    admission: light
+    abilities:
+      - line: 1
+        use: evolve.one-pp
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              upto: 1
+          do:
+            - destroy: enemy

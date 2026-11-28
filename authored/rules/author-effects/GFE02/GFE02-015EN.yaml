@@ -1,0 +1,10 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-015EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create: { token: Infernal Crown, to: field }

@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-010EN:
+    admission: light
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                on: { who: self, zone: field, kind: follower, class: ナイトメア, other: true }
+                keywords: [ward]
+      - line: 2
+        fanfare:
+          targets:
+            - bind: returned
+              from: { who: self, zone: cemetery, kind: follower }
+              n: 1
+          do:
+            - move: { ref: returned, to: hand }
+      - line: 3
+        activate:
+          cost: { act_self: true }
+          do:
+            - buff: { on: { who: opp, zone: field, kind: follower }, power: -3, hp: -3 }
+            - if:
+                cond: { leader_class: ナイトメア }
+                then:
+                  - choose:
+                      bind: summoned
+                      from:
+                        who: self
+                        zone: hand
+                        kind: follower
+                        class: ナイトメア
+                        orig_cost_le: 5
+                      upto: 1
+                  - move: { ref: summoned, to: field, result: entered }

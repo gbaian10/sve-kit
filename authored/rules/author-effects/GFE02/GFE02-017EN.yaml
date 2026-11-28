@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-017EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [storm]
+      - line: 2
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                instead:
+                  - if: { leader_class: ニュートラル }
+                    upto: 3
+                options:
+                  - - destroy: { ref: { who: opp, zone: field, kind: follower } }
+                  - - banish: { top: { who: opp, n: 7 } }
+                  - - discard: { who: opp, n: 2 }

@@ -1,0 +1,15 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-009EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - either:
+                options:
+                  - - create: { token: Velocious Beetle, to: field }
+                  - - create: { token: Virulent Hornet, to: field }
+      - line: 2
+        use: opponent-main-vicious-scorpion
