@@ -274,9 +274,9 @@ fn lord_of_the_flies_creates_the_named_token_chosen_for_each_form() {
     reserve_form(&mut initial, "GFE02-009EN");
     let mut board = game(&initial);
     play_with_modes(&mut board, "source", &[ModeId(1)]);
-    let after = state(&board);
-    let beetle = after["P1"]["field"][1].as_str().unwrap();
-    assert_eq!(after["objects"][beetle]["card"], "GFE02-T01EN");
+    let base = state(&board);
+    let beetle = base["P1"]["field"][1].as_str().unwrap();
+    assert_eq!(base["objects"][beetle]["card"], "GFE02-T01EN");
     assert_eq!(
         board
             .internal_rule_action(
@@ -287,9 +287,9 @@ fn lord_of_the_flies_creates_the_named_token_chosen_for_each_form() {
         "resolved",
     );
     finish(&mut board, None, &[ModeId(2)]);
-    let after = state(&board);
-    let hornet = after["P1"]["field"][2].as_str().unwrap();
-    assert_eq!(after["objects"][hornet]["card"], "GFE02-T02EN");
+    let evolved = state(&board);
+    let hornet = evolved["P1"]["field"][2].as_str().unwrap();
+    assert_eq!(evolved["objects"][hornet]["card"], "GFE02-T02EN");
 }
 
 #[test]
@@ -313,17 +313,17 @@ fn nerea_grants_other_abysscraft_followers_ward_and_weakens_the_enemy_field() {
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":NACHT}]);
     let mut board = game(&initial);
     play_with_modes(&mut board, "source", &[]);
-    let after = state(&board);
-    assert_eq!(after["P1"]["hand"], json!(["recover"]));
-    assert!(keyword(&after, "ally", "守護"));
-    assert!(!keyword(&after, "source", "守護"));
-    assert!(!keyword(&after, "neutral", "守護"));
+    let fanfare = state(&board);
+    assert_eq!(fanfare["P1"]["hand"], json!(["recover"]));
+    assert!(keyword(&fanfare, "ally", "守護"));
+    assert!(!keyword(&fanfare, "source", "守護"));
+    assert!(!keyword(&fanfare, "neutral", "守護"));
     activate(&mut board, number);
-    let after = state(&board);
-    assert_eq!(after["objects"]["enemy"]["power"], 1_u8);
-    assert_eq!(after["objects"]["enemy"]["hp"], 1_u8);
+    let activated = state(&board);
+    assert_eq!(activated["objects"]["enemy"]["power"], 1_u8);
+    assert_eq!(activated["objects"]["enemy"]["hp"], 1_u8);
     assert_eq!(
-        after["P1"]["field"],
+        activated["P1"]["field"],
         json!(["ally", "neutral", "source", "recover"])
     );
 }
@@ -440,8 +440,8 @@ fn zeus_resolves_all_three_modes_for_a_neutral_leader() {
     let mut board = game(&initial);
     play_with_modes(&mut board, "source", &[ModeId(1), ModeId(2), ModeId(3)]);
     let after = state(&board);
-    assert!(after["P2"]["field"].as_array().unwrap().is_empty());
-    assert!(after["P2"]["hand"].as_array().unwrap().is_empty());
+    assert_eq!(after["P2"]["field"], json!([]));
+    assert_eq!(after["P2"]["hand"], json!([]));
     assert_eq!(after["P2"]["banish"].as_array().unwrap().len(), 7);
     assert_eq!(after["P2"]["deck"], json!(["deck-7"]));
 }
