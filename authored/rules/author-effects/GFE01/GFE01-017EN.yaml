@@ -1,0 +1,24 @@
+cards:
+  GFE01-017EN:
+    abilities:
+      - evolve_time:
+          do:
+            - pp:
+                delta: 5
+                who: self
+        line: 1
+      - auto:
+          do:
+            - evolve:
+                ref: it
+          on:
+            enter_field:
+              sel:
+                has_evolve: true
+                kind: follower
+              who: self
+          per_turn: 1
+        line: 2
+    admission: light
+format: 2
+kind: author_effect_set
