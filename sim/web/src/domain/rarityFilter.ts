@@ -1,43 +1,62 @@
+import { PR_PACK } from "./prPack"
 import { BADGE_STYLES } from "./rarityBadges"
 import { PROMO_RARITY, RARITY_LADDER } from "./representative"
 
 export const UNRATED_RARITY = "unrated"
 export const PREMIUM_RARITY = "premium"
 
-// The rarity ladder runs low to high, then Premium and PR.
 const RARITY_ORDER: readonly string[] = [...RARITY_LADDER, PREMIUM_RARITY, PROMO_RARITY]
-// PR appearances follow the same ladder, then the two that have no badge.
+// The rarity panel moves the rarely seen GBF to the end of the badge row.
+const RARITY_CHIP_ORDER = [...RARITY_ORDER.filter((code) => code !== "gbf"), "gbf"]
 const PR_STYLE_ORDER: readonly string[] = [
   ...RARITY_LADDER.filter((code) => (BADGE_STYLES as readonly string[]).includes(code)),
   "none",
   "unknown",
 ]
 
-/** Applies official rarity tokens and the shared premium dimension to one printing. */
+/** What the rarity filter reads from one printing. */
+interface RarityFilterInput {
+  readonly rarityCode: string | null
+  readonly premium: boolean
+  /** The PR appearance style (`rarity_badge.style`); absent means not recorded. */
+  readonly badgeStyle?: string | undefined
+  /** The family code of the printing's home set. */
+  readonly owner?: string | undefined
+}
+
+/** The rarity token a printing is filed under, plus its PR appearance when that token is PR. */
+export function filterRarity({
+  rarityCode,
+  badgeStyle,
+  owner,
+}: Omit<RarityFilterInput, "premium">): { readonly rarity: string; readonly style?: string } {
+  const rarity = rarityCode ?? ""
+  // A PR pack printing without a badge still belongs with the other promos.
+  if (rarity === "" || rarity === "-")
+    return owner === PR_PACK ? { rarity: PROMO_RARITY, style: "none" } : { rarity: UNRATED_RARITY }
+  return rarity === PROMO_RARITY ? { rarity, style: badgeStyle ?? "unknown" } : { rarity }
+}
+
 export function matchesRaritySelection(
-  rarityCode: string | null,
-  premium: boolean,
+  printing: RarityFilterInput,
   selected: readonly string[],
-  badgeStyle?: string,
 ): boolean {
   if (selected.length === 0) return true
   const premiumOnly = selected.includes(PREMIUM_RARITY)
-  if (premium !== premiumOnly) return false
+  if (printing.premium !== premiumOnly) return false
   const raritySelections = selected.filter((token) => token !== PREMIUM_RARITY)
   if (raritySelections.length === 0) return true
-  const rarity = rarityCode ?? ""
-  return raritySelections.some((token) => {
-    if (token === UNRATED_RARITY) return rarity === "" || rarity === "-"
-    if (token.startsWith("pr:")) return rarity === "pr" && token === `pr:${badgeStyle ?? "unknown"}`
-    return token === rarity
-  })
+  const { rarity, style } = filterRarity(printing)
+  return raritySelections.some((token) =>
+    token.startsWith("pr:") ? style !== undefined && token === `pr:${style}` : token === rarity,
+  )
 }
 
 /** Vocabulary rarities in chip order; codes the order does not know keep their own order after it. */
 export function orderRarities<T extends { readonly code: string }>(rarities: readonly T[]): T[] {
   const rank = (code: string) => {
-    const index = RARITY_ORDER.indexOf(code)
-    return index === -1 ? RARITY_ORDER.length : index
+    const index = RARITY_CHIP_ORDER.indexOf(code)
+    return index === -1 ? RARITY_CHIP_ORDER.length : index
   }
   return rarities.toSorted((a, b) => rank(a.code) - rank(b.code))
 }
@@ -47,7 +66,7 @@ export function prStyleTokens(styles: readonly string[]): string[] {
   return PR_STYLE_ORDER.filter((style) => styles.includes(style)).map((style) => `pr:${style}`)
 }
 
-/** Selected rarity tokens (`lg`, `pr`, `pr:gr`, `unrated`) in the filter's display order. */
+/** Selected rarity tokens in ladder order, with their PR appearances grouped together. */
 export function orderRarityTokens(tokens: readonly string[]): string[] {
   const key = (token: string): [number, number] => {
     if (token === UNRATED_RARITY) return [RARITY_ORDER.length + 1, 0]

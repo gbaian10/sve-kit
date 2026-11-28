@@ -24,6 +24,12 @@ const TOKEN_KIND_PLATES: Readonly<Record<string, string>> = {
   treasure,
 }
 
+const LOCATION_ROWS = [
+  ["main", "evolve", "advance"],
+  ["token", "leader"],
+  ["ep", "sep"],
+] as const
+
 // Where a printing goes in a deck; a chip's sub-values (Token kinds, leader frames) sit behind its
 // popover like the former type filter's did, so their tokens and URLs are unchanged.
 export function LocationFilter({
@@ -53,13 +59,22 @@ export function LocationFilter({
     // the other positions show their card-face plates.
     const content =
       code === "main" ? (
-        <span className="inline-flex items-center gap-1.5">
-          <img src={mainDeck} alt="" aria-hidden className="h-6 w-auto shrink-0" />
+        // The tablet sheet can give this filter less room than a phone.
+        <span className="inline-flex items-center gap-1.5 max-md:gap-1 max-md:text-12 @max-[260px]/facet-rows:gap-1 @max-[260px]/facet-rows:text-12">
+          <img
+            src={mainDeck}
+            alt=""
+            aria-hidden
+            className="h-6 w-auto shrink-0 max-md:h-5 max-[360px]:hidden @max-[235px]/facet-rows:hidden"
+          />
           <span>{label}</span>
         </span>
       ) : (
-        <DeckLocationBadges locations={[code]} decorative />
+        <span className="min-w-0 [&_img]:max-w-full [&_img]:object-contain @max-[190px]/facet-rows:[&_img]:h-4">
+          <DeckLocationBadges locations={[code]} decorative />
+        </span>
       )
+    if (code === "main") return [{ code, label, content, className: "shrink-0" }]
     if (code === "token")
       return [
         {
@@ -101,7 +116,7 @@ export function LocationFilter({
   return (
     <FacetChips
       title={t("locationFilter.label")}
-      locationGrid
+      rows={LOCATION_ROWS}
       items={items}
       counts={options?.counts}
       selected={selected}

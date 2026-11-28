@@ -2,6 +2,7 @@ import { cardNoKey, cardNoLookupKey } from "../domain/cardNo"
 import { type BadgeLocation, deckLocationBadges } from "../domain/deckLocation"
 import type { NameSource } from "../domain/nameDisplay"
 import { NORMALIZER_VERSION, normalizeText } from "../domain/normalize"
+import { adoptPrPackRarity } from "../domain/prPack"
 import type { QueryState } from "../domain/query/model"
 import type { RarityBadge } from "../domain/rarityBadges"
 import {
@@ -206,7 +207,6 @@ export function badgeOf(row: JsonObject): RarityBadge | null {
   return (row["rarity_badge"] as RarityBadge | null | undefined) ?? null
 }
 
-/** Official rarity controls sorting; the appearance only describes this printing's badge. */
 function printingRarity(row: JsonObject) {
   return {
     code: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,
@@ -616,7 +616,13 @@ export function preparePrintingOverlay(
             indexed.has(key)
           )
             fail("shape", "printing overlay differs from its catalog identity")
-          indexed.set(key, { ...identity, ...row, home_set_id: owner })
+          indexed.set(
+            key,
+            adoptPrPackRarity(
+              { ...identity, ...row, home_set_id: owner },
+              stringValue(base.index.family(owner)?.["code"] ?? ""),
+            ),
+          )
         }
       rows = indexed
       owners.set(owner, rows)

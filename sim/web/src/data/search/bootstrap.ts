@@ -1,3 +1,4 @@
+import { adoptPrPackRarity } from "../../domain/prPack"
 import type { Row } from "../format-v3/decode"
 import { integerValue, objectValue, stringValue } from "../format-v3/json"
 import { canonicalText } from "../format-v3/json"
@@ -255,6 +256,11 @@ export class BootstrapColumns {
     }
     const group = (name: string, cardId: string): Row[] =>
       (groups.get(name)?.get(cardId) ?? []).map((ordinal) => table(name)?.row(ordinal) ?? {})
+    const adopted = (row: Row): Row =>
+      adoptPrPackRarity(
+        row,
+        stringValue(get("product_family", stringValue(row["home_set_id"]))?.["code"] ?? ""),
+      )
     const currentRevision = (faceId: string, region: string) => {
       const current = (get("face", faceId)?.["current"] ?? []) as Row[]
       const ref = current.find((row) => row["region"] === region)
@@ -275,8 +281,11 @@ export class BootstrapColumns {
       face: (id) => get("face", id),
       facesOf: (id) =>
         group("face", id).sort((a, b) => integerValue(a["ordinal"]) - integerValue(b["ordinal"])),
-      printing: (id) => get("printing", id),
-      printingsOf: (id) => group("printing", id),
+      printing: (id) => {
+        const row = get("printing", id)
+        return row && adopted(row)
+      },
+      printingsOf: (id) => group("printing", id).map(adopted),
       printingByCardNo: () => {
         throw new Error("printingByCardNo is unavailable in search staging")
       },

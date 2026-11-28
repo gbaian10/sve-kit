@@ -84,9 +84,9 @@ describe("rarity chips", () => {
     )
   })
 
-  it("draws GBF in its ladder position and leaves it out of an edition without GBF printings", async () => {
+  it("draws GBF after PR and leaves it out of an edition without GBF printings", async () => {
     const { unmount } = await renderInRouter(<Harness gbfCount={3} />)
-    expect(chips()).toEqual(["BR", "GBF", "SP", "SSP", "PR", "無分類"])
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "GBF", "無分類"])
     expect(screen.getByRole("button", { name: "GBF" }).querySelector("img")).toHaveAttribute(
       "src",
       gbf,
@@ -153,19 +153,19 @@ describe("rarity chips", () => {
     [
       "zh-TW",
       "無分類",
-      "官方沒有登記稀有度的卡，例如 Token、主戰者，以及 PR 系列的 EP、SEP",
+      "沒有稀有度的卡，例如 Token 和主戰者。PR 卡包只看卡面右下的稀有度標籤，沒有標籤的版次都歸在「PR（無標籤）」。",
       "無分類（4）",
     ],
     [
       "ja",
       "分類なし",
-      "公式のレアリティ表記がないカード（トークン、リーダー、PRのEP・SEPなど）",
+      "レアリティのないカード（トークン、リーダーなど）。PRパックは右下のレアリティ表記だけで分類し、表記のないカードは「PR（ラベルなし）」に分類されます。",
       "分類なし（4）",
     ],
     [
       "en",
       "Unrated",
-      "Cards with no official rarity, such as Tokens, leaders, and PR-series EP and SEP cards",
+      "Cards without a rarity, such as tokens and leaders. PR pack cards are rated only by the badge at the lower right; those without one appear under PR (No badge).",
       "Unrated (4)",
     ],
   ] as const)(
