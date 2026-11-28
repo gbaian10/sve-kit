@@ -237,7 +237,7 @@ pub(super) fn player_banish(control: &Control) -> Option<(&Instruction, Binding<
         .then_some((instruction, *player, *count))
 }
 
-/// A checked fixed top slice: another player's deck may only be put into its owner's cemetery.
+/// A checked fixed top slice, with private deck access limited by the destination.
 pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
     let (objects, own_only) = match action {
         Action::Banish { objects } => (objects, true),
@@ -275,6 +275,7 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
             && zone.kind == ZoneKind::Deck
             && (!own_only
                 || zone.player == (PlayerRef::Controller {})
+                || (matches!(action, Action::Banish { .. }) && zone.player == opponent())
                 || top_to_ex_player(action)
                     .is_some_and(|player| matches!(player, PlayerRef::Bound { .. }))) =>
         {
@@ -282,6 +283,13 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
         }
         _ => None,
     }
+}
+
+pub(super) fn own_deck_top_banish(action: &Action) -> Option<(&PlayerRef, u64)> {
+    if !matches!(action, Action::Banish { .. }) {
+        return None;
+    }
+    deck_top(action).filter(|(player, _)| **player == (PlayerRef::Controller {}))
 }
 
 pub(super) fn declared_deck_banish(action: &Action) -> Option<&Expr<Nat>> {

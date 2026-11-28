@@ -1120,7 +1120,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let own = matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller));
+        let opponent = matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Opponent));
         if !own
+            && !opponent
             && !matches!(&top.who, ast::DeckHolder::Bound(name) if self.players.contains_key(name))
         {
             return Err(unsupported(path));

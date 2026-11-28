@@ -1,0 +1,46 @@
+format: 1
+kind: digital_art_match_shard
+records:
+  - art_id: a:ae946f6119265f76bbac205c82189d4f
+    card_id: c:55d991631a9859f2a822bac81abfbbbc
+    face_id: f:6e1d110133205ee99c4447dc815c4614
+    game: svwb
+    state: not_found
+    same_card_targets:
+      - "10324120"
+    witness:
+      printing_id: p:4abbe330ef1d5829b67b32e180739f02
+      face_id: f:6e1d110133205ee99c4447dc815c4614
+      image_url: https://en.shadowverse-evolve.com/wordpress/wp-content/images/cardlist/PR/PR-521EN.png
+      image_sha256: sha256:69a2b91b98b0368fd0bf5c507894d7428f87df793586cf5e6ef99d00ac15c80d
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "10324120"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/9cabd8c959e04428b9dcc3bfae040fbe.png
+        image_sha256: sha256:f60505263241dcee12e25af30ae37e0a6ac12ae84c3674e626b05acd9dbfff9c
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 0
+      - official_id: "10324120"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/30985c71f9e24efb96444f3a6c2227f1.png
+        image_sha256: sha256:5a22a1046959bdc83026d9fe1ac805161e683aec8fe6b716a2aeef133649404c
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 依固定 SIFT recipe 核對既有同卡目標的普通及進化卡圖。兩張候選皆為 0 inliers。

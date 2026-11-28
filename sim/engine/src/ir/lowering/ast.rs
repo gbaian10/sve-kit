@@ -3465,6 +3465,7 @@ pub(super) enum ModeCondition {
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
+    LeaderClass(String),
     LeaderLife(PlayerThreshold),
 }
 

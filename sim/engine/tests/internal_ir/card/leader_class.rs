@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::internal::InputDomain;
 
 fn conditional_draw() -> WellFormedCardProgram {
     let document = evolution_linked_movement::tree(&[(
@@ -111,6 +112,78 @@ fn leader_class_discount_applies_while_paying_the_play_cost() {
             game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
             remaining,
             "{class} leader"
+        );
+    }
+}
+
+#[test]
+fn leader_class_changes_the_number_of_modes_the_controller_can_resolve() {
+    let document = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({"cost":{"pp":0},"do":[{"choice":{
+            "n":1,
+            "instead":[{"if":{"leader_class":"ニュートラル"},"upto":3}],
+            "options":[
+                [{"life":{"who":"self","delta":1}}],
+                [{"life":{"who":"self","delta":2}}],
+                [{"life":{"who":"self","delta":4}}]
+            ]
+        }}]}),
+    )]);
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for (class, maximum, life) in [("ニュートラル", 3, 17), ("ロイヤル", 1, 11)] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["leader"] = json!({"class":class,"life":10});
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "leader-modes",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card(
+                "source",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap()
+        else {
+            panic!("activation must request the printed modes");
+        };
+        let InputDomain::Modes {
+            cardinality, modes, ..
+        } = &question.domain
+        else {
+            panic!("expected mode choice");
+        };
+        assert_eq!(cardinality.minimum, Nat(1));
+        assert_eq!(cardinality.maximum, Some(Nat(maximum)));
+        if maximum == 1 {
+            game.answer_internal_card(question.actor, question.token, Answer::Modes(modes.clone()))
+                .unwrap_err();
+        }
+        let selected = modes
+            .iter()
+            .take(usize::try_from(maximum).unwrap())
+            .copied()
+            .collect();
+        resolved(
+            game.answer_internal_card(question.actor, question.token, Answer::Modes(selected))
+                .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            life
         );
     }
 }
