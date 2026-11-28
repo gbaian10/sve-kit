@@ -239,7 +239,8 @@ sve-carddb parsed-cards validate /absolute/checkout/card-data --previous /privat
    已有身分轉換分片時，工具會拒絕非空的 `same_cards`，連 `--check` 也一樣。若前批的合併已全部寫進登錄，
    重跑改用決定檔副本，只清空已落地的 `same_cards`，保留重播仍需的來源更正與原創插畫分組。
    已併的卡依版次現有的永久卡片 ID 歸位。永久批次原檔照常保留，副本只用於驗證前批重跑零改寫。
-   本批決定檔的 `same_cards` 只列仍需處理的新合併。有轉換分片時，留存分片並在寫入前交維護者決定處理方式。
+   本批決定檔的 `same_cards` 只列仍需處理的新合併。已有轉換分片且本批的 `same_cards` 非空時，
+   留存分片並在寫入前交維護者決定處理方式。
 
    ```bash
    uv --directory carddb run python -m sve_carddb.domains.registry \
