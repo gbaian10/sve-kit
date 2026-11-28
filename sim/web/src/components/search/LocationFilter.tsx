@@ -8,7 +8,7 @@ import mainDeck from "../../assets/card-labels/main-deck.svg"
 import spell from "../../assets/card-labels/spell.svg"
 import treasure from "../../assets/card-labels/treasure.svg"
 import type { SearchOptions } from "../../data"
-import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
+import { leaderFrameTokens, LOCATION_ORDER, tokenKindTokens } from "../../domain/deckLocation"
 import type { TextLang } from "../../domain/search"
 import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { locationLabel, vocabularyOptionLabel } from "./facet-labels"
@@ -51,7 +51,7 @@ export function LocationFilter({
     const type = options?.types.find((item) => item.code === code)
     return type ? vocabularyOptionLabel(type.name, textLang) : code
   }
-  const items = LOCATION_ROWS.flat().flatMap((code): FacetChip[] => {
+  const items = LOCATION_ORDER.flatMap((code): FacetChip[] => {
     // Rows the edition has no printings for stay out, as the type row does; "main" always shows.
     if (code !== "main" && !(counts[code] ?? 0) && options) return []
     const label = locationLabel(t, code)
