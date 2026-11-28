@@ -111,7 +111,8 @@ export function KeywordFilter({
       <div
         role="tablist"
         aria-label={t("filters.keywordRelation")}
-        className="grid grid-cols-2 border-b border-border"
+        // Tabs share the row by their own width: the longest name must stay whole in a narrow popover.
+        className="flex border-b border-border"
       >
         {MECHANIC_RELATIONS.map((value) => {
           const active = value === relation
@@ -132,14 +133,14 @@ export function KeywordFilter({
                 rovingRadioKeyDown(event, MECHANIC_RELATIONS, relation, setRelation, id)
               }}
               className={cn(
-                "-mb-px flex h-9 min-w-0 items-center justify-center gap-1.5 border-b-2 px-2 text-13 font-semibold",
+                "-mb-px flex h-9 flex-auto items-center justify-center gap-1 border-b-2 px-1.5 text-13 font-semibold whitespace-nowrap",
                 "focus-visible:outline-2 focus-visible:outline-offset-2",
                 active
                   ? "border-text-1 text-text-1"
                   : "border-transparent text-text-2 hover:text-text-1",
               )}
             >
-              <span className="truncate">{t(`filters.keywordRelations.${value}`)}</span>
+              {t(`filters.keywordRelations.${value}`)}
               {count > 0 && (
                 <span className="min-w-4.5 shrink-0 rounded-pill bg-text-1 px-1 text-11 leading-4.5 text-surface-1 tabular-nums">
                   <span aria-hidden="true">{count}</span>

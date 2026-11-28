@@ -255,6 +255,7 @@ interface QueryState {
 （由 DSL 推導的範圍，見[關鍵字機制](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)）。
 `absent` 與 `unknown` 的差別只用來計算提示：`SearchOptions.keywordCoverage`／`keywordUnknownCards` 按關係分開，
 未確認張數只算面板的八個關鍵字，提醒使用者結果可能漏掉尚未確認的卡。
+面板以外的 keyword 只能從網址帶入自身條件，它們未確認的卡不計入這個提示。
 某關係在目前地區沒有任何卡被標註時為 `unknown`，帶該關係的查詢回 unsupported-query，不回 0 筆。
 
 另一個 keyword 是 present 不能推本項 absent。
