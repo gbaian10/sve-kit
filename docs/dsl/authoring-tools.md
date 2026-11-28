@@ -480,6 +480,8 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
+`enter_field.sel` 也接受 `has_evolve: true`（「【進化】を持つフォロワーが場に出たとき」，GFE01-017EN），只能與 `who: self`、`kind: follower` 並用，依入場後的有效能力判斷是否持有進化能力；延遲進場監看與其他事件頭仍拒絕。
+
 `enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。同一處也接受 `cost_le: N`，以進場當下的有效費用篩選主體（BP04-063）。
 
 事件本文的 `it` 共用標頭的型別綁定，可指向進場、入 EX、攻擊、進化、離場及破壞的主體；`this` 始終是能力來源。進場使用新世代，離場與破壞使用離場前世代；舊事件的主體離場後再回場，不會強化回來的新世代。沒有卡片主體的時點及起動能力不能使用 `it`，也不以來源代替缺少的事件欄位。本文條件可用 `exists: {in: it, trait: 獣}` 檢查該主體是否符合靜態篩選（BP09-002「場に出たフォロワーが獣・フォロワーなら、代わりに…」寫成 `if`／`else` 兩種強化），可與 `not`、`all`、`any` 組合；判斷比照已選正式目標：讀主體目前仍屬於事件那個世代時的特徵，主體已換世代（例如離場、破壞後）就不符合，不會改讀離場前的快照。
@@ -826,6 +828,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 移動沿用共同的世代、衍生物消去及事件捕捉程序，洗牌清除舊位置知識。
 單獨指示的 `who` 使用 `self`；`each_player` 的階段內可使用該階段的玩家綁定。
 
+`each_player` 的階段內可寫 `choose: {by: p, from: {who: p, zone: cemetery, ...}}`，讓每位玩家從自己的墓場選卡（GFB01d-005EN「各玩家可將自己墓場的 1 張護符加入手牌」）；選擇者必須是墓場持有者本人，由效果控制者代選其他玩家墓場仍拒絕。
+
 墓場選定的卡回牌組後洗牌，必須相鄰寫成：
 
 ```yaml
@@ -863,6 +867,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。`delta` 與非負整數 `set` 二擇一：`set: 0` 把該卡的打出費用設為 0（CP01-035「このターン、それをプレイする際、コストを0にする」、BP02-091 不限本回合），沿用同一個移動回條與費用狀態，只套用到實際移到 EX 的新世代；正數 `delta`、負數 `set` 或與 `next_only` 並用仍拒絕。
 
 同一次私有 Look 可在 `either` 結算分支中選牌，依分支移到手牌或 EX（BP20-049）。每個分支自行記錄成功移動回條並排完剩餘成員，不重新看頂牌，也不把分支內的結果綁定帶到分支外。EX 已滿而未成功移動的成員仍屬餘集，不能按選取清單直接扣掉。
+
+結算時從自己手牌的 `choose` 也可用 `distinct_by: class`（GFB01c-003EN「捨棄任意張不同職業的卡」），每個職業至多選一張，中立也算一個職業；可選張數上限是手牌中的職業數。
 
 `choose` 從同一次 Look 選牌可用 `distinct_by: class` 要求職業互異（BP21-050），搭配 `kind: follower`、`orig_cost_le: 4`、`upto: 2` 及 `may: true`。職業在提示產生時與候選一起保存，作答不能選同職業的兩張；只有一個職業時可選一張，也可不選。玩家提示沿用群組約束，每個職業的群組至多選一張；接續入場沿用場上空位上限，餘集仍扣除成功入場回條。
 
@@ -981,6 +987,8 @@ apply:
 目前只准入場上的公開正式目標與角色引用，不接受私有選卡、收件者聯集角色或結算時 `choose.roles`。
 
 已宣告正式目標的角色也可作姿態指示的對象，例如 `act: {role: {of: enemies, name: rest}}`。它與傷害角色共用同一份已選取集合，不再詢問第二次選取；`n: 2` 搭配一體 primary 與 remaining 可表示兩個相異從者的不同指示。
+
+至多一體的角色可用 `power_of: {role: {of: pair, name: second}}` 讀目前攻擊力：`if_nonempty: 1` 角色一律可讀，`remaining` 只在正式目標至多兩體時可讀（GFB01b-023EN「選擇場上 2 體從者，各自受到另一體攻擊力的傷害」）。讀法與單一正式目標的 `power_of` 相同，離開場上時讀為 0。
 
 權威端的 `awaiting.domain` 在既有 `kind: targets` 題目增加 `roles` 陣列，
 每項為 `{role: <題內整數>, cardinality: {if_nonempty: 1}}` 或
@@ -1266,6 +1274,8 @@ CP05-057 在進化時及超進化時使用
 例如 BP14-118 支付後才計算 EX 宴樂卡張數，BP14-008 置底後回復領袖體力，
 BP17-071 將自身橫置與手牌到 EX 放在同一個 `cost.steps`。
 
+結算時從自己手牌選出的卡移到牌庫底時可加 `result`，以 `count_of` 讀實際放回的張數（GFB01b-018EN「將至多 2 張手牌以任意順序放到牌庫底，抽相同張數」）。同時放回多張需要排序選擇，目前寫成每次 `choose` 至多 1 張並依序移到牌庫底，先放的牌在上方，玩家藉此決定順序。
+
 「これを{アクト}デッキの下に置く」寫成 `cost.steps: [{act_self: true}, {to_deck_bottom: {sel: {in: this}, n: 1}}]`（BP07-012）。
 `in: this` 指付款的來源自身，降低為與自身送墓相同的來源移動，改放持有者牌庫底；正式目標先選，可選來源自身，
 但來源移走後成為新物件，本文對它的指示不再生效。橫置仍只能由場上的來源支付，已橫置時整份付款不成立。
@@ -1403,7 +1413,7 @@ Twin Drive 在每次事件時捕捉觀察者，兩次檢查與 trigger 效果都
 公開頂牌觀察在選出的從者／護符實際入場後，可把觀察集合扣除該次移動 before 成員的餘集移入手牌。沿用觀察回條與成功移動回條的共同作用域；因場上容量未能移動的成員仍屬餘集，不以原先選取清單替代成功結果。
 
 `reveal: {top: {who: self, n: 1}, bind: shown}` 在能力本文頂層公開牌庫頂，不移動卡片。
-它沿用同一批 Look Before 成員，後續不重新查詢最新頂牌。條件、模式及付款分支內的此入口仍拒絕。
+它沿用同一批 Look Before 成員，後續不重新查詢最新頂牌。一般 `if` 分支內可公開（GFB01a-005EN「主戰者是皇家護衛時公開牌庫頂 10 張」），該次觀察只供同一分支的後續步驟讀取，分支結束後讀它仍拒絕；模式、付款及 `optional` 分支內的此入口仍拒絕。
 
 公開後，`agg: {of: {in: shown}, attr: cost, fn: sum}` 讀該批卡片的成本總和；
 `attr: orig_cost` 讀原本成本。`count: {in: {objects_of: shown, view: before}, kind: follower}`

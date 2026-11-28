@@ -1072,6 +1072,14 @@ fn public_top_reveal_reads_only_its_own_published_observation() {
         lowerer
             .lower_with_printed_costs(&body(reveal.clone(), read.clone()), &costs)
             .unwrap();
+        // "If X, reveal": a plain branch may publish a reveal its own later steps read.
+        let mut branch = expanded::spell_tree().clone();
+        *branch
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({"do":[{"if":{"cond":{"leader_life":{"who":"self","le":20_u8}},
+            "then":[reveal.clone(), {"life":{"who":"self","delta":read.clone()}}]}}]});
+        lowerer.lower_with_printed_costs(&branch, &costs).unwrap();
+        // The branch-local observation is not readable after the branch.
         let nested =
             json!({"if":{"cond":{"leader_life":{"who":"self","le":20_u8}},"then":[reveal]}});
         let failure = lowerer
@@ -1079,9 +1087,18 @@ fn public_top_reveal_reads_only_its_own_published_observation() {
             .unwrap_err();
         assert_eq!(failure.code, "unsupported_construct");
         assert!(
-            failure.path.ends_with("/if/then/0"),
-            "the nested producer itself must be rejected"
+            failure.path.ends_with("/do/1"),
+            "the read after the branch must be rejected"
         );
+        // Optional and mode branches still refuse the producer.
+        for wrapped in [
+            json!({"optional":{"steps":[reveal]}}),
+            json!({"choice":{"n":1_u8,"options":[[reveal],[{"draw":{"n":1_u8}}]]}}),
+        ] {
+            lowerer
+                .lower_with_printed_costs(&body(wrapped, read.clone()), &costs)
+                .unwrap_err();
+        }
         for invalid in [
             json!({"look":{"top":{"who":"self","n":1_u8},"bind":"shown"}}),
             json!({"reveal":{"top":{"who":"opp","n":1_u8},"bind":"shown"}}),

@@ -2080,6 +2080,12 @@ pub(super) struct RoleReference {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct RoleObservation {
+    pub role: RoleReference,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Choose {
     pub position: Option<HandPosition>,
     #[serde(default)]
@@ -2371,6 +2377,9 @@ pub(super) enum Number {
     Alias(String),
     Power {
         power_of: Observation,
+    },
+    PowerRole {
+        power_of: RoleObservation,
     },
     Life {
         hp_of: BodyStatReference,
@@ -3845,6 +3854,7 @@ pub(super) struct ExSubscription {
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
     pub r#where: Option<Box<MovementCondition>>,
+    pub has_evolve: Option<True>,
     pub cost_le: Option<u64>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,

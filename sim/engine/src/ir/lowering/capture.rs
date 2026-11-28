@@ -357,6 +357,7 @@ impl BodyContext<'_> {
             | ast::Number::Dice { .. }
             | ast::Number::Counter { .. }
             | ast::Number::Power { .. }
+            | ast::Number::PowerRole { .. }
             | ast::Number::Life { .. }
             | ast::Number::Cost { .. }
             | ast::Number::OriginalCost { .. }

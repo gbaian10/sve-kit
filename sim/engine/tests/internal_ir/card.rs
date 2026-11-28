@@ -899,6 +899,8 @@ mod cemetery_pair_capacity;
 #[path = "card/ward_bypass.rs"]
 mod ward_bypass;
 
+#[path = "card/english_small_mechanisms.rs"]
+mod english_small_mechanisms;
 #[path = "card/layer3_attack_aura.rs"]
 mod layer3_attack_aura;
 #[path = "card/leader_class.rs"]

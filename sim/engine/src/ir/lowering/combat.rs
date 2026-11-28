@@ -66,6 +66,7 @@ pub(super) fn attack(
     }
     let subject_filter = entry.sel.as_ref().map(|subject| ast::MovementSubject {
         r#where: None,
+        has_evolve: None,
         cost_le: None,
         orig_cost_eq: None,
         orig_cost_le: None,
