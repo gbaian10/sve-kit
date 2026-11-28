@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-002EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - if:
+                cond: { my_turn: true }
+                then:
+                  - dice: { bind: roll, who: non_turn }
+                  - if:
+                      cond: { not: { cmp: { left: { dice: roll }, op: eq, right: 1 } } }
+                      then:
+                        - choose: { bind: buried, by: opp, from: { who: opp, zone: field }, n: 2 }
+                        - move: { ref: buried, to: cemetery }
+                        - damage: { to: { leader: opp }, n: 5 }
+                else:
+                  - dice: { bind: turn_roll, who: turn }
+                  - if:
+                      cond: { not: { cmp: { left: { dice: turn_roll }, op: eq, right: 1 } } }
+                      then:
+                        - choose:
+                            { bind: turn_buried, by: opp, from: { who: opp, zone: field }, n: 2 }
+                        - move: { ref: turn_buried, to: cemetery }
+                        - damage: { to: { leader: opp }, n: 5 }
+      - line: 2
+        lastword:
+          do:
+            - if:
+                cond: { leader_class: ウィッチ }
+                then:
+                  - move: { ref: this, to: field }
+                  - choose:
+                      bind: face_up
+                      from:
+                        who: self
+                        zone: evolve_deck
+                        kind: evolve_follower
+                        face_up: true
+                        name: Slumbering Calamity
+                      upto: 1
+                  - flip_down: face_up

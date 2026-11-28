@@ -10,18 +10,17 @@ import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import type { ImageIndex } from "../../data"
 import { type DeckCodeCard, encodeDeckCode } from "../../domain/deck/code"
-import { totalCount } from "../../domain/deck/model"
 import { deckToText } from "../../domain/deck/text"
 import type { DeckEntry } from "../../domain/deck/types"
 import { useDeckEditor } from "./deck-editor"
 import {
   canvasEncoder,
-  type DeckImageCard,
   DeckImageMissing,
   type DeckImageSize,
   encodeDeckImage,
   renderDeckImage,
 } from "./deck-image"
+import { deckImageInput } from "./deck-image-input"
 import { useDeckLabels } from "./deck-labels"
 
 type Tab = "text" | "share" | "image"
@@ -38,19 +37,6 @@ const EXTENSIONS: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
   "image/jpeg": "jpg",
-}
-
-/** Theme colours for the canvas, read from the page's own tokens. */
-function canvasColors() {
-  const styles = getComputedStyle(document.documentElement)
-  const token = (name: string) => styles.getPropertyValue(name).trim()
-  return {
-    page: token("--bg"),
-    text: token("--text-1"),
-    muted: token("--text-3"),
-    badge: token("--accent"),
-    badgeText: token("--accent-ink"),
-  }
 }
 
 function sizeLabel(bytes: number): string {
@@ -178,44 +164,19 @@ export function ExportDialog({
     if (!facts) return
     const mine = ++job.current
     setDrawing({ state: "drawing" })
-    const card = (entry: DeckEntry): DeckImageCard => {
-      const summary = facts.summaryOf(entry.cardId, entry.printingId)
-      return {
-        src: summary ? images?.cardImage(summary.printingId, summary.faceId)?.src : undefined,
-        label: facts.factsOf(entry.cardId)?.name ?? entry.cardId,
-        count: entry.count,
-      }
-    }
-    const leader = deck.leader
-    const leaderSummary = leader ? facts.summaryOf(leader.cardId, leader.printingId) : undefined
-    const leaderName = leader ? (facts.factsOf(leader.cardId)?.name ?? leader.cardId) : ""
     try {
-      const canvas = await renderDeckImage({
-        size: chosen,
-        title: deck.name,
-        subtitle: t("decks.imageSubtitle", {
-          edition: t(`options.edition.${deck.edition}`),
-          basis: labels.basisLabel(deck.basis),
-          main: totalCount(deck.main),
-          evolve: totalCount(deck.evolve),
+      const canvas = await renderDeckImage(
+        deckImageInput({
+          deck,
+          facts,
+          images,
+          size: chosen,
+          file: "card_l",
+          missing: "fail",
+          t,
+          basisLabel: labels.basisLabel,
         }),
-        leader: leader
-          ? {
-              src: leaderSummary
-                ? images?.cardImage(leaderSummary.printingId, leaderSummary.faceId)?.src
-                : undefined,
-              label: leaderName,
-            }
-          : null,
-        leaderLine: t("decks.importLeader", { name: leaderName }),
-        sections: [
-          { label: t("decks.section.main"), cards: deck.main.map(card) },
-          { label: t("decks.section.evolve"), cards: deck.evolve.map(card) },
-        ],
-        // The viewer's own calendar date, as YYYY-MM-DD.
-        footer: t("decks.imageFooter", { date: new Date().toLocaleDateString("sv-SE") }),
-        colors: canvasColors(),
-      })
+      )
       const blob = await encodeDeckImage(chosen, canvasEncoder(canvas))
       if (job.current !== mine) return
       setPicture({

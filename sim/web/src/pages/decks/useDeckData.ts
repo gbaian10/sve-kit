@@ -129,18 +129,30 @@ export function useDeckData(edition: Region): DeckData {
 }
 
 const CHUNK = 20
+const CHUNKS = 4
+
+export interface DeckImages {
+  readonly images: ImageIndex | undefined
+  /**
+   * Whether a face's image row may still arrive: its summary request is running, or it came back
+   * and the row is being fetched. A failed request, a printing the worker's snapshot lacks, or one
+   * past the requests is settled.
+   */
+  readonly pending: (printingId: string, faceId: string) => boolean
+}
 
 /**
  * Image metadata for the deck's own printings. The main-thread snapshot carries only the base
  * printings (a reprint such as BP22-R23 is a locator without image rows there), so the deck asks
  * the search worker the way the recent list does, twenty printings per request, and falls back to
- * the main-thread index for the rest.
+ * the main-thread index for the rest. Four requests cover a leader, fifty main and ten evolve
+ * cards all of different printings.
  */
 export function useDeckImages(
-  deck: Deck,
+  deck: Pick<Deck, "edition" | "leader" | "main" | "evolve" | "side">,
   facts: DeckFacts | null,
   fallback: ImageIndex | undefined,
-): ImageIndex | undefined {
+): DeckImages {
   const ids = useMemo(() => {
     if (!facts) return []
     const seen = new Set<string>()
@@ -158,8 +170,25 @@ export function useDeckImages(
   const first = useRecentSummaries(ids.slice(0, CHUNK), deck.edition)
   const second = useRecentSummaries(ids.slice(CHUNK, CHUNK * 2), deck.edition)
   const third = useRecentSummaries(ids.slice(CHUNK * 2, CHUNK * 3), deck.edition)
-  return useMemo(
-    () => mergeImageIndexes([first.images, second.images, third.images, fallback]),
-    [first.images, second.images, third.images, fallback],
+  const fourth = useRecentSummaries(ids.slice(CHUNK * 3, CHUNK * CHUNKS), deck.edition)
+  const images = useMemo(
+    () => mergeImageIndexes([first.images, second.images, third.images, fourth.images, fallback]),
+    [first.images, second.images, third.images, fourth.images, fallback],
   )
+  const requests = [first, second, third, fourth]
+  // Each printing waits on its own request only: one request failing settles none of the others.
+  const pending = (printingId: string, faceId: string) => {
+    const at = ids.indexOf(printingId)
+    if (at < 0 || at >= CHUNK * CHUNKS) return false
+    // Rows any index already holds (the main thread's, or ones kept from earlier answers) are enough.
+    if (images.asset(printingId, faceId) !== undefined) return false
+    const request = requests[Math.floor(at / CHUNK)]
+    if (request === undefined || request.phase === "error") return false
+    if (request.phase !== "complete") return true
+    // A printing the worker's snapshot lacks has no summary, so no image request follows it.
+    const item = request.recent?.find((summary) => summary.printingId === printingId)
+    if (item?.summary === undefined) return false
+    return request.images?.known?.(printingId, faceId) !== true
+  }
+  return { images, pending }
 }

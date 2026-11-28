@@ -18,6 +18,11 @@ export interface DeckImageInput {
   readonly leaderLine: string
   readonly sections: readonly { readonly label: string; readonly cards: readonly DeckImageCard[] }[]
   readonly footer: string
+  /**
+   * `fail` (the exported picture) refuses a card without its image; `placeholder` (the import
+   * preview, where seeing most cards beats seeing none) draws a named frame in its place.
+   */
+  readonly missing?: "fail" | "placeholder"
   readonly colors: {
     readonly page: string
     readonly text: string
@@ -94,9 +99,31 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   })
 }
 
+/** Splits a label into at most `maxLines` lines of `width`; CJK names wrap by character. */
+function wrapLabel(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  width: number,
+  maxLines: number,
+): string[] {
+  const lines: string[] = []
+  let line = ""
+  for (const char of label) {
+    if (line !== "" && ctx.measureText(line + char).width > width) {
+      lines.push(line)
+      line = ""
+      if (lines.length === maxLines) return lines
+    }
+    line += char
+  }
+  if (line !== "") lines.push(line)
+  return lines.slice(0, maxLines)
+}
+
 /**
  * Draws the picture. Every card image loads first: a deck picture with blank cards would look
- * complete, so any card without its image fails the whole picture with `DeckImageMissing`.
+ * complete, so unless `missing` is `placeholder`, any card without its image fails the whole
+ * picture with `DeckImageMissing`.
  */
 export async function renderDeckImage(
   input: DeckImageInput,
@@ -118,12 +145,7 @@ export async function renderDeckImage(
   const missing = [...(leader ? [leader] : []), ...sections.flatMap((section) => section.cards)]
     .filter((item) => item.image === null)
     .map((item) => item.label)
-  if (missing.length > 0) throw new DeckImageMissing(missing)
-  // Every image loaded; the filters below only narrow the types.
-  const loaded = <T extends { readonly image: HTMLImageElement | null }>(
-    item: T,
-  ): item is T & { readonly image: HTMLImageElement } => item.image !== null
-  const [drawnLeader] = (leader ? [leader] : []).filter(loaded)
+  if (missing.length > 0 && input.missing !== "placeholder") throw new DeckImageMissing(missing)
   const layout = deckImageLayout(
     input.size,
     input.leader !== null,
@@ -143,12 +165,31 @@ export async function renderDeckImage(
   const font = (px: number, weight = 400) =>
     `${String(weight)} ${String(px)}px "IBM Plex Sans", "Noto Sans TC", "Noto Sans JP", sans-serif`
 
-  const drawCard = (image: HTMLImageElement, x: number, y: number, count: number | null) => {
+  const drawCard = (
+    card: { readonly image: HTMLImageElement | null; readonly label: string },
+    x: number,
+    y: number,
+    count: number | null,
+  ) => {
     ctx.save()
     ctx.beginPath()
     ctx.roundRect(x, y, CARD_W, CARD_H, 6)
     ctx.clip()
-    ctx.drawImage(image, x, y, CARD_W, CARD_H)
+    if (card.image) ctx.drawImage(card.image, x, y, CARD_W, CARD_H)
+    else {
+      ctx.fillStyle = colors.muted
+      ctx.globalAlpha = 0.2
+      ctx.fillRect(x, y, CARD_W, CARD_H)
+      ctx.globalAlpha = 1
+      ctx.fillStyle = colors.text
+      ctx.font = font(13, 600)
+      ctx.textAlign = "center"
+      const lines = wrapLabel(ctx, card.label, CARD_W - 12, 5)
+      lines.forEach((line, i) => {
+        ctx.fillText(line, x + CARD_W / 2, y + CARD_H / 2 + (i - lines.length / 2) * 17)
+      })
+      ctx.textAlign = "start"
+    }
     ctx.restore()
     if (count === null) return
     // The count sits top right as on the pool's cards: a disc ringed in the page colour.
@@ -173,8 +214,8 @@ export async function renderDeckImage(
   }
 
   let textX = PAD
-  if (drawnLeader) {
-    drawCard(drawnLeader.image, PAD, 20, null)
+  if (leader) {
+    drawCard(leader, PAD, 20, null)
     textX = PAD + CARD_W + 18
   }
   const textWidth = WIDTH - textX - PAD
@@ -184,21 +225,21 @@ export async function renderDeckImage(
   ctx.fillStyle = colors.muted
   ctx.font = font(18)
   ctx.fillText(input.subtitle, textX, 72, textWidth)
-  if (drawnLeader) {
+  if (leader) {
     ctx.fillStyle = colors.text
     ctx.font = font(16, 600)
     ctx.fillText(input.leaderLine, textX, 104, textWidth)
   }
   let top = layout.header
   for (const section of sections) {
-    const cards = section.cards.filter(loaded)
+    const { cards } = section
     if (cards.length === 0) continue
     ctx.fillStyle = colors.text
     ctx.font = font(20, 600)
     ctx.fillText(section.label, PAD, top)
     cards.forEach((card, i) => {
       drawCard(
-        card.image,
+        card,
         PAD + (i % COLUMNS) * (CARD_W + GAP),
         top + SECTION_TITLE + Math.floor(i / COLUMNS) * (CARD_H + GAP),
         card.count,

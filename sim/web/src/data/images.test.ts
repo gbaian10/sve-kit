@@ -7,7 +7,7 @@ import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { canonical, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { digest } from "./format-v3/sha256"
-import { loadImagePage, retainedImageIndex } from "./images"
+import { type ImageIndex, loadImagePage, mergeImageIndexes, retainedImageIndex } from "./images"
 import { MetadataBytes } from "./metadata"
 import { requestQueue } from "./request-queue"
 
@@ -344,5 +344,27 @@ describe("network scheduling", () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
     await Promise.all([...background, visible])
+  })
+})
+
+describe("merged image indexes", () => {
+  it("answers a face from the index holding its row before one that failed and only knows it", () => {
+    const failed: ImageIndex = {
+      cardImage: () => undefined,
+      asset: () => undefined,
+      known: () => true,
+      failed: true,
+    }
+    const loaded: ImageIndex = {
+      cardImage: (printingId) =>
+        printingId === "p1" ? { src: "/card_l/1.webp", width: 459, height: 640 } : undefined,
+      asset: (printingId) => (printingId === "p1" ? { availability: "ready" } : undefined),
+      known: (printingId) => printingId === "p1",
+    }
+    const merged = mergeImageIndexes([failed, loaded])
+    expect(merged.cardImage("p1", "f1")?.src).toBe("/card_l/1.webp")
+    // A face no index has a row for is still settled by the failure, without an image.
+    expect(merged.known?.("p2", "f1")).toBe(true)
+    expect(merged.cardImage("p2", "f1")).toBeUndefined()
   })
 })

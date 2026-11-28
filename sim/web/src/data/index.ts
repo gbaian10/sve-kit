@@ -27,6 +27,7 @@ export {
   type SnapshotStatus,
 } from "./client"
 export { loadConstructionIndex } from "./construction-index"
+export { type DeckLogResult, fetchDeckLogDeck } from "./decklog"
 export { type DigitalLink, digitalLinkUrl, loadCardDigitalLinks } from "./digital-links"
 export { cardPrintings, locateEdition } from "./edition"
 export { type CardErratum, loadCardErrata } from "./errata"

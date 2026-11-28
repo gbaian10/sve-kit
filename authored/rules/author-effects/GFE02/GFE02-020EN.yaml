@@ -1,0 +1,13 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-020EN:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on: { phase: { whose: self, which: end } }
+          do:
+            - damage:
+                to: { any_of: [{ leader: opp }, { who: opp, zone: field, kind: follower }] }
+                n: 1

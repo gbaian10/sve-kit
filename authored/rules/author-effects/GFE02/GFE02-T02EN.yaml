@@ -1,0 +1,16 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-T02EN:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [rush, assail, bane]
+      - line: 2
+        lastword:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: enemy

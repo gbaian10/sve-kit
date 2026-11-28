@@ -1,0 +1,14 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-007EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: summoned
+              from: { who: self, zone: cemetery, kind: follower, trait: 魔界, orig_cost_le: 7 }
+              n: 1
+          do:
+            - move: { ref: summoned, to: field, result: entered }

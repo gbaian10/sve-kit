@@ -197,14 +197,15 @@ export async function loadImagePage(
   return indexOf(selected)
 }
 
-/** Several partial image indexes as one: each face is answered by the index that knows it. */
+/**
+ * Several partial image indexes as one: each face is answered by the index holding its row, else
+ * by one that only knows it (a failed request knows every face it can no longer bring).
+ */
 export function mergeImageIndexes(indexes: readonly (ImageIndex | undefined)[]): ImageIndex {
   const present = indexes.flatMap((index) => (index ? [index] : []))
   const owner = (printingId: string, faceId: string) =>
-    present.find(
-      (index) =>
-        index.known?.(printingId, faceId) === true || index.asset(printingId, faceId) !== undefined,
-    )
+    present.find((index) => index.asset(printingId, faceId) !== undefined) ??
+    present.find((index) => index.known?.(printingId, faceId) === true)
   return {
     known: (printingId, faceId) => owner(printingId, faceId) !== undefined,
     asset: (printingId, faceId) => owner(printingId, faceId)?.asset(printingId, faceId),

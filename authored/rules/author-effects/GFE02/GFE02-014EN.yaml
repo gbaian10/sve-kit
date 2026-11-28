@@ -1,0 +1,13 @@
+format: 2
+kind: author_effect_set
+cards:
+  GFE02-014EN:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 2 }
+      - line: 2
+        fanfare:
+          do:
+            - move: { top: { who: self, n: 4 }, to: cemetery }

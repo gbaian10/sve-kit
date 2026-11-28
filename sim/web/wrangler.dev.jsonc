@@ -12,11 +12,31 @@
     "REPORT_GITHUB_INSTALLATION_ID": "184135707",
   },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
+  // DeckLog lookups (docs/deployment/cloudflare-development.md §12). Placeholder id: the maintainer
+  // creates the database, puts its id here and applies migrations/ before the next deploy.
+  "d1_databases": [
+    {
+      "binding": "DECKLOG_DB",
+      "database_name": "svekit-dev-decklog",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
   "ratelimits": [
     {
       "name": "CARD_REPORT_LIMITER",
       "namespace_id": "19901",
       "simple": { "limit": 3, "period": 60 },
+    },
+    {
+      "name": "DECKLOG_LIMITER",
+      "namespace_id": "19902",
+      "simple": { "limit": 10, "period": 60 },
+    },
+    {
+      "name": "DECKLOG_UPSTREAM_LIMITER",
+      "namespace_id": "19903",
+      "simple": { "limit": 30, "period": 60 },
     },
   ],
   "observability": { "enabled": true },
