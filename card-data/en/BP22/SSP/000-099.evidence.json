@@ -1,0 +1,154 @@
+{
+  "format": 1,
+  "region": "en",
+  "family": "BP22",
+  "range": "SSP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-d84f931f5b7e8a50": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "cd5cf30b4ba38720a709dfe02791f58a0f82abeb"
+      }
+    },
+    "parsers": {
+      "parsers-701ac596a30e3148": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "en-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-8b744f2cab44c25f": {
+        "parser": "parsers-701ac596a30e3148",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-39364025a23adfc0": [
+        {
+          "ordinal": 0,
+          "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+          "date_raw": "Nov. 20, 2026",
+          "href_raw": [
+            "/cards/searchresults?expansion=BP21-BP22",
+            "https://en.shadowverse-evolve.com/products/bp2122/"
+          ],
+          "resolved_urls": [
+            "https://en.shadowverse-evolve.com/cards/searchresults?expansion=BP21-BP22",
+            "https://en.shadowverse-evolve.com/products/bp2122/"
+          ],
+          "matches": [
+            {
+              "kind": "product_link",
+              "product_url": "https://en.shadowverse-evolve.com/products/bp2122/",
+              "expansion_code": "BP21-BP22"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "qa": {
+      "qa-4f53cda18c2baa0c": [],
+      "qa-d00b5f70100f38c9": [
+        {
+          "stable_source_key": "Q2581",
+          "official_number": "Q2581",
+          "locator": "qa-block:0",
+          "published_on": "2026-11-06",
+          "date_raw": "Nov. 6, 2026"
+        },
+        {
+          "stable_source_key": "Q2580",
+          "official_number": "Q2580",
+          "locator": "qa-block:1",
+          "published_on": "2026-11-06",
+          "date_raw": "Nov. 6, 2026"
+        }
+      ]
+    },
+    "related": {
+      "related-09f694c243e8bdb7": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=BP22-117EN"
+        }
+      ],
+      "related-52e8e1ab8dacf744": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cards/?cardno=CP01-085EN"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:92446752c7b2f2637be31c51c7205913828e00d0b6ba03200d4dd945a158ad73": {
+      "recipe": "recipes-d84f931f5b7e8a50",
+      "raw": {
+        "raw_sha256": "sha256:6c97e77522a751ef727be0d5ae9c46e8cc7aae670f906be2f2185309013d71ce",
+        "raw_bytes": 38722,
+        "first_receipt_id": "sha256:13f4540d11d1e340361975e615170a46ba6584d40544e4c672d87f88de92b936",
+        "descriptor_sha256": "sha256:6f9f0c2fd2542ad3c64c7ad4817cefdfe49d26caef6470975db53e058cfb44ec",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:d9ca3739184c8f71b5c644db00fed2a511f4241200fb36c592b9c796386d0892"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-39364025a23adfc0",
+        "qa": "qa-4f53cda18c2baa0c",
+        "related": "related-52e8e1ab8dacf744",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:72348ccb7716174a3efc1a19f74171e8af753db3466cbac4c96d47c7b2d73195"
+    },
+    "src:v1:d7a53213561367786778aef4db4e0174d9933f4e90ba34850895dcf65b8abd34": {
+      "recipe": "recipes-d84f931f5b7e8a50",
+      "raw": {
+        "raw_sha256": "sha256:786d329e3f8ef799573c2192ad419c3b558331a1f9a6b13e4e3527db8cb4efe8",
+        "raw_bytes": 39390,
+        "first_receipt_id": "sha256:4dd8123fdec813854b6f806aa65fd79f01dbe946d12f74277cf6f1e802e74166",
+        "descriptor_sha256": "sha256:72f389ff41e31356067631a694c5d4aaeb98f49e4828ca94e327140edaecc72d",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-8b744f2cab44c25f",
+            "result_hash": "sha256:a9e6eb686d611fd7ad4db578149c1780a09dbd8e5ebb037203e078ccab96c8fa"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-39364025a23adfc0",
+        "qa": "qa-d00b5f70100f38c9",
+        "related": "related-09f694c243e8bdb7",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:170f9b9d9c1098af62898022a65593a5940464f30adae4ff011ef9a040094936"
+    }
+  }
+}

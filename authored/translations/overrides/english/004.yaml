@@ -1,0 +1,2586 @@
+format: 3
+kind: translation_shard
+records:
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.3cb926c90c9e75c46612abd6
+      lang: zh-Hant
+      source_hash: 3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      references:
+        name.slumbering_calamity:
+          kind: card_name
+          term_id: term:name.slumbering_calamity
+      nodes:
+        - kind: LeafRef
+          slot: name.slumbering_calamity
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.b72464c41fe934dbb69c2f14
+      lang: zh-Hant
+      source_hash: b72464c41fe934dbb69c2f1477e72ede4a4edba914c4082097b40eaa95a713c2
+      references:
+        ability.last_words:
+          kind: glossary
+          key: term:ability.last_words
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        class.witch:
+          kind: vocabulary
+          key:
+            - class
+            - witch
+        keyword.aura:
+          kind: glossary
+          key: term:keyword.aura
+        object.counter:
+          kind: glossary
+          key: term:object.counter
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 10}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n【"
+        - kind: LeafRef
+          slot: keyword.aura
+        - kind: Literal
+          text: "】\n自己的結束階段到來時，在這張卡片上放置1個災禍"
+        - kind: LeafRef
+          slot: object.counter
+        - kind: Literal
+          text: 。之後，若這張卡片的災禍
+        - kind: LeafRef
+          slot: object.counter
+        - kind: Literal
+          text: 數量為3個以上，則這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.last_words
+        - kind: Literal
+          text: "}若自己的主戰者為{"
+        - kind: LeafRef
+          slot: class.witch
+        - kind: Literal
+          text: "}，則將這張卡片召喚到其持有者的"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.669426c50179e88cb2bc0ac0
+      lang: zh-Hant
+      source_hash: 669426c50179e88cb2bc0ac07020911bd110a52778d6f0247f76dc5ad348908e
+      references:
+        ability.last_words:
+          kind: glossary
+          key: term:ability.last_words
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        class.witch:
+          kind: vocabulary
+          key:
+            - class
+            - witch
+        name.slumbering_calamity:
+          kind: card_name
+          term_id: term:name.slumbering_calamity
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】敵方的全部玩家各擲1顆6面骰子。其中擲出1以外點數的各玩家，將自身
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的2張卡片放置到
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: "，並給予自身的主戰者5點傷害。\n{"
+        - kind: LeafRef
+          slot: ability.last_words
+        - kind: Literal
+          text: "}若自己的主戰者為{"
+        - kind: LeafRef
+          slot: class.witch
+        - kind: Literal
+          text: "}，則將這張卡片召喚到其持有者的"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上，並可以將自己的進化牌堆中的1張正面朝上的『
+        - kind: LeafRef
+          slot: name.slumbering_calamity
+        - kind: Literal
+          text: 』轉為背面朝上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.ae1f43d8eeffbda83bae0a51
+      lang: zh-Hant
+      source_hash: ae1f43d8eeffbda83bae0a512a0dac5330220f49238d9ce800fbd61ee8f41535
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 癲狂暴龍
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.0c3c93edc6cd1d0d799c92cd
+      lang: zh-Hant
+      source_hash: 0c3c93edc6cd1d0d799c92cd380ac4b0bebbed1094b6349e3dbe12b6230c0c6f
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        class.dragon:
+          kind: vocabulary
+          key:
+            - class
+            - dragon
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}捨棄X張手牌：選擇敵方"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的至多X個
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: "。給予其各5點傷害。抽1張卡片。\n自己的結束階段到來時，若自己的主戰者為{"
+        - kind: LeafRef
+          slot: class.dragon
+        - kind: Literal
+          text: "}，則各玩家隨機捨棄自身的1張手牌。若該卡片的"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 為6以下，則該玩家給予自身的主戰者4點傷害。若
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 為7以上，則該玩家抽2張卡片。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.7f953cca9ae4a31861cf9c2e
+      lang: zh-Hant
+      source_hash: 7f953cca9ae4a31861cf9c2e396858eeb87251129c673cb5e7b7b276f577daa1
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 喚厄者
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.397a995946b6843ea2cddc53
+      lang: zh-Hant
+      source_hash: 397a995946b6843ea2cddc531d3c792710f55f4bd1cb5c19655b21b2176e07bb
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 1}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}選擇敵方的每名玩家"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上各至多1個
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。將其破壞。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.8a25d09f8a136deb83853b77
+      lang: zh-Hant
+      source_hash: 8a25d09f8a136deb83853b77c1cd8bd9d9a51af49702690e38b9cafec79015d6
+      references:
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        event.super_evolve:
+          kind: glossary
+          key: term:event.super_evolve
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "時】各玩家擲1顆6面骰子，並給予自身的主戰者等同於自身擲出點數的傷害。\n【"
+        - kind: LeafRef
+          slot: event.super_evolve
+        - kind: Literal
+          text: 】重複下列內容2次。「各玩家擲1顆6面骰子，並給予自身的主戰者等同於自身擲出點數的傷害。」
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.8685d2d741a6bfb0c5a87acb
+      lang: zh-Hant
+      source_hash: 8685d2d741a6bfb0c5a87acb0e6e7138208c8ed8ab9b70f9bedf5dcfb1457e4a
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 禍流巨蛇
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.e36f7d1bd5928cb08f7034b8
+      lang: zh-Hant
+      source_hash: e36f7d1bd5928cb08f7034b8be9726ad11db01193f9cb56b58e5e293d6d1861d
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        trait.demon:
+          kind: glossary
+          key: term:trait.demon
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 1}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}可以將自己手牌中的1張"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 7以下的
+        - kind: LeafRef
+          slot: trait.demon
+        - kind: Literal
+          text: ・
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 召喚到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.f7283833d6a3b4e5338aacf0
+      lang: zh-Hant
+      source_hash: f7283833d6a3b4e5338aacf0a8d5e8d290b1ab79a3dfc9c9c28a4dede50acd61
+      references:
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        trait.demon:
+          kind: glossary
+          key: term:trait.demon
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】選擇自己
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的1張
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 7以下的
+        - kind: LeafRef
+          slot: trait.demon
+        - kind: Literal
+          text: ・
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。將其召喚到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.56aac440898d1603f4cf1b09
+      lang: zh-Hant
+      source_hash: 56aac440898d1603f4cf1b09e78c64e5a7ea4930bea6abb466e8acf777598fcb
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 蒼蠅王
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.29c47861d92a98436091593e
+      lang: zh-Hant
+      source_hash: 29c47861d92a98436091593e671e09d55c496c8625cc28f7773a90307823bbeb
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        name.velocious_beetle:
+          kind: card_name
+          term_id: term:name.velocious_beetle
+        name.vicious_scorpion:
+          kind: card_name
+          term_id: term:name.vicious_scorpion
+        name.virulent_hornet:
+          kind: card_name
+          term_id: term:name.virulent_hornet
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 1}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}召喚1個『"
+        - kind: LeafRef
+          slot: name.velocious_beetle
+        - kind: Literal
+          text: 』或1個『
+        - kind: LeafRef
+          slot: name.virulent_hornet
+        - kind: Literal
+          text: 』到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: "上。\n敵方的每名玩家的主要階段到來時，可以召喚1個『"
+        - kind: LeafRef
+          slot: name.vicious_scorpion
+        - kind: Literal
+          text: 』到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.987eb6cb9ae44b7e9e14d72f
+      lang: zh-Hant
+      source_hash: 987eb6cb9ae44b7e9e14d72fa5469c7d28dba72f92c1b260a70f8517b192f01b
+      references:
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        name.velocious_beetle:
+          kind: card_name
+          term_id: term:name.velocious_beetle
+        name.vicious_scorpion:
+          kind: card_name
+          term_id: term:name.vicious_scorpion
+        name.virulent_hornet:
+          kind: card_name
+          term_id: term:name.virulent_hornet
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】召喚1個『
+        - kind: LeafRef
+          slot: name.velocious_beetle
+        - kind: Literal
+          text: 』或1個『
+        - kind: LeafRef
+          slot: name.virulent_hornet
+        - kind: Literal
+          text: 』到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: "上。\n敵方的每名玩家的主要階段到來時，可以召喚1個『"
+        - kind: LeafRef
+          slot: name.vicious_scorpion
+        - kind: Literal
+          text: 』到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.a0708e610ddf37e94cb9a04b
+      lang: zh-Hant
+      source_hash: a0708e610ddf37e94cb9a04b36703e6ca5f8a3e111283edf438556171c0da6f1
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 魔獸女帝‧涅蕾雅
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.c047449d254c65ca09a20bd0
+      lang: zh-Hant
+      source_hash: c047449d254c65ca09a20bd00c8c128497cb6aa819f2e666aead3e6dc0662d37
+      references:
+        ability.activation:
+          kind: glossary
+          key: term:ability.activation
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.engage:
+          kind: glossary
+          key: term:action.engage
+        class.nightmare:
+          kind: vocabulary
+          key:
+            - class
+            - nightmare
+        keyword.ward:
+          kind: glossary
+          key: term:keyword.ward
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        stat.attack:
+          kind: glossary
+          key: term:stat.attack
+        stat.health:
+          kind: glossary
+          key: term:stat.health
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: 自己
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的全部其他{
+        - kind: LeafRef
+          slot: class.nightmare
+        - kind: Literal
+          text: "}"
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 具有【
+        - kind: LeafRef
+          slot: keyword.ward
+        - kind: Literal
+          text: "】。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}選擇自己"
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的1張
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: "。將其加入手牌。\n{"
+        - kind: LeafRef
+          slot: ability.activation
+        - kind: Literal
+          text: "}將這張卡片{"
+        - kind: LeafRef
+          slot: action.engage
+        - kind: Literal
+          text: "}：敵方"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的全部
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: stat.attack
+        - kind: Literal
+          text: "}-3/{"
+        - kind: LeafRef
+          slot: stat.health
+        - kind: Literal
+          text: "}-3。若自己的主戰者為{"
+        - kind: LeafRef
+          slot: class.nightmare
+        - kind: Literal
+          text: "}，則可以將自己手牌中的1張"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 5以下的{
+        - kind: LeafRef
+          slot: class.nightmare
+        - kind: Literal
+          text: "}"
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 召喚到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.0af3584be7836030f92686e4
+      lang: zh-Hant
+      source_hash: 0af3584be7836030f92686e4a77fa8f4fc2de9857c47acb9fdb49db478992af8
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 沃普爾吉斯
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.46ac279b5ef0cfcfc4b9febe
+      lang: zh-Hant
+      source_hash: 46ac279b5ef0cfcfc4b9febe0073b8bba84159c2ba35ff20e2595b70487531b7
+      references:
+        ability.activation:
+          kind: glossary
+          key: term:ability.activation
+        keyword.assail:
+          kind: glossary
+          key: term:keyword.assail
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+        zone.ex:
+          kind: glossary
+          key: term:zone.ex
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: keyword.assail
+        - kind: Literal
+          text: "】\n自己的結束階段到來時，若這張卡片在自己的"
+        - kind: LeafRef
+          slot: zone.ex
+        - kind: Literal
+          text: "中，則給予敵方的全部主戰者2點傷害。\n{"
+        - kind: LeafRef
+          slot: ability.activation
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 2}：將自己
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的這張卡片放置到
+        - kind: LeafRef
+          slot: zone.ex
+        - kind: Literal
+          text: 。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.2ce37b9b95489ef21e7eccd5
+      lang: zh-Hant
+      source_hash: 2ce37b9b95489ef21e7eccd5283cbed5a48ed66b825cc36a8d35b53ed62d767d
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 巴風特
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.f980e4bd6fd567a8461ade50
+      lang: zh-Hant
+      source_hash: f980e4bd6fd567a8461ade505b6d82a1c6812ebff5cd007844a7d2b613d5d4db
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 1}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}將自己牌堆頂的2張卡片放置到"
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.b9d7a47397425f4abfeda574
+      lang: zh-Hant
+      source_hash: b9d7a47397425f4abfeda574d74a23971a4be8ada4b9fa19461902973e25d343
+      references:
+        ability.necrocharge:
+          kind: glossary
+          key: term:ability.necrocharge
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.ex:
+          kind: glossary
+          key: term:zone.ex
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】查看自己牌堆頂的5張卡片。可以將其中1張
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 放置到
+        - kind: LeafRef
+          slot: zone.ex
+        - kind: Literal
+          text: 。將其餘卡片以任意順序放置到牌堆底。【
+        - kind: LeafRef
+          slot: ability.necrocharge
+        - kind: Literal
+          text: " 10】本回合，使用該卡片時，"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: -3。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.28ddbf5b4bdfd98f1def3192
+      lang: zh-Hant
+      source_hash: 28ddbf5b4bdfd98f1def31925290085d66a51c5c7ddcad4b617636cf0112a9e2
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 死與闇之魔鴉
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.a7f7cfe77f19a19e52100070
+      lang: zh-Hant
+      source_hash: a7f7cfe77f19a19e52100070c7972878e2aaf851bde5acc6a5b89038c0d3c96b
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 2}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}將自己牌堆頂的4張卡片放置到"
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.7c08456ced71ba9d1590d97c
+      lang: zh-Hant
+      source_hash: 7c08456ced71ba9d1590d97cc3e85e9bdcccd7d0700f4e06f769974d6bd12241
+      references:
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        name.infernal_crown:
+          kind: card_name
+          term_id: term:name.infernal_crown
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】召喚1個『
+        - kind: LeafRef
+          slot: name.infernal_crown
+        - kind: Literal
+          text: 』到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.c51a70987023c10e9ecd7b72
+      lang: zh-Hant
+      source_hash: c51a70987023c10e9ecd7b723c81579cd3ba830bb8638432fc8e4eb4ca666625
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 殭屍派對
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.2389eb4509182c6dd459b127
+      lang: zh-Hant
+      source_hash: 2389eb4509182c6dd459b127c41a937f1f50cc336554197d41a9e83b9090805c
+      references:
+        ability.necrocharge:
+          kind: glossary
+          key: term:ability.necrocharge
+        ability.quick:
+          kind: glossary
+          key: term:ability.quick
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: ability.quick
+        - kind: Literal
+          text: "}\n選擇敵方"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的1個
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 與自己
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的1張
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。給予前者等同於「自己
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 張數」的傷害。【
+        - kind: LeafRef
+          slot: ability.necrocharge
+        - kind: Literal
+          text: " 20】使後者返回手牌。"
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.f3f792e8e323f1f6f18c5a54
+      lang: zh-Hant
+      source_hash: f3f792e8e323f1f6f18c5a5413b78e8b16c830e59e9c2eeb688b6126e87fa0cc
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 至高之神‧宙斯
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.fbfb9f83d7deeddacc34ee54
+      lang: zh-Hant
+      source_hash: fbfb9f83d7deeddacc34ee542d7d1f40aae601e4cd1b72b0a120a24a598e7921
+      references:
+        ability.choice:
+          kind: glossary
+          key: term:ability.choice
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        class.neutral:
+          kind: vocabulary
+          key:
+            - class
+            - neutral
+        keyword.storm:
+          kind: glossary
+          key: term:keyword.storm
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: keyword.storm
+        - kind: Literal
+          text: "】\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}從下列"
+        - kind: LeafRef
+          slot: ability.choice
+        - kind: Literal
+          text: 1項。若自己的主戰者為{
+        - kind: LeafRef
+          slot: class.neutral
+        - kind: Literal
+          text: "}，則改為"
+        - kind: LeafRef
+          slot: ability.choice
+        - kind: Literal
+          text: 至多3項。【1】破壞敵方的1名玩家
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的全部
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。【2】敵方的1名玩家使自身牌堆頂的7張卡片消失。【3】敵方的1名玩家捨棄自身的2張手牌。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.2b9898c6f11c4d4d3cb36a5e
+      lang: zh-Hant
+      source_hash: 2b9898c6f11c4d4d3cb36a5ed89908bb9a9562be968df546f59f240d061d5137
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 聖鳥‧漢薩
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.3b49563e3be23d2fc8f0431f
+      lang: zh-Hant
+      source_hash: 3b49563e3be23d2fc8f0431f920ebe9bdf1785511fb9579df59dea82f187a7f9
+      references:
+        ability.fanfare:
+          kind: glossary
+          key: term:ability.fanfare
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        stat.health:
+          kind: glossary
+          key: term:stat.health
+      nodes:
+        - kind: Literal
+          text: "{"
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "}{"
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 1}：這張卡片
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: "。\n{"
+        - kind: LeafRef
+          slot: ability.fanfare
+        - kind: Literal
+          text: "}自己的主戰者{"
+        - kind: LeafRef
+          slot: stat.health
+        - kind: Literal
+          text: "}+3。"
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.848ceede9d4b45cd9705208e
+      lang: zh-Hant
+      source_hash: 848ceede9d4b45cd9705208e69ec75eb13f1016194fb256e85b2441715ab09a2
+      references:
+        action.evolve:
+          kind: glossary
+          key: term:action.evolve
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        rule.trait_type:
+          kind: glossary
+          key: term:rule.trait_type
+        stat.attack:
+          kind: glossary
+          key: term:stat.attack
+        stat.health:
+          kind: glossary
+          key: term:stat.health
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】選擇敵方
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的1個
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。將其原始卡片資訊複製到這張卡片上。若複製了【
+        - kind: LeafRef
+          slot: action.evolve
+        - kind: Literal
+          text: 時】能力，則可以使用其中1個。（視為這張卡片所記載的卡片名稱、職業、種類、
+        - kind: LeafRef
+          slot: rule.trait_type
+        - kind: Literal
+          text: 、
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 、
+        - kind: LeafRef
+          slot: stat.attack
+        - kind: Literal
+          text: 、
+        - kind: LeafRef
+          slot: stat.health
+        - kind: Literal
+          text: 與卡文已被替換。）
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.5cd51939cf68c432557f4975
+      lang: zh-Hant
+      source_hash: 5cd51939cf68c432557f497537dc9636ce6fc6e9a515db81ebaea064d5f4eb10
+      references: {}
+      nodes:
+        - kind: Literal
+          text: 阿波羅
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.c6bb7f425e852be15657d1a4
+      lang: zh-Hant
+      source_hash: c6bb7f425e852be15657d1a43da1079e7b874b8f0c81465ccf968c99e1c3075c
+      references:
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 自己的結束階段到來時，給予敵方的全部主戰者與敵方
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的全部
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 1點傷害。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.42a1292a4fe93e600a8ef371
+      lang: zh-Hant
+      source_hash: 42a1292a4fe93e600a8ef3719253c5170d2fce1c9460f0cc1dc9f8ef64b0a512
+      references:
+        name.velocious_beetle:
+          kind: card_name
+          term_id: term:name.velocious_beetle
+      nodes:
+        - kind: LeafRef
+          slot: name.velocious_beetle
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.bc623cd4d84321a984fef841
+      lang: zh-Hant
+      source_hash: bc623cd4d84321a984fef841b9fdbfded539c2e90f417559eb337e3ddd641832
+      references:
+        ability.last_words:
+          kind: glossary
+          key: term:ability.last_words
+        keyword.drain:
+          kind: glossary
+          key: term:keyword.drain
+        keyword.storm:
+          kind: glossary
+          key: term:keyword.storm
+        stat.health:
+          kind: glossary
+          key: term:stat.health
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: keyword.storm
+        - kind: Literal
+          text: 】【
+        - kind: LeafRef
+          slot: keyword.drain
+        - kind: Literal
+          text: "】\n{"
+        - kind: LeafRef
+          slot: ability.last_words
+        - kind: Literal
+          text: "}自己的主戰者{"
+        - kind: LeafRef
+          slot: stat.health
+        - kind: Literal
+          text: "}+1。"
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.9cd4f45f7343c926ab43a8c3
+      lang: zh-Hant
+      source_hash: 9cd4f45f7343c926ab43a8c3e16fb143275d314b1157c438df010c9f7833e752
+      references:
+        name.virulent_hornet:
+          kind: card_name
+          term_id: term:name.virulent_hornet
+      nodes:
+        - kind: LeafRef
+          slot: name.virulent_hornet
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.1c32aa3e122de750533cb315
+      lang: zh-Hant
+      source_hash: 1c32aa3e122de750533cb3152a67f88183af8744e5d138556ea5c3b70a1faf77
+      references:
+        ability.last_words:
+          kind: glossary
+          key: term:ability.last_words
+        keyword.assail:
+          kind: glossary
+          key: term:keyword.assail
+        keyword.bane:
+          kind: glossary
+          key: term:keyword.bane
+        keyword.rush:
+          kind: glossary
+          key: term:keyword.rush
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: keyword.rush
+        - kind: Literal
+          text: 】【
+        - kind: LeafRef
+          slot: keyword.assail
+        - kind: Literal
+          text: 】【
+        - kind: LeafRef
+          slot: keyword.bane
+        - kind: Literal
+          text: "】\n{"
+        - kind: LeafRef
+          slot: ability.last_words
+        - kind: Literal
+          text: "}選擇敵方"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上的1個
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。將其破壞。
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.cd2ca113b2bb7ef14f264162
+      lang: zh-Hant
+      source_hash: cd2ca113b2bb7ef14f264162a3b04b152ab3afe0abdff78fa9f431277a74150d
+      references:
+        name.vicious_scorpion:
+          kind: card_name
+          term_id: term:name.vicious_scorpion
+      nodes:
+        - kind: LeafRef
+          slot: name.vicious_scorpion
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.672447abf401b2d69f206f26
+      lang: zh-Hant
+      source_hash: 672447abf401b2d69f206f26d44ac8fc19c3a2e609609ed49e938ff896d676bf
+      references:
+        ability.last_words:
+          kind: glossary
+          key: term:ability.last_words
+        keyword.ward:
+          kind: glossary
+          key: term:keyword.ward
+      nodes:
+        - kind: Literal
+          text: 【
+        - kind: LeafRef
+          slot: keyword.ward
+        - kind: Literal
+          text: "】\n{"
+        - kind: LeafRef
+          slot: ability.last_words
+        - kind: Literal
+          text: "}給予敵方的全部主戰者1點傷害。"
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.name.dc1669882d5b908abe92c11c
+      lang: zh-Hant
+      source_hash: dc1669882d5b908abe92c11c3fc40489d676faacf1cf2c69377cc1c9a575b1b9
+      references:
+        name.infernal_crown:
+          kind: card_name
+          term_id: term:name.infernal_crown
+      nodes:
+        - kind: LeafRef
+          slot: name.infernal_crown
+  - kind: english_exception_target
+    origin: machine
+    data:
+      id: english.effect.8d9df619ce9fa22a26652578
+      lang: zh-Hant
+      source_hash: 8d9df619ce9fa22a26652578271bcd7268dc9cb89a1cf7c38328bfdc509bcfdf
+      references:
+        ability.necrocharge:
+          kind: glossary
+          key: term:ability.necrocharge
+        rule.cost:
+          kind: glossary
+          key: term:rule.cost
+        type.follower:
+          kind: vocabulary
+          key:
+            - type
+            - follower
+        zone.battlefield:
+          kind: glossary
+          key: term:zone.battlefield
+        zone.cemetery:
+          kind: glossary
+          key: term:zone.cemetery
+      nodes:
+        - kind: Literal
+          text: 自己的結束階段到來時，選擇自己
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 中的1張
+        - kind: LeafRef
+          slot: type.follower
+        - kind: Literal
+          text: 。若其
+        - kind: LeafRef
+          slot: rule.cost
+        - kind: Literal
+          text: 為5以下，則將其召喚到
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。【
+        - kind: LeafRef
+          slot: ability.necrocharge
+        - kind: Literal
+          text: " 20】將其召喚到"
+        - kind: LeafRef
+          slot: zone.battlefield
+        - kind: Literal
+          text: 上。將這張卡片放置到
+        - kind: LeafRef
+          slot: zone.cemetery
+        - kind: Literal
+          text: 。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:2a05d03d9321617070fed76682794bfa52551f55c6cf6912f630ac83dc351257
+        field: name
+        ordinal:
+        source_unit_id: t:en:3cb926c90c9e75c4
+        source_hash: 3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:e0f39574048dc18dad4e2bb52dd6b2f113aa6aa5a558bd76f53b60b0a9fda0cc
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      card_id: c:04ea050341d8531fa5c12b3f7c12cad6
+      face_id: f:11a8bec1892952849b94682e760eba2d
+      target_id: english.name.3cb926c90c9e75c46612abd6
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:2a05d03d9321617070fed76682794bfa52551f55c6cf6912f630ac83dc351257
+        field: effect
+        ordinal:
+        source_unit_id: t:en:b72464c41fe934db
+        source_hash: b72464c41fe934dbb69c2f1477e72ede4a4edba914c4082097b40eaa95a713c2
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:e0f39574048dc18dad4e2bb52dd6b2f113aa6aa5a558bd76f53b60b0a9fda0cc
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: b72464c41fe934dbb69c2f1477e72ede4a4edba914c4082097b40eaa95a713c2
+      card_id: c:04ea050341d8531fa5c12b3f7c12cad6
+      face_id: f:11a8bec1892952849b94682e760eba2d
+      target_id: english.effect.b72464c41fe934dbb69c2f14
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:8579c30acdc639d2fb09cd1572d55ae32853234f4e2abad93189a5e92382014e
+        field: name
+        ordinal:
+        source_unit_id: t:en:3cb926c90c9e75c4
+        source_hash: 3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:d592f211914aa1fa1024127db3b854799f0d3c7a141800e166b83e8312e91c46
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      card_id: c:755a6a0575755fc5969dde4b11a9f80c
+      face_id: f:71ffbe5c7f265a83a3a923c2ba3b62e0
+      target_id: english.name.3cb926c90c9e75c46612abd6
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:8579c30acdc639d2fb09cd1572d55ae32853234f4e2abad93189a5e92382014e
+        field: effect
+        ordinal:
+        source_unit_id: t:en:669426c50179e88c
+        source_hash: 669426c50179e88cb2bc0ac07020911bd110a52778d6f0247f76dc5ad348908e
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:d592f211914aa1fa1024127db3b854799f0d3c7a141800e166b83e8312e91c46
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 669426c50179e88cb2bc0ac07020911bd110a52778d6f0247f76dc5ad348908e
+      card_id: c:755a6a0575755fc5969dde4b11a9f80c
+      face_id: f:71ffbe5c7f265a83a3a923c2ba3b62e0
+      target_id: english.effect.669426c50179e88cb2bc0ac0
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5ed57ada88b30ba850e1a234462a1be0b93962545942b34b6c87c684a686ba7f
+        field: name
+        ordinal:
+        source_unit_id: t:en:ae1f43d8eeffbda8
+        source_hash: ae1f43d8eeffbda83bae0a512a0dac5330220f49238d9ce800fbd61ee8f41535
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:047e81ad172888e933d4d3969286ef54c3c88a7186429105656789ed4b45d9a3
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: ae1f43d8eeffbda83bae0a512a0dac5330220f49238d9ce800fbd61ee8f41535
+      card_id: c:0a43ee2163475a4a9122beca71a8f97c
+      face_id: f:ff906bad8d69505ab4fb6c8f8912a470
+      target_id: english.name.ae1f43d8eeffbda83bae0a51
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5ed57ada88b30ba850e1a234462a1be0b93962545942b34b6c87c684a686ba7f
+        field: effect
+        ordinal:
+        source_unit_id: t:en:0c3c93edc6cd1d0d
+        source_hash: 0c3c93edc6cd1d0d799c92cd380ac4b0bebbed1094b6349e3dbe12b6230c0c6f
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:047e81ad172888e933d4d3969286ef54c3c88a7186429105656789ed4b45d9a3
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 0c3c93edc6cd1d0d799c92cd380ac4b0bebbed1094b6349e3dbe12b6230c0c6f
+      card_id: c:0a43ee2163475a4a9122beca71a8f97c
+      face_id: f:ff906bad8d69505ab4fb6c8f8912a470
+      target_id: english.effect.0c3c93edc6cd1d0d799c92cd
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:67b893f258dcea960840ca011ed98f3486e60231628a91f069a7217235eadcc1
+        field: name
+        ordinal:
+        source_unit_id: t:en:7f953cca9ae4a318
+        source_hash: 7f953cca9ae4a31861cf9c2e396858eeb87251129c673cb5e7b7b276f577daa1
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:645f0f839ad03c9df0e86d5870c10d75828b4725d24650d868028b089e6ba005
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 7f953cca9ae4a31861cf9c2e396858eeb87251129c673cb5e7b7b276f577daa1
+      card_id: c:3843874671855932a0022693d403f925
+      face_id: f:07b54a5d187952929378485f0fd2889c
+      target_id: english.name.7f953cca9ae4a31861cf9c2e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:67b893f258dcea960840ca011ed98f3486e60231628a91f069a7217235eadcc1
+        field: effect
+        ordinal:
+        source_unit_id: t:en:397a995946b6843e
+        source_hash: 397a995946b6843ea2cddc531d3c792710f55f4bd1cb5c19655b21b2176e07bb
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:645f0f839ad03c9df0e86d5870c10d75828b4725d24650d868028b089e6ba005
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 397a995946b6843ea2cddc531d3c792710f55f4bd1cb5c19655b21b2176e07bb
+      card_id: c:3843874671855932a0022693d403f925
+      face_id: f:07b54a5d187952929378485f0fd2889c
+      target_id: english.effect.397a995946b6843ea2cddc53
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:fa3531f46b6acd1d84f4759fabdf0f7c5a1336535652cf1bb9cff052a76783c5
+        field: name
+        ordinal:
+        source_unit_id: t:en:7f953cca9ae4a318
+        source_hash: 7f953cca9ae4a31861cf9c2e396858eeb87251129c673cb5e7b7b276f577daa1
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:a5b3f35df1c8b282cc0f5bd35bc41c078bc4655c2c02f2c307b8ee44c7fa0bc4
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 7f953cca9ae4a31861cf9c2e396858eeb87251129c673cb5e7b7b276f577daa1
+      card_id: c:8098dd3b46e05b6ba8498b77869a17fe
+      face_id: f:2a56eaa1b5105ff09bb3a27193aa71f7
+      target_id: english.name.7f953cca9ae4a31861cf9c2e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:fa3531f46b6acd1d84f4759fabdf0f7c5a1336535652cf1bb9cff052a76783c5
+        field: effect
+        ordinal:
+        source_unit_id: t:en:8a25d09f8a136deb
+        source_hash: 8a25d09f8a136deb83853b77c1cd8bd9d9a51af49702690e38b9cafec79015d6
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:a5b3f35df1c8b282cc0f5bd35bc41c078bc4655c2c02f2c307b8ee44c7fa0bc4
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 8a25d09f8a136deb83853b77c1cd8bd9d9a51af49702690e38b9cafec79015d6
+      card_id: c:8098dd3b46e05b6ba8498b77869a17fe
+      face_id: f:2a56eaa1b5105ff09bb3a27193aa71f7
+      target_id: english.effect.8a25d09f8a136deb83853b77
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:87c8cc004cbfc5dba79d6ef4c21282184b6c76a527fdd70fb8ab4a9907cad14b
+        field: name
+        ordinal:
+        source_unit_id: t:en:8685d2d741a6bfb0
+        source_hash: 8685d2d741a6bfb0c5a87acb0e6e7138208c8ed8ab9b70f9bedf5dcfb1457e4a
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:6ce4514a1c058465bf060d083779b3e4445af97740f9b1e0a81f4de1823f9da1
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 8685d2d741a6bfb0c5a87acb0e6e7138208c8ed8ab9b70f9bedf5dcfb1457e4a
+      card_id: c:3c17f26e94b859bc9a00732e51d414e3
+      face_id: f:90690a0b57dc59c18fffec695e7e5bea
+      target_id: english.name.8685d2d741a6bfb0c5a87acb
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:87c8cc004cbfc5dba79d6ef4c21282184b6c76a527fdd70fb8ab4a9907cad14b
+        field: effect
+        ordinal:
+        source_unit_id: t:en:e36f7d1bd5928cb0
+        source_hash: e36f7d1bd5928cb08f7034b8be9726ad11db01193f9cb56b58e5e293d6d1861d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:6ce4514a1c058465bf060d083779b3e4445af97740f9b1e0a81f4de1823f9da1
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: e36f7d1bd5928cb08f7034b8be9726ad11db01193f9cb56b58e5e293d6d1861d
+      card_id: c:3c17f26e94b859bc9a00732e51d414e3
+      face_id: f:90690a0b57dc59c18fffec695e7e5bea
+      target_id: english.effect.e36f7d1bd5928cb08f7034b8
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:44691eb6960e8de2e8651036e1497733dd2b59758cf4f2616e144e5df0d79ef9
+        field: name
+        ordinal:
+        source_unit_id: t:en:8685d2d741a6bfb0
+        source_hash: 8685d2d741a6bfb0c5a87acb0e6e7138208c8ed8ab9b70f9bedf5dcfb1457e4a
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:27ab0ce982b0477d4eb1329fab71ed8afe8737a87bddbf6dc6fd358b5981cddd
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 8685d2d741a6bfb0c5a87acb0e6e7138208c8ed8ab9b70f9bedf5dcfb1457e4a
+      card_id: c:49c9d7aba5a658cebf585241a55ea7f4
+      face_id: f:32d75c2ab75f5fcf9ce2ccc158f0625d
+      target_id: english.name.8685d2d741a6bfb0c5a87acb
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:44691eb6960e8de2e8651036e1497733dd2b59758cf4f2616e144e5df0d79ef9
+        field: effect
+        ordinal:
+        source_unit_id: t:en:f7283833d6a3b4e5
+        source_hash: f7283833d6a3b4e5338aacf0a8d5e8d290b1ab79a3dfc9c9c28a4dede50acd61
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:27ab0ce982b0477d4eb1329fab71ed8afe8737a87bddbf6dc6fd358b5981cddd
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: f7283833d6a3b4e5338aacf0a8d5e8d290b1ab79a3dfc9c9c28a4dede50acd61
+      card_id: c:49c9d7aba5a658cebf585241a55ea7f4
+      face_id: f:32d75c2ab75f5fcf9ce2ccc158f0625d
+      target_id: english.effect.f7283833d6a3b4e5338aacf0
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:0900f3dd51b89dbd5fcc9ffdd2d1da815450b6964cec87669d2c84e963e3bd2a
+        field: name
+        ordinal:
+        source_unit_id: t:en:56aac440898d1603
+        source_hash: 56aac440898d1603f4cf1b09e78c64e5a7ea4930bea6abb466e8acf777598fcb
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:70bea0e6655ea94347d1389b09a7968c61b4c78dea75de03e723b2c81498ed20
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 56aac440898d1603f4cf1b09e78c64e5a7ea4930bea6abb466e8acf777598fcb
+      card_id: c:52ede53a3e885bd9bebff94219e1a6a5
+      face_id: f:32e0a77534215d05b4c71361133e58d0
+      target_id: english.name.56aac440898d1603f4cf1b09
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:0900f3dd51b89dbd5fcc9ffdd2d1da815450b6964cec87669d2c84e963e3bd2a
+        field: effect
+        ordinal:
+        source_unit_id: t:en:29c47861d92a9843
+        source_hash: 29c47861d92a98436091593e671e09d55c496c8625cc28f7773a90307823bbeb
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:70bea0e6655ea94347d1389b09a7968c61b4c78dea75de03e723b2c81498ed20
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 29c47861d92a98436091593e671e09d55c496c8625cc28f7773a90307823bbeb
+      card_id: c:52ede53a3e885bd9bebff94219e1a6a5
+      face_id: f:32e0a77534215d05b4c71361133e58d0
+      target_id: english.effect.29c47861d92a98436091593e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5d5455ffe6cf48eaf6a1a7d160c2bdb775fd79e191c1d04d2fe0a5bfd5d9be1b
+        field: name
+        ordinal:
+        source_unit_id: t:en:56aac440898d1603
+        source_hash: 56aac440898d1603f4cf1b09e78c64e5a7ea4930bea6abb466e8acf777598fcb
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:af8bd022dbb447a188dbd7b46246f64ec18c3d7e51f4623be64b10a56536a303
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 56aac440898d1603f4cf1b09e78c64e5a7ea4930bea6abb466e8acf777598fcb
+      card_id: c:71a5216075375a3cad3ff2c48b626631
+      face_id: f:64047732879b597b804dff5c8644c4ab
+      target_id: english.name.56aac440898d1603f4cf1b09
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5d5455ffe6cf48eaf6a1a7d160c2bdb775fd79e191c1d04d2fe0a5bfd5d9be1b
+        field: effect
+        ordinal:
+        source_unit_id: t:en:987eb6cb9ae44b7e
+        source_hash: 987eb6cb9ae44b7e9e14d72fa5469c7d28dba72f92c1b260a70f8517b192f01b
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:af8bd022dbb447a188dbd7b46246f64ec18c3d7e51f4623be64b10a56536a303
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 987eb6cb9ae44b7e9e14d72fa5469c7d28dba72f92c1b260a70f8517b192f01b
+      card_id: c:71a5216075375a3cad3ff2c48b626631
+      face_id: f:64047732879b597b804dff5c8644c4ab
+      target_id: english.effect.987eb6cb9ae44b7e9e14d72f
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:9aeebddf925f96c88f4cd021c6b7250686dfd54502915ccb1de4af9831ca79e3
+        field: name
+        ordinal:
+        source_unit_id: t:en:a0708e610ddf37e9
+        source_hash: a0708e610ddf37e94cb9a04b36703e6ca5f8a3e111283edf438556171c0da6f1
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:743782f0ff224a0c68f6a956f3eb333589f8d03587bf64e598828e21c76675fc
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: a0708e610ddf37e94cb9a04b36703e6ca5f8a3e111283edf438556171c0da6f1
+      card_id: c:b4980ce179235d2d9fbad2c43de23ec7
+      face_id: f:6ad79ab970f5542fb21788cac26f126e
+      target_id: english.name.a0708e610ddf37e94cb9a04b
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:9aeebddf925f96c88f4cd021c6b7250686dfd54502915ccb1de4af9831ca79e3
+        field: effect
+        ordinal:
+        source_unit_id: t:en:c047449d254c65ca
+        source_hash: c047449d254c65ca09a20bd00c8c128497cb6aa819f2e666aead3e6dc0662d37
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:743782f0ff224a0c68f6a956f3eb333589f8d03587bf64e598828e21c76675fc
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: c047449d254c65ca09a20bd00c8c128497cb6aa819f2e666aead3e6dc0662d37
+      card_id: c:b4980ce179235d2d9fbad2c43de23ec7
+      face_id: f:6ad79ab970f5542fb21788cac26f126e
+      target_id: english.effect.c047449d254c65ca09a20bd0
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:a18d17a5776ab9270f6a7717c70391603c9979aa09bbe02017faddbd59785940
+        field: name
+        ordinal:
+        source_unit_id: t:en:0af3584be7836030
+        source_hash: 0af3584be7836030f92686e4a77fa8f4fc2de9857c47acb9fdb49db478992af8
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:b4d8728ed010ea3cee57504aa259fa7ed3f42c58830ea439fb0268cb5e9ddcb7
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 0af3584be7836030f92686e4a77fa8f4fc2de9857c47acb9fdb49db478992af8
+      card_id: c:ea713a3fc2115791811c17383a894c4b
+      face_id: f:984313d9ec3e5297ac55bba4aa601c1f
+      target_id: english.name.0af3584be7836030f92686e4
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:a18d17a5776ab9270f6a7717c70391603c9979aa09bbe02017faddbd59785940
+        field: effect
+        ordinal:
+        source_unit_id: t:en:46ac279b5ef0cfcf
+        source_hash: 46ac279b5ef0cfcfc4b9febe0073b8bba84159c2ba35ff20e2595b70487531b7
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:b4d8728ed010ea3cee57504aa259fa7ed3f42c58830ea439fb0268cb5e9ddcb7
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 46ac279b5ef0cfcfc4b9febe0073b8bba84159c2ba35ff20e2595b70487531b7
+      card_id: c:ea713a3fc2115791811c17383a894c4b
+      face_id: f:984313d9ec3e5297ac55bba4aa601c1f
+      target_id: english.effect.46ac279b5ef0cfcfc4b9febe
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:ea5b6602bc5ffcf6dd15b470474d2b7068832a3d1b361f18e4235a730a024dd0
+        field: name
+        ordinal:
+        source_unit_id: t:en:2ce37b9b95489ef2
+        source_hash: 2ce37b9b95489ef21e7eccd5283cbed5a48ed66b825cc36a8d35b53ed62d767d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:2c7bb25e70477a780cc400f85d1267a49900dc9d2231aabca6fd7c08a1d3f56f
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 2ce37b9b95489ef21e7eccd5283cbed5a48ed66b825cc36a8d35b53ed62d767d
+      card_id: c:322d977f885b5f3ba0efe06a7b4534c5
+      face_id: f:948a71c560f55a48b9e88f5a29715e6c
+      target_id: english.name.2ce37b9b95489ef21e7eccd5
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:ea5b6602bc5ffcf6dd15b470474d2b7068832a3d1b361f18e4235a730a024dd0
+        field: effect
+        ordinal:
+        source_unit_id: t:en:f980e4bd6fd567a8
+        source_hash: f980e4bd6fd567a8461ade505b6d82a1c6812ebff5cd007844a7d2b613d5d4db
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:2c7bb25e70477a780cc400f85d1267a49900dc9d2231aabca6fd7c08a1d3f56f
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: f980e4bd6fd567a8461ade505b6d82a1c6812ebff5cd007844a7d2b613d5d4db
+      card_id: c:322d977f885b5f3ba0efe06a7b4534c5
+      face_id: f:948a71c560f55a48b9e88f5a29715e6c
+      target_id: english.effect.f980e4bd6fd567a8461ade50
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:536d0123ac7b4d390b7273483f974b9dfdc09ea579de6d789ff3152f5fdf54f4
+        field: name
+        ordinal:
+        source_unit_id: t:en:2ce37b9b95489ef2
+        source_hash: 2ce37b9b95489ef21e7eccd5283cbed5a48ed66b825cc36a8d35b53ed62d767d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:62f1d484ce2f7273eae541bca6c2e7468677014f940a9c70dd0355d679ff0084
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 2ce37b9b95489ef21e7eccd5283cbed5a48ed66b825cc36a8d35b53ed62d767d
+      card_id: c:b721474f46ef54918d871af5abebd0a6
+      face_id: f:e40c61c3dfd0523c8b30291e224a483e
+      target_id: english.name.2ce37b9b95489ef21e7eccd5
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:536d0123ac7b4d390b7273483f974b9dfdc09ea579de6d789ff3152f5fdf54f4
+        field: effect
+        ordinal:
+        source_unit_id: t:en:b9d7a47397425f4a
+        source_hash: b9d7a47397425f4abfeda574d74a23971a4be8ada4b9fa19461902973e25d343
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:62f1d484ce2f7273eae541bca6c2e7468677014f940a9c70dd0355d679ff0084
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: b9d7a47397425f4abfeda574d74a23971a4be8ada4b9fa19461902973e25d343
+      card_id: c:b721474f46ef54918d871af5abebd0a6
+      face_id: f:e40c61c3dfd0523c8b30291e224a483e
+      target_id: english.effect.b9d7a47397425f4abfeda574
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:32322d93b07dc0af946dec6cbe8a54ed2db5d60bb24a8dbab4abb00e191a0921
+        field: name
+        ordinal:
+        source_unit_id: t:en:28ddbf5b4bdfd98f
+        source_hash: 28ddbf5b4bdfd98f1def31925290085d66a51c5c7ddcad4b617636cf0112a9e2
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:0398a7947729954d3f90ab3647e17a26e015cd3d6bb1a9b0917a9f82da163b97
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 28ddbf5b4bdfd98f1def31925290085d66a51c5c7ddcad4b617636cf0112a9e2
+      card_id: c:d0c0018c083257e0bd9a4c3b6e0e1c41
+      face_id: f:637a47ff40195cf48992b9027a9b7fc5
+      target_id: english.name.28ddbf5b4bdfd98f1def3192
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:32322d93b07dc0af946dec6cbe8a54ed2db5d60bb24a8dbab4abb00e191a0921
+        field: effect
+        ordinal:
+        source_unit_id: t:en:a7f7cfe77f19a19e
+        source_hash: a7f7cfe77f19a19e52100070c7972878e2aaf851bde5acc6a5b89038c0d3c96b
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:0398a7947729954d3f90ab3647e17a26e015cd3d6bb1a9b0917a9f82da163b97
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: a7f7cfe77f19a19e52100070c7972878e2aaf851bde5acc6a5b89038c0d3c96b
+      card_id: c:d0c0018c083257e0bd9a4c3b6e0e1c41
+      face_id: f:637a47ff40195cf48992b9027a9b7fc5
+      target_id: english.effect.a7f7cfe77f19a19e52100070
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:3c1d34900b8c7b526f27bb7af08b8696d4d82717c8b68c67e8c5b8711db8371f
+        field: name
+        ordinal:
+        source_unit_id: t:en:28ddbf5b4bdfd98f
+        source_hash: 28ddbf5b4bdfd98f1def31925290085d66a51c5c7ddcad4b617636cf0112a9e2
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:d17b7ed2ea1f59f9b7645598c397a3afb2e0fabf8730cd254d441cec0e5b815d
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 28ddbf5b4bdfd98f1def31925290085d66a51c5c7ddcad4b617636cf0112a9e2
+      card_id: c:d8f6ae8b716f5e798c97c91e51c03701
+      face_id: f:a1d7860fa6c8583c9820d31caf795e90
+      target_id: english.name.28ddbf5b4bdfd98f1def3192
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:3c1d34900b8c7b526f27bb7af08b8696d4d82717c8b68c67e8c5b8711db8371f
+        field: effect
+        ordinal:
+        source_unit_id: t:en:7c08456ced71ba9d
+        source_hash: 7c08456ced71ba9d1590d97cc3e85e9bdcccd7d0700f4e06f769974d6bd12241
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:d17b7ed2ea1f59f9b7645598c397a3afb2e0fabf8730cd254d441cec0e5b815d
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 7c08456ced71ba9d1590d97cc3e85e9bdcccd7d0700f4e06f769974d6bd12241
+      card_id: c:d8f6ae8b716f5e798c97c91e51c03701
+      face_id: f:a1d7860fa6c8583c9820d31caf795e90
+      target_id: english.effect.7c08456ced71ba9d1590d97c
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:a9aad10380e2ea443074560c53e0909a99af8b339ce77bec50745a6df9a4632c
+        field: name
+        ordinal:
+        source_unit_id: t:en:c51a70987023c10e
+        source_hash: c51a70987023c10e9ecd7b723c81579cd3ba830bb8638432fc8e4eb4ca666625
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:f094e3f021caaaf5bf71eda6b5c1ebbc34f5a757a3d60b4c434964b9a2abca52
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: c51a70987023c10e9ecd7b723c81579cd3ba830bb8638432fc8e4eb4ca666625
+      card_id: c:d5e4e5d1cb675d29947ff588ca720d6a
+      face_id: f:a1a4a1733d435c0b8cd897a98106ab38
+      target_id: english.name.c51a70987023c10e9ecd7b72
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:a9aad10380e2ea443074560c53e0909a99af8b339ce77bec50745a6df9a4632c
+        field: effect
+        ordinal:
+        source_unit_id: t:en:2389eb4509182c6d
+        source_hash: 2389eb4509182c6dd459b127c41a937f1f50cc336554197d41a9e83b9090805c
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:f094e3f021caaaf5bf71eda6b5c1ebbc34f5a757a3d60b4c434964b9a2abca52
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 2389eb4509182c6dd459b127c41a937f1f50cc336554197d41a9e83b9090805c
+      card_id: c:d5e4e5d1cb675d29947ff588ca720d6a
+      face_id: f:a1a4a1733d435c0b8cd897a98106ab38
+      target_id: english.effect.2389eb4509182c6dd459b127
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:7c8481b4e519c933f4b02ed21bfa32765d935ea55443fad1a2b45d8cd5f15625
+        field: name
+        ordinal:
+        source_unit_id: t:en:f3f792e8e323f1f6
+        source_hash: f3f792e8e323f1f6f18c5a5413b78e8b16c830e59e9c2eeb688b6126e87fa0cc
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:be1cf5f9eafbbaafccecbdd2f501375608d8815c6a70c28d9fc638c10a227e7b
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: f3f792e8e323f1f6f18c5a5413b78e8b16c830e59e9c2eeb688b6126e87fa0cc
+      card_id: c:728cad83545c5ffd9bfbc9f9bf5b936c
+      face_id: f:837c0d3adbb851f19a3942561710c516
+      target_id: english.name.f3f792e8e323f1f6f18c5a54
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:7c8481b4e519c933f4b02ed21bfa32765d935ea55443fad1a2b45d8cd5f15625
+        field: effect
+        ordinal:
+        source_unit_id: t:en:fbfb9f83d7deedda
+        source_hash: fbfb9f83d7deeddacc34ee542d7d1f40aae601e4cd1b72b0a120a24a598e7921
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:be1cf5f9eafbbaafccecbdd2f501375608d8815c6a70c28d9fc638c10a227e7b
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: fbfb9f83d7deeddacc34ee542d7d1f40aae601e4cd1b72b0a120a24a598e7921
+      card_id: c:728cad83545c5ffd9bfbc9f9bf5b936c
+      face_id: f:837c0d3adbb851f19a3942561710c516
+      target_id: english.effect.fbfb9f83d7deeddacc34ee54
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5d065c4064f0994ea777c90a3156fd2cbd81c90685b17c9a9e78a09fdd5e7c84
+        field: name
+        ordinal:
+        source_unit_id: t:en:2b9898c6f11c4d4d
+        source_hash: 2b9898c6f11c4d4d3cb36a5ed89908bb9a9562be968df546f59f240d061d5137
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:1cb8692d4a081ed113a6f55275dc74dbffcedddddf25b2112a67408e7d861735
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 2b9898c6f11c4d4d3cb36a5ed89908bb9a9562be968df546f59f240d061d5137
+      card_id: c:cdb2fd482ec25983b341d1110ffd5414
+      face_id: f:433f421218445d8589607748612f60da
+      target_id: english.name.2b9898c6f11c4d4d3cb36a5e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:5d065c4064f0994ea777c90a3156fd2cbd81c90685b17c9a9e78a09fdd5e7c84
+        field: effect
+        ordinal:
+        source_unit_id: t:en:3b49563e3be23d2f
+        source_hash: 3b49563e3be23d2fc8f0431f920ebe9bdf1785511fb9579df59dea82f187a7f9
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:1cb8692d4a081ed113a6f55275dc74dbffcedddddf25b2112a67408e7d861735
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 3b49563e3be23d2fc8f0431f920ebe9bdf1785511fb9579df59dea82f187a7f9
+      card_id: c:cdb2fd482ec25983b341d1110ffd5414
+      face_id: f:433f421218445d8589607748612f60da
+      target_id: english.effect.3b49563e3be23d2fc8f0431f
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:3629b8e8b700d28412564e546ab5fb926e8ff05522dccfb855c04fc3e1d24a8d
+        field: name
+        ordinal:
+        source_unit_id: t:en:2b9898c6f11c4d4d
+        source_hash: 2b9898c6f11c4d4d3cb36a5ed89908bb9a9562be968df546f59f240d061d5137
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:5cba9385baec77f0281830592077fa73e1aa757c396c97c73b17ee4da91b5821
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 2b9898c6f11c4d4d3cb36a5ed89908bb9a9562be968df546f59f240d061d5137
+      card_id: c:227b9547c53f59e9ad3dff42c714c690
+      face_id: f:cf1a67460c305bfc97f15e0bbed3b47c
+      target_id: english.name.2b9898c6f11c4d4d3cb36a5e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:3629b8e8b700d28412564e546ab5fb926e8ff05522dccfb855c04fc3e1d24a8d
+        field: effect
+        ordinal:
+        source_unit_id: t:en:848ceede9d4b45cd
+        source_hash: 848ceede9d4b45cd9705208e69ec75eb13f1016194fb256e85b2441715ab09a2
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:5cba9385baec77f0281830592077fa73e1aa757c396c97c73b17ee4da91b5821
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 848ceede9d4b45cd9705208e69ec75eb13f1016194fb256e85b2441715ab09a2
+      card_id: c:227b9547c53f59e9ad3dff42c714c690
+      face_id: f:cf1a67460c305bfc97f15e0bbed3b47c
+      target_id: english.effect.848ceede9d4b45cd9705208e
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:67504c88486a0f9406f94439b4c2f3bb2c4d79dbf5d31e889fccd37ae4958959
+        field: name
+        ordinal:
+        source_unit_id: t:en:5cd51939cf68c432
+        source_hash: 5cd51939cf68c432557f497537dc9636ce6fc6e9a515db81ebaea064d5f4eb10
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:f4ebd649f7104d8601daf6eafbb91758fc5c41e19306ba42546265867f1fc879
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 5cd51939cf68c432557f497537dc9636ce6fc6e9a515db81ebaea064d5f4eb10
+      card_id: c:835a52c6e57e556c9d7a087fda44f175
+      face_id: f:852e5025ef8c5187883dddde0320b9be
+      target_id: english.name.5cd51939cf68c432557f4975
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:67504c88486a0f9406f94439b4c2f3bb2c4d79dbf5d31e889fccd37ae4958959
+        field: effect
+        ordinal:
+        source_unit_id: t:en:c6bb7f425e852be1
+        source_hash: c6bb7f425e852be15657d1a43da1079e7b874b8f0c81465ccf968c99e1c3075c
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:f4ebd649f7104d8601daf6eafbb91758fc5c41e19306ba42546265867f1fc879
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: c6bb7f425e852be15657d1a43da1079e7b874b8f0c81465ccf968c99e1c3075c
+      card_id: c:835a52c6e57e556c9d7a087fda44f175
+      face_id: f:852e5025ef8c5187883dddde0320b9be
+      target_id: english.effect.c6bb7f425e852be15657d1a4
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:43c574430a414d3b92466ae9a7b0943965bc1f0f6ef45686e969304a4a3511d4
+        field: name
+        ordinal:
+        source_unit_id: t:en:42a1292a4fe93e60
+        source_hash: 42a1292a4fe93e600a8ef3719253c5170d2fce1c9460f0cc1dc9f8ef64b0a512
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:cf1af2f41108536ed0008e63701b793328f26da64596f7772e791d22d729847d
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 42a1292a4fe93e600a8ef3719253c5170d2fce1c9460f0cc1dc9f8ef64b0a512
+      card_id: c:7bec1afc217b558b8fe562a75b8b445c
+      face_id: f:3697d4fc1de8510c8a9798d3a6c8735a
+      target_id: english.name.42a1292a4fe93e600a8ef371
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:43c574430a414d3b92466ae9a7b0943965bc1f0f6ef45686e969304a4a3511d4
+        field: effect
+        ordinal:
+        source_unit_id: t:en:bc623cd4d84321a9
+        source_hash: bc623cd4d84321a984fef841b9fdbfded539c2e90f417559eb337e3ddd641832
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:cf1af2f41108536ed0008e63701b793328f26da64596f7772e791d22d729847d
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: bc623cd4d84321a984fef841b9fdbfded539c2e90f417559eb337e3ddd641832
+      card_id: c:7bec1afc217b558b8fe562a75b8b445c
+      face_id: f:3697d4fc1de8510c8a9798d3a6c8735a
+      target_id: english.effect.bc623cd4d84321a984fef841
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:174c545e0a8e6fdc77a0b37253010b44a506cf87898f97a61a4ba55292abf4dc
+        field: name
+        ordinal:
+        source_unit_id: t:en:9cd4f45f7343c926
+        source_hash: 9cd4f45f7343c926ab43a8c3e16fb143275d314b1157c438df010c9f7833e752
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:eb47eb29e884016f686b9b0109c448a3e2536103630ffa95664326d05e8dc3ab
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 9cd4f45f7343c926ab43a8c3e16fb143275d314b1157c438df010c9f7833e752
+      card_id: c:5a318640bed1522c8c835f5bea9d4c41
+      face_id: f:4f93e044d5025d49bd86ec2e200ad408
+      target_id: english.name.9cd4f45f7343c926ab43a8c3
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:174c545e0a8e6fdc77a0b37253010b44a506cf87898f97a61a4ba55292abf4dc
+        field: effect
+        ordinal:
+        source_unit_id: t:en:1c32aa3e122de750
+        source_hash: 1c32aa3e122de750533cb3152a67f88183af8744e5d138556ea5c3b70a1faf77
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:eb47eb29e884016f686b9b0109c448a3e2536103630ffa95664326d05e8dc3ab
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 1c32aa3e122de750533cb3152a67f88183af8744e5d138556ea5c3b70a1faf77
+      card_id: c:5a318640bed1522c8c835f5bea9d4c41
+      face_id: f:4f93e044d5025d49bd86ec2e200ad408
+      target_id: english.effect.1c32aa3e122de750533cb315
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:bc354381b7f555291aee966360630227fd431f7485fa28865a09c9230f9732b5
+        field: name
+        ordinal:
+        source_unit_id: t:en:cd2ca113b2bb7ef1
+        source_hash: cd2ca113b2bb7ef14f264162a3b04b152ab3afe0abdff78fa9f431277a74150d
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:5340928be6fa701692f51aa4e851f0483b6bcafabd8e0f4b258c5f0d47105a34
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: cd2ca113b2bb7ef14f264162a3b04b152ab3afe0abdff78fa9f431277a74150d
+      card_id: c:758c39d6c6fd559493cd1f8d47af22c7
+      face_id: f:d106b51cd6b957489bded0b1417386dc
+      target_id: english.name.cd2ca113b2bb7ef14f264162
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:bc354381b7f555291aee966360630227fd431f7485fa28865a09c9230f9732b5
+        field: effect
+        ordinal:
+        source_unit_id: t:en:672447abf401b2d6
+        source_hash: 672447abf401b2d69f206f26d44ac8fc19c3a2e609609ed49e938ff896d676bf
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:5340928be6fa701692f51aa4e851f0483b6bcafabd8e0f4b258c5f0d47105a34
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 672447abf401b2d69f206f26d44ac8fc19c3a2e609609ed49e938ff896d676bf
+      card_id: c:758c39d6c6fd559493cd1f8d47af22c7
+      face_id: f:d106b51cd6b957489bded0b1417386dc
+      target_id: english.effect.672447abf401b2d69f206f26
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:2e3e5a64c906f7085a7bf406608fef2da8b0f2521878d4cf846697cdee9eb4af
+        field: name
+        ordinal:
+        source_unit_id: t:en:dc1669882d5b908a
+        source_hash: dc1669882d5b908abe92c11c3fc40489d676faacf1cf2c69377cc1c9a575b1b9
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:0edea4beb46acacd941326a17aed643f844471faeae158c5ef2d89ff23704a19
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: dc1669882d5b908abe92c11c3fc40489d676faacf1cf2c69377cc1c9a575b1b9
+      card_id: c:b175ce000a935c07a451f71817a45288
+      face_id: f:3553c9407c295940904ed6c29e3c6a35
+      target_id: english.name.dc1669882d5b908abe92c11c
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+  - kind: english_exception_use
+    origin: machine
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:2e3e5a64c906f7085a7bf406608fef2da8b0f2521878d4cf846697cdee9eb4af
+        field: effect
+        ordinal:
+        source_unit_id: t:en:8d9df619ce9fa22a
+        source_hash: 8d9df619ce9fa22a26652578271bcd7268dc9cb89a1cf7c38328bfdc509bcfdf
+        source_ref:
+          batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+          source_version_id: src:v1:0edea4beb46acacd941326a17aed643f844471faeae158c5ef2d89ff23704a19
+          parser: translation-en-v1
+          locator: /faces/0/text
+          text_hash: 8d9df619ce9fa22a26652578271bcd7268dc9cb89a1cf7c38328bfdc509bcfdf
+      card_id: c:b175ce000a935c07a451f71817a45288
+      face_id: f:3553c9407c295940904ed6c29e3c6a35
+      target_id: english.effect.8d9df619ce9fa22a26652578
+      identity: confirmed_no_jp
+      reason: 已逐版次核對 2026-11-25 的凍結日版全集及封存卡圖，確認此英版卡在該範圍無同卡日版，沿用本版次的完整英文來源。
+    low_confidence: true
+    note: 依卡面原文保留死靈充能後的句序與範圍。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:04ea050341d8531fa5c12b3f7c12cad6
+        face_id: f:11a8bec1892952849b94682e760eba2d
+        source_lang: en
+        source_hash: sha256:3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      term_id: term:name.slumbering_calamity
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:e0f39574048dc18dad4e2bb52dd6b2f113aa6aa5a558bd76f53b60b0a9fda0cc
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:755a6a0575755fc5969dde4b11a9f80c
+        face_id: f:71ffbe5c7f265a83a3a923c2ba3b62e0
+        source_lang: en
+        source_hash: sha256:3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      term_id: term:name.slumbering_calamity
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:d592f211914aa1fa1024127db3b854799f0d3c7a141800e166b83e8312e91c46
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:3cb926c90c9e75c46612abd62b8b9201c0208a72e683fb005a2425743908925d
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:7bec1afc217b558b8fe562a75b8b445c
+        face_id: f:3697d4fc1de8510c8a9798d3a6c8735a
+        source_lang: en
+        source_hash: sha256:42a1292a4fe93e600a8ef3719253c5170d2fce1c9460f0cc1dc9f8ef64b0a512
+      term_id: term:name.velocious_beetle
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:cf1af2f41108536ed0008e63701b793328f26da64596f7772e791d22d729847d
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:42a1292a4fe93e600a8ef3719253c5170d2fce1c9460f0cc1dc9f8ef64b0a512
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:5a318640bed1522c8c835f5bea9d4c41
+        face_id: f:4f93e044d5025d49bd86ec2e200ad408
+        source_lang: en
+        source_hash: sha256:9cd4f45f7343c926ab43a8c3e16fb143275d314b1157c438df010c9f7833e752
+      term_id: term:name.virulent_hornet
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:eb47eb29e884016f686b9b0109c448a3e2536103630ffa95664326d05e8dc3ab
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:9cd4f45f7343c926ab43a8c3e16fb143275d314b1157c438df010c9f7833e752
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:758c39d6c6fd559493cd1f8d47af22c7
+        face_id: f:d106b51cd6b957489bded0b1417386dc
+        source_lang: en
+        source_hash: sha256:cd2ca113b2bb7ef14f264162a3b04b152ab3afe0abdff78fa9f431277a74150d
+      term_id: term:name.vicious_scorpion
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:5340928be6fa701692f51aa4e851f0483b6bcafabd8e0f4b258c5f0d47105a34
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:cd2ca113b2bb7ef14f264162a3b04b152ab3afe0abdff78fa9f431277a74150d
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。
+  - kind: card_name_concept
+    origin: machine
+    data:
+      subject:
+        card_id: c:b175ce000a935c07a451f71817a45288
+        face_id: f:3553c9407c295940904ed6c29e3c6a35
+        source_lang: en
+        source_hash: sha256:dc1669882d5b908abe92c11c3fc40489d676faacf1cf2c69377cc1c9a575b1b9
+      term_id: term:name.infernal_crown
+      source_ref:
+        batch_id: sha256:f189af3200a16f847b7f369744ff840e1e98b68ef611714417f2ad57c72313e5
+        source_version_id: src:v1:0edea4beb46acacd941326a17aed643f844471faeae158c5ef2d89ff23704a19
+        parser: translation-en-v1
+        locator: /faces/0/name
+        text_hash: sha256:dc1669882d5b908abe92c11c3fc40489d676faacf1cf2c69377cc1c9a575b1b9
+      reason: 本英版卡名及指名效果使用同一個名稱概念，譯名參考已凍結的數位版同名來源。

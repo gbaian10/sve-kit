@@ -4,6 +4,16 @@
   "family": "BP15",
   "range": "R/000-099",
   "products": {
+    "products-7baa80be21635bcb": [
+      {
+        "name": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+        "date": "Nov. 20, 2026",
+        "links": [
+          "/cards/searchresults?expansion=BP21-BP22",
+          "https://en.shadowverse-evolve.com/products/bp2122/"
+        ]
+      }
+    ],
     "products-eb47d00ae38b6235": [
       {
         "name": "Combined Set \"Eightfold Retribution & Omens and Heirs\"",
@@ -443,6 +453,138 @@
             "fetched_at": "2026-09-27T13:36:30.495903Z"
           },
           "document_ref": "documents-bc7174f77e7c9663"
+        }
+      ]
+    },
+    {
+      "card_no": "BP15-R060EN",
+      "documents": {
+        "documents-8a739b417edbec1d": {
+          "region": "en",
+          "record": {
+            "number": "BP15-R060EN",
+            "faces": [
+              {
+                "name": "Celestial Dragoon",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "1",
+                  "hp": "1",
+                  "power": "1"
+                },
+                "text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWhenever you discard a card, {icon_stand|[engage]}: Draw a card.",
+                "sections": [],
+                "raw_text": "{icon_evolve|[evolve]} {icon_cost01|[cost01]}: Evolve this.\nWhenever you discard a card, {icon_stand|[engage]}: Draw a card.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP15-R060EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1930 (Jan. 16, 2026)",
+                "question": "If I discard a card during an opponent's turn, does this follower's automatic ability trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP15-R061EN|Celestial Dragoon}",
+                "href": "/cards/?cardno=BP15-R061EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9d2fd439e81d7ab98e2718e74c5d0062f171e238de4f0d1072c07c4d7120a372",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP15-R060EN",
+            "fetched_at": "2026-11-27T13:32:41.573722Z"
+          },
+          "document_ref": "documents-8a739b417edbec1d"
+        }
+      ]
+    },
+    {
+      "card_no": "BP15-R061EN",
+      "documents": {
+        "documents-67c85637d0517bc3": {
+          "region": "en",
+          "record": {
+            "number": "BP15-R061EN",
+            "faces": [
+              {
+                "name": "Celestial Dragoon",
+                "info": {
+                  "Card Set": "Combined Set \"Academy Royale & Dusk of Calamity\"",
+                  "Card Type": "Follower / Evolved",
+                  "Class": "Dragoncraft",
+                  "Format": "Any",
+                  "Rarity": "Legendary",
+                  "Trait": "Dragonheart"
+                },
+                "stats": {
+                  "cost": "-",
+                  "hp": "2",
+                  "power": "2"
+                },
+                "text": "On Evolve - Look at the top 5 cards of your deck. You may reveal a {icon_dragon|[dragoncraft]} card that costs 7 or more from among them and add it to your hand. Put the rest on the bottom of your deck in any order.\nWhenever you discard a card, {icon_stand|[engage]}: Draw a card.",
+                "sections": [],
+                "raw_text": "On Evolve - Look at the top 5 cards of your deck. You may reveal a {icon_dragon|[dragoncraft]} card that costs 7 or more from among them and add it to your hand. Put the rest on the bottom of your deck in any order.\nWhenever you discard a card, {icon_stand|[engage]}: Draw a card.",
+                "speech": null,
+                "illustrator": "irua",
+                "image": "/wordpress/wp-content/images/cardlist/BP22/BP15-R061EN.png",
+                "trait_raw": "Dragonheart",
+                "traits": [
+                  "Dragonheart"
+                ]
+              }
+            ],
+            "release_date": "Nov. 20, 2026",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "title": "Q1930 (Jan. 16, 2026)",
+                "question": "If I discard a card during an opponent's turn, does this follower's automatic ability trigger?",
+                "answer": "Yes, it does."
+              }
+            ],
+            "products_ref": "products-7baa80be21635bcb",
+            "related_cards": [
+              {
+                "label": "{BP15-R060EN|Celestial Dragoon}",
+                "href": "/cards/?cardno=BP15-R060EN"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cb990da5bd177afb12c096087a392601afa0fba7590b458af641c55705179811",
+            "url": "https://en.shadowverse-evolve.com/cards/?cardno=BP15-R061EN",
+            "fetched_at": "2026-11-27T13:32:44.227279Z"
+          },
+          "document_ref": "documents-67c85637d0517bc3"
         }
       ]
     },

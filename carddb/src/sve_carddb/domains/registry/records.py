@@ -4,13 +4,42 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
+from sve_carddb.core.json import SAFE_INTEGER
 from sve_carddb.core.models import Date, Hash, RecordData, Text, UInt
+from sve_carddb.core.provenance import Version
 from sve_carddb.core.regions import Region
 
 CardId = Annotated[str, Field(pattern=r"^c:[0-9a-f]{32}\Z")]
 FaceId = Annotated[str, Field(pattern=r"^f:[0-9a-f]{32}\Z")]
 PrintingId = Annotated[str, Field(pattern=r"^p:[0-9a-f]{32}\Z")]
 Recipe = Literal["registry-observation-v2"]
+CorrectionField = Literal["effect", "card_type", "name", "cost"]
+
+
+def correction_value(field: str, raw: str | None) -> str | int | None:
+    """Translate exact cost observations to the existing nullable wire type."""
+    if field != "cost" or raw is None:
+        return raw
+    if raw == "-":
+        return None
+    if not raw.isascii() or not raw.isdecimal() or int(raw) > SAFE_INTEGER:
+        raise ValueError("Cost correction requires a non-negative integer or '-'")
+    return int(raw)
+
+
+def validate_cost_binding(
+    field: CorrectionField, expected: str, corrected: str, version: str | None
+) -> None:
+    """Require the precise observed card-page version for a cost correction."""
+    if field == "cost":
+        if version is None:
+            raise ValueError("Cost correction requires its observed source version")
+        correction_value(field, expected)
+        correction_value(field, corrected)
+    elif version is not None:
+        raise ValueError(
+            "The exact source version pin is supported for cost corrections"
+        )
 
 
 class Observation(RecordData):
@@ -123,13 +152,16 @@ class CorrectionData(RecordData):
     id: Annotated[str, Field(pattern=r"^x:[0-9a-f]{32}\Z")]
     printing_id: PrintingId
     face_id: FaceId
-    field: Literal["effect", "card_type", "name"]
+    field: CorrectionField
     expected_raw_value: str
     corrected_value: str
     sections: SectionCorrection | None = Field(
         default=None, exclude_if=lambda value: value is None
     )
     expected_source_hash: Hash
+    expected_source_version_id: Version | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
     source_hash_recipe: Recipe
     reason: Text
     state: Literal["active", "needs_review"]
@@ -139,10 +171,16 @@ class CorrectionData(RecordData):
     evidence: Annotated[tuple[CorrectionEvidence, ...], Field(min_length=1)]
 
     @model_validator(mode="after")
-    def section_scope(self) -> CorrectionData:
-        """Keep supplementary edits in the text correction and translation boundary."""
+    def field_scope(self) -> CorrectionData:
+        """Validate the evidence and payload required by this correction field."""
         if self.sections is not None and self.field != "effect":
             raise ValueError("Supplementary sections require an effect correction")
+        validate_cost_binding(
+            self.field,
+            self.expected_raw_value,
+            self.corrected_value,
+            self.expected_source_version_id,
+        )
         return self
 
 

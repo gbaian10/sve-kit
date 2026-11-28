@@ -123,7 +123,7 @@ def test_index_symlink_rejected(registry_root: Path, tmp_path: Path) -> None:
         load_registry(registry_root)
 
 
-def test_official_snapshot_preserves_all_allocations_and_eleven_corrections(
+def test_official_snapshot_preserves_all_allocations_and_twelve_corrections(
     official_snapshot: RegistrySnapshot,
 ) -> None:
     root = Path(__file__).resolve().parents[4] / "authored"
@@ -131,13 +131,13 @@ def test_official_snapshot_preserves_all_allocations_and_eleven_corrections(
     before = {p: hashlib.sha256(p.read_bytes()).digest() for p in paths}
     snapshot = official_snapshot
     assert (
-        len([r for r in snapshot.records.values() if r.kind == "card_int_id"]) == 15497
+        len([r for r in snapshot.records.values() if r.kind == "card_int_id"]) == 16066
     )
-    assert snapshot.files.index().next_int_id == {"jp": 28078, "en": 67421}
+    assert snapshot.files.index().next_int_id == {"jp": 28078, "en": 67990}
     corrections = [
         r for r in snapshot.records.values() if isinstance(r.data, CorrectionData)
     ]
-    assert len(corrections) == 11
+    assert len(corrections) == 12
     assert all(
         isinstance(r.data, CorrectionData) and r.data.state == "active"
         for r in corrections

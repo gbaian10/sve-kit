@@ -82,7 +82,13 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
 
 @pytest.mark.parametrize(
     ("region", "field"),
-    [("jp", "effect"), ("en", "effect"), ("en", "card_type"), ("jp", "name")],
+    [
+        ("jp", "effect"),
+        ("en", "effect"),
+        ("en", "card_type"),
+        ("jp", "name"),
+        ("en", "cost"),
+    ],
 )
 def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: ignore[too-many-statements] -- validates independent SQL, source, current and public reference boundaries in one transaction
     tmp_path: Path, inputs: Inputs, region: Region, field: str
@@ -140,9 +146,12 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
             )
         assert len(db.rows("source_correction")) == 1
         correction = db.rows("source_correction")[0].values
-        assert correction["expected_raw_value"] == Json(
-            {"effect": "Rule.", "name": raw.content.name}.get(field, "Spell")
+        expected_raw = (
+            3
+            if field == "cost"
+            else {"effect": "Rule.", "name": raw.content.name}.get(field, "Spell")
         )
+        assert correction["expected_raw_value"] == Json(expected_raw)
         assert (
             correction["expected_source_hash"] == raw.card.observation.observation_hash
         )
@@ -178,6 +187,18 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
             assert units[revisions[revision_id(candidate)]["name_unit_id"]] == (
                 "Corrected name"
             )
+        elif field == "cost":
+            assert result["result_unit_id"] is None
+            assert correction["corrected_value"] == Json(None)
+            assert revisions[revision_id(raw)]["cost"] == 3
+            assert revisions[revision_id(candidate)]["cost"] is None
+            assert application.marker(None) == {
+                "field": "cost",
+                "corrected_from": 3,
+                "is_corrected": True,
+                "reason": "Synthetic source\ntranscription correction",
+                "source_url": None,
+            }
         else:
             assert result["result_unit_id"] is None
             assert revisions[revision_id(raw)]["type_code"] == "spell"
@@ -221,6 +242,23 @@ def test_proposed_correction_is_retained_but_never_applied_or_marked(
         assert db.rows("source_correction")[0].values["state"] == "needs_review"
         assert len(db.rows("correction_evidence")) == 1
         assert not db.rows("correction_application")
+
+
+def test_cost_correction_rejects_another_version_even_with_identical_fields(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    case = make_correction_case(tmp_path, inputs, region="en", field="cost").texts
+
+    def edit(entry: Entry) -> None:
+        entry.data["expected_source_version_id"] = "src:v1:" + "0" * 64
+
+    edit_record(case.root, "source_correction", edit)
+    case.identity = replace(case.identity, snapshot=load_registry(case.root))
+    plan = plan_text_observations(case.identity, case.provider, images=case.images)
+    (application,) = plan.corrections
+    assert application.status == "conflict"
+    assert application.marker(None) is None
+    assert plan.candidates() == plan.observations
 
 
 def test_already_fixed_is_not_reapplied_even_when_old_hash_differs(

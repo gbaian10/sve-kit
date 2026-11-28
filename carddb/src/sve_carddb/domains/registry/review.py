@@ -5,26 +5,40 @@ from datetime import date
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.provenance import Version
 from sve_carddb.domains.registry.inputs import Card, Mapping, read_cards, read_mapping
+from sve_carddb.domains.registry.records import CorrectionField, validate_cost_binding
 
 
 class Correction(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", regex_engine="python-re")
     region: Literal["jp", "en"]
     card_no: str
     face_index: int = Field(default=0, ge=0, le=1)
-    field: Literal["effect", "card_type", "name"]
+    field: CorrectionField
     expected_raw_value: str
     corrected_value: str
+    expected_source_version_id: Version | None = None
     image_sha256: str
     locator: str
     state: Literal["active", "needs_review"]
     reason: str
     adoption_scope: Literal["identity_check_only"] | None = None
     source_correction_status: Literal["pending_user_confirmation"] | None = None
+
+    @model_validator(mode="after")
+    def field_scope(self) -> Correction:
+        """Require the source pin and supported values for cost corrections."""
+        validate_cost_binding(
+            self.field,
+            self.expected_raw_value,
+            self.corrected_value,
+            self.expected_source_version_id,
+        )
+        return self
 
 
 class InitDecisions(BaseModel):
@@ -92,6 +106,8 @@ def _check_correction(
         if correction.field == "effect"
         else face.name
         if correction.field == "name"
+        else (face.cost if correction.region == "jp" else face.stats["cost"])
+        if correction.field == "cost"
         else face.info.get("Card Type", face.card_type)
     )
     if expected != correction.expected_raw_value:
@@ -105,7 +121,7 @@ def _check_correction(
 
 
 def validation_cards(inputs: Inputs) -> tuple[dict[str, Card], dict[str, Card]]:
-    """Use image-supported type exceptions only for identity checks.
+    """Use image-supported type and active cost corrections in identity checks.
 
     Raw observations remain untouched; candidate corrections are not applied to
     published rules or promoted to confirmed corrections.
@@ -113,6 +129,18 @@ def validation_cards(inputs: Inputs) -> tuple[dict[str, Card], dict[str, Card]]:
     jp = {number: card.model_copy(deep=True) for number, card in inputs.jp.items()}
     en = {number: card.model_copy(deep=True) for number, card in inputs.en.items()}
     for correction in inputs.decisions.corrections:
+        if correction.field == "cost" and correction.state == "active":
+            card = (jp if correction.region == "jp" else en)[correction.card_no]
+            face = card.faces[correction.face_index]
+            if correction.region == "jp":
+                if face.cost != correction.expected_raw_value:
+                    raise ValueError(f"Stale correction: {correction.card_no}")
+                face.cost = correction.corrected_value
+            else:
+                if face.stats["cost"] != correction.expected_raw_value:
+                    raise ValueError(f"Stale correction: {correction.card_no}")
+                face.stats["cost"] = correction.corrected_value
+            continue
         if correction.field != "card_type":
             continue
         if correction.state == "needs_review" and (

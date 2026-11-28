@@ -1,0 +1,30 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: printing
+    owner: BP11
+    data:
+      id: p:619dcdaa89bb542890a86d0f8c3a000e
+      card_id: c:11c42b3388045151998f1307da6b40a3
+      region: en
+      card_no: BP11-R003EN
+      variant_key: standard
+      home_set_id: BP11
+      source_face_map:
+        - source_index: 0
+          face_id: f:d36709430be356a095efa3570536d7dc
+      observation:
+        region: en
+        card_no: BP11-R003EN
+        observation_hash: sha256:a393c48d51d4d5d6d4c51f17882a17db3cfa3e68c1550c1071de473724e8a5a8
+        rules_hash: sha256:2966f9cbfbe274ed4be081d0904650d4f8400c86af59172b7c35d28cf291a152
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP21-PR02
+        target_observation:
+          region: jp
+          card_no: BP21-PR02
+          observation_hash: sha256:d20721302f3cb9fbcd9aac6832c51f58231e569bb77a444a06cae98336bc1d99
+          rules_hash: sha256:147fe9ec2db9067bd5fe7fc99721a37c634a3e5b328f0c00bf8dd7b86395bc8b
+          recipe: registry-observation-v2
