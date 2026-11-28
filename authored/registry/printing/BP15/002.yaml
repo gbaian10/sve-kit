@@ -1,0 +1,57 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: printing
+    owner: BP15
+    data:
+      id: p:7ff8464c3bb25be18cf0ec48f0135aff
+      card_id: c:2417f5c0e23d53ae983334b9549c1a50
+      region: en
+      card_no: BP15-R060EN
+      variant_key: standard
+      home_set_id: BP15
+      source_face_map:
+        - source_index: 0
+          face_id: f:107f98acf2dc5baa89ca0ed8b81c8ac5
+      observation:
+        region: en
+        card_no: BP15-R060EN
+        observation_hash: sha256:e968b747ac4ba8a4ab2549596fdb56cebc39466f573474ddf9cd5d854c5af63a
+        rules_hash: sha256:64ffdb93c38e2f48699945018b04148f149171ba6b6b5a18f05a774a6d0fd875
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP22-R07
+        target_observation:
+          region: jp
+          card_no: BP22-R07
+          observation_hash: sha256:82b1ff8a5da95d9bcea0573320c61f062c4ec0e6fd6b233bf8ff2f3bf93103a7
+          rules_hash: sha256:263e35c9ce5f326b6dd6cf50b9a094b4758f6f3ec767e3c6e551221b294430ff
+          recipe: registry-observation-v2
+  - kind: printing
+    owner: BP15
+    data:
+      id: p:0e49b1b4e992510fb55ed5311604f2d6
+      card_id: c:7ef1478fb67650be881a5f0834ae9d92
+      region: en
+      card_no: BP15-R061EN
+      variant_key: standard
+      home_set_id: BP15
+      source_face_map:
+        - source_index: 0
+          face_id: f:60678373550f586f8d272b7c50a1df64
+      observation:
+        region: en
+        card_no: BP15-R061EN
+        observation_hash: sha256:dd066097f3f997e559929e3132fcb0e51abedd67fffcc6a02ba581711936ad39
+        rules_hash: sha256:a42af8c7d3d9a47b01eac0e5ec148dac8cd21b65ad1c8a7b60bdeff629772c0c
+        recipe: registry-observation-v2
+      cross_region_review:
+        checked: true
+        target_jp_card_no: BP22-R08
+        target_observation:
+          region: jp
+          card_no: BP22-R08
+          observation_hash: sha256:babfe29fd2e9ae65a0aff6a8a732bb85eda0803afbfabdeec13f2897d76b4cab
+          rules_hash: sha256:92d2ebedfcb9f669469efeb61250c976f1d8f0608bb9c83724c315a587ea2c06
+          recipe: registry-observation-v2

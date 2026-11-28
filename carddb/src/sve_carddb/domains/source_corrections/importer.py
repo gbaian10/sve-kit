@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build import Json
 from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.registry.records import correction_value
 from sve_carddb.domains.source_corrections.plan import verify_applications
 
 if TYPE_CHECKING:
@@ -43,8 +44,10 @@ def correction_values(application: Application) -> dict[str, Value]:
         ]
         if data.field in TEXT_FIELDS
         else None,
-        "expected_raw_value": Json(data.expected_raw_value),
-        "corrected_value": Json(data.corrected_value),
+        "expected_raw_value": Json(
+            correction_value(data.field, data.expected_raw_value)
+        ),
+        "corrected_value": Json(correction_value(data.field, data.corrected_value)),
         "expected_raw_sections": Json(list(data.sections.expected_raw_value))
         if data.sections is not None
         else None,
@@ -122,7 +125,7 @@ def populate_corrections(db: Database, plan: TextPlan, texts: TextInterner) -> N
 
 def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> None:
     """Check domain values and raw/result separation beyond SQLite FK/adoption checks."""
-    from sve_carddb.domains.text_observations.importer import revision_id  # ruff: ignore[import-outside-top-level] -- avoids the importer dependency cycle
+    from sve_carddb.domains.text_observations.importer import revision_id, stat  # ruff: ignore[import-outside-top-level] -- avoids the importer dependency cycle
 
     verify_applications(plan.identity, plan.observations, plan.corrections)
     expected = {
@@ -178,6 +181,7 @@ def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> 
                     "face_id": item.face_id,
                     "region": item.region,
                     "effect_unit_id": effect["id"],
+                    "cost": stat(candidate.content.stats[0]),
                     "type_code": vocabulary.lookup(
                         item.region, "type", candidate.content.type_raw
                     ).code,

@@ -469,6 +469,13 @@ class Builder:
                 "expected_raw_value": correction.expected_raw_value,
                 "corrected_value": correction.corrected_value,
                 "expected_source_hash": digest(canonical(card.model_dump(mode="json"))),
+                **(
+                    {
+                        "expected_source_version_id": correction.expected_source_version_id
+                    }
+                    if correction.expected_source_version_id is not None
+                    else {}
+                ),
                 "source_hash_recipe": "registry-observation-v2",
                 "reason": correction.reason,
                 "state": correction.state,

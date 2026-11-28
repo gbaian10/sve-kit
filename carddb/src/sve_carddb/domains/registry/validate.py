@@ -248,8 +248,11 @@ def _fields(entry: Entry) -> None:
     expected = set(FIELDS[entry.kind].split())
     if entry.kind == "printing" and entry.data.get("region") == "en":
         expected.add("cross_region_review")
-    if entry.kind == "source_correction" and "sections" in entry.data:
-        expected.add("sections")
+    if entry.kind == "source_correction":
+        if "sections" in entry.data:
+            expected.add("sections")
+        if entry.data.get("field") == "cost":
+            expected.add("expected_source_version_id")
     if set(entry.data) != expected:
         raise ValueError(f"Invalid data fields: {entry.record_key}")
     key = (
