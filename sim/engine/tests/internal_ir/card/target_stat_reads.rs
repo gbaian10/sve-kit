@@ -97,14 +97,52 @@ fn a_chosen_cemetery_follower_lends_its_attack_before_it_returns() {
 }
 
 #[test]
-fn a_cemetery_target_lends_only_its_attack() {
-    let tree = equipment_played::tree(
-        &json!({"activate":{
-            "cost":{"pp":0},
-            "targets":[{"bind":"fallen","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1}],
-            "do":[{"damage":{"to":{"leaders":"opponents"},"n":{"orig_cost_of":"fallen"}}}]
-        }}),
-        "unit-amulet",
-    );
-    lowerer().lower(&tree).unwrap_err();
+fn a_selected_cemetery_followers_original_cost_controls_its_return() {
+    let program = amulet_program(&json!({
+        "cost":{"pp":0},
+        "targets":[{"bind":"fallen","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1}],
+        "do":[{"if":{"cond":{"cmp":{"left":{"orig_cost_of":"fallen"},"op":"le","right":5}},
+            "then":[{"move":{"ref":"fallen","to":"field","result":"entered"}}]}}]
+    }));
+    for (cost, expected) in [("5", json!(["p", "fallen"])), ("6", json!(["p"]))] {
+        let mut game = board(
+            &program,
+            cost,
+            &json!({
+                "field":[{"id":"p","card":"unit-amulet"}],
+                "cemetery":[{"id":"fallen","card":"unit-follower"}]
+            }),
+        );
+        activate_with_first_targets(&mut game, &program);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["field"],
+            expected
+        );
+    }
+}
+
+#[test]
+fn an_original_cost_condition_requires_a_public_single_target() {
+    for (from, n) in [
+        (json!({"who":"self","zone":"hand","kind":"follower"}), 1),
+        (json!({"who":"self","zone":"cemetery","kind":"follower"}), 2),
+        (
+            json!({"any_of":[
+                {"who":"self","zone":"field","kind":"follower"},
+                {"who":"self","zone":"cemetery","kind":"follower"}
+            ]}),
+            1,
+        ),
+    ] {
+        let tree = equipment_played::tree(
+            &json!({"activate":{
+                "cost":{"pp":0},
+                "targets":[{"bind":"fallen","from":from,"n":n}],
+                "do":[{"if":{"cond":{"cmp":{"left":{"orig_cost_of":"fallen"},"op":"le","right":5}},
+                    "then":[{"draw":{"n":1}}]}}]
+            }}),
+            "unit-amulet",
+        );
+        lowerer().lower(&tree).unwrap_err();
+    }
 }

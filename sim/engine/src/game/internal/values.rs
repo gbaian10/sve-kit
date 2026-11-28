@@ -833,7 +833,7 @@ impl Execution {
     }
 
     /// A printed original cost belongs to the card, so a moved target still has it.
-    /// Only a public pick of at most one field or EX card lends it; a private pick never does.
+    /// A public pick of at most one field, EX or cemetery card lends it.
     fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
         let Selector::Bound { reference } = objects else {
             return Err(unsupported("original cost of an unselected object"));
@@ -841,7 +841,7 @@ impl Execution {
         if !self
             .targets
             .get(&reference.key())
-            .is_some_and(super::card::selection::TargetWait::public_board_single)
+            .is_some_and(super::card::selection::TargetWait::public_original_cost_single)
         {
             return Err(unsupported(
                 "original cost of a private or multiple selection",

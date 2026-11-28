@@ -228,8 +228,10 @@ struct Environment {
     destroyed_before: BTreeSet<Key>,
     distributions: BTreeMap<Key, super::RecipientSet>,
     access: BTreeMap<Key, super::Visibility>,
-    /// Public answers naming at most one field or EX card, whose printed cost anyone may read.
+    /// Public answers naming at most one field or EX card for current board statistics.
     public_board_singles: BTreeSet<Key>,
+    /// Public single targets from the field, EX area or cemetery lend their original cost.
+    public_cost_singles: BTreeSet<Key>,
     /// Recipient choices of exactly one leader or follower, the only ones `by_kind` may narrow.
     single_recipients: BTreeSet<Key>,
     receipt_access: BTreeMap<ReceiptId, super::Visibility>,
@@ -270,6 +272,8 @@ impl Environment {
         self.access.extend(other.access.clone());
         self.public_board_singles
             .extend(other.public_board_singles.iter().copied());
+        self.public_cost_singles
+            .extend(other.public_cost_singles.iter().copied());
         self.single_recipients
             .extend(other.single_recipients.iter().copied());
         self.receipt_access.extend(other.receipt_access.clone());
@@ -328,6 +332,7 @@ impl Checker {
             distributions: BTreeMap::new(),
             access: BTreeMap::new(),
             public_board_singles: BTreeSet::new(),
+            public_cost_singles: BTreeSet::new(),
             single_recipients: BTreeSet::new(),
             receipt_access: BTreeMap::new(),
             movement_before_access: BTreeMap::new(),
