@@ -13,7 +13,7 @@ default-groups = ["dev", "test"]
 [tool.ruff]
 
 # SQL style for hand-written files (D1 migrations under sim/web/migrations). Not wired into hooks or
-# CI yet; run by hand: uv run --with sqlfluff sqlfluff lint sim/web/migrations
+# CI yet; run by hand: uvx sqlfluff lint sim/web/migrations
 [tool.sqlfluff.core]
 dialect = "sqlite"
 templater = "raw"
