@@ -1649,6 +1649,7 @@ fn choice_count(
         }
         ast::ModeCondition::EnteredFrom(_) => return Err(unsupported(path)),
         ast::ModeCondition::EnteredBy(condition) => context.entered_by(condition, path)?,
+        ast::ModeCondition::LeaderClass(class) => super::conditions::leader_class(class),
         ast::ModeCondition::LeaderLife(threshold) => Expr::Compute(Box::new(
             super::conditions::leader_life_condition(threshold, path)?,
         )),
