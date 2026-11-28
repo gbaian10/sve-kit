@@ -13,8 +13,8 @@ const PR_STYLE_ORDER: readonly string[] = [
   "unknown",
 ]
 
-// PR pack leaders can be found with other promos even though their cards carry no rarity.
-export const PR_PACK = "pr"
+// PR pack cards without a printed rarity can still be found with other promos.
+const PR_PACK = "pr"
 
 /** What the rarity filter reads from one printing. */
 interface RarityFilterInput {
@@ -24,7 +24,6 @@ interface RarityFilterInput {
   readonly badgeStyle?: string | undefined
   /** The family code of the printing's home set. */
   readonly owner?: string | undefined
-  readonly type?: string | undefined
 }
 
 /** The rarity token a printing is filed under, plus its PR appearance when that token is PR. */
@@ -32,13 +31,10 @@ export function filterRarity({
   rarityCode,
   badgeStyle,
   owner,
-  type,
 }: Omit<RarityFilterInput, "premium">): { readonly rarity: string; readonly style?: string } {
   const rarity = rarityCode ?? ""
   if (rarity === "" || rarity === "-")
-    return owner === PR_PACK && type === "leader"
-      ? { rarity: PROMO_RARITY, style: "none" }
-      : { rarity: UNRATED_RARITY }
+    return owner === PR_PACK ? { rarity: PROMO_RARITY, style: "none" } : { rarity: UNRATED_RARITY }
   return rarity === PROMO_RARITY ? { rarity, style: badgeStyle ?? "unknown" } : { rarity }
 }
 

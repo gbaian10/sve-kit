@@ -157,7 +157,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
 編號類別僅決定版次列顯示順序，不推導稀有度或版次身分，也不改變卡頁預設版次選取。
 
-Web 的 `rarity` 篩選依各版次的 `rarity_code` 歸類。沒有稀有度的 PR 卡包主戰者歸入 `pr:none`，其餘沒有稀有度代碼的版次歸入 `unrated`。
+Web 的 `rarity` 篩選依各版次的 `rarity_code` 歸類。PR 卡包中沒有稀有度的版次歸入 `pr:none`，其餘沒有稀有度代碼的版次歸入 `unrated`。
 PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none`、`unknown`）；子項目僅列該地區有資料的外觀。
 計數按該地區版次計算，不隨目前文字或其他篩選條件縮減；PR 子項目互斥且完整，加總等於父項目。
 例如 `rarity=sp,pr:br,unrated` 同時包含官方 SP、官方 PR 的 BR 標籤外觀，以及無分類版次；圖牌仍依卡面外觀顯示。

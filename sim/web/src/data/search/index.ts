@@ -20,12 +20,7 @@ import {
   STAT_CAP,
   statSelected,
 } from "../../domain/query/model"
-import {
-  filterRarity,
-  matchesRaritySelection,
-  PR_PACK,
-  PREMIUM_RARITY,
-} from "../../domain/rarityFilter"
+import { filterRarity, matchesRaritySelection, PREMIUM_RARITY } from "../../domain/rarityFilter"
 import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
@@ -214,7 +209,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 41
+export const INDEX_IMAGE_FORMAT = 42
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -352,13 +347,6 @@ function prBadgeFilterStyle(row?: JsonObject): string {
   return (row && badgeOf(row)?.style) ?? "unknown"
 }
 
-/** A printing's type as the index files it: its front face's revision shown in this edition. */
-function printingTypeOf(index: CardIndex, row: JsonObject, edition: Region): string | undefined {
-  const front = index.facesOf(stringValue(row["card_id"]))[0]
-  const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
-  return printingTypeCode(row, revision) ?? undefined
-}
-
 function optionsOf(
   bootstrap: BootstrapColumns,
   index: CardIndex,
@@ -380,13 +368,10 @@ function optionsOf(
   for (const row of printingRows) {
     // Locator-only rows do not yet carry an official classification.
     if (row["region"] !== edition || !Object.hasOwn(row, "rarity_code")) continue
-    const owner = familyCodes.get(stringValue(row["home_set_id"]))
     const { rarity, style } = filterRarity({
       rarityCode: typeof row["rarity_code"] === "string" ? row["rarity_code"] : null,
       badgeStyle: prBadgeFilterStyle(row),
-      owner,
-      // Only PR pack printings can be filed by their type.
-      ...(owner === PR_PACK ? { type: printingTypeOf(index, row, edition) } : {}),
+      owner: familyCodes.get(stringValue(row["home_set_id"])),
     })
     const premium = row["premium"] === true
     const countToken = premium ? PREMIUM_RARITY : rarity
@@ -1390,7 +1375,6 @@ export class SearchIndex {
           premium: this.printings.premium[printing] === 1,
           badgeStyle: this.pool.get(this.printings.badge[printing] ?? 0),
           owner: this.pool.get(this.printings.owner[printing] ?? 0),
-          type: this.pool.get(this.printings.type[printing] ?? 0),
         },
         state.rarities,
       ) &&

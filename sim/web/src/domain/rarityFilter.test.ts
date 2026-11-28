@@ -6,7 +6,6 @@ import {
   filterRarity,
   matchesRaritySelection,
   orderRarityTokens,
-  PR_PACK,
   PREMIUM_RARITY,
   toggleFacet,
 } from "./rarityFilter"
@@ -85,30 +84,26 @@ describe("premium rarity selection", () => {
   })
 })
 
-describe("PR pack leaders without an official rarity", () => {
-  // PR-017 and the other PR pack leaders are listed with "-"; PR-660 carries an official PR.
-  const prLeader = { rarityCode: "-", premium: false, owner: PR_PACK, type: "leader" }
-  const prLeaderWithRarity = {
-    rarityCode: "pr",
-    premium: false,
-    badgeStyle: "none",
-    owner: PR_PACK,
-    type: "leader",
-  }
-  const prEp = { rarityCode: "-", premium: false, owner: PR_PACK, type: "token" }
-  const bp01Leader = { rarityCode: "-", premium: false, owner: "bp01", type: "leader" }
+describe("PR pack printings without an official rarity", () => {
+  // PR-017 (leader) and PR-266 (EP) are listed with "-"; PR-660 carries an official PR.
+  const prLeader = { rarityCode: "-", premium: false, owner: "pr" }
+  const prEp = { rarityCode: null, premium: false, owner: "pr" }
+  const prWithRarity = { rarityCode: "pr", premium: false, badgeStyle: "none", owner: "pr" }
+  const bp01Leader = { rarityCode: "-", premium: false, owner: "bp01" }
 
   it("files them under PR without a badge, not under unrated", () => {
-    expect(filterRarity(prLeader)).toEqual({ rarity: "pr", style: "none" })
-    for (const selected of [["pr"], ["pr:none"], ["pr:sr", "pr:none"]])
-      expect(matchesRaritySelection(prLeader, selected)).toBe(true)
-    for (const selected of [["unrated"], ["pr:sr"], ["pr:unknown"], ["br"]])
-      expect(matchesRaritySelection(prLeader, selected)).toBe(false)
-    expect(matchesRaritySelection(prLeaderWithRarity, ["pr:none"])).toBe(true)
+    for (const printing of [prLeader, prEp]) {
+      expect(filterRarity(printing)).toEqual({ rarity: "pr", style: "none" })
+      for (const selected of [["pr"], ["pr:none"], ["pr:sr", "pr:none"]])
+        expect(matchesRaritySelection(printing, selected)).toBe(true)
+      for (const selected of [["unrated"], ["pr:sr"], ["pr:unknown"], ["br"]])
+        expect(matchesRaritySelection(printing, selected)).toBe(false)
+    }
+    expect(matchesRaritySelection(prWithRarity, ["pr:none"])).toBe(true)
   })
 
-  it("keeps other unrated printings unrated", () => {
-    for (const printing of [prEp, bp01Leader, { rarityCode: null, premium: false }]) {
+  it("keeps unrated printings outside the PR pack unrated", () => {
+    for (const printing of [bp01Leader, { rarityCode: null, premium: false }]) {
       expect(filterRarity(printing)).toEqual({ rarity: "unrated" })
       expect(matchesRaritySelection(printing, ["unrated"])).toBe(true)
       expect(matchesRaritySelection(printing, ["pr"])).toBe(false)
