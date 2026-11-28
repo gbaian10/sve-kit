@@ -129,10 +129,11 @@ impl Checker {
                             .iter()
                             .all(|group| selector_in_zones(&group.selector, zones))
                     };
-                    if in_zones(&[ZoneKind::Field, ZoneKind::Ex]) {
+                    let board_single = in_zones(&[ZoneKind::Field, ZoneKind::Ex]);
+                    if board_single {
                         self.env.public_board_singles.insert(binding.key());
-                        self.env.public_cost_singles.insert(binding.key());
-                    } else if in_zones(&[ZoneKind::Cemetery]) {
+                    }
+                    if board_single || in_zones(&[ZoneKind::Cemetery]) {
                         self.env.public_cost_singles.insert(binding.key());
                     }
                 }
