@@ -121,11 +121,14 @@ impl BodyContext<'_> {
             upto: upto.map(ast::NumericArgument::Literal),
             option: None,
         };
-        let (domain, cardinality) = match union {
-            None => self.object_choice(&target, path, true)?,
-            Some(branches) if hand => self.hand_union_choice(&target, branches, path)?,
-            Some(branches) => self.observed_object_choice(&target, branches, path, true)?,
+        self.holder_choice = own_zone_chooser(choice, from);
+        let lowered = match union {
+            None => self.object_choice(&target, path, true),
+            Some(branches) if hand => self.hand_union_choice(&target, branches, path),
+            Some(branches) => self.observed_object_choice(&target, branches, path, true),
         };
+        self.holder_choice = None;
+        let (domain, cardinality) = lowered?;
         if matches!(domain, super::super::ChoiceDomain::Objects { .. })
             && exact_own_cemetery_choice(choice, cardinality)
         {
@@ -1129,5 +1132,17 @@ impl BodyContext<'_> {
         } else {
             Ok(Expr::Compute(Box::new(Predicate::And { predicates })))
         }
+    }
+}
+
+/// "Each player ... from their cemetery": the bound player choosing from its own zone.
+fn own_zone_chooser(choice: &ast::Choose, from: &ast::TargetQuery) -> Option<String> {
+    match (&choice.by, &from.who) {
+        (Some(ast::Participant::Bound(chooser)), Some(ast::Side::Bound(holder)))
+            if chooser == holder =>
+        {
+            Some(holder.clone())
+        }
+        _ => None,
     }
 }

@@ -214,9 +214,11 @@ impl BodyContext<'_> {
                     name,
                     ObjectReceipt::Movement {
                         receipt: match value.to {
-                            // A whole-zone return is one unordered move, not a placed order.
+                            // A whole-zone return is one unordered move, not a placed order;
+                            // a chosen hand card placed at a fixed deck edge is one move too.
                             ast::Destination::Deck
-                                if !matches!(value.r#ref, Some(ast::MoveObjects::Whole(_))) =>
+                                if !matches!(value.r#ref, Some(ast::MoveObjects::Whole(_)))
+                                    && !self.selected_hand_move(value) =>
                             {
                                 MovementReceipt::Order {
                                     receipt: ReceiptReference::new(receipt),
@@ -689,7 +691,7 @@ impl BodyContext<'_> {
             } else {
                 let query = public_query.ok_or_else(|| unsupported(path))?;
                 let objects = self.public_move_objects(query, path)?;
-                Self::fixed_deck_move(value, objects, path)
+                Self::fixed_deck_move(value, objects, false, path)
             };
         }
         if value.position.is_some()
@@ -908,7 +910,15 @@ impl BodyContext<'_> {
         } else {
             self.objects(objects, path)?
         };
-        Self::fixed_deck_move(value, objects, path)
+        Self::fixed_deck_move(value, objects, self.selected_hand_move(value), path)
+    }
+
+    /// "Put cards from your hand on the bottom of your deck. Draw that many" counts a privately
+    /// chosen hand card's move.
+    fn selected_hand_move(&self, value: &ast::Move) -> bool {
+        value.order.is_none()
+            && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name)))
+                if self.hand_targets.contains(name))
     }
 
     fn ordinary_move_source(
@@ -958,9 +968,10 @@ impl BodyContext<'_> {
     fn fixed_deck_move(
         value: &ast::Move,
         objects: Selector,
+        counted: bool,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.order.is_some() || value.result.is_some() {
+        if value.order.is_some() || (value.result.is_some() && !counted) {
             return Err(unsupported(path));
         }
         Ok(Action::Move {

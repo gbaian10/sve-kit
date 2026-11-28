@@ -207,7 +207,8 @@ pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
         && own_hand_selector(&group.selector, &decision.actor)
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
-        && constraint.distinct_by.is_none()
+        // "Cards of different classes" groups the chooser's own hand by printed class.
+        && matches!(constraint.distinct_by, None | Some(ObjectProperty::Class))
         && constraint.aggregate_bounds.is_empty()
         && constraint.disjoint == Disjointness::Disjoint
 }

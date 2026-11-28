@@ -1627,14 +1627,23 @@ struct BodyContext<'definitions> {
     targets: BTreeMap<String, Binding<Selector>>,
     follower_targets: BTreeSet<String>,
     target_roles: BTreeMap<(String, String), Binding<Selector>>,
+    /// Target roles holding at most one object, whose stats a body may read.
+    single_roles: BTreeSet<(String, String)>,
     ability_holders: BTreeSet<String>,
     /// Formal targets naming at most one field or EX object, whose stats a body may read.
     single_targets: BTreeSet<String>,
     /// Single formal targets chosen from a cemetery, whose printed attack a later read may use.
     cemetery_targets: BTreeSet<String>,
+    /// The bound player making the current resolution choice from its own zone.
+    holder_choice: Option<String>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
     resolution_scope: ScopeId,
+    /// The scope whose body may publish a top-of-deck reveal: the resolution body or a plain
+    /// conditional branch of it.
+    public_reveal_scope: ScopeId,
+    /// Public reveals published in the current conditional branch, forgotten after it.
+    branch_reveals: Vec<String>,
     resolution_captures: Vec<super::Capture>,
     event_captures: Vec<super::Capture>,
     event_trigger: Option<TriggerSpec>,
@@ -1725,12 +1734,16 @@ impl<'definitions> BodyContext<'definitions> {
             targets: BTreeMap::new(),
             follower_targets: BTreeSet::new(),
             target_roles: BTreeMap::new(),
+            single_roles: BTreeSet::new(),
             ability_holders: BTreeSet::new(),
             single_targets: BTreeSet::new(),
             cemetery_targets: BTreeSet::new(),
+            holder_choice: None,
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
             resolution_scope: scope,
+            public_reveal_scope: scope,
+            branch_reveals: vec![],
             resolution_captures: vec![],
             event_captures: vec![],
             event_trigger: None,
@@ -1894,6 +1907,59 @@ impl<'definitions> BodyContext<'definitions> {
     }
 
     /// Each branch names the narrowed recipient; the other kind's branch never runs.
+    fn conditional(
+        &mut self,
+        conditional: &ast::Conditional,
+        step_path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Node, LoweringError> {
+        let condition = self.condition(&conditional.cond, step_path)?;
+        let parent = self.scope;
+        let reveal_scope = self.public_reveal_scope;
+        // "If X, reveal the top N cards": a plain branch of the resolution body may
+        // publish a reveal that only its own later steps read.
+        let reveals_in_branch = parent == reveal_scope;
+        let outer_reveals = self.branch_reveals.len();
+        self.scope = self.card_allocator.scope(step_path)?;
+        if reveals_in_branch {
+            self.public_reveal_scope = self.scope;
+        }
+        let then_body = self.steps(
+            &conditional.then,
+            &format!("{step_path}/if/then"),
+            source,
+            ability_source,
+        );
+        self.forget_branch_reveals(outer_reveals);
+        let then_body = then_body?;
+        let else_body = if let Some(otherwise) = &conditional.r#else {
+            self.scope = self.card_allocator.scope(step_path)?;
+            if reveals_in_branch {
+                self.public_reveal_scope = self.scope;
+            }
+            let body = self.steps(
+                otherwise,
+                &format!("{step_path}/if/else"),
+                source,
+                ability_source,
+            );
+            self.forget_branch_reveals(outer_reveals);
+            Some(body?)
+        } else {
+            None
+        };
+        self.scope = parent;
+        self.public_reveal_scope = reveal_scope;
+        Ok(Node::Control {
+            control: super::Control::If {
+                condition,
+                then_body,
+                else_body,
+            },
+        })
+    }
+
     fn by_kind(
         &mut self,
         by_kind: &ast::ByKind,
@@ -2187,38 +2253,8 @@ impl<'definitions> BodyContext<'definitions> {
                 continue;
             }
             if let ast::Step::If(conditional) = step {
-                let condition = self.condition(&conditional.cond, &step_path)?;
-                let parent = self.scope;
-                self.scope = self.card_allocator.scope(&step_path)?;
-                let then_body = self.steps(
-                    &conditional.then,
-                    &format!("{step_path}/if/then"),
-                    source,
-                    ability_source,
-                )?;
-                let else_body = if let Some(otherwise) = &conditional.r#else {
-                    self.scope = self.card_allocator.scope(&step_path)?;
-                    Some(self.steps(
-                        otherwise,
-                        &format!("{step_path}/if/else"),
-                        source,
-                        ability_source,
-                    )?)
-                } else {
-                    None
-                };
-                self.scope = parent;
-                steps.push(Self::located_step(
-                    source,
-                    &step_path,
-                    Node::Control {
-                        control: super::Control::If {
-                            condition,
-                            then_body,
-                            else_body,
-                        },
-                    },
-                ));
+                let node = self.conditional(conditional, &step_path, source, ability_source)?;
+                steps.push(Self::located_step(source, &step_path, node));
                 continue;
             }
             if let ast::Step::ByKind(by_kind) = step {

@@ -305,6 +305,28 @@ fn mill(
     })
 }
 
+/// A departing Ward follower (cemetery observers) or an entering follower with Evolve.
+fn subject_keyword(
+    subject: Option<&ast::MovementSubject>,
+    support: FilterSupport,
+    path: &str,
+) -> Result<Option<KeywordId>, LoweringError> {
+    let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
+    // "When a follower with Evolve is put onto your field" reads the entered follower's abilities.
+    if subject.is_some_and(|sel| sel.has_evolve.is_some()) {
+        if keyword.is_some() || !matches!(support, FilterSupport::EntryCost) {
+            return Err(unsupported(path));
+        }
+        return Ok(Some(KeywordId::Evolution));
+    }
+    if keyword.is_some_and(|keyword| {
+        keyword != KeywordId::Ward || !matches!(support, FilterSupport::CemeteryWard)
+    }) {
+        return Err(unsupported(path));
+    }
+    Ok(keyword)
+}
+
 pub(super) fn movement_filter(
     own: Option<bool>,
     itself: bool,
@@ -365,17 +387,13 @@ pub(super) fn movement_filter(
         })
         .transpose()?;
     let original_cost = original_cost(subject, path)?;
-    let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
+    let keyword = subject_keyword(subject, support, path)?;
     // Own field-to-cemetery observers read the departing card's printed cost (BP19-074).
     let allow_original_cost = matches!(
         support,
         FilterSupport::OriginalCost | FilterSupport::EntryCost | FilterSupport::CemeteryWard
     );
-    if (original_cost.is_some() && !allow_original_cost)
-        || keyword.is_some_and(|keyword| {
-            keyword != KeywordId::Ward || !matches!(support, FilterSupport::CemeteryWard)
-        })
-    {
+    if original_cost.is_some() && !allow_original_cost {
         return Err(unsupported(path));
     }
     Ok(SubjectFilter {

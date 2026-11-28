@@ -1265,6 +1265,22 @@ impl BodyContext<'_> {
                 }
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
+            // "The second's attack": a single-object role of one distinct target selection.
+            ast::Number::PowerRole { power_of } => {
+                let key = (power_of.role.of.clone(), power_of.role.name.clone());
+                if !self.single_roles.contains(&key) {
+                    return Err(unsupported(path));
+                }
+                let reference = self
+                    .target_roles
+                    .get(&key)
+                    .copied()
+                    .ok_or_else(|| unsupported(path))?;
+                Ok(Expr::Compute(Box::new(IntOperation::Sum {
+                    objects: Selector::Bound { reference },
+                    property: super::super::NumericProperty::Attack,
+                })))
+            }
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
             ast::Number::Cost { cost_of } => match cost_of {
                 ast::Observation::Binding(name) if name == "it" => {
