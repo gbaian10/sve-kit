@@ -8,7 +8,7 @@ import mainDeck from "../../assets/card-labels/main-deck.svg"
 import spell from "../../assets/card-labels/spell.svg"
 import treasure from "../../assets/card-labels/treasure.svg"
 import type { SearchOptions } from "../../data"
-import { leaderFrameTokens, LOCATION_ORDER, tokenKindTokens } from "../../domain/deckLocation"
+import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
 import type { TextLang } from "../../domain/search"
 import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { locationLabel, vocabularyOptionLabel } from "./facet-labels"
@@ -24,7 +24,6 @@ const TOKEN_KIND_PLATES: Readonly<Record<string, string>> = {
   treasure,
 }
 
-// Fixed rows, whatever the width: the deck's own piles, the chips with sub-values, then the points.
 const LOCATION_ROWS = [
   ["main", "evolve", "advance"],
   ["token", "leader"],
@@ -52,7 +51,7 @@ export function LocationFilter({
     const type = options?.types.find((item) => item.code === code)
     return type ? vocabularyOptionLabel(type.name, textLang) : code
   }
-  const items = LOCATION_ORDER.flatMap((code): FacetChip[] => {
+  const items = LOCATION_ROWS.flat().flatMap((code): FacetChip[] => {
     // Rows the edition has no printings for stay out, as the type row does; "main" always shows.
     if (code !== "main" && !(counts[code] ?? 0) && options) return []
     const label = locationLabel(t, code)
@@ -60,20 +59,22 @@ export function LocationFilter({
     // the other positions show their card-face plates.
     const content =
       code === "main" ? (
-        // Narrow screens tighten it, and the narrowest drop the card back, so the first row still
-        // fits three chips.
-        <span className="inline-flex items-center gap-1.5 max-md:gap-1 max-md:text-12">
+        // The tablet sheet can give this filter less room than a phone.
+        <span className="inline-flex items-center gap-1.5 max-md:gap-1 max-md:text-12 @max-[260px]/facet-rows:gap-1 @max-[260px]/facet-rows:text-12">
           <img
             src={mainDeck}
             alt=""
             aria-hidden
-            className="h-6 w-auto shrink-0 max-md:h-5 max-[360px]:hidden"
+            className="h-6 w-auto shrink-0 max-md:h-5 max-[360px]:hidden @max-[235px]/facet-rows:hidden"
           />
           <span>{label}</span>
         </span>
       ) : (
-        <DeckLocationBadges locations={[code]} decorative />
+        <span className="min-w-0 [&_img]:max-w-full [&_img]:object-contain @max-[190px]/facet-rows:[&_img]:h-4">
+          <DeckLocationBadges locations={[code]} decorative />
+        </span>
       )
+    if (code === "main") return [{ code, label, content, className: "shrink-0" }]
     if (code === "token")
       return [
         {

@@ -17,6 +17,7 @@ export interface FacetChipOption {
 }
 
 export interface FacetChip extends FacetChipOption {
+  readonly className?: string
   /** Sub-values behind a popover; the chip itself selects or clears all of them at once. */
   readonly children?: readonly FacetChipOption[]
 }
@@ -71,7 +72,7 @@ export function FacetChips({
         describedBy={hintId}
         className={cn(
           children.length > 0 && "rounded-r-none",
-          rows && "min-w-0 max-md:h-11 max-md:px-1",
+          rows && "min-w-0 max-md:h-11 max-md:px-1 @max-[260px]/facet-rows:px-1",
         )}
         onClick={() => {
           toggle(item.code)
@@ -81,7 +82,11 @@ export function FacetChips({
       </Toggle>
     )
     return (
-      <span key={item.code} data-filter-chip="" className="inline-flex min-w-0">
+      <span
+        key={item.code}
+        data-filter-chip=""
+        className={cn("inline-flex min-w-0", item.className)}
+      >
         {chip}
         {hintId !== undefined && (
           <span id={hintId} className="sr-only">
@@ -112,15 +117,15 @@ export function FacetChips({
     )
   }
   const content = rows ? (
-    <div className="flex flex-col gap-1.5">
-      {rows
-        .map((codes) => codes.flatMap((code) => items.filter((item) => item.code === code)))
-        .filter((row) => row.length > 0)
-        .map((row) => (
-          <div key={row[0]?.code} className="flex min-w-0 gap-1.5">
+    <div className="@container/facet-rows flex w-full min-w-0 flex-col gap-1.5">
+      {rows.map((codes) => {
+        const row = codes.flatMap((code) => items.filter((item) => item.code === code))
+        return row.length > 0 ? (
+          <div key={codes[0]} className="flex min-w-0 gap-1.5 @max-[190px]/facet-rows:gap-1">
             {row.map(chipOf)}
           </div>
-        ))}
+        ) : null
+      })}
     </div>
   ) : (
     <div className="flex flex-wrap gap-1.5">{items.map(chipOf)}</div>

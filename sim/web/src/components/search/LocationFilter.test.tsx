@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react"
+import { fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { expect, it } from "vitest"
@@ -134,27 +134,46 @@ it("hides locations the edition has no printings for, but always offers the main
 })
 
 it("lays the chips out in three fixed rows, leaving out absent ones", async () => {
+  function UpdatingCounts() {
+    const [complete, setComplete] = useState(true)
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            setComplete(false)
+          }}
+        >
+          Update counts
+        </button>
+        <Harness
+          initial=""
+          counts={
+            complete
+              ? { main: 9, evolve: 4, advance: 1, token: 5, leader: 3, ep: 2, sep: 1 }
+              : { main: 9, evolve: 4, leader: 3 }
+          }
+        />
+      </>
+    )
+  }
   const rowsOf = () => {
     const main = screen.getByRole("button", { name: "主牌組" })
     const rows = main.closest("[data-filter-chip]")?.parentElement?.parentElement
     return [...(rows?.children ?? [])].map((row) =>
-      [...row.querySelectorAll(":scope > [data-filter-chip] > button:first-child")].map((button) =>
-        button.getAttribute("aria-label"),
-      ),
+      within(row as HTMLElement)
+        .getAllByRole("button", { pressed: false })
+        .map((button) => button.getAttribute("aria-label")),
     )
   }
-  const { unmount } = await renderInRouter(
-    <Harness
-      initial=""
-      counts={{ main: 9, evolve: 4, advance: 1, token: 5, leader: 3, ep: 2, sep: 1 }}
-    />,
-  )
+  await renderInRouter(<UpdatingCounts />)
   expect(rowsOf()).toEqual([
     ["主牌組", "進化", "進階"],
     ["Token", "主戰者"],
     ["EP", "SEP"],
   ])
-  unmount()
-  await renderInRouter(<Harness initial="" counts={{ main: 9, evolve: 4, leader: 3 }} />)
+  screen.getByRole("button", { name: "主戰者" }).focus()
+  fireEvent.click(screen.getByRole("button", { name: "Update counts" }))
   expect(rowsOf()).toEqual([["主牌組", "進化"], ["主戰者"]])
+  expect(screen.getByRole("button", { name: "主戰者" })).toHaveFocus()
 })
