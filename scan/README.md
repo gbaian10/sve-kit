@@ -55,7 +55,9 @@ python -m sve_scan eval-deck deck-rec-ft2                             # deck rec
 
 Give every model its own deck-label output folder: deck-label skips photos already in the folder and
 eval-deck reads whatever is there, so a reused folder reports the earlier model. Compare with the numbers in
-MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
+MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation"). `eval-deck` scores against the
+cards SIFT confirmed in that run; the model card's deck figure scores every model on the union of several runs,
+so reproduce it on a fixed card set before comparing.
 
 ### Train a new model version
 
@@ -213,11 +215,11 @@ python -m sve_scan index rec-ft2                                      # index/re
   few cards win every uncertain photo. The index step refuses hub values made for another gallery
 - A new set: rerun `gallery`, `rec-hub` and `index`; the models need no retraining (about 8% of cards are held out
   of training to keep checking that)
-- Stage 3 added a set with a new frame style (GBF) and many English-only cards. Continuing stage 2 re-creates the
-  class weights from the current gallery, so new cards need no special handling. Against stage 2 on the same
-  gallery (each with its own index), top-1 on 165 new Japanese cards in the maintainer's photos, cut exactly at
-  their SIFT-located corners, rose from .927 to .964; the five single-card photo sets scored 397/429 and
-  399/429 (two runs of the same recipe: 392 and 399)
+- Stage 3 added a set with a new frame style (GBF) and many new English printings. Continuing stage 2 re-creates
+  the class weights from the current gallery, so new cards need no special handling. Against stage 2 on the same
+  gallery (each with its own index), top-1 on 165 new Japanese cards in the maintainer's photos (estimated at
+  least 40% visible, cut exactly at their SIFT-located corners) rose from .927 to .964; the five single-card
+  photo sets scored 397/429 and 399/429 (two runs of the same recipe: 392 and 399)
 
 ### 4. Corner finder
 

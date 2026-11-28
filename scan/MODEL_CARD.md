@@ -73,28 +73,28 @@ The models run in `sim/web` (`src/domain/scan/`, `src/pages/scan/`); the Python 
 The real photos in this section are held out (never used in training). Card level: different printings of the
 same card count as the same answer.
 
-| Set                                                                                                                                       | Metric                                                                       | Result                |
-| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------- |
-| Marketplace listing photos, three sets (206, 44, 40)                                                                                      | Recogniser top-1 (centre crop)                                               | .951, 1.0, .875       |
-| Foil cards (100)                                                                                                                          | Recogniser top-1 (centre crop)                                               | .920                  |
-| Video frames (39)                                                                                                                         | Recogniser top-1 (centre crop)                                               | .821                  |
-| Maintainer's photos of new Japanese cards (22 photos; 165 cards with an estimated 40% or more visible, cut at their SIFT-located corners) | Recogniser top-1: exact corners; each corner moved up to 4% of the card size | .964; .958            |
-| Deck photos of 6 held-out events (35 photos, 894 SIFT-confirmed cards)                                                                    | Named right; accepted (of those, wrong)                                      | 861 (.963); 825 (2)   |
-| Synthetic deck photo, 12 large cards in 2 rows                                                                                            | Cards found                                                                  | 12/12, no false boxes |
-| Maintainer's single-card phone saves (63), before the last recogniser stage                                                               | Card named right                                                             | .857                  |
-| Side-seat bursts, cards in view (86 frames, 146 cards)                                                                                    | Cards found at threshold 0.35                                                | .918                  |
+| Set                                                                                                                                       | Metric                                                                                   | Result                |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------- |
+| Marketplace listing photos, three sets (206, 44, 40)                                                                                      | Recogniser top-1 (centre crop)                                                           | .951, 1.0, .875       |
+| Foil cards (100)                                                                                                                          | Recogniser top-1 (centre crop)                                                           | .920                  |
+| Video frames (39)                                                                                                                         | Recogniser top-1 (centre crop)                                                           | .821                  |
+| Maintainer's photos of new Japanese cards (22 photos; 165 cards with an estimated 40% or more visible, cut at their SIFT-located corners) | Recogniser top-1: exact corners; each corner moved up to 4% of the card width and height | .964; .958            |
+| Deck photos of 6 held-out events (35 photos, 894 SIFT-confirmed cards)                                                                    | Named right; accepted (of those, wrong)                                                  | 861 (.963); 825 (2)   |
+| Synthetic deck photo, 12 large cards in 2 rows                                                                                            | Cards found                                                                              | 12/12, no false boxes |
+| Maintainer's single-card phone saves (63), before the last recogniser stage                                                               | Card named right                                                                         | .857                  |
+| Side-seat bursts, cards in view (86 frames, 146 cards)                                                                                    | Cards found at threshold 0.35                                                            | .918                  |
 
-Two trainings with the same recipe got 392 and 399 of the 429 single-card photos (the published model is the
-second), so differences of a few photos between versions are within run-to-run variation. The new-card photos
+Two trainings with the same recipe got 392 and 399 of the 429 single-card photos, 7 apart; the published
+`rec-1` is the 399 run. The new-card photos
 show cards spread on a table, partly overlapping; the corner finder does not box those well (see
 "Limitations"), so the cards are cut where SIFT matching against the official image puts them. The visible share
 is estimated as the area of the SIFT matches' convex hull over the card's area.
 
-Synthetic queries made from official images (nine degraded copies per printing) check that nothing regressed.
+Synthetic queries made from official images (nine degraded copies per printing) serve as a regression check.
 The recogniser was trained on most of these images, so they are not a held-out test. Top-1: new Japanese
-printings (CP05, SCS02 and new PR cards; 3,519 queries) .905, new English printings (5,121 queries) .919,
-held-out older Japanese printings (3,600 queries) .918. Of the answers that passed the accept threshold and
-margin, none was wrong in any of the three groups.
+printings (CP05, SCS02 and new PR cards; 3,519 queries) .905, new English printings (5,121 queries) .919, and a
+sample of 400 older Japanese printings held out in the previous training stage (3,600 queries) .918; most of
+those 400 are on the training side of the last stage's split.
 
 The deck numbers count SIFT-confirmed cards, which lean towards easy cards, and cards the corner finder missed
 are not in the denominator, so they are optimistic. The 894 cards are the union of the SIFT-confirmed cards
@@ -123,7 +123,8 @@ uses only its own confirmed cards as the denominator. The web client's deck read
   rebuilt (usually without retraining; see README, "Common tasks"). Of the cards added in the last training stage
   (see README, "Recogniser"), the new Japanese cards were checked on synthetic queries and the maintainer's 22
   photos, and the new English cards on synthetic queries only. The Leader card CP05-LD09 (sparkle finish)
-  appears twice in those photos; neither crop passed the accept threshold
+  appears twice in those photos: named right but with a low score in one, named as another Leader in the
+  other (about 31% visible)
 - **Held-out split**: about 8% of cards are held out of training, drawn from the gallery of each training run.
   The last stage ran on a larger gallery than the stages before it, so some of its held-out cards were trained
   on earlier and its synthetic held-out numbers are not a clean test. The real-photo sets never feed training
