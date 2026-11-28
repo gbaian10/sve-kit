@@ -2926,11 +2926,23 @@ pub(super) struct DriveTriggerSubscription {
     pub during: Option<During>,
 }
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-pub(super) struct DrawSubscription {
-    #[serde(rename = "who")]
-    pub _who: SelfPlayer,
-    pub not_phase: StartPhase,
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DrawSubscription {
+    OwnNonStart {
+        #[serde(rename = "who")]
+        _who: SelfPlayer,
+        not_phase: StartPhase,
+    },
+    EveryPlayer {
+        #[serde(rename = "who")]
+        _who: EveryDrawPlayer,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EveryDrawPlayer {
+    All,
 }
 
 #[derive(Deserialize)]

@@ -280,7 +280,7 @@ runtime_record!(
         player: PlayerId,
         object: ObjectRef,
         ordinal: Nat,
-        instruction: InstructionId
+        instruction: Option<InstructionId>
     }
 );
 runtime_record!(DiscardEvent {

@@ -2294,8 +2294,10 @@ auto:
 
 `by_kind` 的 leader 分支將 item 窄化為 PlayerRef，所以 life.who:item；follower 分支 item 是 ObjectRef。`entry_payment` 合法不存在時 did 為 false；拼錯 receipt 名或跨 scope 引用仍是載入錯誤。以上兩者不能混作缺值兜底。
 
-### 開始階段以外的抽牌
+### 抽牌誘發
 
 `auto.on: {drew: {who: self, not_phase: start}}` 表示自己在開始階段以外每實際抽到一張牌時觸發。
-一次抽多張各觸發一次；其他效果把牌加入手牌不算抽牌。此子集只開放場上的印刷能力，
-不開放其他玩家、其他階段篩選、抽牌來源或歷史讀取。
+
+`auto.on: {drew: {who: all}}` 表示任一玩家每成功抽到一張牌時觸發，包括開始階段的規則抽牌（GFB01b-006EN，Q758）。
+一次抽多張逐張觸發。搜尋、回收及其他把牌加入手牌的動作不算抽牌。這兩種訂閱限場上的印刷能力。
+`who: all` 不接受其他篩選，抽牌事件資料與歷史不開放給作者讀取。
