@@ -1,5 +1,5 @@
-// The snapshot does not say which class or title a mechanism belongs to. Each class mechanism is
-// printed only on its class's JP cards; each crossover one comes from one collaboration (CP01–CP03).
+// The snapshot does not say which class or title a mechanism belongs to. Classes were checked
+// against the JP card text (each appears on one class only); crossovers follow packs CP01–CP03.
 export const CLASS_MECHANISM_GROUPS = [
   { classCode: "elf", mechanisms: ["combo"] },
   { classCode: "witch", mechanisms: ["spellchain", "stack", "earth_rite"] },

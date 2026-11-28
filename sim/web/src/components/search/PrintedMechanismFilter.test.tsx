@@ -58,7 +58,7 @@ it("keeps a crossover selection disabled while loading and explains unknown card
   expect(within(group).getByRole("button", { name: "Serve2" })).toBeEnabled()
 })
 
-it("lays the buttons out in one row per class and title, abbreviations on hover", async () => {
+it("groups the buttons by class and title, naming each group and explaining SC", async () => {
   const props = {
     options: { coverage: "complete" as const, unknownCards: 0, counts: {} },
     selected: [],
@@ -87,5 +87,5 @@ it("lays the buttons out in one row per class and title, abbreviations on hover"
   await userEvent.click(screen.getByRole("button", { name: /^合作作品機制/u }))
   const vanguard = screen.getByRole("group", { name: "卡片戰鬥!! 先導者" })
   expect(within(vanguard).getAllByRole("button")).toHaveLength(3)
-  expect(screen.getByTitle("卡片戰鬥!! 先導者")).toHaveTextContent("先導者")
+  expect(screen.getByTitle("卡片戰鬥!! 先導者").textContent).toBe("先導者")
 })
